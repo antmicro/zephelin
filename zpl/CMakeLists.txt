@@ -2,17 +2,26 @@ cmake_minimum_required(VERSION 3.20)
 
 zephyr_library_named(zpl)
 zephyr_library_sources(lib.c)
+
+zephyr_library_sources_ifdef(CONFIG_ZPL_SCOPE_MARKING scope_marking.c)
+zephyr_library_sources_ifdef(CONFIG_ZPL_SCOPE_MARKING scope_event.c)
+zephyr_linker_sources_ifdef(CONFIG_ZPL_SCOPE_MARKING DATA_SECTIONS code_scope.ld)
+
 zephyr_library_sources_ifdef(CONFIG_ZPL_RUNTIME_CONFIG_NONE configuration_none.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_RUNTIME_CONFIG_UART configuration_uart.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_RUNTIME_CONFIG_DEBUG configuration_debug.c)
+
 zephyr_library_sources_ifdef(CONFIG_ZPL_TRACE_BACKEND_TRIVIAL_UART trivial_uart_backend.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_TRACE_BACKEND_USB usb_backend.c)
+
 zephyr_library_sources_ifdef(CONFIG_ZPL_MEMORY_PROFILING memory_profiler.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_MEMORY_PROFILING memory_event.c)
+
 zephyr_library_sources_ifdef(CONFIG_ZPL_TFLM_EVENTS tflm_events.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_TFLM_PROFILER tflm_profiler.cpp)
 zephyr_library_sources_ifdef(CONFIG_ZPL_TVM_EVENTS tvm_events.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_TVM_PROFILER tvm_profiler.c)
+
 zephyr_library_sources_ifdef(CONFIG_ZPL_CPU_LOAD_PROFILING cpu_load.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_DIE_TEMP_PROFILING die_temp.c)
 zephyr_library_sources_ifdef(CONFIG_ZPL_INFERENCE_PROFILING inference_event.c)

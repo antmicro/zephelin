@@ -36,3 +36,10 @@ int zpl_init(void)
 #endif /* CONFIG_TRACING_THREAD */
 	return 0;
 }
+
+#ifdef CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT
+void sys_trace_k_heap_sys_k_malloc_enter(struct k_heap *h, size_t size) { }
+void sys_trace_k_heap_sys_k_malloc_exit(struct k_heap *h, size_t size, void *ret) { }
+void sys_trace_k_thread_foreach_enter(k_thread_user_cb_t user_cb, void *user_data) { }
+void sys_trace_k_thread_foreach_exit(k_thread_user_cb_t user_cb, void *user_data) { }
+#endif /* CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT */

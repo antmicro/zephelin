@@ -208,6 +208,10 @@ config ZPL_RUNTIME_CONFIG_DEBUG
 
 endchoice
 
+config ZPL_SCOPE_MARKING
+	bool "Scope entry and leaving marking"
+	depends on ZPL
+
 config ZPL_CPU_LOAD_PROFILING
 	bool "CPU load profiling"
 	depends on ZPL
