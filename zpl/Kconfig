@@ -1,25 +1,25 @@
 rsource "Kconfig.mute_traces"
 
 config ZPL
-	bool "Support for Zephyr Profiling Library"
+	bool "Support for Zeppelin"
 	help
-	  Say 'Y' if you want to enable support for the Zephyr Profiling
-	  Library.
+	  Say 'Y' if you want to enable support for Zeppelin, the Zephyr AI
+	  Profiling Library.
 
 config ZPL_TRACE
 	bool "Support for integration with Zephyr tracing subsystem"
 	select TRACING
 
 choice
-	prompt "Zephyr Profiling Library trace format"
+	prompt "Zeppelin trace format"
 	default ZPL_TRACE_FORMAT_PLAINTEXT
 	depends on ZPL_TRACE
 
 config ZPL_TRACE_FORMAT_PLAINTEXT
-	bool "Plaintext format for Zephyr Profiling Library trace"
+	bool "Plaintext format for Zeppelin trace"
 
 config ZPL_TRACE_FORMAT_CTF
-	bool "CTF format for Zephyr Profiling Library trace"
+	bool "CTF format for Zeppelin trace"
 
 endchoice
 
@@ -29,20 +29,20 @@ choice TRACING_FORMAT_CHOICE
 endchoice
 
 choice
-	prompt "Zephyr Profiling Library trace backend"
+	prompt "Zeppelin trace backend"
 	default ZPL_TRACE_BACKEND_UART
 	depends on ZPL_TRACE
 
 config ZPL_TRACE_BACKEND_UART
-	bool "UART backend for Zephyr Profiling Library"
+	bool "UART backend for Zeppelin"
 	select UART
 
 config ZPL_TRACE_BACKEND_TRIVIAL_UART
-	bool "Trivial UART backend for Zephyr Profiling Library"
+	bool "Trivial UART backend for Zeppelin"
 	select UART
 
 config ZPL_TRACE_BACKEND_USB
-	bool "USB backend for Zephyr Profiling Library"
+	bool "USB backend for Zeppelin"
 	select GPIO
 	# Selecting HWINFO should be dropped after this issue is resolved:
 	# https://github.com/zephyrproject-rtos/zephyr/issues/93266
@@ -51,7 +51,7 @@ config ZPL_TRACE_BACKEND_USB
 	select USB_DEVICE_STACK_NEXT
 
 config ZPL_TRACE_BACKEND_DEBUGGER
-	bool "Debugger backend for Zephyr Profiling Library"
+	bool "Debugger backend for Zeppelin"
 
 endchoice
 
@@ -129,7 +129,7 @@ config ZPL_INFERENCE_PROFILING
 	bool "Build with inference profiling support"
 
 choice
-	prompt "Zephyr Profiling Library trace mode"
+	prompt "Zeppelin trace mode"
 	default ZPL_TRACE_LAYER_PROFILING_MODE
 	depends on ZPL_TRACE
 

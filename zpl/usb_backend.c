@@ -7,7 +7,7 @@ LOG_MODULE_REGISTER(zpl_usb_backend);
 #define ZPL_USB_VID			0x456	/* Analog Devices */
 #define ZPL_USB_PID			0xaa55	/* Random PID */
 #define ZPL_PRODUCT_MANUFACTURER	"Antmicro"
-#define ZPL_PRODUCT_STRING		"Zephyr Profiling Library"
+#define ZPL_PRODUCT_STRING		"Zeppelin"
 #define ZPL_USBD_MAX_POWER		100	/* 100 mA */
 
 USBD_DEVICE_DEFINE(zpl_usbd,
@@ -17,7 +17,7 @@ USBD_DEVICE_DEFINE(zpl_usbd,
 /* USB Descriptors */
 USBD_DESC_MANUFACTURER_DEFINE(zpl_mfr, ZPL_PRODUCT_MANUFACTURER);
 USBD_DESC_PRODUCT_DEFINE(zpl_product, ZPL_PRODUCT_STRING);
-USBD_DESC_CONFIG_DEFINE(fs_cfg_desc, "ZPL Full-Speed Configuration");
+USBD_DESC_CONFIG_DEFINE(fs_cfg_desc, "Zeppelin Full-Speed Configuration");
 
 static const uint8_t attributes = 0;
 static const char *blocklist[] = { NULL };

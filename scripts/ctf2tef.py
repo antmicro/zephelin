@@ -396,7 +396,7 @@ def prepare_dir(trace: Path, zephyr_base: Path | None = None):
 
         zpl_metadata = base / "zpl" / "metadata"
         if not zpl_metadata.exists():
-            print(f"ZPL metadata ({zpl_metadata}) does not exist", file=sys.stderr)
+            print(f"Zeppelin metadata ({zpl_metadata}) does not exist", file=sys.stderr)
             exit(1)
 
         with zpl_metadata.open("r") as fd:

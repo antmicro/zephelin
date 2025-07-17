@@ -72,7 +72,7 @@ def memory_data(msg) -> dict:
     if "memory_addr" in args:
         MEMORY_ADDRESSES.add(int(args["memory_addr"]))
     try:
-        # Get enum label and remove ZPL_ prefix
+        # Get enum label and remove zpl_ prefix
         # This will override "memory_region"
         return {"memory_region": args["memory_region"].labels[0][4:]}
     except Exception:

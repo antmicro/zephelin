@@ -1,4 +1,4 @@
-"""ZPL West extension for tracing data capture."""
+"""Zeppelin West extension for tracing data capture."""
 
 import signal
 import subprocess

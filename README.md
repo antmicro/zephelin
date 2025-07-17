@@ -1,6 +1,6 @@
-# Zephyr AI Profiling Library
+# Zeppelin - Zephyr AI Profiling Library
 
-This repository hosts sources of the Zephyr AI Profiling Library.
+This repository hosts sources of Zeppelin, the Zephyr AI Profiling Library.
 
 ## Getting started
 
@@ -42,7 +42,7 @@ This can be achieved with [prepare_trace.py](./scripts/prepare_trace.py) script,
 python3 ./scripts/prepare_trace.py [-h] [-o OUTPUT] [--zephyr-base ZEPHYR_BASE] [--tflm-model-path TFLM_MODEL_PATH] ctf_trace
 ```
 
-## Setting up USB device permissions for ZPL
+## Setting up USB device permissions for Zeppelin
 
 To use the USB backend and its associated `west zpl-usb-capture` command
 seamlessly, use the following udev rule in e.g.
