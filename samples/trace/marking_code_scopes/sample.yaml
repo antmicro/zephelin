@@ -1,0 +1,12 @@
+sample:
+  name: marking_code_scopes
+common:
+  tags: profiling
+tests:
+  sample.trace.marking_code_scopes.plaintext.robot:
+    tags: profiling
+    harness: robot
+    harness_config:
+      robot_testsuite: marking_code_scopes_plaintext.robot
+    extra_configs:
+      - CONFIG_ZPL_RUNTIME_CONFIG_UART=y
