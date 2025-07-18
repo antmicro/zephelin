@@ -1,38 +1,64 @@
 *** Variables ***
-${COUNTER_HEX}          43 6f 75 6e 74 65 72 3a 20
-${ZPL_MEMORY_EVENT}     EE
-${ZPL_STACK}            00
-${ZPL_HEAP}             01
-${ZPL_K_HEAP}           02
-${ZPL_MEM_SLAB}         03
+${SOCKET_PORT}                      4321
+${ZPL_STACK}                        ${0}
+${ZPL_HEAP}                         ${1}
+${ZPL_K_HEAP}                       ${2}
+${ZPL_MEM_SLAB}                     ${3}
+
+*** Settings ***
+Resource			${KEYWORDS}
+Library				../../../tests/TraceTester.py
+
+*** Keywords ***
+Set Up Socket Terminal
+	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
+	Execute Command		connector Connect ${UART} "term"
 
 *** Settings ***
 Resource			${KEYWORDS}
 
 *** Test Cases ***
 Should Display Memory Usage
-	Execute Command		$elf = ${ELF}
-	Execute Command		include ${RESC}
-	Create Terminal Tester	${UART}  defaultPauseEmulation=True	binaryMode=True
-	Write Char Delay	0.01
+	Prepare Machine
+
+	Set Up Socket Terminal
+	Trace Tester Open Socket	${SOCKET_PORT}
+
+	Start Emulation
 
 # Counter: 5
-	Wait For Bytes On Uart  ${COUNTER_HEX} 35
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_STACK}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_HEAP}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_K_HEAP}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_MEM_SLAB}
+	Wait For Trace On Uart	named_event	name=counter	arg0=${5}
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_STACK}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_K_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_MEM_SLAB}	memory_addr=any	used=any	unused=any	for_thread_id=any
 
 # Counter: 4
-	Wait For Bytes On Uart  ${COUNTER_HEX} 34
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_STACK}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_HEAP}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_K_HEAP}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_MEM_SLAB}
+	Wait For Trace On Uart	named_event	name=counter	arg0=${4}
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_STACK}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_K_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_MEM_SLAB}	memory_addr=any	used=any	unused=any	for_thread_id=any
+
+# Counter: 3
+	Wait For Trace On Uart	named_event	name=counter	arg0=${3}
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_STACK}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_K_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_MEM_SLAB}	memory_addr=any	used=any	unused=any	for_thread_id=any
+
+# Counter: 2
+	Wait For Trace On Uart	named_event	name=counter	arg0=${2}
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_STACK}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_K_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_MEM_SLAB}	memory_addr=any	used=any	unused=any	for_thread_id=any
 
 # Counter: 1
-	Wait For Bytes On Uart  ${COUNTER_HEX} 31
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_STACK}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_HEAP}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_K_HEAP}
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_MEM_SLAB}
+	Wait For Trace On Uart	named_event	name=counter	arg0=${1}
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_STACK}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_K_HEAP}	memory_addr=any	used=any	unused=any	for_thread_id=any
+	Wait For Trace On Uart	zpl_memory	memory_region=${ZPL_MEM_SLAB}	memory_addr=any	used=any	unused=any	for_thread_id=any
+
+	Trace Tester Close Socket

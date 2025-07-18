@@ -17,7 +17,7 @@ void recursive_function(int counter)
 	int *stdlib_malloc_test = malloc(sizeof(int) * 512);
 	stdlib_malloc_test[0] = 5;
 
-	printk("Counter: %d\n", counter);
+	sys_trace_named_event("counter", counter, 0);
 	if (counter > 0) {
 		k_msleep(200);
 		recursive_function(counter - 1);

@@ -1,35 +1,42 @@
 *** Variables ***
-${CONV_2D}                  43 4F 4E 56 5F 32 44
-${CONV_2D_SUBGRAPH_IDX}     00 00
-${CONV_2D_OP_IDX}           00 00
-${ZPL_INFERENCE_ENTER_ID}   D0
-${ZPL_INFERENCE_EXIT_ID}    D1
-${ZPL_TFLM_BEGIN_EVENT_ID}  A0
-${ZPL_TFLM_END_EVENT_ID}    A1
-${ZPL_MEMORY_EVENT}         EE
-${ZPL_STACK}                00
+${SOCKET_PORT}                      4321
 
 *** Settings ***
 Resource			${KEYWORDS}
+Library				../../../tests/TraceTester.py
+
+*** Keywords ***
+Set Up Socket Terminal
+	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
+	Execute Command		connector Connect ${UART} "term"
 
 *** Test Cases ***
 Should Display Layer Profiling Traces
-	Execute Command		$elf = ${ELF}
-	Execute Command		include ${RESC}
-	Create Terminal Tester	${UART}  defaultPauseEmulation=True	binaryMode=True
-	Write Char Delay	0.01
+	Prepare Machine
 
-	# Inference events
-	Wait For Bytes On Uart	${ZPL_INFERENCE_ENTER_ID}
-	Wait For Bytes On Uart	${ZPL_INFERENCE_EXIT_ID}
+	Set Up Socket Terminal
+	Trace Tester Open Socket	${SOCKET_PORT}
 
-	# Conv 2D Layer
-	Wait For Bytes On Uart	${ZPL_TFLM_BEGIN_EVENT_ID}
-	# thread ID
-	Wait For Bytes On Uart	${CONV_2D_SUBGRAPH_IDX} ${CONV_2D_OP_IDX} ${CONV_2D}
-	Wait For Bytes On Uart	${ZPL_TFLM_END_EVENT_ID}
-	# thread ID
-	Wait For Bytes On Uart	${CONV_2D_SUBGRAPH_IDX} ${CONV_2D_OP_IDX} ${CONV_2D}
+	Start Emulation
 
-	# Memory Events
-	Wait For Bytes On Uart  ${ZPL_MEMORY_EVENT} ${ZPL_STACK}
+	Wait For Trace On Uart	zpl_inference_enter
+	Wait For Trace On Uart	zpl_inference_exit
+
+	Wait For Trace On Uart	zpl_tflm_enter
+	Wait For Trace On Uart	zpl_tflm_exit
+
+	Wait For Trace On Uart	zpl_memory
+
+	Trace Tester Close Socket
+
+Should Not Display Full Traces
+	Prepare Machine
+
+	Set Up Socket Terminal
+	Trace Tester Open Socket	${SOCKET_PORT}
+
+	Start Emulation
+
+	Trace Should Not Be On Uart	thread_info
+
+	Trace Tester Close Socket

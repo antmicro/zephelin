@@ -5,7 +5,7 @@
 #include <generated/model_data.h>
 #include <model.h>
 
-#define N_SAMPLES 10
+#define N_SAMPLES 2
 #define INPUT_SHAPE_0 128
 #define INPUT_SHAPE_1 3
 #define INPUT_MIN_VAL -2040.0f

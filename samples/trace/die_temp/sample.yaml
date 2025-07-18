@@ -20,8 +20,9 @@ tests:
   sample.trace.die_temp.ctf.robot:
     tags: profiling
     extra_configs:
-      - CONFIG_TRACING_BUFFER_SIZE=4096
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
     harness: robot
     harness_config:
       robot_testsuite: die_temp_ctf.robot

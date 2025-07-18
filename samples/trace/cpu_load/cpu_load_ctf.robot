@@ -1,12 +1,25 @@
+*** Variables ***
+${SOCKET_PORT}                      4321
+
 *** Settings ***
 Resource			${KEYWORDS}
+Library				../../../tests/TraceTester.py
+
+*** Keywords ***
+Set Up Socket Terminal
+	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
+	Execute Command		connector Connect ${UART} "term"
 
 *** Test Cases ***
 Should Display CPU Load
-	Execute Command		$elf = ${ELF}
-	Execute Command		include ${RESC}
-	Create Terminal Tester	${UART}  defaultPauseEmulation=True	binaryMode=True
-	Write Char Delay	0.01
+	Prepare Machine
 
-	# Event ID and value 1000
-	Wait For Bytes On Uart	C0 E8 03
+	Set Up Socket Terminal
+	Trace Tester Open Socket	${SOCKET_PORT}
+
+	Start Emulation
+
+	Wait For Trace On Uart	zpl_cpu_load_event	cpu_load=${1000}
+	Wait For Trace On Uart	zpl_cpu_load_event	cpu_load=any
+
+	Trace Tester Close Socket

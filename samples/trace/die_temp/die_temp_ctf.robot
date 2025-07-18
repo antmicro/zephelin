@@ -1,12 +1,26 @@
+*** Variables ***
+${SOCKET_PORT}                      4321
+@{DIE_TEMP}                         ${0.0}	${NaN}
+
 *** Settings ***
 Resource			${KEYWORDS}
+Library				../../../tests/TraceTester.py
+
+*** Keywords ***
+Set Up Socket Terminal
+	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
+	Execute Command		connector Connect ${UART} "term"
 
 *** Test Cases ***
 Should Display DIE Temp
-	Execute Command		$elf = ${ELF}
-	Execute Command		include ${RESC}
-	Create Terminal Tester	${UART}  defaultPauseEmulation=True	binaryMode=True
-	Write Char Delay	0.01
+	Prepare Machine
 
-	# Event ID, 0, NaN
-	Wait For Bytes On Uart	C1 00 00 00 00 00 00 C0 7F
+	Set Up Socket Terminal
+	Trace Tester Open Socket	${SOCKET_PORT}
+
+	Start Emulation
+
+	Wait For Trace On Uart	zpl_die_temp_event	die_temp=${DIE_TEMP}
+	Wait For Trace On Uart	zpl_die_temp_event	die_temp=${DIE_TEMP}
+
+	Trace Tester Close Socket

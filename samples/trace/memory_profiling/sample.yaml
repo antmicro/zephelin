@@ -9,17 +9,17 @@ tests:
     harness_config:
       type: one_line
       regex:
-        - "Counter: 5"
+        - "zpl_named_event: counter \\(5; 0\\)"
         - "zpl_memory_event stack \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event heap \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event k_heap \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event mem_slab \\(0x[0-9a-f]+\\) \\d+B \\d+B"
-        - "Counter: 4"
+        - "zpl_named_event: counter \\(4; 0\\)"
         - "zpl_memory_event stack \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event heap \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event k_heap \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event mem_slab \\(0x[0-9a-f]+\\) \\d+B \\d+B"
-        - "Counter: 1"
+        - "zpl_named_event: counter \\(1; 0\\)"
         - "zpl_memory_event stack \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event heap \\(0x[0-9a-f]+\\) \\d+B \\d+B"
         - "zpl_memory_event k_heap \\(0x[0-9a-f]+\\) \\d+B \\d+B"
@@ -41,6 +41,8 @@ tests:
     extra_configs:
       - CONFIG_TRACING_BUFFER_SIZE=4096
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
   sample.trace.memory_profiling.uart_conf.robot:
     tags: profiling
     harness: robot

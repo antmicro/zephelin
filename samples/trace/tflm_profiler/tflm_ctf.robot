@@ -1,13 +1,39 @@
-** Settings ***
+*** Variables ***
+${SOCKET_PORT}                      4321
+
+*** Settings ***
 Resource			${KEYWORDS}
+Library				../../../tests/TraceTester.py
+
+*** Keywords ***
+Set Up Socket Terminal
+	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
+	Execute Command		connector Connect ${UART} "term"
 
 *** Test Cases ***
 Should Display TFLM OP Name
-	Execute Command		$elf = ${ELF}
-	Execute Command		include ${RESC}
-	Create Terminal Tester	${UART}  defaultPauseEmulation=True	binaryMode=True
-	Write Char Delay	0.01
+	Prepare Machine
 
-	# "CONV_2D" in ASCII
-	Wait For Bytes On Uart	43 4F 4E 56 5F 32 44
-	Wait For Bytes On Uart	43 4F 4E 56 5F 32 44
+	Set Up Socket Terminal
+	Trace Tester Open Socket	${SOCKET_PORT}
+
+	Start Emulation
+
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${0}	tag=CONV_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${0}	tag=CONV_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${1}	tag=MAX_POOL_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${1}	tag=MAX_POOL_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${2}	tag=CONV_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${2}	tag=CONV_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${3}	tag=MAX_POOL_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${3}	tag=MAX_POOL_2D	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${4}	tag=RESHAPE	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${4}	tag=RESHAPE	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${5}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${5}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${6}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${6}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${7}	tag=SOFTMAX	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${7}	tag=SOFTMAX	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
+
+	Trace Tester Close Socket

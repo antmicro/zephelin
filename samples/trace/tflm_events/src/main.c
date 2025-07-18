@@ -1,7 +1,6 @@
 #include <zpl/lib.h>
 #include <zpl/tflm_events.h>
 #include <zephyr/kernel.h>
-#include <stdio.h>
 
 int main(void)
 {

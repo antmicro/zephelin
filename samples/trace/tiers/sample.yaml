@@ -90,6 +90,8 @@ tests:
     extra_configs:
       - CONFIG_ZPL_TRACE_MINIMAL_MODE=y
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
     harness_config:
       robot_testsuite: ctf_minimal.robot
   sample.trace.tiers.ctf.layer_profiling.robot:
@@ -97,6 +99,8 @@ tests:
     extra_configs:
       - CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE=y
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
     harness_config:
       robot_testsuite: ctf_layer_profiling.robot
   sample.trace.tiers.ctf.full.robot:
@@ -104,5 +108,7 @@ tests:
     extra_configs:
       - CONFIG_ZPL_TRACE_FULL_MODE=y
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
     harness_config:
       robot_testsuite: ctf_full.robot

@@ -1,13 +1,25 @@
+*** Variables ***
+${SOCKET_PORT}                      4321
+
 *** Settings ***
 Resource			${KEYWORDS}
+Library				../../../tests/TraceTester.py
+
+*** Keywords ***
+Set Up Socket Terminal
+	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
+	Execute Command		connector Connect ${UART} "term"
 
 *** Test Cases ***
 Should Display OP Name
-	Execute Command		$elf = ${ELF}
-	Execute Command		include ${RESC}
-	Create Terminal Tester	${UART}  defaultPauseEmulation=True	binaryMode=True
-	Write Char Delay	0.01
+	Prepare Machine
 
-	# "tvmgen_default_fused_nn_conv2d_add_nn_relu" in ASCII
-	Wait For Bytes On Uart	74 76 6D 67 65 6E 5F 64 65 66 61 75 6C 74 5F 66 75 73 65 64 5F 6E 6E 5F 63 6F 6E 76 32 64 5F 61 64 64 5F 6E 6E 5F 72 65 6C 75
-	Wait For Bytes On Uart	74 76 6D 67 65 6E 5F 64 65 66 61 75 6C 74 5F 66 75 73 65 64 5F 6E 6E 5F 63 6F 6E 76 32 64 5F 61 64 64 5F 6E 6E 5F 72 65 6C 75
+	Set Up Socket Terminal
+	Trace Tester Open Socket	${SOCKET_PORT}
+
+	Start Emulation
+
+	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${3}	tag=tvmgen_default_fused_nn_conv2d_add_nn_relu	thread_id=any
+	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${3}	tag=tvmgen_default_fused_nn_conv2d_add_nn_relu	thread_id=any
+
+	Trace Tester Close Socket
