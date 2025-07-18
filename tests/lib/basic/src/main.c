@@ -54,4 +54,14 @@ ZTEST(zpl, test_runtime_check_conf)
 	zassert_equal(IS_ENABLED(CONFIG_ZPL_MEMORY_USAGE_TRACE), ZPL_CHECK_IF_CONF(mem_usage_trace), "ZPL_CHECK_IF_CONF(mem_usage_trace) returned an incorrect value");
 }
 
+
+ZPL_CODE_SCOPE_DEFINE(code_scope1, 1);
+ZPL_CODE_SCOPE_DEFINE(code_scope2, 0);
+
+ZTEST(zpl, test_dynamic_config_check)
+{
+	zassert_true(code_scope1.is_enabled, "The scope should be enabled");
+	zassert_false(code_scope2.is_enabled, "The scope should not be enabled");
+}
+
 ZTEST_SUITE(zpl, NULL, NULL, NULL, NULL, NULL);
