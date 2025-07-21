@@ -58,9 +58,10 @@ CUSTOM_EVENTS = [
     ),
 ]
 
-# Set with initial addresses for memory regions,
-# used for mapping them to their symbols from built Zephyr ELF
-MEMORY_ADDRESSES = set()
+# Mapping of memory regions initial addresses to their sizes in bytes,
+# used for extracting region symbols from built Zephyr ELF
+# and calculating total size of the RAM.
+REGION_SIZES = {}
 
 
 def memory_data(msg) -> dict:
@@ -70,7 +71,8 @@ def memory_data(msg) -> dict:
     if not (args := msg.event.payload_field):
         return {}
     if "memory_addr" in args:
-        MEMORY_ADDRESSES.add(int(args["memory_addr"]))
+        addr = int(args["memory_addr"])
+        REGION_SIZES[addr] = max(REGION_SIZES.get(addr, 0), int(args["used"] + args["unused"]))
     try:
         # Get enum label and remove zpl_ prefix
         # This will override "memory_region"
@@ -137,7 +139,7 @@ def extract_memory_symbols(zephyr_elf_path: Path):
         addr_to_symbol[addr.lower()].append(name)
 
     mem_symbols = {}
-    for addr in MEMORY_ADDRESSES:
+    for addr in REGION_SIZES:
         addr_hex = f"{addr:x}"
         if addr_hex not in addr_to_symbol or not addr_to_symbol[addr_hex]:
             print(f"Cannot find symbol for address 0x{addr_hex}", file=sys.stderr)
@@ -148,12 +150,10 @@ def extract_memory_symbols(zephyr_elf_path: Path):
     return mem_symbols
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        "prepare_trace",
-        description=__doc__,
-        allow_abbrev=False,
-    )
+def setup_parser(parser: argparse.ArgumentParser):
+    """
+    Sets up parser for prepare trace script.
+    """
     parser.add_argument(
         "ctf_trace",
         type=Path,
@@ -164,7 +164,7 @@ if __name__ == "__main__":
         "--output",
         type=Path,
         help="The path to the output, if not provided, the results will be printed to STDOUT",
-        default=None,
+        required=True,
     )
     parser.add_argument(
         "--zephyr-base",
@@ -188,16 +188,67 @@ if __name__ == "__main__":
         default=None,
     )
     parser.add_argument(
+        "--build-dir",
+        type=Path,
+        help="Path to the build directory",
+        default=None,
+    )
+    parser.add_argument(
         "--zephyr-elf-path",
         type=Path,
         help="Path to the built Zephyr ELF, required for extracting symbols of memory regions",
         default=None,
     )
-    args = parser.parse_args(sys.argv[1:])
+    return parser
 
+
+def process_ram_report(ram: dict) -> float:
+    """
+    Calculates the allocated memory from ram_report without heaps, stack and slabs from metadata.
+
+    Parameters
+    ----------
+    ram : dict
+        The JSON representation of ram_report results (from ram.json file)
+
+    Returns
+    -------
+    float
+        Allocated memory
+    """
+    if "children" in ram:
+        s = 0
+        for child in ram["children"]:
+            s += process_ram_report(child)
+        ram["size"] -= s
+        return s
+
+    if (
+        "address" not in ram
+        or ram["address"] not in REGION_SIZES
+        # Exclude z_malloc_heap as its size is based on unused RAM
+        or ram["name"] == "z_malloc_heap"
+    ):
+        return 0
+
+    s = REGION_SIZES[ram["address"]]
+    ram["size"] -= s
+    return s
+
+
+def prepare(args: argparse.Namespace):
+    """
+    Prepares CTF trace to be visualized.
+
+    This includes converting it to TEF and extending with additional
+    metadata with info about memory or used model.
+    """
+    if not args.build_dir:
+        args.build_dir = Path(".") / "build"
     # Convert CTF
     with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
-        tef_trace, thread_name = ctf_to_tef(str(tmp_dir), False, CUSTOM_METADATA, CUSTOM_EVENTS)
+        results = ctf_to_tef(str(tmp_dir), False, CUSTOM_METADATA, CUSTOM_EVENTS)
+        tef_trace, thread_name = results.tef, results.thread_names
 
     if thread_name:
         # Custom metadata event supported by Speedscope to associate ID with thread name
@@ -226,7 +277,7 @@ if __name__ == "__main__":
         add_model_metadata(tef_trace, extract_model_data(args.tvm_model_path))
 
     # Metadata with memory symbols
-    if MEMORY_ADDRESSES:
+    if REGION_SIZES:
         if args.zephyr_elf_path is None:
             args.zephyr_elf_path = Path(".") / "build" / "zephyr" / "zephyr.elf"
         mem_symbols = extract_memory_symbols(args.zephyr_elf_path)
@@ -242,6 +293,24 @@ if __name__ == "__main__":
             },
         )
 
+        ram_report: Path = args.build_dir / "ram.json"
+        if ram_report.exists():
+            with ram_report.open("r") as fd:
+                ram = json.load(fd)["symbols"]
+
+            process_ram_report(ram)
+            tef_trace.append(
+                {
+                    "name": "MEMORY::STATICALLY_ASSIGNED_MEM",
+                    "cat": "zephyr",
+                    "ph": EventPhase.METADATA.value,
+                    "pid": 0,
+                    "tid": 0,
+                    "ts": 0,
+                    "args": ram["size"],
+                },
+            )
+
     # Print or save the result
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -249,3 +318,15 @@ if __name__ == "__main__":
             json.dump(tef_trace, fd)
     else:
         print(json.dumps(tef_trace, indent=2))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        "prepare_trace",
+        description=__doc__,
+        allow_abbrev=False,
+    )
+    parser = setup_parser(parser)
+    args = parser.parse_args(sys.argv[1:])
+
+    prepare(args)
