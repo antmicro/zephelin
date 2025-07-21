@@ -9,6 +9,7 @@ void zpl_inference_enter()
 	zpl_inference_event_t zpl_inference_enter_event = {
 		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
 		.id = ZPL_INFERENCE_ENTER_EVENT,
+		.thread_id = (uint32_t)k_current_get(),
 	};
 
 	tracing_format_raw_data(
@@ -25,6 +26,7 @@ void zpl_inference_exit()
 	zpl_inference_event_t zpl_inference_exit_event = {
 		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
 		.id = ZPL_INFERENCE_EXIT_EVENT,
+		.thread_id = (uint32_t)k_current_get(),
 	};
 
 	tracing_format_raw_data(

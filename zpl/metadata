@@ -61,11 +61,17 @@ event {
 event {
 	name = zpl_inference_enter;
 	id = 0xD0;
+	fields := struct {
+		uint32_t thread_id;
+	};
 };
 
 event {
 	name = zpl_inference_exit;
 	id = 0xD1;
+	fields := struct {
+		uint32_t thread_id;
+	};
 };
 
 event {

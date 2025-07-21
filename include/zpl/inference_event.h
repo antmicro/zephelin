@@ -19,6 +19,7 @@
 typedef struct __packed {
 	uint32_t timestamp;
 	uint8_t id;
+	uint32_t thread_id;
 } zpl_inference_event_t;
 #endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) */
 
