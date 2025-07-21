@@ -16,7 +16,7 @@ from enum import Enum
 from pathlib import Path
 from shutil import copy2
 from tempfile import TemporaryDirectory
-from typing import Any, Callable
+from typing import Any, Callable, NamedTuple
 
 import bt2  # From the babeltrace2 package.
 
@@ -213,12 +213,23 @@ def emit_event(
     )
 
 
+class CTFConversionResult(NamedTuple):
+    """
+    The results of CTF to TEF conversion.
+    """
+
+    # Converted trace in TEF
+    tef: list[dict]
+    # Mapping of thread name to its ID
+    thread_names: dict[str, int]
+
+
 def ctf_to_tef(
     path: str,
     skip_args: bool = False,
     custom_metadata: dict[str, CustomMetadataDefinition] | None = None,
     custom_events: list[CustomEventDefinition] | None = None,
-) -> tuple[list, dict[str, int]]:
+) -> CTFConversionResult:
     """
     Converts CTF trace to the JSON in TEF format.
 
@@ -236,10 +247,8 @@ def ctf_to_tef(
 
     Returns
     -------
-    list
-        The trace in TEF format.
-    dict[str, int]
-        The dictionary mapping thread name to its ID.
+    CTFConversionResult
+        The converted trace and information about thread names
     """
     if custom_metadata is None:
         custom_metadata = {}
@@ -349,12 +358,11 @@ def ctf_to_tef(
             )
             continue
         # Check whether thread has changed
-        if msg.event.name == "thread_name_set":
+        if str(msg.event.name).startswith("thread_"):
             thread_name[str(fields["name"])] = int(fields["thread_id"])
         # Check whether thread has changed
         if msg.event.name == "thread_switched_in":
             current_thread = thread_id = int(fields["thread_id"])
-            thread_name[str(fields["name"])] = current_thread
         # Add instantaneous event representation
         converted += [
             emit_event(msg, msg.event.name, thread_id, EventPhase.BEGIN, skip_args=skip_args),
@@ -362,7 +370,7 @@ def ctf_to_tef(
                 msg, msg.event.name, thread_id, EventPhase.END, INSTANT_EVENT_LENGTH, skip_args
             ),
         ]
-    return converted, thread_name
+    return CTFConversionResult(converted, thread_name)
 
 
 @contextmanager
@@ -445,7 +453,7 @@ if __name__ == "__main__":
         exit(1)
 
     with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
-        converted = ctf_to_tef(str(tmp_dir), args.exclude_args)
+        converted = ctf_to_tef(str(tmp_dir), args.exclude_args).tef
 
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
