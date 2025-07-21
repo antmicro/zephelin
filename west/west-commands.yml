@@ -13,3 +13,8 @@ west-commands:
       - name: zpl-debug-config
         class: ZplDebugConfig
         help: Enable/Disable configs in runtime using debug interface
+  - file: west/west-prepare-trace.py
+    commands:
+      - name: zpl-prepare-trace
+        class: ZplPrepareTrace
+        help: Prepares traces for a visualization
