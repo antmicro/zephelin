@@ -92,6 +92,8 @@ def memory_data(msg) -> dict:
 # and value is a definition of new metadata event.
 CUSTOM_METADATA = {
     "zpl_memory": CustomMetadataDefinition("MEMORY", None, memory_data),
+    "zpl_cpu_load_event": CustomMetadataDefinition("CPU_LOAD", None, None),
+    "zpl_die_temp_event": CustomMetadataDefinition("DIE_TEMP", None, None),
     "thread_info": CustomMetadataDefinition("THREAD", None, None),
 }
 
