@@ -9,7 +9,7 @@ stages:
     RENODE_VERSION: "renode_1.15.3+20250611gitbf88af3a1_amd64.deb"
   image: "zephyrprojectrtos/ci:v0.28.2"
   before_script:
-    - wget "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.deb
+    - wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.deb
     - dpkg -i renode.deb
     - apt update -qq
     - apt install -yqq python3-bt2 xxd git-lfs gdb-multiarch
@@ -27,18 +27,22 @@ Run Tuttest:
 
 Run Twister:
   extends: .test_template
-  parallel:
-    - qemu_cortex_m3
-    - max78002evkit/max78002/m4
-    - max32690fthr/max32690/m4
-    - stm32f429i_disc1/stm32f429xx
+  parallel: 8
   script:
     - source env.sh
     - west init -l .
-    - west update
+    - west update &> /dev/null
     - west patch apply
     - west zephyr-export
-    - west twister -v -p ${CI_PARALLEL_NAME} -T samples -T tests
+
+    - |
+      platforms="
+        -p qemu_cortex_m3
+        -p max78002evkit/max78002/m4
+        -p max32690fthr/max32690/m4
+        -p stm32f429i_disc1/stm32f429xx
+      "
+    - west twister -v $platforms -T samples -T tests --subset $CI_NODE_INDEX/$CI_NODE_TOTAL
   artifacts:
     paths:
       - twister-out
