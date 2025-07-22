@@ -150,6 +150,8 @@ def convert_from_bt2(x: Any) -> str | int | float | bool | dict:
         return x
     if isinstance(x, dict | bt2._StructureFieldConst):
         return {convert_from_bt2(k): convert_from_bt2(v) for k, v in x.items()}
+    if isinstance(x, dict | bt2._StaticArrayFieldConst):
+        return [convert_from_bt2(v) for v in x]
     if isinstance(x, bt2._BoolValueConst | bt2._BoolFieldConst):
         return bool(x)
     if isinstance(x, bt2._EnumerationFieldConst):
@@ -160,7 +162,7 @@ def convert_from_bt2(x: Any) -> str | int | float | bool | dict:
         return float(x)
     if isinstance(x, bt2._StringValueConst | bt2._StringFieldConst):
         return str(x)
-    raise ValueError("Unexpected value from trace", x)
+    raise ValueError("Unexpected value from trace", x, type(x))
 
 
 def emit_event(
