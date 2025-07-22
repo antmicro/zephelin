@@ -276,7 +276,15 @@ def ctf_to_tef(
     current_thread = 0  # By default use 0 as main thread ID
     msg_it = bt2.TraceCollectionMessageIterator(path)
     # Try to get main thread ID
-    for msg in msg_it:
+    while True:
+        try:
+            msg = next(msg_it)
+        except StopIteration:
+            break
+        except bt2._Error:
+            break
+
+        print(msg, file=sys.stderr)
         if not hasattr(msg, "event"):
             continue
         fields = msg.event.payload_field
@@ -287,7 +295,15 @@ def ctf_to_tef(
         break
     # Restart the iterator
     msg_it = bt2.TraceCollectionMessageIterator(path)
-    for msg in msg_it:
+    while True:
+        try:
+            msg = next(msg_it)
+        except StopIteration:
+            break
+        except bt2._Error:
+            break
+
+        print(msg, file=sys.stderr)
         # Skip messages without events
         if not hasattr(msg, "event"):
             continue
