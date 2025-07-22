@@ -97,12 +97,12 @@ event {
 };
 
 event {
-  zpl_scope_event;
-  id = 0xEF;
-  fields := struct {
-	  ctf_bounded_string_t scope_name[30];
-	  uint8_t is_exit;
-	  uint32_t cycles;
-	  uint32_t for_thread_id;
-  };
-}
+	name = zpl_scope_event;
+	id = 0xEF;
+	fields := struct {
+		ctf_bounded_string_t scope_name[30];
+		uint8_t is_exit;
+		uint32_t cycles;
+		uint32_t for_thread_id;
+	};
+};
