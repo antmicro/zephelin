@@ -42,7 +42,7 @@ Run Twister:
         -p max32690fthr/max32690/m4
         -p stm32f429i_disc1/stm32f429xx
       "
-    - west twister -v $platforms -T samples -T tests --subset $CI_NODE_INDEX/$CI_NODE_TOTAL
+    - west twister -v $platforms -T samples -T tests --subset $CI_NODE_INDEX/$CI_NODE_TOTAL -j 1
   artifacts:
     paths:
       - twister-out
