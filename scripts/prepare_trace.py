@@ -56,6 +56,13 @@ CUSTOM_EVENTS = [
         layer_name,
         lambda _: {"runtime": "microTVM"},
     ),
+    CustomEventDefinition(
+        "SCOPE::",
+        "zpl_scope_enter",
+        "zpl_scope_exit",
+        lambda msg: msg.event.payload_field.get("scope_name", ""),
+        None,
+    ),
 ]
 
 # Mapping of memory regions initial addresses to their sizes in bytes,
