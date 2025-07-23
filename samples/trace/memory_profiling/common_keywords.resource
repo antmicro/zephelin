@@ -3,10 +3,10 @@ ${MEMORY_ADDRESS}       0[xX][0-9a-fA-F]+
 
 *** Keywords ***
 Wait For Memory Event On Uart
-	Wait For Line On Uart	zpl_memory_event stack \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+B  treatAsRegex=true
-	Wait For Line On Uart	zpl_memory_event heap \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+B  treatAsRegex=true
-	Wait For Line On Uart	zpl_memory_event k_heap \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+B  treatAsRegex=true
-	Wait For Line On Uart	zpl_memory_event mem_slab \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+B  treatAsRegex=true
+	Wait For Line On Uart	zpl_memory_event stack \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+  treatAsRegex=true
+	Wait For Line On Uart	zpl_memory_event heap \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+  treatAsRegex=true
+	Wait For Line On Uart	zpl_memory_event k_heap \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+  treatAsRegex=true
+	Wait For Line On Uart	zpl_memory_event mem_slab \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B \\d+  treatAsRegex=true
 
 Test Runtime Config
 	Wait For Line On Uart	zpl_named_event: counter (5; 0)
