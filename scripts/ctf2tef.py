@@ -315,8 +315,8 @@ def ctf_to_tef(
                     EventPhase.BEGIN,
                     skip_args=skip_args,
                     additional_args=custom_event_args_func[msg.event.name](msg)
-                    if custom_event_args_func
-                    else {},
+                    if custom_event_args_func[msg.event.name]
+                    else None,
                 )
             )
             continue
@@ -329,8 +329,8 @@ def ctf_to_tef(
                     EventPhase.END,
                     skip_args=skip_args,
                     additional_args=custom_event_args_func[msg.event.name](msg)
-                    if custom_event_args_func
-                    else {},
+                    if custom_event_args_func[msg.event.name]
+                    else None,
                 )
             )
             continue
