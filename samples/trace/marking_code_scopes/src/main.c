@@ -4,12 +4,14 @@
 ZPL_CODE_SCOPE_DEFINE(code_scope1, 0);
 ZPL_CODE_SCOPE_DEFINE(code_scope2, 0);
 ZPL_CODE_SCOPE_DEFINE(code_scope3, 1);
+ZPL_CODE_SCOPE_DEFINE(code_scope4, 1);
 
 void test_function(int counter)
 {
-	printf("Test: %d\n", counter);
+	printk("Test: %d\n", counter);
 	ZPL_MARK_CODE_SCOPE(code_scope1) {
-		printf("Inner test: %d\n", counter);
+		printk("Inner test: %d\n", counter);
+		k_sleep(K_MSEC(100));
 	}
 }
 
@@ -17,9 +19,20 @@ void test_function2(int counter)
 {
 	zpl_code_scope_enter(code_scope2);
 
-	printf("Inside of scope test_function2 %d\n", counter);
+		printk("Inside of scope test_function2 %d\n", counter);
+		k_sleep(K_MSEC(100));
 
 	zpl_code_scope_exit(code_scope2);
+}
+
+void test_recurent(int counter)
+{
+	printk("Recurent: %d\n", counter);
+	ZPL_MARK_CODE_SCOPE(code_scope4) {
+		k_sleep(K_MSEC(100));
+		if (counter == 0) return;
+		test_recurent(counter - 1);
+	}
 }
 
 int main(void)
@@ -37,6 +50,8 @@ int main(void)
 		test_function2(i);
 		k_sleep(K_MSEC(100));
 	}
+
+	test_recurent(5);
 
 	return 0;
 }
