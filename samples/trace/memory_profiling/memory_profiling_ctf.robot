@@ -7,15 +7,8 @@ ${ZPL_MEM_SLAB}                     ${3}
 
 *** Settings ***
 Resource			${KEYWORDS}
+Resource			../common/socket.robot
 Library				../../../tests/TraceTester.py
-
-*** Keywords ***
-Set Up Socket Terminal
-	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
-	Execute Command		connector Connect ${UART} "term"
-
-*** Settings ***
-Resource			${KEYWORDS}
 
 *** Test Cases ***
 Should Display Memory Usage

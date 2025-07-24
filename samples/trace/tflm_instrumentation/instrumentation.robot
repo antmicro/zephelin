@@ -5,6 +5,7 @@ ${TRIGGER_FUNCTION}                 loop
 
 *** Settings ***
 Resource                            ${KEYWORDS}
+Resource                            ../common/socket.robot
 Library                             zaru_helper.py
 
 *** Keywords ***
@@ -12,10 +13,6 @@ Wait For TFLM Sample Output
   FOR  ${i}  IN RANGE  0  10
     Wait For Line On Uart       x_value: \\d+.\\d+, y_value: \\d+.\\d+        treatAsRegex=true
   END
-
-Set Up Socket Terminal
-  Execute Command          emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
-  Execute Command          connector Connect ${UART} "term"
 
 *** Test Cases ***
 Instrumentation Should Respond To Ping

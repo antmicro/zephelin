@@ -3,12 +3,8 @@ ${SOCKET_PORT}                      4321
 
 *** Settings ***
 Resource			${KEYWORDS}
+Resource			../common/socket.robot
 Library				../../../tests/TraceTester.py
-
-*** Keywords ***
-Set Up Socket Terminal
-	Execute Command		emulation CreateServerSocketTerminal ${SOCKET_PORT} "term" False
-	Execute Command		connector Connect ${UART} "term"
 
 *** Test Cases ***
 Should Display Layer Profiling Traces
