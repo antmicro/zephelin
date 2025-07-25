@@ -59,3 +59,42 @@ Run Lint:
 
     - excludes="-e SysbuildKconfig -e GitLint -e Identity -e ClangFormat -e BinaryFiles"
     - ../zephyr/scripts/ci/check_compliance.py -c origin/main..HEAD $excludes
+
+Run pytest:
+  stage: Test
+  image: "zephyrprojectrtos/ci:v0.28.2"
+  script:
+    - west init -l .
+    - west update
+    - west patch apply
+    - west zephyr-export
+
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install --no-cache-dir
+      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/
+      pytest
+      -r requirements.txt
+    - pytest
+
+Run prepare_trace:
+  stage: Test
+  image: "zephyrprojectrtos/ci:v0.28.2"
+  script:
+    - west init -l .
+    - west update
+    - west patch apply
+    - west zephyr-export
+
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install --no-cache-dir
+      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/
+      pytest
+      -r requirements.txt
+    - python ./scripts/prepare_trace.py tests/ctf2tef/trace.ctf -o trace.tef
+    - diff tests/ctf2tef/trace.tef trace.tef
+  artifacts:
+    paths:
+      - trace.tef
+    when: always
