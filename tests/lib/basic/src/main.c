@@ -55,13 +55,30 @@ ZTEST(zpl, test_runtime_check_conf)
 }
 
 
-ZPL_CODE_SCOPE_DEFINE(code_scope1, 1);
-ZPL_CODE_SCOPE_DEFINE(code_scope2, 0);
+ZPL_CODE_SCOPE_DEFINE(code_scope_enabled, 1);
+ZPL_CODE_SCOPE_DEFINE(code_scope_disabled, 0);
 
 ZTEST(zpl, test_dynamic_config_check)
 {
-	zassert_true(code_scope1.is_enabled, "The scope should be enabled");
-	zassert_false(code_scope2.is_enabled, "The scope should not be enabled");
+	zassert_true(code_scope_enabled.is_enabled, "The scope should be enabled");
+	zassert_false(code_scope_disabled.is_enabled, "The scope should not be enabled");
+}
+
+ZTEST(zpl, test_code_scope_macro)
+{
+	int counter_enabled = 0;
+	int counter_disabled = 0;
+
+	ZPL_MARK_CODE_SCOPE(code_scope_enabled) {
+		counter_enabled++;
+	}
+
+	ZPL_MARK_CODE_SCOPE(code_scope_disabled) {
+		counter_disabled++;
+	}
+
+	zassert_equal(1, counter_enabled, "The code scope should be ran exactly once");
+	zassert_equal(1, counter_disabled, "The code scope should be ran exactly once");
 }
 
 ZTEST_SUITE(zpl, NULL, NULL, NULL, NULL, NULL);
