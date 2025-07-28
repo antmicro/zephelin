@@ -10,3 +10,13 @@ tests:
       robot_testsuite: marking_code_scopes_plaintext.robot
     extra_configs:
       - CONFIG_ZPL_RUNTIME_CONFIG_UART=y
+  sample.trace.marking_code_scopes.ctf.robot:
+    tags: profiling
+    harness: robot
+    harness_config:
+      robot_testsuite: marking_code_scopes_ctf.robot
+    extra_configs:
+      - CONFIG_ZPL_RUNTIME_CONFIG_UART=n
+      - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
