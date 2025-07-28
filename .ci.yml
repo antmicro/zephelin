@@ -12,10 +12,10 @@ stages:
     - wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.deb
     - dpkg -i renode.deb
     - apt update -qq
-    - apt install -yqq python3-bt2 xxd git-lfs gdb-multiarch
+    - apt install -yqq xxd git-lfs gdb-multiarch
     - git lfs pull
-    # make bt2 visible in the venv that comes with the container
-    - cp -r /usr/lib/python3/dist-packages/bt2 /opt/python/venv/lib/**/site-packages/
+    - pip install --no-cache-dir
+      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/bt2/
 
 Run Tuttest:
   extends: .test_template
@@ -72,7 +72,7 @@ Run pytest:
     - python -m venv venv
     - source venv/bin/activate
     - pip install --no-cache-dir
-      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/
+      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/bt2/
       pytest
       -r requirements.txt
     - pytest
@@ -89,7 +89,7 @@ Run prepare_trace:
     - python -m venv venv
     - source venv/bin/activate
     - pip install --no-cache-dir
-      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/
+      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/bt2/
       pytest
       -r requirements.txt
     - python ./scripts/prepare_trace.py tests/ctf2tef/trace.ctf -o trace.tef
