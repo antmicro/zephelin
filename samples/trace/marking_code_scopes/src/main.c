@@ -25,13 +25,13 @@ void test_function2(int counter)
 	zpl_code_scope_exit(code_scope2);
 }
 
-void test_recurent(int counter)
+void test_recurrent(int counter)
 {
-	printk("Recurent: %d\n", counter);
+	printk("Recurrent: %d\n", counter);
 	ZPL_MARK_CODE_SCOPE(code_scope4) {
 		k_sleep(K_MSEC(100));
 		if (counter == 0) return;
-		test_recurent(counter - 1);
+		test_recurrent(counter - 1);
 	}
 }
 
@@ -51,7 +51,7 @@ int main(void)
 		k_sleep(K_MSEC(100));
 	}
 
-	test_recurent(5);
+	test_recurrent(5);
 
 	return 0;
 }
