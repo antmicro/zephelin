@@ -11,8 +11,6 @@ TVMProfiler tvm_profiler = {
 
 static int num_events_ = 0;
 static uint8_t op_idx_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
-static uint32_t begin_cycles_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
-static uint32_t end_cycles_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 static const char *tags_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 
 
@@ -23,9 +21,13 @@ int zpl_tvm_profiler_begin_event(int op_idx, const char* tag)
 	}
 	int event_handle = num_events_;
 
-	begin_cycles_[event_handle] = k_cycle_get_32();
 	op_idx_[event_handle] = op_idx;
 	tags_[event_handle] = tag;
+
+	zpl_emit_tvm_enter_event(
+		k_cycle_get_32(),
+		op_idx,
+		tag);
 
 	++num_events_;
 
@@ -38,22 +40,14 @@ void zpl_tvm_profiler_end_event(int event_handle)
 		return;
 	}
 
-	end_cycles_[event_handle] = k_cycle_get_32();
+	zpl_emit_tvm_exit_event(
+		k_cycle_get_32(),
+		op_idx_[event_handle],
+		tags_[event_handle]);
 }
 
 void zpl_tvm_profiler_dump_events()
 {
-	for (int i = 0; i < num_events_; ++i) {
-		zpl_emit_tvm_enter_event(
-			begin_cycles_[i],
-			op_idx_[i],
-			tags_[i]);
-		zpl_emit_tvm_exit_event(
-			end_cycles_[i],
-			op_idx_[i],
-			tags_[i]);
-	}
-
 	num_events_ = 0;
 }
 
