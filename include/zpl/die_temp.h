@@ -17,6 +17,7 @@
 typedef struct __packed {
 	uint32_t timestamp;
 	uint8_t id;
+	uint16_t sensor_count;
 	float die_temp[CONFIG_ZPL_DIE_TEMP_PROFILING_SENSORS_COUNT];
 } zpl_die_temp_event_t;
 #endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) */

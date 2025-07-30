@@ -98,7 +98,8 @@ event {
 	name = zpl_die_temp_event;
 	id = 0xC1;
 	fields := struct {
-		float32 die_temp[2];
+		uint16_t sensor_count;
+		float32 die_temp[sensor_count];
 	};
 };
 
