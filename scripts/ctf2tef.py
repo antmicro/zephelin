@@ -6,6 +6,7 @@ to the JSON-based Trace Event Format (TEF), which can be consumed by Speedscope.
 """
 
 import argparse
+import collections
 import json
 import os
 import sys
@@ -162,6 +163,10 @@ def convert_from_bt2(x: Any) -> str | int | float | bool | dict:
         return float(x)
     if isinstance(x, bt2._StringValueConst | bt2._StringFieldConst):
         return str(x)
+    if isinstance(x, collections.abc.Mapping):
+        return {convert_from_bt2(k): convert_from_bt2(v) for k, v in x.items()}
+    if isinstance(x, collections.abc.Sequence):
+        return [convert_from_bt2(v) for v in x]
     raise ValueError("Unexpected value from trace", x, type(x))
 
 
