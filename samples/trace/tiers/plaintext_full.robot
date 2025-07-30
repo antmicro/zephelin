@@ -6,7 +6,6 @@ Should Display Full Traces
 	Prepare Machine
 
 	Wait For Line On Uart	zpl_inference_enter:
-	Wait For Line On Uart	zpl_inference_exit:
 	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=0 tag=CONV_2D
 	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=0 tag=CONV_2D
 	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=1 tag=MAX_POOL_2D
@@ -23,6 +22,5 @@ Should Display Full Traces
 	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=6 tag=FULLY_CONNECTED
 	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX
 	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX
-	Wait For Line On Uart	sys_trace_isr_enter
 	Wait For Line On Uart	sys_trace_isr_exit
 	Wait For Line On Uart	zpl_memory_event

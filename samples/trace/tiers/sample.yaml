@@ -21,7 +21,6 @@ tests:
       type: one_line
       regex:
         - "zpl_inference_enter:"
-        - "zpl_inference_exit:"
         - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=0 tag=CONV_2D"
         - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=0 tag=CONV_2D"
         - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=1 tag=MAX_POOL_2D"
@@ -38,6 +37,7 @@ tests:
         - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=6 tag=FULLY_CONNECTED"
         - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX"
         - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX"
+        - "zpl_inference_exit:"
         - "zpl_memory_event"
   sample.trace.tiers.plaintext.full:
     harness: console
@@ -47,7 +47,6 @@ tests:
       type: one_line
       regex:
         - "zpl_inference_enter:"
-        - "zpl_inference_exit:"
         - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=0 tag=CONV_2D"
         - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=0 tag=CONV_2D"
         - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=1 tag=MAX_POOL_2D"
@@ -64,6 +63,7 @@ tests:
         - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=6 tag=FULLY_CONNECTED"
         - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX"
         - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX"
+        - "zpl_inference_exit:"
         - "sys_trace_isr_enter"
         - "sys_trace_isr_exit"
         - "zpl_memory_event"

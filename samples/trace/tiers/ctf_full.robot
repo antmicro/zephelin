@@ -18,10 +18,11 @@ Should Display Full Traces
 	Wait For Trace On Uart	thread_info
 
 	Wait For Trace On Uart	zpl_inference_enter
-	Wait For Trace On Uart	zpl_inference_exit
 
 	Wait For Trace On Uart	zpl_tflm_enter
 	Wait For Trace On Uart	zpl_tflm_exit
+
+	Wait For Trace On Uart	zpl_inference_exit
 
 	Wait For Trace On Uart	zpl_memory
 
