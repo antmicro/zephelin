@@ -15,6 +15,7 @@ typedef struct __packed {
 	uint32_t thread_id;
 	uint16_t subgraph_idx;
 	uint16_t op_idx;
+	uint16_t tag_len;
 	uint8_t tag[CONFIG_ZPL_TRACE_CTF_MAX_STR_LEN];
 	uint32_t arena_used_bytes;
 	uint32_t arena_tail_usage;
@@ -26,6 +27,7 @@ typedef struct __packed {
 	uint32_t thread_id;
 	uint16_t subgraph_idx;
 	uint16_t op_idx;
+	uint16_t tag_len;
 	uint8_t tag[CONFIG_ZPL_TRACE_CTF_MAX_STR_LEN];
 	uint32_t arena_used_bytes;
 	uint32_t arena_tail_usage;

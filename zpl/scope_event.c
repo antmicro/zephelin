@@ -21,6 +21,7 @@ void zpl_emit_scope_event(char* scope_name, uint8_t is_exit)
 		.cycles = cycles,
 		.timestamp = k_cyc_to_ns_floor64(cycles),
 		.thread_id = (uint32_t)k_current_get(),
+		.scope_name_len = ZPL_MAX_SCOPE_NAME_LENGTH + 1,
 	};
 	strncpy((char*)&scope_event.scope_name, scope_name, ZPL_MAX_SCOPE_NAME_LENGTH);
 	tracing_format_raw_data((uint8_t *)&scope_event, sizeof(zpl_scope_event_t));

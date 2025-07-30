@@ -17,7 +17,8 @@ void zpl_emit_tflm_enter_event(
 		.subgraph_idx = subgraph_idx,
 		.op_idx = op_idx,
 		.arena_used_bytes = arena_used_bytes,
-		.arena_tail_usage = arena_tail_usage
+		.arena_tail_usage = arena_tail_usage,
+		.tag_len = CONFIG_ZPL_TRACE_CTF_MAX_STR_LEN,
 	};
 	snprintf(&(zpl_tflm_enter_event.tag[0]), CONFIG_ZPL_TRACE_CTF_MAX_STR_LEN, "%s", tag);
 
@@ -44,7 +45,8 @@ void zpl_emit_tflm_exit_event(
 		.subgraph_idx = subgraph_idx,
 		.op_idx = op_idx,
 		.arena_used_bytes = arena_used_bytes,
-		.arena_tail_usage = arena_tail_usage
+		.arena_tail_usage = arena_tail_usage,
+		.tag_len = CONFIG_ZPL_TRACE_CTF_MAX_STR_LEN,
 	};
 	snprintf(&(zpl_tflm_exit_event.tag[0]), CONFIG_ZPL_TRACE_CTF_MAX_STR_LEN, "%s", tag);
 

@@ -12,7 +12,8 @@ event {
 		uint32_t thread_id;
 		uint16_t subgraph_idx;
 		uint16_t op_idx;
-		ctf_bounded_string_t tag[20];
+		uint16_t tag_len;
+		ctf_bounded_string_t tag[tag_len];
 		uint32_t arena_used_bytes;
 		uint32_t arena_tail_usage;
 	};
@@ -25,7 +26,8 @@ event {
 		uint32_t thread_id;
 		uint16_t subgraph_idx;
 		uint16_t op_idx;
-		ctf_bounded_string_t tag[20];
+		uint16_t tag_len;
+		ctf_bounded_string_t tag[tag_len];
 		uint32_t arena_used_bytes;
 		uint32_t arena_tail_usage;
 	};
@@ -44,7 +46,8 @@ event {
 	fields := struct {
 		uint32_t thread_id;
 		uint8_t op_idx;
-		ctf_bounded_string_t tag[60];
+		uint16_t tag_len;
+		ctf_bounded_string_t tag[tag_len];
 	};
 };
 
@@ -54,7 +57,8 @@ event {
 	fields := struct {
 		uint32_t thread_id;
 		uint8_t op_idx;
-		ctf_bounded_string_t tag[60];
+		uint16_t tag_len;
+		ctf_bounded_string_t tag[tag_len];
 	};
 };
 
@@ -107,7 +111,8 @@ event {
 	name = zpl_scope_enter;
 	id = 0xEF;
 	fields := struct {
-		ctf_bounded_string_t scope_name[31];
+		uint16_t scope_name_len;
+		ctf_bounded_string_t scope_name[scope_name_len];
 		uint32_t cycles;
 		uint32_t thread_id;
 	};
@@ -117,7 +122,8 @@ event {
 	name = zpl_scope_exit;
 	id = 0xF0;
 	fields := struct {
-		ctf_bounded_string_t scope_name[31];
+		uint16_t scope_name_len;
+		ctf_bounded_string_t scope_name[scope_name_len];
 		uint32_t cycles;
 		uint32_t thread_id;
 	};

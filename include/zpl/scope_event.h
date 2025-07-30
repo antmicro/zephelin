@@ -10,6 +10,7 @@
 typedef struct __packed {
 	uint32_t timestamp;
 	uint8_t id;
+	uint16_t scope_name_len;
 	uint8_t scope_name[ZPL_MAX_SCOPE_NAME_LENGTH + 1];
 	uint32_t cycles;
 	uint32_t thread_id;
