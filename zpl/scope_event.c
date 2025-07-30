@@ -11,7 +11,7 @@ void zpl_emit_scope_event(char* scope_name, uint8_t is_exit)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	if (strlen(scope_name) > ZPL_MAX_SCOPE_NAME_LENGTH) {
-		LOG_WRN("Scope name \"%s\" is too long (%d > %d), might get truncated\n", scope_name, sizeof(scope_name), ZPL_MAX_SCOPE_NAME_LENGTH);
+		LOG_WRN("Scope name \"%s\" is too long (%d > %d), might get truncated\n", scope_name, strlen(scope_name), ZPL_MAX_SCOPE_NAME_LENGTH);
 	}
 
 	uint32_t cycles = k_cycle_get_32();
