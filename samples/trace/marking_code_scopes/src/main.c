@@ -1,10 +1,10 @@
 #include <zephyr/kernel.h>
 #include <zpl/lib.h>
 
-ZPL_CODE_SCOPE_DEFINE(code_scope1, 0);
-ZPL_CODE_SCOPE_DEFINE(code_scope2, 0);
-ZPL_CODE_SCOPE_DEFINE(code_scope3, 1);
-ZPL_CODE_SCOPE_DEFINE(code_scope4, 1);
+ZPL_CODE_SCOPE_DEFINE(code_scope1, false);
+ZPL_CODE_SCOPE_DEFINE(code_scope2, false);
+ZPL_CODE_SCOPE_DEFINE(code_scope3, true);
+ZPL_CODE_SCOPE_DEFINE(code_scope4, true);
 
 void test_function(int counter)
 {
