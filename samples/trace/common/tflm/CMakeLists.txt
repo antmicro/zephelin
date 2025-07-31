@@ -1,3 +1,8 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 zephyr_library_named(tflm_model)
 zephyr_library_sources(src/model.cpp)
 zephyr_include_directories("${CMAKE_CURRENT_BINARY_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/src")

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 Script converting Common Trace Format (CTF) trace
 to the JSON-based Trace Event Format (TEF), which can be consumed by Speedscope.

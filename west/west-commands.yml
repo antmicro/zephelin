@@ -1,3 +1,8 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 west-commands:
   - file: west/west-zpl.py
     commands:
