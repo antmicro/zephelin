@@ -1,15 +1,16 @@
-From 7edf3e58c8c9b81b8c263ac8f62bc97762151bb2 Mon Sep 17 00:00:00 2001
+From d96238276bcddf5e95cf56227284ee04ce2aa4f0 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
-Date: Fri, 6 Jun 2025 13:58:31 +0200
+Date: Fri, 1 Aug 2025 13:06:32 +0200
 Subject: [PATCH 2/3] boards: adi: max32690fthr: add renode/renode-robot
  support
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
+Signed-off-by: Krzysztof Sychla <ksychla@antmicro.com>
 ---
- boards/adi/max32690fthr/board.cmake                |  9 +++++++++
- .../adi/max32690fthr/max32690fthr_max32690_m4.yaml |  7 +++++++
- boards/adi/max32690fthr/support/max32690.resc      | 14 ++++++++++++++
- 3 files changed, 30 insertions(+)
+ boards/adi/max32690fthr/board.cmake           |  9 +++++++++
+ .../max32690fthr_max32690_m4.yaml             |  7 +++++++
+ boards/adi/max32690fthr/support/max32690.resc | 19 +++++++++++++++++++
+ 3 files changed, 35 insertions(+)
  create mode 100644 boards/adi/max32690fthr/support/max32690.resc
 
 diff --git a/boards/adi/max32690fthr/board.cmake b/boards/adi/max32690fthr/board.cmake
@@ -49,15 +50,20 @@ index 7b802ab4795..69a5ee8b676 100644
 +    resc: boards/adi/max32690fthr/support/max32690.resc
 diff --git a/boards/adi/max32690fthr/support/max32690.resc b/boards/adi/max32690fthr/support/max32690.resc
 new file mode 100644
-index 00000000000..b03cd9d6ac2
+index 00000000000..8aa5b991a0f
 --- /dev/null
 +++ b/boards/adi/max32690fthr/support/max32690.resc
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,19 @@
 +$name?="max32690"
 +
 +using sysbus
 +mach create $name
 +machine LoadPlatformDescription @https://zephyr-dashboard.renode.io/zephyr_sim/54b826336bae437f851fcba332481e24a7e1532d/0e512aebf21a8c51bda51fa67354277811f10a40/max32690fthr_max32690_m4/hello_world/hello_world.repl
++machine LoadPlatformDescriptionFromString
++"""
++cpu0:
++    PerformanceInMips: 30
++"""
 +
 +showAnalyzer uart0
 +
@@ -68,5 +74,5 @@ index 00000000000..b03cd9d6ac2
 +"""
 +runMacro $reset
 -- 
-2.43.0
+2.48.1
 

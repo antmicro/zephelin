@@ -43,13 +43,13 @@ patches:
     email: gustavo.romero@linaro.org
     date: 2025-06-04
   - path: zephyr/renode/0001-boards-adi-max78002evkit-add-renode-renode-robot-sup.patch
-    sha256sum: bb3426e714f802e07676c9a911c1a0f73a43b280ae6be775e72f83b06867838b
+    sha256sum: 62f5dcd3f26640c99d4026af2a8c5d520ab1d2f58db18d3fd3399b0317bdfc6e
     module: zephyr
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
     date: 2025-06-06
   - path: zephyr/renode/0002-boards-adi-max32690fthr-add-renode-renode-robot-supp.patch
-    sha256sum: 5dcaa0d4f3f8fffeec9e51b1729839ca4dce9aec5891f7e765adc07ead87ce15
+    sha256sum: 1522a3d523cdc54ca586c6e74c4a4edc32a337043473280cbeb766c6052c0224
     module: zephyr
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
