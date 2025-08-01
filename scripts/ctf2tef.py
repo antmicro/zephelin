@@ -14,6 +14,7 @@ from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
+from math import isnan
 from pathlib import Path
 from shutil import copy2
 from tempfile import TemporaryDirectory
@@ -148,10 +149,12 @@ def convert_from_bt2(x: Any) -> str | int | float | bool | dict:
         Raised if type of the given object is not supported.
     """
     if isinstance(x, str | int | float):
+        if isinstance(x, float) and isnan(x):
+            return None
         return x
     if isinstance(x, dict | bt2._StructureFieldConst):
         return {convert_from_bt2(k): convert_from_bt2(v) for k, v in x.items()}
-    if isinstance(x, dict | bt2._StaticArrayFieldConst):
+    if isinstance(x, bt2._StaticArrayFieldConst):
         return [convert_from_bt2(v) for v in x]
     if isinstance(x, bt2._BoolValueConst | bt2._BoolFieldConst):
         return bool(x)
@@ -160,7 +163,8 @@ def convert_from_bt2(x: Any) -> str | int | float | bool | dict:
     if isinstance(x, bt2._IntegerValueConst | bt2._IntegerFieldConst):
         return int(x)
     if isinstance(x, bt2._RealValueConst | bt2._RealFieldConst):
-        return float(x)
+        x = float(x)
+        return None if isnan(x) else x
     if isinstance(x, bt2._StringValueConst | bt2._StringFieldConst):
         return str(x)
     if isinstance(x, collections.abc.Mapping):
