@@ -15,9 +15,9 @@ ZPL_CODE_SCOPE_DEFINE(code_scope4, true);
 
 void test_function(int counter)
 {
-	printk("Test: %d\n", counter);
+	sys_trace_named_event("test_function", 1, 1);
 	ZPL_MARK_CODE_SCOPE(code_scope1) {
-		printk("Inner test: %d\n", counter);
+		sys_trace_named_event("test_function", 1, 2);
 		k_sleep(K_MSEC(100));
 	}
 }
@@ -26,7 +26,7 @@ void test_function2(int counter)
 {
 	zpl_code_scope_enter(code_scope2);
 
-		printk("Inside of scope test_function2 %d\n", counter);
+		sys_trace_named_event("test_function", 2, 1);
 		k_sleep(K_MSEC(100));
 
 	zpl_code_scope_exit(code_scope2);
@@ -34,7 +34,7 @@ void test_function2(int counter)
 
 void test_recurrent(int counter)
 {
-	printk("Recurrent: %d\n", counter);
+	sys_trace_named_event("recurrent_test_function", 1, 1);
 	ZPL_MARK_CODE_SCOPE(code_scope4) {
 		k_sleep(K_MSEC(100));
 		if (counter == 0) return;
