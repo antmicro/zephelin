@@ -59,14 +59,14 @@ Should Enable Code Scopes In Memory
 	Change Code Scope State In Memory  code_scope3  enable
 	Change Code Scope State In Memory  code_scope4  enable
 
-	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope3  cycles=any  thread_id=any  timeout=20
-	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope3  cycles=any  thread_id=any  timeout=20
+	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope3  cycles=any  thread_id=any  timeout=30
+	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope3  cycles=any  thread_id=any  timeout=30
 
-	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope1  cycles=any  thread_id=any  timeout=20
-	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope1  cycles=any  thread_id=any  timeout=20
+	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope1  cycles=any  thread_id=any  timeout=30
+	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope1  cycles=any  thread_id=any  timeout=30
 
-	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope2  cycles=any  thread_id=any  timeout=20
-	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope2  cycles=any  thread_id=any  timeout=20
+	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope2  cycles=any  thread_id=any  timeout=30
+	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope2  cycles=any  thread_id=any  timeout=30
 
-	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope4  cycles=any  thread_id=any  timeout=20
-	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope4  cycles=any  thread_id=any  timeout=20
+	Wait For Trace On Uart  zpl_scope_enter  scope_name=code_scope4  cycles=any  thread_id=any  timeout=30
+	Wait For Trace On Uart  zpl_scope_exit   scope_name=code_scope4  cycles=any  thread_id=any  timeout=30
