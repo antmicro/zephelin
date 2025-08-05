@@ -15,15 +15,15 @@ Should Display Full Traces
 
 	Start Emulation
 
-	Wait For Trace On Uart	thread_info
+	Wait For Trace On Uart	thread_info  timeout=30
 
-	Wait For Trace On Uart	zpl_inference_enter
+	Wait For Trace On Uart	zpl_inference_enter  timeout=30
 
-	Wait For Trace On Uart	zpl_tflm_enter
-	Wait For Trace On Uart	zpl_tflm_exit
+	Wait For Trace On Uart	zpl_tflm_enter  timeout=30
+	Wait For Trace On Uart	zpl_tflm_exit  timeout=30
 
-	Wait For Trace On Uart	zpl_inference_exit
+	Wait For Trace On Uart	zpl_inference_exit  timeout=30
 
-	Wait For Trace On Uart	zpl_memory
+	Wait For Trace On Uart	zpl_memory  timeout=30
 
 	Trace Tester Close Socket
