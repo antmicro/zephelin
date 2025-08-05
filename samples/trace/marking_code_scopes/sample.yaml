@@ -8,15 +8,22 @@ sample:
 common:
   tags: profiling
 tests:
+  sample.trace.marking_code_scopes:
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "zpl_scope_enter \\d+ code_scope3"
+        - "zpl_scope_exit \\d+ code_scope3"
+        - "zpl_scope_enter \\d+ code_scope4"
+        - "zpl_scope_exit \\d+ code_scope4"
   sample.trace.marking_code_scopes.plaintext.robot:
-    tags: profiling
     harness: robot
     harness_config:
       robot_testsuite: marking_code_scopes_plaintext.robot
     extra_configs:
       - CONFIG_ZPL_RUNTIME_CONFIG_UART=y
   sample.trace.marking_code_scopes.ctf.robot:
-    tags: profiling
     harness: robot
     harness_config:
       robot_testsuite: marking_code_scopes_ctf.robot
