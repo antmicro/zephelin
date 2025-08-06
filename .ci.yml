@@ -11,12 +11,7 @@ stages:
     SCALENODE_RAM: 8192
   image: "zephyrprojectrtos/ci:v0.28.2"
   before_script:
-    - wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.deb
-    - dpkg -i renode.deb
-    - apt update -qq
-    - apt install -yqq xxd gdb-multiarch
-    - pip install --no-cache-dir
-      bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/bt2/
+    - ./scripts/ci/install_deps.sh
 
 Run Tuttest:
   extends: .test_template
@@ -31,11 +26,7 @@ Run Twister:
   parallel: 8
   script:
     - source zpl_env.sh
-    - west init -l .
-    - west update &> /dev/null
-    - west patch apply
-    - west zephyr-export
-
+    - ./scripts/ci/setup_zephyr.sh
     - |
       platforms="
         -p qemu_cortex_m3
@@ -53,11 +44,7 @@ Run Lint:
   stage: Test
   image: "zephyrprojectrtos/ci:v0.28.2"
   script:
-    - west init -l .
-    - west update
-    - west patch apply
-    - west zephyr-export
-
+    - ./scripts/ci/setup_zephyr.sh
     - excludes="-e SysbuildKconfig -e GitLint -e Identity -e ClangFormat -e BinaryFiles"
     - ../zephyr/scripts/ci/check_compliance.py -c origin/main..HEAD $excludes
 
@@ -65,11 +52,7 @@ Run pytest:
   stage: Test
   image: "zephyrprojectrtos/ci:v0.28.2"
   script:
-    - west init -l .
-    - west update
-    - west patch apply
-    - west zephyr-export
-
+    - ./scripts/ci/setup_zephyr.sh
     - python -m venv venv
     - source venv/bin/activate
     - pip install --no-cache-dir
@@ -82,11 +65,7 @@ Run prepare_trace:
   stage: Test
   image: "zephyrprojectrtos/ci:v0.28.2"
   script:
-    - west init -l .
-    - west update
-    - west patch apply
-    - west zephyr-export
-
+    - ./scripts/ci/setup_zephyr.sh
     - python -m venv venv
     - source venv/bin/activate
     - pip install --no-cache-dir

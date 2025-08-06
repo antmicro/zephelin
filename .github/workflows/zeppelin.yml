@@ -1,0 +1,102 @@
+name: zeppelin
+run-name: Zeppelin
+on: [push, pull_request]
+env:
+  RENODE_VERSION: "renode_1.15.3+20250611gitbf88af3a1_amd64.deb"
+  DEBIAN_FRONTEND: noninteractive
+  CMAKE_PREFIX_PATH: /opt/toolchains
+jobs:
+  Run-Tuttest:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          ./scripts/ci/install_deps.sh
+          pip install git+https://github.com/antmicro/tuttest
+      - name: Run Tuttest
+        run: |
+          tuttest README.md "pip-init" | bash -
+          tuttest README.md "west-init" | bash -
+          tuttest README.md "build-samples" | bash -
+
+  Run-Twister:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    strategy:
+      matrix:
+        platform:
+          - qemu_cortex_m3
+          - max78002evkit/max78002/m4
+          - max32690fthr/max32690/m4
+          - stm32f429i_disc1/stm32f429xx
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          ./scripts/ci/install_deps.sh
+      - name: Setup Zephyr
+        run: |
+          ./scripts/ci/setup_zephyr.sh
+      - name: Run Twister
+        run: |
+          export ZPL_BASE="$(pwd)"
+          west twister -v -p ${{ matrix.platform }} -T samples -T tests -j 1 --timeout-multiplier 3
+      - uses: actions/upload-artifact@v4
+        with:
+          path: |
+              twister-out
+
+  Run-Lint:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Zephyr
+        run: |
+          ./scripts/ci/setup_zephyr.sh
+      - name: Run Compliance Check
+        run: |
+          git config --global --add safe.directory $(pwd)
+          excludes="-e SysbuildKconfig -e GitLint -e Identity -e ClangFormat -e BinaryFiles"
+          ../zephyr/scripts/ci/check_compliance.py -c origin/main..HEAD $excludes
+
+  Run-PyTest:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Zephyr
+        run: |
+          ./scripts/ci/setup_zephyr.sh
+      - name: Install PyTest
+        run: |
+          pip install --no-cache-dir pytest -r requirements.txt
+      - run: |
+          pytest
+
+  Run-PrepareTrace:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Zephyr
+        run: |
+          ./scripts/ci/setup_zephyr.sh
+      - name: Install PyTest
+        run: |
+          pip install --no-cache-dir  pytest -r requirements.txt
+      - name: Run PrepareTrace
+        run: |
+          python ./scripts/prepare_trace.py tests/ctf2tef/trace.ctf -o trace.tef
+          diff tests/ctf2tef/trace.tef trace.tef
+      - uses: actions/upload-artifact@v4
+        with:
+          path: |
+              trace.def
