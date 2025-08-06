@@ -1,0 +1,44 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+choice
+	prompt "Zeppelin trace backend"
+	default ZPL_TRACE_BACKEND_UART
+	depends on ZPL_TRACE
+
+config ZPL_TRACE_BACKEND_UART
+	bool "UART backend for Zeppelin"
+	select UART
+
+config ZPL_TRACE_BACKEND_TRIVIAL_UART
+	bool "Trivial UART backend for Zeppelin"
+	select UART
+
+config ZPL_TRACE_BACKEND_USB
+	bool "USB backend for Zeppelin"
+	select GPIO
+	# Selecting HWINFO should be dropped after this issue is resolved:
+	# https://github.com/zephyrproject-rtos/zephyr/issues/93266
+	select HWINFO
+	select TRACING_HANDLE_HOST_CMD
+	select USB_DEVICE_STACK_NEXT
+
+config ZPL_TRACE_BACKEND_DEBUGGER
+	bool "Debugger backend for Zeppelin"
+
+endchoice
+
+config TRACING_BACKEND_NAME
+	string
+	default "tracing_backend_uart" if ZPL_TRACE_BACKEND_UART
+	default "tracing_backend_trivial_uart" if ZPL_TRACE_BACKEND_TRIVIAL_UART
+	default "tracing_backend_usb" if ZPL_TRACE_BACKEND_USB
+	default "tracing_backend_ram" if ZPL_TRACE_BACKEND_DEBUGGER
+
+choice TRACING_BACKEND_CHOICE
+	default TRACING_BACKEND_UART if ZPL_TRACE_BACKEND_UART
+	default TRACING_BACKEND_USB if ZPL_TRACE_BACKEND_USB
+	default TRACING_BACKEND_RAM if ZPL_TRACE_BACKEND_DEBUGGER
+endchoice

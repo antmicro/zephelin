@@ -1,0 +1,35 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config ZPL_MEMORY_PROFILING
+	bool "Memory profiling"
+	depends on ZPL
+	depends on SYS_HEAP_ARRAY_SIZE > 0
+	select SYS_HEAP_RUNTIME_STATS
+	select THREAD_STACK_INFO
+	select THREAD_MONITOR
+	select INIT_STACKS
+	help
+	  Say 'Y' if you want to enable support for the Memory Profiling.
+
+config ZPL_MEMORY_PROFILING_INTERVAL
+	int "Memory profiling interval in milliseconds"
+	default 1000
+	depends on ZPL_MEMORY_PROFILING
+
+config ZPL_MEMORY_PROFILING_THREAD_STACK_SIZE
+	int "Memory profiling thread stack size in bytes"
+	default 512
+	depends on ZPL_MEMORY_PROFILING
+
+config ZPL_MEMORY_PROFILING_THREAD_PRIORITY
+	int "Memory profiling thread priority"
+	default 5
+	depends on ZPL_MEMORY_PROFILING
+
+config ZPL_MEMORY_PROFILING_THREAD_DELAY
+	int "Memory profiling thread delay"
+	default 0
+	depends on ZPL_MEMORY_PROFILING

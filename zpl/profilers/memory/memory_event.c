@@ -30,7 +30,7 @@ void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region, uint
 	);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING(
-		 "zpl_memory_event %s (%#x) %uB %uB %u\n", zpl_memory_region_enum_to_string(memory_region), memory_addr, used_memory, unused_memory, for_thread_id
+		 "zpl_memory_event %s (%#x) %uB %uB 0x%x\n", zpl_memory_region_enum_to_string(memory_region), memory_addr, used_memory, unused_memory, for_thread_id
 	);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
 }

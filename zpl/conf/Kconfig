@@ -1,0 +1,24 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+choice
+	prompt "Zpl runtime configuration method"
+	default ZPL_RUNTIME_CONFIG_NONE
+
+config ZPL_RUNTIME_CONFIG_NONE
+	bool "No runtime configuration"
+
+config ZPL_RUNTIME_CONFIG_UART
+	bool "Runtime configuration via UART"
+	select SHELL
+	select SHELL_MINIMAL
+
+config ZPL_RUNTIME_CONFIG_DEBUG
+	bool "Runtime configuration via debug flags"
+
+endchoice
+
+config ZPL_MEMORY_USAGE_TRACE
+	bool "Enables memory usage traces"

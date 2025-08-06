@@ -3,7 +3,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-rsource "Kconfig.mute_traces"
+rsource "profilers/Kconfig"
+rsource "backends/Kconfig"
+rsource "scopes/Kconfig"
+rsource "conf/Kconfig"
+rsource "conf/Kconfig.mute_traces"
 
 config ZPL
 	bool "Support for Zeppelin"
@@ -33,46 +37,6 @@ choice TRACING_FORMAT_CHOICE
 	default TRACING_CTF if ZPL_TRACE_FORMAT_CTF
 endchoice
 
-choice
-	prompt "Zeppelin trace backend"
-	default ZPL_TRACE_BACKEND_UART
-	depends on ZPL_TRACE
-
-config ZPL_TRACE_BACKEND_UART
-	bool "UART backend for Zeppelin"
-	select UART
-
-config ZPL_TRACE_BACKEND_TRIVIAL_UART
-	bool "Trivial UART backend for Zeppelin"
-	select UART
-
-config ZPL_TRACE_BACKEND_USB
-	bool "USB backend for Zeppelin"
-	select GPIO
-	# Selecting HWINFO should be dropped after this issue is resolved:
-	# https://github.com/zephyrproject-rtos/zephyr/issues/93266
-	select HWINFO
-	select TRACING_HANDLE_HOST_CMD
-	select USB_DEVICE_STACK_NEXT
-
-config ZPL_TRACE_BACKEND_DEBUGGER
-	bool "Debugger backend for Zeppelin"
-
-endchoice
-
-config TRACING_BACKEND_NAME
-	string
-	default "tracing_backend_uart" if ZPL_TRACE_BACKEND_UART
-	default "tracing_backend_trivial_uart" if ZPL_TRACE_BACKEND_TRIVIAL_UART
-	default "tracing_backend_usb" if ZPL_TRACE_BACKEND_USB
-	default "tracing_backend_ram" if ZPL_TRACE_BACKEND_DEBUGGER
-
-choice TRACING_BACKEND_CHOICE
-	default TRACING_BACKEND_UART if ZPL_TRACE_BACKEND_UART
-	default TRACING_BACKEND_USB if ZPL_TRACE_BACKEND_USB
-	default TRACING_BACKEND_RAM if ZPL_TRACE_BACKEND_DEBUGGER
-endchoice
-
 config ZPL_TRACE_CTF_MAX_STR_LEN
 	int "Maximum string length for CTF events"
 	default 20
@@ -82,56 +46,6 @@ config ZPL_TRACE_CTF_MAX_LONG_STR_LEN
 	int "Maximum long string length for CTF events"
 	default 60
 	depends on ZPL_TRACE_FORMAT_CTF
-
-config ZPL_MEMORY_PROFILING
-	bool "Memory profiling"
-	depends on ZPL
-	depends on SYS_HEAP_ARRAY_SIZE > 0
-	select SYS_HEAP_RUNTIME_STATS
-	select THREAD_STACK_INFO
-	select THREAD_MONITOR
-	select INIT_STACKS
-	help
-	  Say 'Y' if you want to enable support for the Memory Profiling.
-
-config ZPL_MEMORY_PROFILING_INTERVAL
-	int "Memory profiling interval in milliseconds"
-	default 1000
-	depends on ZPL_MEMORY_PROFILING
-
-config ZPL_MEMORY_PROFILING_THREAD_STACK_SIZE
-	int "Memory profiling thread stack size in bytes"
-	default 512
-	depends on ZPL_MEMORY_PROFILING
-
-config ZPL_MEMORY_PROFILING_THREAD_PRIORITY
-	int "Memory profiling thread priority"
-	default 5
-	depends on ZPL_MEMORY_PROFILING
-
-config ZPL_MEMORY_PROFILING_THREAD_DELAY
-	int "Memory profiling thread delay"
-	default 0
-	depends on ZPL_MEMORY_PROFILING
-
-config ZPL_TFLM_EVENTS
-	bool "Enables TFLite Micro events"
-	depends on ZPL
-
-config ZPL_TFLM_PROFILER
-	bool "Build with TFLM profiler support"
-	depends on ZPL_TFLM_EVENTS
-	depends on TENSORFLOW_LITE_MICRO
-	depends on CPP
-	depends on STD_CPP17
-
-config ZPL_TFLM_PROFILER_MAX_EVENTS
-	int "Maximum number of stored events"
-	default 32
-	depends on ZPL_TFLM_PROFILER
-
-config ZPL_INFERENCE_PROFILING
-	bool "Build with inference profiling support"
 
 choice
 	prompt "Zeppelin trace mode"
@@ -179,108 +93,3 @@ config ZPL_TRACE_FULL_MODE
 	imply TRACING_IDLE
 
 endchoice
-
-config ZPL_MEMORY_USAGE_TRACE
-	bool "Enables memory usage traces"
-
-config ZPL_TVM_EVENTS
-	bool "Enables micro TVM events"
-	depends on ZPL
-
-config ZPL_TVM_PROFILER
-	bool "Enables micro TVM profiler"
-	depends on ZPL
-
-config ZPL_TVM_PROFILER_MAX_EVENTS
-	int "Max number of buffered event"
-	default 32
-	depends on ZPL_TVM_PROFILER
-
-choice
-	prompt "Zpl runtime configuration method"
-	default ZPL_RUNTIME_CONFIG_NONE
-
-config ZPL_RUNTIME_CONFIG_NONE
-	bool "No runtime configuration"
-
-config ZPL_RUNTIME_CONFIG_UART
-	bool "Runtime configuration via UART"
-	select SHELL
-	select SHELL_MINIMAL
-
-config ZPL_RUNTIME_CONFIG_DEBUG
-	bool "Runtime configuration via debug flags"
-
-endchoice
-
-config ZPL_SCOPE_MARKING
-	bool "Scope entry and leaving marking"
-	depends on ZPL
-
-config ZPL_CPU_LOAD_PROFILING
-	bool "CPU load profiling"
-	depends on ZPL
-	depends on CPU_LOAD
-	select INIT_STACKS
-	help
-	  Say 'Y' if you want to enable support for the CPU load profiling.
-
-config ZPL_CPU_LOAD_PROFILING_INTERVAL
-	int "CPU load profiling interval in milliseconds"
-	default 1000
-	depends on ZPL_CPU_LOAD_PROFILING
-
-config ZPL_CPU_LOAD_PROFILING_THREAD_STACK_SIZE
-	int "CPU load profiling thread stack size in bytes"
-	default 512
-	depends on ZPL_CPU_LOAD_PROFILING
-
-config ZPL_CPU_LOAD_PROFILING_THREAD_PRIORITY
-	int "CPU load profiling thread priority"
-	default 5
-	depends on ZPL_CPU_LOAD_PROFILING
-
-config ZPL_CPU_LOAD_PROFILING_THREAD_DELAY
-	int "CPU load profiling thread delay"
-	default 0
-	depends on ZPL_CPU_LOAD_PROFILING
-
-config ZPL_CPU_LOAD_TRACE
-	bool "Enables CPU load traces"
-
-config ZPL_DIE_TEMP_PROFILING
-	bool "DIE temperature profiling"
-	depends on ZPL
-	depends on ADC
-	depends on SENSOR
-	select INIT_STACKS
-	help
-	  Say 'Y' if you want to enable support for the DIE temperature profiling.
-
-config ZPL_DIE_TEMP_PROFILING_SENSORS_COUNT
-	int "Number of DIE temperature sensors to use for profiling"
-	default 2
-	depends on ZPL_DIE_TEMP_PROFILING
-
-config ZPL_DIE_TEMP_PROFILING_INTERVAL
-	int "DIE temperature profiling interval in milliseconds"
-	default 1000
-	depends on ZPL_DIE_TEMP_PROFILING
-
-config ZPL_DIE_TEMP_PROFILING_THREAD_STACK_SIZE
-	int "DIE temperature profiling thread stack size in bytes"
-	default 512
-	depends on ZPL_DIE_TEMP_PROFILING
-
-config ZPL_DIE_TEMP_PROFILING_THREAD_PRIORITY
-	int "DIE temperature profiling thread priority"
-	default 5
-	depends on ZPL_DIE_TEMP_PROFILING
-
-config ZPL_DIE_TEMP_PROFILING_THREAD_DELAY
-	int "DIE temperature profiling thread delay"
-	default 0
-	depends on ZPL_DIE_TEMP_PROFILING
-
-config ZPL_DIE_TEMP_TRACE
-	bool "Enables DIE temperature traces"

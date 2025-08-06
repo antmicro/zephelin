@@ -1,0 +1,20 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config ZPL_TFLM_EVENTS
+	bool "Enables TFLite Micro events"
+	depends on ZPL
+
+config ZPL_TFLM_PROFILER
+	bool "Build with TFLM profiler support"
+	depends on ZPL_TFLM_EVENTS
+	depends on TENSORFLOW_LITE_MICRO
+	depends on CPP
+	depends on STD_CPP17
+
+config ZPL_TFLM_PROFILER_MAX_EVENTS
+	int "Maximum number of stored events"
+	default 32
+	depends on ZPL_TFLM_PROFILER

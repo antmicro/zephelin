@@ -1,0 +1,17 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config ZPL_TVM_EVENTS
+	bool "Enables micro TVM events"
+	depends on ZPL
+
+config ZPL_TVM_PROFILER
+	bool "Enables micro TVM profiler"
+	depends on ZPL
+
+config ZPL_TVM_PROFILER_MAX_EVENTS
+	int "Max number of buffered event"
+	default 32
+	depends on ZPL_TVM_PROFILER
