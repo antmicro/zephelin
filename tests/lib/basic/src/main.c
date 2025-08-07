@@ -9,7 +9,7 @@
 #include <zephyr/ztest.h>
 #include <zephyr/usb/usbd.h>
 
-#include <zpl/lib.h>
+#include <zpl.h>
 #include <zpl/configuration.h>
 
 #ifdef CONFIG_ZPL_TRACE_BACKEND_USB

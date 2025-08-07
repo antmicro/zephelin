@@ -8,7 +8,7 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/kernel.h>
 #include <stdlib.h>
-#include <zpl/lib.h>
+#include <zpl.h>
 
 K_MEM_SLAB_DEFINE(test_mem_slab, 256, 32, 4);
 K_HEAP_DEFINE(test_k_heap, 1024);

@@ -6,7 +6,7 @@
  */
 
 #include <zephyr/kernel.h>
-#include <zpl/lib.h>
+#include <zpl.h>
 
 ZPL_CODE_SCOPE_DEFINE(code_scope1, false);
 ZPL_CODE_SCOPE_DEFINE(code_scope2, false);

@@ -6,7 +6,7 @@
  */
 
 #include <zephyr/kernel.h>
-#include <zpl/lib.h>
+#include <zpl.h>
 
 int main(void)
 {

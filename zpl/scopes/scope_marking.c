@@ -6,7 +6,7 @@
  */
 
 #include <zephyr/kernel.h>
-#include <zpl/lib.h>
+#include <zpl.h>
 #include <zpl/configuration.h>
 #include <zpl/scope_event.h>
 

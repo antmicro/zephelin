@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zpl/lib.h>
+#include <zpl.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/random/random.h>
