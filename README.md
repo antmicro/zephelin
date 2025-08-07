@@ -21,7 +21,7 @@ west patch apply
 west zephyr-export
 west packages pip --install
 west sdk install
-source env.sh
+source zpl_env.sh
 ```
 
 ## Building samples

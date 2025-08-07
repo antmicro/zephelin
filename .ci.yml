@@ -31,7 +31,7 @@ Run Twister:
   extends: .test_template
   parallel: 8
   script:
-    - source env.sh
+    - source zpl_env.sh
     - west init -l .
     - west update &> /dev/null
     - west patch apply
