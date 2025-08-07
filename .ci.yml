@@ -14,8 +14,7 @@ stages:
     - wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.deb
     - dpkg -i renode.deb
     - apt update -qq
-    - apt install -yqq xxd git-lfs gdb-multiarch
-    - git lfs pull
+    - apt install -yqq xxd gdb-multiarch
     - pip install --no-cache-dir
       bt2 -f https://dl.antmicro.com/projects/zephyr-profiling/bt2/
 
