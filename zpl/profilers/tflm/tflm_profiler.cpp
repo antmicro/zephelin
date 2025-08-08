@@ -8,7 +8,7 @@
 #include <zpl/tflm_profiler.hpp>
 
 extern "C" {
-#include <zpl/tflm_events.h>
+#include <zpl/tflm_event.h>
 #include <zephyr/kernel.h>
 }
 

@@ -6,7 +6,7 @@
  */
 
 #include <tvm/runtime/crt/profiler.h>
-#include <zpl/tvm_events.h>
+#include <zpl/tvm_event.h>
 #include <zpl/tvm_profiler.h>
 
 TVMProfiler tvm_profiler = {

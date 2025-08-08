@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
-/* TFLite Micro events IDs */
+/* TVM events IDs */
 #define ZPL_TVM_BEGIN_EVENT 0xB0
 #define ZPL_TVM_END_EVENT 0xB1
 

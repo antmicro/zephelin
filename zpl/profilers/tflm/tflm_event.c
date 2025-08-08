@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zpl/tflm_events.h>
+#include <zpl/tflm_event.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>

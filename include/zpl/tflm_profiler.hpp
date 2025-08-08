@@ -1,7 +1,7 @@
 #pragma once
 
 extern "C" {
-#include <zpl/tflm_events.h>
+#include <zpl/tflm_event.h>
 }
 #include <tensorflow/lite/micro/micro_profiler_interface.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>

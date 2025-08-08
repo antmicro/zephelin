@@ -6,7 +6,7 @@
  */
 
 #include <zpl.h>
-#include <zpl/tflm_events.h>
+#include <zpl/tflm_event.h>
 #include <zephyr/kernel.h>
 
 int main(void)
