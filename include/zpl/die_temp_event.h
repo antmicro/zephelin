@@ -1,5 +1,5 @@
-#ifndef ZPL_DIE_TEMP_H_
-#define ZPL_DIE_TEMP_H_
+#ifndef ZPL_DIE_TEMP_EVENT_H_
+#define ZPL_DIE_TEMP_EVENT_H_
 
 /**
  * DIE temperature profiling.
@@ -27,4 +27,4 @@ typedef struct __packed {
  */
 void zpl_emit_die_temp_event(void);
 
-#endif /* ZPL_DIE_TEMP_H_ */
+#endif /* ZPL_DIE_TEMP_EVENT_H_ */

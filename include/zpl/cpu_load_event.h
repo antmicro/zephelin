@@ -1,5 +1,5 @@
-#ifndef ZPL_CPU_LOAD_H_
-#define ZPL_CPU_LOAD_H_
+#ifndef ZPL_CPU_LOAD_EVENT_H_
+#define ZPL_CPU_LOAD_EVENT_H_
 
 /**
  * CPU load profiling.
@@ -26,4 +26,4 @@ typedef struct __packed {
  */
 void zpl_emit_cpu_load_event(void);
 
-#endif /* ZPL_CPU_LOAD_H_ */
+#endif /* ZPL_CPU_LOAD_EVENT_H_ */

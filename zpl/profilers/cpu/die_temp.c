@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zpl/die_temp.h>
+#include <zpl/die_temp_event.h>
 
 #include <stdio.h>
 #include <math.h>
