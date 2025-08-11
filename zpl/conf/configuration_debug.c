@@ -6,6 +6,7 @@
  */
 
 #include <zpl/configuration.h>
+
 #include <zephyr/kernel.h>
 
 #define ZPL_WAIT_FOR_CONF_DEF(name, config)                 \

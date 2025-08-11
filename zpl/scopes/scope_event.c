@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/scope_event.h>
+
 #include <string.h>
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>
 #include <zephyr/logging/log.h>
-
-#include <zpl/scope_event.h>
 
 LOG_MODULE_DECLARE(zpl_scope_event);
 

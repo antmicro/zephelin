@@ -5,10 +5,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr/kernel.h>
 #include <zpl.h>
 #include <zpl/configuration.h>
 #include <zpl/scope_event.h>
+
+#include <zephyr/kernel.h>
 
 int __zpl_scope_enter_exit(int is_leaving, struct zpl_code_scope_conf config) {
 	if (is_leaving) {

@@ -7,10 +7,10 @@
 
 #include <zpl/tvm_event.h>
 
+#include <stdio.h>
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>
 
-#include <stdio.h>
 
 void __zpl_emit_tvm_event(uint32_t cycles, uint8_t op_idx, const char* tag, bool is_exit)
 {

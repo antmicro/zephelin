@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "zpl/inference_event.h"
+#include <zpl/inference_event.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>

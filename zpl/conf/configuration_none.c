@@ -5,8 +5,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr/kernel.h>
 #include <zpl/configuration.h>
+
+#include <zephyr/kernel.h>
 
 #define ZPL_WAIT_FOR_CONF_DEF(name, define)  \
 void zpl_wait_for_##name(void)               \

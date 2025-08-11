@@ -5,10 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/memory_event.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>
-
-#include <zpl/memory_event.h>
 
 void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region, uintptr_t memory_addr, uint32_t used_memory, uint32_t unused_memory, uint32_t for_thread_id)
 {

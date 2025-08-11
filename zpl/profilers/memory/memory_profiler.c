@@ -7,6 +7,7 @@
 
 #include <zpl/memory_event.h>
 #include <zpl/configuration.h>
+
 #include <zephyr/kernel.h>
 #include <zephyr/sys/sys_heap.h>
 #include <zephyr/sys/iterable_sections.h>

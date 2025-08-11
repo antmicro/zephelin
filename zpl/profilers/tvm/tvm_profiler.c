@@ -5,9 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <tvm/runtime/crt/profiler.h>
 #include <zpl/tvm_event.h>
 #include <zpl/tvm_profiler.h>
+
+#include <tvm/runtime/crt/profiler.h>
 
 TVMProfiler tvm_profiler = {
     .begin_event_cb = zpl_tvm_profiler_begin_event,

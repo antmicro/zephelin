@@ -5,10 +5,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/usb_backend.h>
+
 #include <zephyr/tracing/tracing.h>
 #include <zephyr/tracing/tracing_format.h>
 #include <zephyr/usb/usbd.h>
-#include <zpl/usb_backend.h>
 
 LOG_MODULE_DECLARE(zpl);
 
