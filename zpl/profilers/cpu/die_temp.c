@@ -56,6 +56,8 @@ void zpl_emit_die_temp_event(void)
 		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
 		.id = ZPL_DIE_TEMP_EVENT,
 		.sensor_count = SENSORS_COUNT,
+		.stream_id = 0,
+		.packet_size = sizeof(zpl_die_temp_event_t) * 8,
 	};
 	for (int i = 0; i < SENSORS_COUNT; ++i) {
 		zpl_die_temp_event.die_temp[i] = die_temp[i];

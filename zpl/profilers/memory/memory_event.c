@@ -25,6 +25,8 @@ void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region,
 		.used = used_memory,
 		.unused = unused_memory,
 		.for_thread_id = for_thread_id,
+		.stream_id = 0,
+		.packet_size = sizeof(zpl_memory_event_t) * 8,
 	};
 
 	tracing_format_raw_data(

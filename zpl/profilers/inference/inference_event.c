@@ -17,6 +17,8 @@ void zpl_inference_enter(void)
 		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
 		.id = ZPL_INFERENCE_ENTER_EVENT,
 		.thread_id = (uint32_t)k_current_get(),
+		.stream_id = 0,
+		.packet_size = sizeof(zpl_inference_event_t) * 8,
 	};
 
 	tracing_format_raw_data(
@@ -34,6 +36,8 @@ void zpl_inference_exit(void)
 		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
 		.id = ZPL_INFERENCE_EXIT_EVENT,
 		.thread_id = (uint32_t)k_current_get(),
+		.stream_id = 0,
+		.packet_size = sizeof(zpl_inference_event_t) * 8,
 	};
 
 	tracing_format_raw_data(

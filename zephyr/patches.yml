@@ -132,3 +132,9 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-10-02
+  - path: zephyr/ctf/0001-subsys-tracing-ctf-use-packets.patch
+    sha256sum: 3f02ebee3ae744667a9922b8f4ae6c23dd3bc24f0a898bf2fa423929927b8ba9
+    module: zephyr
+    author: Mikołaj Klikowicz
+    email: mklikowicz@antmicro.com
+    date: 2025-08-11

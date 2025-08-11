@@ -28,6 +28,7 @@ extern "C" {
  * CPU load event structure.
  */
 typedef struct __packed {
+	uint16_t stream_id, packet_size;
 	uint32_t timestamp;
 	uint8_t id;
 	uint16_t cpu_load; /* CPU load denoted by a number 0-1000 */

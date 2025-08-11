@@ -5,7 +5,16 @@ typealias floating_point {
     align = 8;
 } := float32;
 
+stream {
+	id = 1;
+	event.header := struct event_header;
+	packet.context := struct {
+		uint16_t packet_size;
+	};
+};
+
 event {
+	stream_id = 1;
 	name = zpl_tflm_enter;
 	id = 0xA0;
 	fields := struct {
@@ -20,6 +29,7 @@ event {
 };
 
 event {
+	stream_id = 1;
 	name = zpl_tflm_exit;
 	id = 0xA1;
 	fields := struct {
@@ -41,6 +51,7 @@ enum zpl_memory_region : uint8_t {
 };
 
 event {
+	stream_id = 1;
 	name = zpl_tvm_enter;
 	id = 0xB0;
 	fields := struct {
@@ -52,6 +63,7 @@ event {
 };
 
 event {
+	stream_id = 1;
 	name = zpl_tvm_exit;
 	id = 0xB1;
 	fields := struct {
@@ -63,6 +75,7 @@ event {
 };
 
 event {
+	stream_id = 0;
 	name = zpl_inference_enter;
 	id = 0xD0;
 	fields := struct {
@@ -71,6 +84,7 @@ event {
 };
 
 event {
+	stream_id = 0;
 	name = zpl_inference_exit;
 	id = 0xD1;
 	fields := struct {
@@ -79,6 +93,7 @@ event {
 };
 
 event {
+	stream_id = 0;
 	name = zpl_memory;
 	id = 0xEE;
 	fields := struct {
@@ -91,6 +106,7 @@ event {
 };
 
 event {
+	stream_id = 0;
 	name = zpl_cpu_load_event;
 	id = 0xC0;
 	fields := struct {
@@ -99,6 +115,7 @@ event {
 };
 
 event {
+	stream_id = 0;
 	name = zpl_die_temp_event;
 	id = 0xC1;
 	fields := struct {
@@ -108,6 +125,7 @@ event {
 };
 
 event {
+	stream_id = 0;
 	name = zpl_scope_enter;
 	id = 0xEF;
 	fields := struct {
@@ -119,6 +137,7 @@ event {
 };
 
 event {
+	stream_id = 0;
 	name = zpl_scope_exit;
 	id = 0xF0;
 	fields := struct {

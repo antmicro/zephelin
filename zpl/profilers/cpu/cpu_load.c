@@ -20,6 +20,8 @@ void zpl_emit_cpu_load_event(void)
 		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
 		.id = ZPL_CPU_LOAD_EVENT,
 		.cpu_load = cpu_load,
+		.stream_id = 0,
+		.packet_size = sizeof(zpl_cpu_load_event_t) * 8,
 	};
 	tracing_format_raw_data(
 		(uint8_t *)&zpl_cpu_load_event, sizeof(zpl_cpu_load_event_t)

@@ -21,6 +21,7 @@ extern "C" {
 #define ZPL_MAX_SCOPE_NAME_LENGTH 30
 
 typedef struct __packed {
+	uint16_t stream_id, packet_size;
 	uint32_t timestamp;
 	uint8_t id;
 	uint16_t scope_name_len;

@@ -22,6 +22,7 @@ extern "C" {
 #define ZPL_TFLM_EXIT_EVENT 0xA1
 
 typedef struct __packed {
+	uint16_t stream_id, packet_size;
 	uint32_t timestamp;
 	uint8_t id;
 	uint32_t thread_id;

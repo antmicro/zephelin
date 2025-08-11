@@ -26,6 +26,7 @@ enum zpl_memory_region {
 };
 
 typedef struct __packed {
+	uint16_t stream_id, packet_size;
 	uint32_t timestamp;
 	uint8_t id;
 	enum zpl_memory_region memory_region;
