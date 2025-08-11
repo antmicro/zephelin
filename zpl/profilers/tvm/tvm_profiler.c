@@ -73,13 +73,9 @@ int zpl_tvm_profiler_begin_event(void *state, int op_idx, const char *tag)
 	}
 	int event_handle = zpl_state->num_events_;
 
+	zpl_state->begin_cycles_[event_handle] = soft_cycle_get_64();
 	zpl_state->op_idx_[event_handle] = op_idx;
 	zpl_state->tags_[event_handle] = tag;
-
-	zpl_emit_tvm_enter_event(
-		k_cycle_get_32(),
-		op_idx,
-		tag);
 
 	++(zpl_state->num_events_);
 
@@ -92,15 +88,27 @@ void zpl_tvm_profiler_end_event(void *state, int event_handle)
 		return;
 	}
 
-	zpl_emit_tvm_exit_event(
-		k_cycle_get_32(),
-		((ZPL_TVMProfilerState *)(state))->op_idx_[event_handle],
-		((ZPL_TVMProfilerState *)(state))->tags_[event_handle]);
+	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
+
+	zpl_state->end_cycles_[event_handle] = soft_cycle_get_64();
 }
 
 void zpl_tvm_profiler_dump_events(void *state)
 {
-	((ZPL_TVMProfilerState *)(state))->num_events_ = 0;
+	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
+
+	for (int i = 0; i < num_events_; ++i) {
+		zpl_emit_tvm_enter_event(
+			zpl_state->begin_cycles_[i],
+			zpl_state->op_idx_[i],
+			zpl_state->tags_[i]);
+		zpl_emit_tvm_exit_event(
+			zpl_state->end_cycles_[i],
+			zpl_state->op_idx_[i],
+			zpl_state->tags_[i]);
+	}
+
+	zpl_state->num_events_ = 0;
 }
 
 #else /* defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE) */
