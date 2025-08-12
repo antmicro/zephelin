@@ -298,11 +298,10 @@ def ctf_to_tef(
         except bt2._Error:
             break
 
-        print(msg, file=sys.stderr)
         if not hasattr(msg, "event"):
             continue
         fields = msg.event.payload_field
-        if msg.event.name != "thread_info" or fields.get("name", None) != "main":
+        if not msg.event.name.startswith("thread_") or fields.get("name", None) != "main":
             continue
         thread_name["main"] = int(fields.get("thread_id", 0))
         current_thread = thread_name["main"]
@@ -317,7 +316,6 @@ def ctf_to_tef(
         except bt2._Error:
             break
 
-        print(msg, file=sys.stderr)
         # Skip messages without events
         if not hasattr(msg, "event"):
             continue
