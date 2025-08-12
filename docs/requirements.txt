@@ -1,0 +1,3 @@
+https://github.com/antmicro/antmicro-sphinx-utils/archive/main.zip
+tqdm
+requests
