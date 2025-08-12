@@ -10,6 +10,7 @@ config ZPL_TVM_EVENTS
 config ZPL_TVM_PROFILER
 	bool "Enables micro TVM profiler"
 	depends on ZPL
+  select ZPL_TVM_EVENTS
 
 config ZPL_TVM_PROFILER_MAX_EVENTS
 	int "Max number of buffered event"
