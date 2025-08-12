@@ -4,26 +4,23 @@
 # SPDX-License-Identifier: Apache-2.0
 
 sample:
-  name: simple
+  name: die_temp
 common:
   tags: profiling
   platform_allow:
     - stm32f429i_disc1/stm32f429xx
-  harness: console
-  harness_config:
-    type: one_line
-    regex:
-      - "zpl_die_temp_event: die_temp\\[0\\]=[0-9]+\\.[0-9]+"
 tests:
   sample.trace.die_temp.plaintext:
-    tags: profiling
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "zpl_die_temp_event: die_temp\\[0\\]=[0-9]+\\.[0-9]+"
   sample.trace.die_temp.plaintext.robot:
-    tags: profiling
     harness: robot
     harness_config:
       robot_testsuite: die_temp_plaintext.robot
   sample.trace.die_temp.ctf.robot:
-    tags: profiling
     extra_configs:
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
       - CONFIG_BOOT_BANNER=n

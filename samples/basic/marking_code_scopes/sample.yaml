@@ -6,7 +6,7 @@
 sample:
   name: marking_code_scopes
 common:
-  tags: profiling
+  tags: basic
 tests:
   sample.trace.marking_code_scopes:
     harness: console

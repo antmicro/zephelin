@@ -4,24 +4,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 sample:
-  name: simple
+  name: named_event
 common:
-  tags: profiling
-  harness: console
-  harness_config:
-    type: one_line
-    regex:
-      - "zpl_named_event"
+  tags: events
 tests:
   sample.trace.named_event.plaintext:
-    tags: profiling
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "zpl_named_event"
   sample.trace.named_event.plaintext.robot:
-    tags: profiling
     harness: robot
     harness_config:
       robot_testsuite: named_event_plaintext.robot
   sample.trace.named_event.ctf.robot:
-    tags: profiling
     extra_configs:
       - CONFIG_TRACING_BUFFER_SIZE=4096
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
@@ -31,7 +28,6 @@ tests:
     harness_config:
       robot_testsuite: named_event_ctf.robot
   sample.trace.named_event.trivial_uart.robot:
-    tags: profiling
     platform_allow:
       - max78002evkit/max78002/m4
     extra_configs:
@@ -40,14 +36,12 @@ tests:
     harness_config:
       robot_testsuite: named_event_plaintext_trivial_uart.robot
   sample.trace.named_event.usb:
-    tags: profiling
     platform_allow:
       - stm32f429i_disc1/stm32f429xx
     build_only: true
     extra_configs:
       - CONFIG_ZPL_TRACE_BACKEND_USB=y
   sample.trace.named_event.debugger:
-    tags: profiling
     extra_configs:
       - CONFIG_ZPL_TRACE_BACKEND_DEBUGGER=y
       - CONFIG_RAM_TRACING_BUFFER_SIZE=10240

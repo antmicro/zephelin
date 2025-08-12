@@ -4,24 +4,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 sample:
-  name: simple
+  name: tflm_events
 common:
-  tags: profiling
-  harness: console
-  harness_config:
-    type: one_line
-    regex:
-      - "zpl_tflm_enter_event"
+  tags: events
 tests:
   sample.trace.tflm_events.plaintext:
-    tags: profiling
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "zpl_tflm_enter_event"
   sample.trace.tflm_events.plaintext.robot:
-    tags: profiling
     harness: robot
     harness_config:
       robot_testsuite: tflm_events_plaintext.robot
   sample.trace.tflm_events.ctf.robot:
-    tags: profiling
     extra_configs:
       - CONFIG_TRACING_BUFFER_SIZE=4096
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
