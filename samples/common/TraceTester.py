@@ -43,7 +43,7 @@ class TraceTester:
 
         # prepare directory with traces and metadata for babeltrace
         metadata_zephyr_path = Path(os.environ["ZEPHYR_BASE"]) / "subsys/tracing/ctf/tsdl/metadata"
-        metadata_zpl_path = Path(__file__).parent.parent / "zpl/metadata"
+        metadata_zpl_path = Path(__file__).parent.parent.parent / "zpl/metadata"
 
         metadata_zephyr = metadata_zephyr_path.read_text()
         metadata_zpl = metadata_zpl_path.read_text()

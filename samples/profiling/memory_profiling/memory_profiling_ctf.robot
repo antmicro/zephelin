@@ -8,7 +8,7 @@ ${ZPL_MEM_SLAB}                     ${3}
 *** Settings ***
 Resource			${KEYWORDS}
 Resource			../../common/socket.robot
-Library				../../../tests/TraceTester.py
+Library				../../common/TraceTester.py
 
 *** Test Cases ***
 Should Display Memory Usage

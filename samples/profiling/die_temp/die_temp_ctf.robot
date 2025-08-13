@@ -5,7 +5,7 @@ ${SOCKET_PORT}                      4321
 *** Settings ***
 Resource			${KEYWORDS}
 Resource			../../common/socket.robot
-Library				../../../tests/TraceTester.py
+Library				../../common/TraceTester.py
 
 *** Test Cases ***
 Should Display DIE Temp

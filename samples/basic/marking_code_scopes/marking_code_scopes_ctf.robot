@@ -2,7 +2,7 @@
 Resource			${KEYWORDS}
 Resource			../../common/socket.robot
 Resource			common.resource
-Library				../../../tests/TraceTester.py
+Library				../../common/TraceTester.py
 
 *** Variables ***
 ${SOCKET_PORT}                      4321
