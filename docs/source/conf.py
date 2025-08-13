@@ -18,6 +18,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
 
 from datetime import datetime
+from pathlib import Path
 
 from antmicro_sphinx_utils.defaults import antmicro_html, antmicro_latex
 from antmicro_sphinx_utils.defaults import extensions as default_extensions
@@ -85,3 +86,7 @@ html_title = project
 (latex_elements, latex_documents, latex_logo, latex_additional_files) = antmicro_latex(
     basic_filename, authors, project
 )
+
+# Set trace_viewer tag to also render the links to interactive version
+if (Path(__file__).parent / "_static" / "trace_viewer" / "index.html").exists():
+    tags.add("trace_viewer")  # noqa: F821 pylint: disable=undefined-variable

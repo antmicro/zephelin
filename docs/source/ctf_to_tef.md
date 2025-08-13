@@ -184,6 +184,7 @@ It is created from `zpl_memory` CTF event.
 ```
 :::
 
+(cpu-load-event)=
 #### `CPU_LOAD`
 
 The {{TEF_Metadata}} event defining CPU load (`cpu_load` field) in a given timestamp (`ts`).
@@ -206,6 +207,7 @@ It is converted from `zpl_cpu_load_event` CTF event.
 ```
 :::
 
+(die-temp-event)=
 #### `DIE_TEMP`
 
 The {{TEF_Metadata}} event providing DIE temperatures (`die_temp` array with at most two measurements in degrees Celsius) for a given timestamp (`ts`).
