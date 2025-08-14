@@ -1,0 +1,24 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: simple
+common:
+  tags: profiling
+  platform_allow:
+    - stm32f746g_disco
+tests:
+  sample.trace.demo.plaintext.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: demo_plaintext.robot
+  sample.trace.demo.ctf.robot:
+    extra_configs:
+      - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
+    harness: robot
+    harness_config:
+      robot_testsuite: demo_ctf.robot

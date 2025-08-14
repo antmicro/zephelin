@@ -1,0 +1,15 @@
+$name?="stm32f746g_disco"
+
+using sysbus
+mach create $name
+machine LoadPlatformDescription $ORIGIN/stm32f746g_disco_lis2ds12.repl
+showAnalyzer usart1
+
+sysbus.i2c1.lis2ds12 FeedSample $ORIGIN/../../common/data/magic_wand/magic_wand.data -1
+
+macro reset
+"""
+    sysbus LoadELF $elf
+    cpu0 VectorTableOffset `sysbus GetSymbolAddress "_vector_table"`
+"""
+runMacro $reset

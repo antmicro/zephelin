@@ -1,0 +1,17 @@
+/ {
+	chosen {
+		zephyr,tracing-uart = &usart1;
+	};
+	aliases {
+		accel = &lis2ds12;
+	};
+};
+
+&i2c1 {
+    lis2ds12: lis2ds12@3d {
+        compatible = "st,lis2ds12";
+        reg = <0x3d>;
+        status = "okay";
+    };
+    status = "okay";
+};
