@@ -60,6 +60,12 @@ patches:
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
     date: 2025-06-06
+  - path: zephyr/renode/0004-boards-st-stm32f746g_disco-renode-renode-robot-suppo.patch
+    sha256sum: f8ad11422eaeb613758217cb740b8f8690bbb0e4adae420bd779a5fea1747b14
+    module: zephyr
+    author: Maciej Torhan
+    email: mtorhan@antmicro.com
+    date: 2025-08-14
   - path: zephyr/0004-add-adc1-to-stm32f4_disc1-board.patch
     sha256sum: 35f1d3e8a703c61aa9a42ca460cb4ef1c25b0eb7e91e3889b9724535445a5ec8
     module: zephyr
