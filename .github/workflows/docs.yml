@@ -1,0 +1,85 @@
+name: zeppelin
+run-name: Zeppelin
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  RENODE_VERSION: "renode_1.15.3+20250611gitbf88af3a1_amd64.deb"
+  DEBIAN_FRONTEND: noninteractive
+  CMAKE_PREFIX_PATH: /opt/toolchains
+jobs:
+  Run-GatherTrace:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          ./scripts/ci/install_deps.sh
+          sudo apt-get install -yqq --no-install-recommends xxd git-lfs swig libelf-dev libdw-dev mono-complete
+      - name: Setup Zephyr
+        run: ./scripts/ci/setup_zephyr.sh
+      - name: Gather Traces
+        run: ./scripts/ci/gather_traces.sh
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tef-traces
+          path: tef_*.json
+
+  Run-BuildDocs:
+    runs-on: ubuntu-latest
+    needs: [Run-GatherTrace]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone and build Zeppelin Trace Viewer
+        run: |
+          git clone --recursive https://github.com/antmicro/zeppelin-trace-viewer.git
+          cd zeppelin-trace-viewer
+          corepack enable
+          yarn
+          yarn build
+          mkdir -p ../docs/source/_static/trace_viewer
+          cp -r dist/* ../docs/source/_static/trace_viewer
+          cd ..
+      - name: Download traces
+        uses: actions/download-artifact@v4
+        with:
+          name: tef-traces
+          path: docs/source/_static/trace_viewer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-full
+          python -m pip install -r docs/requirements.txt
+      - name: Generate documentation
+        run: |
+          cd docs
+          make html latexpdf
+          cp build/latex/*.pdf build/html
+          cd -
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gh-page
+          path: docs/build/html
+      - name: Deploy docs to GH Pages
+        if: github.event_name == 'push' && github.repository == 'antmicro/zeppelin'
+        run: |
+          cd docs/build/html
+          touch .nojekyll
+          git init
+          cp ../../../.git/config ./.git/config
+          git add .
+          git config --local user.email "push@gha"
+          git config --local user.name "GHA"
+          git commit -am "update ${{ github.sha }}"
+          git push -u origin +HEAD:gh-pages
+          rm -rf .git
