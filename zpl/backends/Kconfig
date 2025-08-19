@@ -24,6 +24,7 @@ config ZPL_TRACE_BACKEND_USB
 	select HWINFO
 	select TRACING_HANDLE_HOST_CMD
 	select USB_DEVICE_STACK_NEXT
+	depends on TRACING_ASYNC
 
 config ZPL_TRACE_BACKEND_DEBUGGER
 	bool "Debugger backend for Zeppelin"
