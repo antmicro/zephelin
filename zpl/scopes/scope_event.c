@@ -12,7 +12,7 @@
 #include <zephyr/tracing/tracing_format.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_DECLARE(zpl_scope_event);
+LOG_MODULE_REGISTER(zpl_scope_event);
 
 void zpl_emit_scope_event(char* scope_name, uint8_t is_exit)
 {

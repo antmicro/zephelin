@@ -13,7 +13,7 @@
 #include <zephyr/sys/iterable_sections.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_DECLARE(memory_profiler);
+LOG_MODULE_REGISTER(memory_profiler);
 
 void zpl_profile_stack(const struct k_thread *thread, void *user_data)
 {
