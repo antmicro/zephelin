@@ -146,6 +146,16 @@ class ZplUsbCapture(WestCommand):
         parser.add_argument("vendor_id", help="Vendor ID")
         parser.add_argument("product_id", help="Product ID")
         parser.add_argument("output_path", help="Capture output path")
+        parser.add_argument(
+            "-t", "--timeout", help="Timeout of the USB capture in seconds", type=int, default=2
+        )
+        parser.add_argument(
+            "-w",
+            "--wait-for-device",
+            help="When this flag is set, the command will wait for the device to connect",
+            action="store_true",
+            required=False,
+        )
 
         return parser
 
@@ -153,6 +163,11 @@ class ZplUsbCapture(WestCommand):
         vid = int(args.vendor_id, 16)
         pid = int(args.product_id, 16)
         dev = usb.core.find(idVendor=vid, idProduct=pid)
+
+        if args.wait_for_device and dev is None:
+            self.inf(f"Waiting for device {vid:04x}:{pid:04x}...")
+            while (dev := usb.core.find(idVendor=vid, idProduct=pid)) is None:
+                time.sleep(0.05)
 
         if dev is None:
             self.die(f"Couldn't open USB device with vid={vid} pid={pid}!")
@@ -183,7 +198,7 @@ class ZplUsbCapture(WestCommand):
             while True:
                 try:
                     buf = usb.util.create_buffer(10 * 1024)
-                    read_ep.read(buf, 2000)
+                    read_ep.read(buf, args.timeout * 1000)
                     f.write("".join([chr(x) for x in buf]).encode())
                 except usb.core.USBTimeoutError:
                     self.die("USB operation timeout!")
