@@ -27,6 +27,10 @@ int main(void)
 
 	zpl_init();
 
+	#ifdef CONFIG_ZPL_TRACE_BACKEND_USB
+	k_sleep(K_MSEC(500));
+	#endif
+
 	model_init();
 	status = model_load(model_data, model_data_len);
 	if (status) {
