@@ -23,3 +23,8 @@ west-commands:
       - name: zpl-prepare-trace
         class: ZplPrepareTrace
         help: Prepares traces for a visualization
+  - file: west/west-instrumentation.py
+    commands:
+      - name: zpl-instrumentation-uart-capture
+        class: ZplInstrumentationUartCapture
+        help: Capture instrumentation traces using UART
