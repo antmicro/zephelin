@@ -34,12 +34,12 @@ def get_stream(port):
 
 
 class ZplInstrumentationUartCapture(WestCommand):
-    """Main class for the instrumentation-uart-capture command."""
+    """Main class for the zpl-instrumentation-uart-capture command."""
 
     def __init__(self):
-        """Init function for the instrumentation-uart-capture command."""
+        """Init function for the zpl-instrumentation-uart-capture command."""
         super().__init__(
-            "instrumentation-uart-capture",
+            "zpl-instrumentation-uart-capture",
             "Capture instrumentation traces using UART",
             dedent("""
                 Capture instrumentation traces using UART.
