@@ -132,3 +132,9 @@ patches:
     author: Maciej Torhan
     email: mtorhan@antmicro.com
     date: 2025-06-09
+  - path: zephyr/instrumentation-subsystem/fixes/0001-scripts-zaru.py-deduplicate-code-rename-perfetto-to-.patch
+    sha256sum: d66ac026456cd2133e5642a837019deea6a587d109afff395caa4b346a313268
+    module: zephyr
+    author: Maciej Sobkowski
+    email: msobkowski@antmicro.com
+    date: 2025-06-09
