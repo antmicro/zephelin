@@ -78,19 +78,52 @@ trace capture.
 #### west zpl-uart-capture
 
 ```bash
-west zpl-uart-capture [port] [baud rate] [output file]
+west zpl-uart-capture [-h] serial_port serial_baudrate output_path
+
+Capture traces using UART. This command capures traces using the serial interface.
+
+positional arguments:
+  serial_port      Seral port
+  serial_baudrate  Seral baudrate
+  output_path      Capture output path
+
+options:
+  -h, --help       show this help message and exit
 ```
 
 #### west zpl-usb-capture
 
 ```bash
-west zpl-usb-capture [vendor id] [product id] [output file]
+west zpl-usb-capture [-h] [-t TIMEOUT] [-w] vendor_id product_id output_path
+
+Capture traces using USB. This command capures traces using USB.
+
+positional arguments:
+  vendor_id             Vendor ID
+  product_id            Product ID
+  output_path           Capture output path
+
+options:
+  -h, --help            show this help message and exit
+  -t, --timeout TIMEOUT
+                        Timeout of the USB capture in seconds
+  -w, --wait-for-device
+                        When this flag is set, the command will wait for the device to connect
 ```
 
 #### west zpl-gdb-capture
 
 ```bash
-west zpl-gdb-capture [elf file] [output file]
+west zpl-gdb-capture [-h] elf_path output_path
+
+Capture traces using GDB. This command captures traces using GDB from RAM using the `dump` command.
+
+positional arguments:
+  elf_path     Zephyr ELF path
+  output_path  Capture output path
+
+options:
+  -h, --help   show this help message and exit
 ```
 
 ### Profiling tiers
