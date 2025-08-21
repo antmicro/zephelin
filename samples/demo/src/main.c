@@ -1,4 +1,4 @@
-#include <zpl/lib.h>
+#include <zpl.h>
 
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
