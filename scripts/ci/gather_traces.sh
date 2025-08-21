@@ -22,7 +22,7 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_memory_profiling.json
 west build -p -b $BOARD samples/profiling/tvm_profiler -- ${CTF_CONFS}
 timeout --preserve-status -s INT 20s python3 ./scripts/run_renode.py
 west zpl-prepare-trace ./channel0_0 \
-  --tvm-model-path ./samples/profiling/tvm_profiler/model/magic-wand-graph.json \
+  --tvm-model-path ./samples/common/tvm/model/magic-wand-graph.json \
   -o ./tef_tvm_profiler.json
 
 ### Marking code scopes
