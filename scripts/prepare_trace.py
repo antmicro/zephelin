@@ -190,26 +190,28 @@ def setup_parser(parser: argparse.ArgumentParser):
         type=Path,
         help="Path to the TFLM model, extracted information will be appedened "
         "to the final trace as a metadata",
-        default=None,
     )
     parser.add_argument(
         "--tvm-model-path",
         type=Path,
         help="Path to the TVM graph file, extracted information will be appedened "
         "to the final trace as a metadata",
-        default=None,
+    )
+    parser.add_argument(
+        "--tvm-model-metadata-path",
+        type=Path,
+        help="Path to the TVM metadata file, extracted information will be appedened "
+        "to the final trace as a metadata",
     )
     parser.add_argument(
         "--build-dir",
         type=Path,
         help="Path to the build directory",
-        default=None,
     )
     parser.add_argument(
         "--zephyr-elf-path",
         type=Path,
         help="Path to the built Zephyr ELF, required for extracting symbols of memory regions",
-        default=None,
     )
     parser.add_argument(
         "--instrumentation",
@@ -304,7 +306,10 @@ def prepare(args: argparse.Namespace):
     if args.tvm_model_path is not None:
         from extract_tvm_model_data import extract_model_data
 
-        add_model_metadata(tef_trace, extract_model_data(args.tvm_model_path))
+        add_model_metadata(
+            tef_trace,
+            extract_model_data(args.tvm_model_path, args.tvm_model_metadata_path),
+        )
 
     # Metadata with memory symbols
     if REGION_SIZES:

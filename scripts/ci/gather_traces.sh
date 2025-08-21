@@ -29,6 +29,7 @@ west build -p -b $BOARD samples/profiling/tvm_profiler -- ${CTF_CONFS}
 python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
 west zpl-prepare-trace ./channel0_0 \
   --tvm-model-path ./samples/common/tvm/model/magic-wand-graph.json \
+  --tvm-model-metadata-path ./samples/common/tvm/model/magic-wand-metadata.json \
   -o ./tef_tvm_profiler.json
 
 ### Marking code scopes
