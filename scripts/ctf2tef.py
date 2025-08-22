@@ -445,6 +445,28 @@ def prepare_dir(trace: Path, zephyr_base: Path | None = None):
         yield tmp_dir
 
 
+@contextmanager
+def prepare_dir_for_instrumentation(trace: Path, instrumentation_metadata: Path):
+    """
+    Prepare temporary directory with CTF and extended metadata for instrumentation traces.
+
+    Yields
+    ------
+    Path
+        The temporary directory with CTF and custom metadata.
+    """
+    with TemporaryDirectory() as tmp_dir:
+        tmp_dir = Path(tmp_dir)
+
+        tmp_ctf = tmp_dir / trace.name
+        copy2(trace, tmp_ctf)
+
+        tmp_metadata = tmp_dir / "metadata"
+        copy2(instrumentation_metadata, tmp_metadata)
+
+        yield tmp_dir
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         "ctf2tef",
@@ -476,14 +498,45 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether event arguments should be skipped",
     )
+    parser.add_argument(
+        "--instrumentation-traces",
+        action="store_true",
+        help="Whether the CTF file contains instrumentation traces",
+    )
+    parser.add_argument(
+        "--instrumentation-metadata",
+        help="The generated instrumentation metadata file",
+        type=Path,
+        required=False,
+        default=Path(__file__).parent.parent / "build" / "ctf_metadata",
+    )
+    parser.add_argument(
+        "--instrumentation-elf",
+        help="Elf file for instrumentation traces",
+        type=Path,
+        required=False,
+        default=Path(__file__).parent.parent / "build" / "zephyr" / "zephyr.elf",
+    )
     args = parser.parse_args(sys.argv[1:])
 
     if not args.ctf_trace.exists():
         print(f"Specified trace ({args.ctf_trace}) does not exist", file=sys.stderr)
         exit(1)
 
-    with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
-        converted = ctf_to_tef(str(tmp_dir), args.exclude_args).tef
+    if args.instrumentation_traces:
+        assert args.zephyr_base is not None
+        sys.path.insert(1, f"{args.zephyr_base}/scripts")
+        import zaru
+
+        with prepare_dir_for_instrumentation(
+            args.ctf_trace, args.instrumentation_metadata
+        ) as tmp_dir:
+            converted, _ = zaru.get_traces_in_trace_event_format(
+                str(tmp_dir), Path(args.instrumentation_elf), True
+            )
+    else:
+        with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
+            converted = ctf_to_tef(str(tmp_dir), args.exclude_args).tef
 
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
