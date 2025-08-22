@@ -1,12 +1,14 @@
 # Zeppelin Trace Viewer
 
-Trace Viewer is a visual interface for traces in Trace Event Format (TEF).
-To fully utilize features of the viewer, it is suggested to process traces with [CTF converter](./ctf_to_tef.md).
+Zeppelin Trace Viewer is a visual interface for traces in Trace Event Format (TEF).
+To fully utilize the features of the viewer, we suggest processing traces with the [CTF converter](./ctf_to_tef.md).
+
+Go to the [GitHub-hosted Zeppelin Trace Viewer](https://antmicro.github.io/zeppelin-trace-viewer) to begin analyzing traces.
 
 ## Requirements
 
-The viewer leverages workspaces to manage a third-party dependencies like Speedscope.
-This requires [yarn](https://yarnpkg.com/) in version newer than 1.x, provided by [corepack](https://github.com/nodejs/corepack#readme) (usually installed together with Node.js):
+The viewer leverages workspaces to manage third-party dependencies like Speedscope.
+This requires [yarn](https://yarnpkg.com/) in version 1.x or newer, provided by [corepack](https://github.com/nodejs/corepack#readme) (usually installed together with Node.js):
 ```bash
 # Allows to use package managers without having to install them
 corepack enable
@@ -16,18 +18,18 @@ yarn
 
 ## Building
 
-There are a few predefined commands with basic utilities:
+There are several predefined commands with basic utilities:
 - `yarn build` - Builds for production, emitting to `dist/`
-- `yarn preview` - Starts a server at http://localhost:4173/ to test production build locally
-- `yarn dev` - Starts a dev server at http://localhost:5173/
+- `yarn preview` - Starts a server at `http://localhost:4173/` to test production build locally
+- `yarn dev` - Starts a dev server at `http://localhost:5173/`
 - `yarn lint` - Lints a code and applies all applicable fixes
 
 ## Usage
 
 The viewer is built around [Speedscope](https://github.com/jlfwong/speedscope) - an interactive flamegraph viewer with support for many trace/profiling formats.
 
-To display a trace, simply import a TEF file using `File/Import trace` (or `Browse`) button ({numref}`main_screen_fig`).
-This action will change the internal state of the Speedscope, which triggers the reaction of `Additional info` section.
+To display a trace, simply import a TEF file using the `File/Import trace` (or `Browse`) button ({numref}`main_screen_fig`).
+This action will change the internal state of Speedscope, which triggers the reaction of `Additional info` section.
 It gathers metadata and initializes custom panels based on available data.
 
 :::{figure-md} main_screen_fig
@@ -71,7 +73,7 @@ The microTVM model information example
 
 ### Plot panels
 
-The trace viewer can also visualize resources usage (like memory or CPU load) or data from sensors (e.g. DIE temperature) using plots ({numref}`plots_fig`).
+The trace viewer can also visualize resource usage (like memory or CPU load) or data from sensors (such as DIE temperature) using plots ({numref}`plots_fig`).
 
 Panels with these plots are automatically created whenever a trace with necessary data is loaded:
 * [](memory-event) events for memory plots,

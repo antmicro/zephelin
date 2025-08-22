@@ -1,13 +1,12 @@
 # Introduction
 
-The aim of this project is to create Zeppelin, the Zephyr AI Profiling Library,
-which allows the user to capture, analyze and report runtime performance
-metrics for AI/ML inference workloads.
+Zephyr Profiling Library (ZPL), or Zeppelin for short, is a library which enables capturing and reporting runtime performance metrics, for the profiling and detailed analysis of Zephyr applications, with a special focus on applications running AI/ML inference workloads.
 
-This documentation describes the following aspects of the project:
-* {doc}`library` - describes how to build and test the profiling middleware
-* {doc}`configuration` - describes build-time and runtime configuration
-* {doc}`memory_profiling` - describes memory profiling along with memory events
-* {doc}`code_scopes` - describes usage of tracing code scopes
+This documentation describes the following aspects of Zeppelin and the associated projects:
+
+* {doc}`library` - provides general information on Zeppelin repository, describes how to build, test and use the profiling middleware
+* {doc}`configuration` - describes build-time and runtime configuration of Zeppelin library
+* {doc}`memory_profiling` - describes memory profiling, along with memory events
+* {doc}`code_scopes` - describes the use of tracing code scopes
 * {doc}`ctf_to_tef` - describes how traces are converted and processed
-* {doc}`visual_interface` - describes a tool for trace visualization
+* {doc}`visual_interface` - describes the tool for trace visualization

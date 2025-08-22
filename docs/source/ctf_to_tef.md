@@ -1,17 +1,10 @@
 # CTF to TEF conversion
 
-In order to expand the compatibility of received trace in Common Trace Format (CTF), we had prepared a converter to the [Trace Event Format](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?tab=t.0#heading=h.yr4qxyxotyw) (TEF).
-
-## Requirements
-
-The converter is a Python script requiring few dependencies:
-* [Babeltrace](https://github.com/efficios/babeltrace) with Python bindings
-* [PyYAML](https://github.com/yaml/pyyaml)
-* [LiteRT](https://github.com/google-ai-edge/LiteRT) - only for extracting metadata from LiteRT models, can be installed with `pip3 install ai-edge-litert`
+In order to expand the compatibility of the traces received in Common Trace Format (CTF), we created a converter for obtaining them in the [Trace Event Format (TEF)](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?tab=t.0#heading=h.yr4qxyxotyw).
 
 ## Usage
 
-The converter can be used with a following command:
+You can run the converter with the following command:
 
 ```bash
 west zpl-prepare-trace \
@@ -20,31 +13,34 @@ west zpl-prepare-trace \
   ctf_trace
 ```
 
-There are a few optional arguments:
-* `--zephyr-base` - the script tries to automatically find the Zephyr directory in order to use metadata file definition of CTF events, if this cannot done, user has to provide the path or set `ZEPHYR_BASE` environmental variable,
-* `--build-dir` - the directory storing results of build and [ram_report](https://docs.zephyrproject.org/latest/develop/optimizations/tools.html#build-target-ram-report).
-* `--tflm-model-path` - the given TFLite Micro model is processed to extract information about its layer and tensors, the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} event,
-* `--tvm-model-path` - the given microTVM graph JSON file is processed to extract information about model's layer and tensors, the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} Event,
-* `-o` - points to the file where the converted trace should be saved, if not provided the JSON will be printed to STDOUT.
+There are several optional arguments available:
+* `--zephyr-base` - the script tries to automatically find the Zephyr directory in order to use the metadata file definition of CTF events.
+  If this fails, you have to provide the path or set the `ZEPHYR_BASE` environmental variable.
+* `--build-dir` - the directory storing the results of the build and [ram_report](https://docs.zephyrproject.org/latest/develop/optimizations/tools.html#build-target-ram-report).
+* `--tflm-model-path` - the provided TFLite Micro model is processed to extract information about its layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} event.
+* `--tvm-model-path` - the provided microTVM graph JSON file is processed to extract information about model's layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} Event,
+* `-o` - the file path which points to the file where the converted trace should be saved.
+  If not provided, the JSON will be printed to STDOUT.
 
-It, apart from changing format, implements custom logic which can group elements into {{TEF_Duration}} events and extend their arguments (see [](converted-events)).
-Moreover, a completely new events can be added to the trace extending the context and improving the trace visualization capabilities (see [](optional-events)).
-Furthermore, the command also converts timestamps from nanoseconds (used in CTF) to microseconds, as Speedscope assumes they are provided in such unit.
+Apart from changing the format, this involves a custom logic which can group elements into {{TEF_Duration}} events, and extend their arguments (see [](converted-events)).
+Completely new events can be added to the trace, extending the context, and improving the trace visualization capabilities (see [](optional-events)).
+Furthermore, the command also converts timestamps from nanoseconds (used in CTF) to microseconds, which are valid for Zeppelin Trace Viewer and Speedscope (it assumes that the timestamps are provided in such unit).
 
 ## Events
 
 (converted-events)=
 ### Converted events
 
-This section contains events that are not produced during the Zeppelin runtime, but are used to provide additional information for a better visualizations.
+This section describes events that are converted from CTF events, emitted during Zeppelin runtime.
+Based on those, the trace viewer produces dedicated panels with visualizations (e.g. plot panels).
 
 #### Zephyr events
 
-For default Zephyr events (defined in [metadata](https://github.com/zephyrproject-rtos/zephyr/blob/main/subsys/tracing/ctf/tsdl/metadata)), the beginning event has always the `_enter` suffix, whereas the end event has `_exit`.
+For default Zephyr events (defined in [metadata](https://github.com/zephyrproject-rtos/zephyr/blob/main/subsys/tracing/ctf/tsdl/metadata)), the beginning event always gets the `_enter` suffix, whereas the ending event gets the `_exit` suffix.
 These events are marked as `B` and `E` events, creating {{TEF_Duration}} event in TEF.
-The remaining Zephyr events are of {{TEF_Instant}} type, but as Speedscope does not support displaying such events, they are also converted to the Duration Event with 1 microsecond of duration.
+The remaining Zephyr events are of {{TEF_Instant}} type, but since Speedscope does not support displaying such events, they are also converted to a Duration Event with 1 microsecond of duration.
 
-:::{admonition} Example event
+:::{example} Example events
 :collapsible:
 ```json
 {
@@ -69,10 +65,10 @@ The remaining Zephyr events are of {{TEF_Instant}} type, but as Speedscope does 
 
 #### `zpl_inference`
 
-The {{TEF_Duration}} event marking the beginning and end of the inference.
-It is created from `zpl_inference_enter` and `zpl_inference_exit` CTF events.
+The {{TEF_Duration}} event marking the beginning and end of model's inference.
+It is created from the CTF events `zpl_inference_enter` and `zpl_inference_exit`.
 
-:::{admonition} Example event
+:::{example} `zpl_inference` events examples
 :collapsible:
 ```json
 {
@@ -103,21 +99,21 @@ It is created from `zpl_inference_enter` and `zpl_inference_exit` CTF events.
 
 #### `MODEL::{LAYER_OP}[_{SUBGRAPH_IDX}]_{OP_IDX}`
 
-The `MODEL::*` {{TEF_Duration}} event is unique for each layer of model, described with:
+The `MODEL::*` {{TEF_Duration}} event is unique to each layer of a model, described with:
 * `LAYER_OP` - a tag of operation like `CONV_2D` or `MAX_POOL_2D`,
-* `SUBGRAPH_IDX` - an optional number representing the ID of subgraph to which a given layer belongs,
+* `SUBGRAPH_IDX` - an optional number representing the ID of a subgraph to which a given layer belongs,
 * `OP_IDX` - a number representing the ID of the operation in a subgraph.
 
 The event contains:
 * identifiers like `op_idx` and optional `subgraph_idx`,
-* `tag` with layer name,
+* `tag` with the layer name,
 * `thread_id` pointing to the thread that executed this layer,
-* `runtime` specifying which runtime was used,
-* and additional runtime-specific data.
+* `runtime` specifying which runtime was used, and
+* additional runtime-specific data.
 
 This event is converted from TFLite micro (`zpl_tflm_(enter|exit)`) and microTVM (`zpl_tvm_(enter|exit)`) events.
 
-:::{admonition} Example event
+:::{example} `MODEL::*` events examples
 :collapsible:
 ```json
 {
@@ -160,10 +156,10 @@ This event is converted from TFLite micro (`zpl_tflm_(enter|exit)`) and microTVM
 (memory-event)=
 #### `MEMORY`
 
-The {{TEF_Metadata}} event with information about a [memory region](memory-ctf) in a given timestamp (`ts`).
-It is created from `zpl_memory` CTF event.
+The {{TEF_Metadata}} event with information about a [memory region](memory-ctf) for a given timestamp (`ts`).
+It is created from the CTF event `zpl_memory`.
 
-:::{admonition} Example event
+:::{example} `MEMORY` metadata example
 :collapsible:
 ```json
 {
@@ -187,10 +183,10 @@ It is created from `zpl_memory` CTF event.
 (cpu-load-event)=
 #### `CPU_LOAD`
 
-The {{TEF_Metadata}} event defining CPU load (`cpu_load` field) in a given timestamp (`ts`).
-It is converted from `zpl_cpu_load_event` CTF event.
+The {{TEF_Metadata}} event defining CPU load (`cpu_load` field) for a given timestamp (`ts`).
+It is converted from the CTF event `zpl_cpu_load_event`.
 
-:::{admonition} Example event
+:::{example} `CPU_LOAD` metadata example
 :collapsible:
 ```json
 {
@@ -210,10 +206,10 @@ It is converted from `zpl_cpu_load_event` CTF event.
 (die-temp-event)=
 #### `DIE_TEMP`
 
-The {{TEF_Metadata}} event providing DIE temperatures (`die_temp` array with at most two measurements in degrees Celsius) for a given timestamp (`ts`).
-It is converted from `zpl_die_temp_event` CTF event.
+The {{TEF_Metadata}} event providing DIE temperatures (`die_temp` array with at most two measurements, in degrees Celsius) for a given timestamp (`ts`).
+It is converted from the CTF event `zpl_die_temp_event`.
 
-:::{admonition} Example event
+:::{example} `DIE_TEMP` metadata example
 :collapsible:
 ```json
 {
@@ -233,20 +229,19 @@ It is converted from `zpl_die_temp_event` CTF event.
 ```
 :::
 
-
 (optional-events)=
 ### Additional events
 
-This section contains events that are not produced during the Zeppelin runtime, but are used to provide additional information for a better visualizations.
+This section contains events that are not produced during the Zeppelin runtime, but are used to provide additional information for better visualizations.
 
 (memory-statically-assigned-mem-event)=
 #### `MEMORY::STATICALLY_ASSIGNED_MEM`
 
 The {{TEF_Metadata}} event informing about the part of RAM (in bytes), used by the compiled objects.
 This value is calculated using size from [ram_report](https://docs.zephyrproject.org/latest/develop/optimizations/tools.html#build-target-ram-report) and subtracting sizes of the memory regions (from [`MEMORY` events](memory-event)).
-The event looks like:
+The event looks like this:
 
-:::{admonition} Example event
+:::{example} `MEMORY::STATICALLY_ASSIGNED_MEM` metadata example
 :collapsible:
 ```json
 {
@@ -264,11 +259,11 @@ The event looks like:
 (memory-symbols-event)=
 #### `MEMORY::SYMBOLS`
 
-The {{TEF_Metadata}} event containing mapping of memory region addresses to their symbols extracted from `zephyr.elf`.
-It is used to present human-readable description of the regions, e.g. making it easier to trace back to source code.
-The example event:
+The {{TEF_Metadata}} event contains the mapping of memory region addresses to their symbols extracted from `zephyr.elf`.
+It is used to present human-readable description of the regions, e.g. making it easier to trace back to the source code.
+Example event:
 
-:::{admonition} Example event
+:::{example} `MEMORY::SYMBOLS` metadata example
 :collapsible:
 ```json
 {
@@ -294,12 +289,12 @@ The example event:
 
 #### `thread_name`
 
-The {{TEF_Metadata}} event used by Speedscope to associate thread ID with a name.
+The {{TEF_Metadata}} event is used by Speedscope to associate a thread ID with a name.
 Apart from describing which thread is shown on the flamegraph, the thread name is also used to provide human-readable label for the thread stack.
 
-The one event describes exactly one thread with arguments containing thread name assigned to the key `name`.
+One event describes exactly one thread with arguments containing the thread name, assigned to the key `name`.
 
-:::{admonition} Example event
+:::{example} `thread_name` metadata example
 :collapsible:
 ```json
 {
@@ -319,17 +314,17 @@ The one event describes exactly one thread with arguments containing thread name
 #### `MODEL`
 
 The `MODEL` {{TEF_Metadata}} event contains following information:
-* `inputs` - specification of model inputs, described with `name`, `shape` and `dtype`,
-* `outputs` - specification of model outputs, with the same properties as `inputs`,
-* `tensors` - specification of internal data like inputs and outputs of layers, their weights or biases; the properties are the same as `inputs` with additional `index` and optional `subgraph_idx`,
-* `ops` - specification of model operations:
-  * `op_name` - name of the operation (e.g. `CONV_2D` or `tvmgen_default_fused_nn_conv2d_add_nn_relu`),
-  * `index` - ID of the operation,
-  * `inputs` and `outputs` - list of `index`es pointing to elements from `tensors` which specify operation's inputs and outputs properties,
-  * `inputs_types` and `outputs_types` - operation's inputs and outputs data types,
-  * `inputs_shapes` and `outputs_shapes` - operation's inputs and outputs shapes.
+* `inputs` - the specification of model inputs, described with `name`, `shape` and `dtype`,
+* `outputs` - the specification of model outputs, with the same properties as `inputs`,
+* `tensors` - the specification of internal data like inputs and outputs of layers, their weights or biases; the properties are the same as `inputs`, but with additional `index` and optional `subgraph_idx`,
+* `ops` - the specification of model operations:
+  * `op_name` - the name of the operation (e.g. `CONV_2D` or `tvmgen_default_fused_nn_conv2d_add_nn_relu`),
+  * `index` - the ID of the operation,
+  * `inputs` and `outputs` - lists with indices pointing to `tensors` with input and output data (respectively),
+  * `inputs_types` and `outputs_types` - the operation's input and output data types,
+  * `inputs_shapes` and `outputs_shapes` - the operation's input and output shapes.
 
-:::{admonition} Example event of MagicWand model for TFLite micro runtime
+:::{example} Example event of Magic Wand model for TFLite Micro runtime
 :collapsible:
 ```json
 {
