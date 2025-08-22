@@ -4,76 +4,76 @@
 # SPDX-License-Identifier: Apache-2.0
 
 config TRACING_SYSCALL
-        default n
+	default n
 
 config TRACING_THREAD
-        default n
+	default n
 
 config TRACING_WORK
-        default n
+	default n
 
 config TRACING_ISR
-        default n
+	default n
 
 config TRACING_SEMAPHORE
-        default n
+	default n
 
 config TRACING_MUTEX
-        default n
+	default n
 
 config TRACING_CONDVAR
-        default n
+	default n
 
 config TRACING_QUEUE
-        default n
+	default n
 
 config TRACING_FIFO
-        default n
+	default n
 
 config TRACING_LIFO
-        default n
+	default n
 
 config TRACING_STACK
-        default n
+	default n
 
 config TRACING_MESSAGE_QUEUE
-        default n
+	default n
 
 config TRACING_MAILBOX
-        default n
+	default n
 
 config TRACING_PIPE
-        default n
+	default n
 
 config TRACING_HEAP
-        default n
+	default n
 
 config TRACING_MEMORY_SLAB
-        default n
+	default n
 
 config TRACING_TIMER
-        default n
+	default n
 
 config TRACING_EVENT
-        default n
+	default n
 
 config TRACING_POLLING
-        default n
+	default n
 
 config TRACING_PM
-        default n
+	default n
 
 config TRACING_NETWORKING
-        default n
+	default n
 
 config TRACING_NET_SOCKETS
-        default n
+	default n
 
 config TRACING_NET_CORE
-        default n
+	default n
 
 config TRACING_GPIO
-        default n
+	default n
 
 config TRACING_IDLE
-        default n
+	default n

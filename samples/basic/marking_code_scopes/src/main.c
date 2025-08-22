@@ -37,7 +37,9 @@ void test_recurrent(int counter)
 	sys_trace_named_event("recurrent_test_function", 1, 1);
 	ZPL_MARK_CODE_SCOPE(code_scope4) {
 		k_sleep(K_MSEC(100));
-		if (counter == 0) return;
+		if (counter == 0) {
+			return;
+		}
 		test_recurrent(counter - 1);
 	}
 }

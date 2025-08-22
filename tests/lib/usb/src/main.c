@@ -11,16 +11,19 @@
 #include <zpl/usb_backend.h>
 
 /* This typedef is needed for the `usbd_register_all_class()` function mock */
-typedef const char * const * blocklist_t;
+typedef const char * const *blocklist_t;
 
 DEFINE_FFF_GLOBALS;
 
-FAKE_VALUE_FUNC(int, usbd_add_configuration, struct usbd_context *, const enum usbd_speed, struct usbd_config_node *);
+FAKE_VALUE_FUNC(int, usbd_add_configuration, struct usbd_context *,
+		const enum usbd_speed, struct usbd_config_node *);
 FAKE_VALUE_FUNC(int, usbd_add_descriptor, struct usbd_context *, struct usbd_desc_node *);
-FAKE_VALUE_FUNC(int, usbd_device_set_code_triple, struct usbd_context *, const enum usbd_speed, const uint8_t, const uint8_t, const uint8_t);
+FAKE_VALUE_FUNC(int, usbd_device_set_code_triple, struct usbd_context *,
+		const enum usbd_speed, const uint8_t, const uint8_t, const uint8_t);
 FAKE_VALUE_FUNC(int, usbd_init, struct usbd_context *);
 FAKE_VOID_FUNC(usbd_self_powered, struct usbd_context *, const bool);
-FAKE_VALUE_FUNC(int, usbd_register_all_classes, struct usbd_context *, const enum usbd_speed, uint8_t, blocklist_t);
+FAKE_VALUE_FUNC(int, usbd_register_all_classes, struct usbd_context *,
+		const enum usbd_speed, uint8_t, blocklist_t);
 
 ZTEST(zpl_usb_backend, test_zpl_usbd_init_device_pass)
 {

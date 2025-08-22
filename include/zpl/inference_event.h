@@ -34,11 +34,11 @@ typedef struct __packed {
 /**
  * Marks inference enter.
  */
-void zpl_inference_enter();
+void zpl_inference_enter(void);
 
 /**
  * Marks inference exit.
  */
-void zpl_inference_exit();
+void zpl_inference_exit(void);
 
 #endif /* ZPL_INFERENCE_EVENT_H_ */

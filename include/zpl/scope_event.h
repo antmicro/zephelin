@@ -24,6 +24,6 @@ typedef struct __packed {
 	uint32_t thread_id;
 } zpl_scope_event_t;
 
-void zpl_emit_scope_event(char* scope_name, uint8_t is_exit);
+void zpl_emit_scope_event(char *scope_name, uint8_t is_exit);
 
-#endif  // ZPL_SCOPE_EVENT_H_
+#endif /* ZPL_SCOPE_EVENT_H_ */

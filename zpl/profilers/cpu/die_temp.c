@@ -32,7 +32,7 @@ void zpl_emit_die_temp_event(void)
 			die_temp[i] = NAN;
 			continue;
 		}
-		if (!device_is_ready(sensors[i])){
+		if (!device_is_ready(sensors[i])) {
 			die_temp[i] = NAN;
 			continue;
 		}
@@ -62,20 +62,26 @@ void zpl_emit_die_temp_event(void)
 	}
 	tracing_format_raw_data((uint8_t *)&zpl_die_temp_event, sizeof(zpl_die_temp_event_t));
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
-#define APPEND_TO_STR(str_, str_p_, fmt_, ...) \
-	snprintf(str_p_, MAX(0, sizeof(str_) - (int)(str_p_ - str_)), fmt_ __VA_OPT__(,) __VA_ARGS__);
+#define APPEND_TO_STR(str_, str_p_, fmt_, ...) snprintf(str_p_, \
+		MAX(0, sizeof(str_) - (int)(str_p_ - str_)), \
+		fmt_ __VA_OPT__(,) __VA_ARGS__);
 
 	char trace_str[24 + 20 * SENSORS_COUNT];
 	char *trace_str_p = trace_str;
-	memset(trace_str, 0, sizeof(trace_str));
 
+	memset(trace_str, 0, sizeof(trace_str));
 	trace_str_p += APPEND_TO_STR(trace_str, trace_str_p, "zpl_die_temp_event:");
+
 	for (int i = 0; i < SENSORS_COUNT; ++i) {
 		if (isnan(die_temp[i])) {
-			trace_str_p += APPEND_TO_STR(trace_str, trace_str_p, " die_temp[%d]=NaN", i);
+			trace_str_p += APPEND_TO_STR(trace_str, trace_str_p,
+					" die_temp[%d]=NaN", i);
 		} else {
-			int die_temp_int = (int)(100*die_temp[i]);
-			trace_str_p += APPEND_TO_STR(trace_str, trace_str_p, " die_temp[%d]=%d.%d", i, die_temp_int / 100, die_temp_int % 100);
+			int die_temp_int = (int)(100 * die_temp[i]);
+
+			trace_str_p += APPEND_TO_STR(trace_str, trace_str_p,
+					" die_temp[%d]=%d.%d", i,
+					die_temp_int / 100, die_temp_int % 100);
 		}
 	}
 	trace_str_p += APPEND_TO_STR(trace_str, trace_str_p, "\n");

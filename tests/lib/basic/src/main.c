@@ -58,7 +58,9 @@ ZTEST(zpl, test_library_init_fail)
 
 ZTEST(zpl, test_runtime_check_conf)
 {
-	zassert_equal(IS_ENABLED(CONFIG_ZPL_MEMORY_USAGE_TRACE), ZPL_CHECK_IF_CONF(mem_usage_trace), "ZPL_CHECK_IF_CONF(mem_usage_trace) returned an incorrect value");
+	zassert_equal(IS_ENABLED(CONFIG_ZPL_MEMORY_USAGE_TRACE),
+			ZPL_CHECK_IF_CONF(mem_usage_trace),
+			"ZPL_CHECK_IF_CONF(mem_usage_trace) returned an incorrect value");
 }
 
 

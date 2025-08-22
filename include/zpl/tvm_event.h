@@ -27,8 +27,8 @@ typedef struct __packed {
 } zpl_tvm_event_t;
 #endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) */
 
-void zpl_emit_tvm_enter_event(uint32_t cycles, uint8_t op_idx, const char* tag);
+void zpl_emit_tvm_enter_event(uint32_t cycles, uint8_t op_idx, const char *tag);
 
-void zpl_emit_tvm_exit_event(uint32_t cycles, uint8_t op_idx, const char* tag);
+void zpl_emit_tvm_exit_event(uint32_t cycles, uint8_t op_idx, const char *tag);
 
 #endif /* ZPL_TVM_EVENTS_H_ */

@@ -25,8 +25,9 @@ void zpl_profile_stack(const struct k_thread *thread, void *user_data)
 		return;
 	}
 
-	zpl_emit_memory_for_thread_event(
-	  ZPL_STACK, thread->stack_info.start, thread->stack_info.size - unused, unused, (uint32_t)thread);
+	zpl_emit_memory_for_thread_event(ZPL_STACK, thread->stack_info.start,
+			thread->stack_info.size - unused, unused,
+			(uint32_t)thread);
 }
 
 void zpl_profile_heap(void)
@@ -37,7 +38,7 @@ void zpl_profile_heap(void)
 	bool included_in_k_heap;
 
 	for (i = 0; i < sys_heap_array_get(&ha); i++) {
-		// Filter out heaps included in profile_k_heap
+		/* Filter out heaps included in profile_k_heap */
 		included_in_k_heap = false;
 		STRUCT_SECTION_FOREACH(k_heap, k_ha) {
 			if ((uintptr_t)ha[i] == (uintptr_t)&k_ha->heap) {
@@ -45,26 +46,35 @@ void zpl_profile_heap(void)
 				break;
 			}
 		}
-		if (included_in_k_heap) continue;
+
+		if (included_in_k_heap) {
+			continue;
+		}
 
 		sys_heap_runtime_stats_get(ha[i], &stats);
-		zpl_emit_memory_event(ZPL_HEAP, (uintptr_t)ha[i], stats.allocated_bytes, stats.free_bytes);
+		zpl_emit_memory_event(ZPL_HEAP, (uintptr_t)ha[i],
+				stats.allocated_bytes, stats.free_bytes);
 	}
 }
 
 void zpl_profile_memory_slabs(void)
 {
 	STRUCT_SECTION_FOREACH(k_mem_slab, slab) {
-		zpl_emit_memory_event(ZPL_MEM_SLAB, (uintptr_t)slab, slab->info.num_used * slab->info.block_size, slab->info.num_blocks * slab->info.block_size - slab->info.num_used * slab->info.block_size);
+		zpl_emit_memory_event(ZPL_MEM_SLAB, (uintptr_t)slab,
+				slab->info.num_used * slab->info.block_size,
+				slab->info.num_blocks * slab->info.block_size -
+				slab->info.num_used * slab->info.block_size);
 	}
 }
 
 void zpl_profile_k_heaps(void)
 {
 	struct sys_memory_stats stats;
+
 	STRUCT_SECTION_FOREACH(k_heap, heap) {
 		sys_heap_runtime_stats_get(&heap->heap, &stats);
-		zpl_emit_memory_event(ZPL_K_HEAP, (uintptr_t)&heap->heap, stats.allocated_bytes, stats.free_bytes);
+		zpl_emit_memory_event(ZPL_K_HEAP, (uintptr_t)&heap->heap,
+				stats.allocated_bytes, stats.free_bytes);
 	}
 }
 

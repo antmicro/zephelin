@@ -11,18 +11,18 @@
 #include <tvm/runtime/crt/profiler.h>
 
 TVMProfiler tvm_profiler = {
-    .begin_event_cb = zpl_tvm_profiler_begin_event,
-    .end_event_cb = zpl_tvm_profiler_end_event,
+	.begin_event_cb = zpl_tvm_profiler_begin_event,
+	.end_event_cb = zpl_tvm_profiler_end_event,
 };
 
 #if defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE)
 
-static int num_events_ = 0;
+static int num_events_;
 static uint8_t op_idx_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 static const char *tags_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 
 
-int zpl_tvm_profiler_begin_event(int op_idx, const char* tag)
+int zpl_tvm_profiler_begin_event(int op_idx, const char *tag)
 {
 	if (num_events_ >= CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS) {
 		return -1;
@@ -54,17 +54,17 @@ void zpl_tvm_profiler_end_event(int event_handle)
 		tags_[event_handle]);
 }
 
-void zpl_tvm_profiler_dump_events()
+void zpl_tvm_profiler_dump_events(void)
 {
 	num_events_ = 0;
 }
 
 #else /* defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE) */
 
-int zpl_tvm_profiler_begin_event(int op_idx, const char* tag) { return -1; }
+int zpl_tvm_profiler_begin_event(int op_idx, const char *tag) { return -1; }
 
 void zpl_tvm_profiler_end_event(int event_handle) {}
 
-void zpl_tvm_profiler_dump_events() {}
+void zpl_tvm_profiler_dump_events(void) {}
 
 #endif /* defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE) */

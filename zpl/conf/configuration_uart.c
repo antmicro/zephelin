@@ -55,9 +55,9 @@
 		return 0;                                                                  \
 	}                                                                            \
 	SHELL_STATIC_SUBCMD_SET_CREATE(sub_##name,                                   \
-	        SHELL_CMD(enable, NULL, #name" - enable", enable_##name),             \
-	        SHELL_CMD(disable, NULL, #name" - disable", disable_##name),           \
-	        SHELL_SUBCMD_SET_END                                                 \
+		SHELL_CMD(enable, NULL, #name" - enable", enable_##name),             \
+		SHELL_CMD(disable, NULL, #name" - disable", disable_##name),           \
+		SHELL_SUBCMD_SET_END                                                 \
 	);                                                                           \
 	SHELL_CMD_REGISTER(name, &sub_##name, #name, NULL);
 
@@ -70,7 +70,8 @@
 
 #ifdef CONFIG_ZPL_SCOPE_MARKING
 
-void zpl_change_state_dynamic_conf(char* conf_name, bool state) {
+void zpl_change_state_dynamic_conf(char *conf_name, bool state)
+{
 	STRUCT_SECTION_FOREACH(zpl_code_scope_conf, config) {
 		if (strcmp(config->conf_name, conf_name) == 0) {
 			config->is_enabled = state;
@@ -102,16 +103,17 @@ static int zpl_list_dynamic_conf(const struct shell *sh, size_t argc, char **arg
 {
 	shell_print(sh, "Available configs:");
 	STRUCT_SECTION_FOREACH(zpl_code_scope_conf, config) {
-		shell_print(sh, "\t%s:\t%s", config->conf_name, config->is_enabled ? "enabled" : "disabled");
+		shell_print(sh, "\t%s:\t%s", config->conf_name,
+				config->is_enabled ? "enabled" : "disabled");
 	}
 	return 0;
 }
 
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_dynamic_conf,
-        SHELL_CMD(enable, NULL, "Dynamic conf - enable", zpl_enable_dynamic_conf),
-        SHELL_CMD(disable, NULL, "Dynamic conf - disable", zpl_disable_dynamic_conf),
-        SHELL_CMD(list, NULL, "List available dynamic configurations", zpl_list_dynamic_conf),
-        SHELL_SUBCMD_SET_END
+	SHELL_CMD(enable, NULL, "Dynamic conf - enable", zpl_enable_dynamic_conf),
+	SHELL_CMD(disable, NULL, "Dynamic conf - disable", zpl_disable_dynamic_conf),
+	SHELL_CMD(list, NULL, "List available dynamic configurations", zpl_list_dynamic_conf),
+	SHELL_SUBCMD_SET_END
 );
 SHELL_CMD_REGISTER(dynamic_conf, &sub_dynamic_conf, "dynamic_conf", NULL);
 

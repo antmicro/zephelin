@@ -10,7 +10,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>
 
-void zpl_inference_enter()
+void zpl_inference_enter(void)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	zpl_inference_event_t zpl_inference_enter_event = {
@@ -23,11 +23,11 @@ void zpl_inference_enter()
 		(uint8_t *)&zpl_inference_enter_event, sizeof(zpl_inference_event_t)
 	);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
-	TRACING_STRING("zpl_inference_enter:\n");
+	TRACING_STRING("%s:\n", __func__);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
 }
 
-void zpl_inference_exit()
+void zpl_inference_exit(void)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	zpl_inference_event_t zpl_inference_exit_event = {
@@ -40,6 +40,6 @@ void zpl_inference_exit()
 		(uint8_t *)&zpl_inference_exit_event, sizeof(zpl_inference_event_t)
 	);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
-	TRACING_STRING("zpl_inference_exit:\n");
+	TRACING_STRING("%s:\n", __func__);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
 }

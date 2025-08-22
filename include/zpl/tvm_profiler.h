@@ -18,7 +18,7 @@
  *
  * @returns Handle of the created event.
  */
-int zpl_tvm_profiler_begin_event(int op_idx, const char* tag);
+int zpl_tvm_profiler_begin_event(int op_idx, const char *tag);
 
 /**
  * Called by TVMProfiler after op execution. Marks event end.
@@ -30,6 +30,6 @@ void zpl_tvm_profiler_end_event(int event_handle);
 /**
  * Dumps events from buffer to trace backend.
  */
-void zpl_tvm_profiler_dump_events();
+void zpl_tvm_profiler_dump_events(void);
 
 #endif /* ZPL_TVM_PROFILER_H_ */

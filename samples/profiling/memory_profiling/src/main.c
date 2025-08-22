@@ -16,12 +16,15 @@ K_HEAP_DEFINE(test_k_heap, 1024);
 void recursive_function(int counter)
 {
 	char *block_ptr;
+
 	if (k_mem_slab_alloc(&test_mem_slab, (void **)&block_ptr, K_MSEC(100)) == 0) {
 		memset(block_ptr, 0, 100);
 	}
+
 	int *k_heap_variable = k_heap_alloc(&test_k_heap, 7, K_MSEC(100));
 	int *heap_variable = k_malloc(sizeof(int) * 5);
 	int *stdlib_malloc_test = malloc(sizeof(int) * 512);
+
 	stdlib_malloc_test[0] = 5;
 
 	sys_trace_named_event("counter", counter, 0);
