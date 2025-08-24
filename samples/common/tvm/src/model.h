@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2025 Analog Devices, Inc.
+ * Copyright (c) 2025 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 #ifndef SAMPLES_TRACE_TVM_PROFILER_SRC_MODEL_H_
 #define SAMPLES_TRACE_TVM_PROFILER_SRC_MODEL_H_
 

@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2025 Analog Devices, Inc.
+ * Copyright (c) 2025 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 // tvm target: c -keys=arm_cpu,cpu -device=arm_cpu -march=armv7e-m -mcpu=cortex-m7
 // -model=stm32f746xx
 #define TVM_EXPORTS

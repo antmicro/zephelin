@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2025 Analog Devices, Inc.
+ * Copyright (c) 2025 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 #ifndef ZPL_TVM_PROFILER_H_
 #define ZPL_TVM_PROFILER_H_
 #include <tvm/runtime/crt/profiler.h>

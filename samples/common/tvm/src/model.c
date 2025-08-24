@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2025 Analog Devices, Inc.
+ * Copyright (c) 2025 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 #include <tvm/runtime/c_backend_api.h>
 #include <tvm/runtime/crt/crt.h>
 #include <tvm/runtime/crt/graph_executor.h>

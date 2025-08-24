@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2025 Analog Devices, Inc.
+ * Copyright (c) 2025 Antmicro <www.antmicro.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
 #ifndef ZPL_CPU_LOAD_EVENT_H_
 #define ZPL_CPU_LOAD_EVENT_H_
 
