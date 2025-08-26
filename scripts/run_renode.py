@@ -11,6 +11,7 @@ Python script for running Kenning Zephyr Runtime in Renode.
 
 import argparse
 import re
+import time
 from pathlib import Path
 
 import serial
@@ -64,6 +65,9 @@ if __name__ == "__main__":
     parser.add_argument("--sensor-samples", type=Path, help="Path to file with sensor samples")
     parser.add_argument("--trace-output", type=Path, help="Path to file where traces will be saved")
     parser.add_argument("--trace-output-stdout", action="store_true", help="Write trace to stdout")
+    parser.add_argument(
+        "--timeout", type=int, help="Defines for how long the simulation should run in seconds."
+    )
     args = parser.parse_args()
 
     board = get_cmake_var("BOARD:STRING").split("/")[0]
@@ -139,6 +143,7 @@ if __name__ == "__main__":
     print("Starting Renode simulation. Press CTRL+C to exit.")
     emulation.StartAll()
 
+    simulation_start = time.time()
     while True:
         try:
             traces = trace_serial.read_all()
@@ -152,14 +157,22 @@ if __name__ == "__main__":
                 print(logs.decode(errors="ignore"), end="", flush=True)
 
         except KeyboardInterrupt:
-            print("Exiting...")
             break
         # pylint: disable-next=try-except-raise
         except Exception:
+            print("Program failed, saving traces...")
+            if trace_f is not None:
+                trace_f.close()
+            trace_serial.close()
             raise
+        if args.timeout:
+            if time.time() - simulation_start >= args.timeout:
+                break
 
     if trace_f is not None:
         trace_f.close()
 
     trace_serial.close()
     emulation.clear()
+
+    print("\nExiting...")
