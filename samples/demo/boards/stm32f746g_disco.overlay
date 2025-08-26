@@ -1,6 +1,7 @@
 / {
 	chosen {
-		zephyr,tracing-uart = &usart1;
+		zephyr,console = &usart1;
+		zephyr,tracing-uart = &usart6;
 	};
 	aliases {
 		accel = &lis2ds12;
