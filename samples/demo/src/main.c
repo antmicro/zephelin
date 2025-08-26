@@ -123,9 +123,24 @@ void read_accel_data(float *x, float *y, float *z)
 		*z = sensor_value_to_float(&val[2]);
 
 		printk("%s: ", accelerometer->name);
-		printk("x=%+d.%03d ", (int)(*x), abs((int)((*x) * 1000)) % 1000);
-		printk("y=%+d.%03d ", (int)(*y), abs((int)((*y) * 1000)) % 1000);
-		printk("z=%+d.%03d\n", (int)(*z), abs((int)((*z) * 1000)) % 1000);
+		printk(
+			"x=%c%d.%03d ",
+			(*x > 0 ? '+' : '-'),
+			abs((int)(*x)),
+			abs((int)((*x) * 1000)) % 1000
+		);
+		printk(
+			"y=%c%d.%03d ",
+			(*y > 0 ? '+' : '-'),
+			abs((int)(*y)),
+			abs((int)((*y) * 1000)) % 1000
+		);
+		printk(
+			"z=%c%d.%03d\n",
+			(*z > 0 ? '+' : '-'),
+			abs((int)(*z)),
+			abs((int)((*z) * 1000)) % 1000
+		);
 	} while (0);
 }
 
