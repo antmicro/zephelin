@@ -119,9 +119,9 @@ void read_accel_data(float *x, float *y, float *z)
 			break;
 		}
 
-		*x = sensor_value_to_float(&val[0]);
-		*y = sensor_value_to_float(&val[1]);
-		*z = sensor_value_to_float(&val[2]);
+		*x = sensor_value_to_float(&val[0]) / (2 * 9.807);
+		*y = sensor_value_to_float(&val[1]) / (2 * 9.807);
+		*z = sensor_value_to_float(&val[2]) / (2 * 9.807);
 
 		printk("%s: ", accelerometer->name);
 		printk(
