@@ -58,15 +58,16 @@ int main(void)
 
 	for (;;) {
 		read_input((float *)model_input);
+
+		if (!run_inference) {
+			continue;
+		}
+
 		status = model_load_input((uint8_t *)model_input,
 					  sizeof(float) * INPUT_SHAPE_0 * INPUT_SHAPE_1);
 		if (status) {
 			printk("Model load input failed %d\n", status);
 			break;
-		}
-
-		if (!run_inference) {
-			continue;
 		}
 
 		status = model_run();
