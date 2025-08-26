@@ -31,3 +31,23 @@ def test_ctf2tef():
         ctf2tef.ctf_to_tef(
             str(d), False, prepare_trace.CUSTOM_METADATA, prepare_trace.CUSTOM_EVENTS
         )
+
+
+def test_instrumentation_ctf2tef():
+    """Tests CTF to TEF conversion using instrumentation traces."""
+    base = (
+        zephyr_base
+        if zephyr_base is not None
+        else Path(__file__).parent.parent.parent.parent / "zephyr"
+    )
+    assert base is not None
+    sys.path.append(str(base / "scripts"))
+    import zaru
+
+    with ctf2tef.prepare_dir_for_instrumentation(
+        Path("./tests/ctf2tef/instrumentation/trace.ctf"),
+        Path("./tests/ctf2tef/instrumentation/metadata"),
+    ) as tmp_dir:
+        zaru.get_traces_in_trace_event_format(
+            str(tmp_dir), Path("./tests/ctf2tef/instrumentation/zephyr.elf"), True
+        )
