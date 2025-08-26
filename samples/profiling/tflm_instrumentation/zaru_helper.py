@@ -114,7 +114,7 @@ def generate_instrumentation_perfetto_trace(instrumentation_script, pty_link):
             "--serial",
             pty_link,
             "trace",
-            "--perfetto",
+            "--export-tef",
             "--output",
             "zephyr_trace.json",
         ],
