@@ -1,0 +1,30 @@
+/ {
+	chosen {
+		zephyr,console = &uart2;
+		zephyr,tracing-uart = &uart0;
+	};
+	aliases {
+		accel = &adxl345;
+	};
+};
+
+&i2c0 {
+	adxl345: adxl345@53 {
+		compatible = "adi,adxl345";
+		reg = <0x53>;
+		status = "okay";
+	};
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+	pinctrl-0 = < &uart0a_tx_p2_12 &uart0a_rx_p2_11 >;
+	pinctrl-names = "default";
+	current-speed = < 115200 >;
+	data-bits = < 0x8 >;
+};
+
+&uart2 {
+	current-speed = < 115200 >;
+};
