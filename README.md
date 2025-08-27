@@ -59,6 +59,7 @@ source zpl_env.sh
 
 In the end, download [Renode](https://renode.io) and configure environment variables for [pyrenode3](https://github.com/antmicro/pyrenode3) package:
 
+<!-- name="renode-prepare" -->
 ```bash
 wget https://builds.renode.io/renode-latest.pkg.tar.xz
 export PYRENODE_PKG=$(pwd)/renode-latest.pkg.tar.xz

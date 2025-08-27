@@ -1,6 +1,11 @@
 name: zeppelin
 run-name: Zeppelin
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 env:
   RENODE_VERSION: "renode_1.15.3+20250611gitbf88af3a1_amd64.deb"
   DEBIAN_FRONTEND: noninteractive
@@ -21,12 +26,15 @@ jobs:
           tuttest README.md "pip-init" | bash -
           tuttest README.md "west-init" | bash -
           tuttest README.md "build-samples" | bash -
+          tuttest README.md "renode-prepare" | bash -
+          tuttest README.md "build-demo" | bash -
 
   Run-Twister:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - qemu_cortex_m3
@@ -45,8 +53,11 @@ jobs:
         run: |
           export ZPL_BASE="$(pwd)"
           west twister -v -p ${{ matrix.platform }} -T samples -T tests -j 1 --timeout-multiplier 3
+          normalized_name=$(echo ${{ matrix.platform}} | tr '/' '_')
+          echo "TWISTER_SUFFIX=$normalized_name" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         with:
+          name: "twister-out-${{ env.TWISTER_SUFFIX }}"
           path: |
               twister-out
 
