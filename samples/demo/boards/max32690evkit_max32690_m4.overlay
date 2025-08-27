@@ -13,6 +13,7 @@
 		compatible = "adi,adxl345";
 		reg = <0x53>;
 		status = "okay";
+		odr = <12>;
 	};
 	status = "okay";
 };
