@@ -5,9 +5,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #include <zpl.h>
 
+#include <math.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
 #include <zephyr/random/random.h>
@@ -21,6 +21,11 @@
 #define OUTPUT_SHAPE_0 1
 #define OUTPUT_SHAPE_1 4
 
+#define MOVEMENT_THRESHOLD 0.01f
+
+K_SEM_DEFINE(run_inference, 0, 1);
+K_MUTEX_DEFINE(data_buffer_mutex);
+int sample_idx;
 static float data_buffer[INPUT_SHAPE_0][INPUT_SHAPE_1];
 const struct device *const accelerometer = DEVICE_DT_GET(DT_ALIAS(accel));
 
@@ -29,11 +34,11 @@ const struct device *const accelerometer = DEVICE_DT_GET(DT_ALIAS(accel));
  */
 const char *class_names[OUTPUT_SHAPE_1] = {"wing", "ring", "slope", "negative"};
 
-static bool run_inference = false;
+void read_input(float *model_input);
 
 void read_accel_data(float *x, float *y, float *z);
 
-void read_input(float *model_input);
+void read_accel_data_fun(void);
 
 int main(void)
 {
@@ -57,11 +62,12 @@ int main(void)
 	}
 
 	for (;;) {
-		read_input((float *)model_input);
-
-		if (!run_inference) {
+		if (k_sem_take(&run_inference, K_NO_WAIT) != 0) {
+			k_msleep(10);
 			continue;
 		}
+
+		read_input((float *)model_input);
 
 		status = model_load_input((uint8_t *)model_input,
 					  sizeof(float) * INPUT_SHAPE_0 * INPUT_SHAPE_1);
@@ -90,6 +96,20 @@ int main(void)
 	}
 
 	return 0;
+}
+
+void read_input(float *model_input)
+{
+	if (k_mutex_lock(&data_buffer_mutex, K_FOREVER) == 0) {
+		memcpy(model_input, &data_buffer[sample_idx][0],
+		       (INPUT_SHAPE_0 - sample_idx) * sizeof(float) * INPUT_SHAPE_1);
+		if (sample_idx > 0) {
+			memcpy(&model_input[(INPUT_SHAPE_0 - sample_idx) * INPUT_SHAPE_1],
+			       data_buffer, sample_idx * sizeof(float) * INPUT_SHAPE_1);
+		}
+
+		k_mutex_unlock(&data_buffer_mutex);
+	}
 }
 
 void read_accel_data(float *x, float *y, float *z)
@@ -145,31 +165,39 @@ void read_accel_data(float *x, float *y, float *z)
 	} while (0);
 }
 
-void read_input(float *model_input)
+void read_accel_data_fun(void)
 {
-	static int sample_idx = 0;
+	float prev_x = 0.0f, prev_y = 0.0f, prev_z = 0.0f;
 	float x, y, z;
-	int input_offset;
 
-	read_accel_data(&x, &y, &z);
+	while (true) {
+		read_accel_data(&x, &y, &z);
 
-	/* convert to mili G */
-	data_buffer[sample_idx][0] = 1000.0f * x;
-	data_buffer[sample_idx][1] = 1000.0f * y;
-	data_buffer[sample_idx][2] = 1000.0f * z;
+		if (k_mutex_lock(&data_buffer_mutex, K_FOREVER) == 0) {
+			/* convert to mili G */
+			data_buffer[sample_idx][0] = 1000.0f * x;
+			data_buffer[sample_idx][1] = 1000.0f * y;
+			data_buffer[sample_idx][2] = 1000.0f * z;
 
-	++sample_idx;
-	sample_idx %= INPUT_SHAPE_0;
+			k_mutex_unlock(&data_buffer_mutex);
 
-	/* run inference every 16 samples */
-	run_inference = (sample_idx % 16) == 0;
+			++sample_idx;
+			sample_idx %= INPUT_SHAPE_0;
+		}
 
-	input_offset = sample_idx * INPUT_SHAPE_1;
+		/* run inference every 16 samples if accelerometer is moving */
+		if ((fabsf(prev_x - x) + fabsf(prev_y - y) + fabsf(prev_z - z) >
+		     MOVEMENT_THRESHOLD) &&
+		    (sample_idx % 16) == 0) {
+			k_sem_give(&run_inference);
+		}
 
-	memcpy(model_input, &data_buffer[sample_idx][0],
-	       (INPUT_SHAPE_0 - sample_idx) * sizeof(float) * INPUT_SHAPE_1);
-	if (sample_idx > 0) {
-		memcpy(&model_input[(INPUT_SHAPE_0 - sample_idx) * INPUT_SHAPE_1], data_buffer,
-		       sample_idx * sizeof(float) * INPUT_SHAPE_1);
+		prev_x = x;
+		prev_y = y;
+		prev_z = z;
+
+		k_msleep(10);
 	}
 }
+
+K_THREAD_DEFINE(read_accel_data_thread, 512, read_accel_data_fun, NULL, NULL, NULL, -1, 0, 100);
