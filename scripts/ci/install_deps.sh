@@ -14,7 +14,7 @@ fi
 
 # install deps with apt
 apt update -qq
-apt install -yqq xxd gdb-multiarch
+apt install -yqq xxd gdb-multiarch mono-complete
 
 # install deps with pip
 pip install -r requirements.txt
