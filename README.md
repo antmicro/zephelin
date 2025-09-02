@@ -128,8 +128,10 @@ This can be achieved with `west zpl-prepare-trace` command, which:
 west zpl-prepare-trace [-h] -o OUTPUT [--zephyr-base ZEPHYR_BASE]
                        [--tflm-model-path TFLM_MODEL_PATH]
                        [--tvm-model-path TVM_MODEL_PATH]
+                       [--tvm-model-metadata-path TVM_MODEL_METADATA_PATH]
                        [--build-dir BUILD_DIR]
                        [--zephyr-elf-path ZEPHYR_ELF_PATH]
+                       [--instrumentation-ctf INSTRUMENTATION_CTF]
                        ctf_trace
 ```
 

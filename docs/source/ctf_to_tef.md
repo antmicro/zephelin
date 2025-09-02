@@ -10,7 +10,8 @@ You can run the converter with the following command:
 west zpl-prepare-trace \
   [-h] -o OUTPUT [--zephyr-base ZEPHYR_BASE] [--build-dir BUILD_DIR] \
   [--tflm-model-path TFLM_MODEL_PATH] [--tvm-model-path TVM_MODEL_PATH] \
-  [--instrumentation] \
+  [--tvm-model-metadata-path TVM_MODEL_METADATA_PATH] \
+  [--instrumentation]
   ctf_trace
 ```
 
@@ -20,6 +21,9 @@ There are several optional arguments available:
 * `--build-dir` - the directory storing the results of the build and [ram_report](https://docs.zephyrproject.org/latest/develop/optimizations/tools.html#build-target-ram-report).
 * `--tflm-model-path` - the provided TFLite Micro model is processed to extract information about its layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} event.
 * `--tvm-model-path` - the provided microTVM graph JSON file is processed to extract information about model's layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} Event,
+* `--tvm-model-path` - the provided microTVM graph JSON file is processed to extract information about model's layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} Event.
+* `--tvm-model-metadata-path` - the provided microTVM Intermediate Representation file is processed to extract more information about operators parameters. It can be obtained from the compiled module
+(see [export_tvm_metadata.py](https://github.com/antmicro/zephelin/blob/main/scripts/export_tvm_metadata.py) for reference). Verified TVM versions: `v0.14.dev273` - `v0.18.0`.
 * `--instrumentation` - the option indicating `ctf_trace` was produced by the instrumentation subsystem.
 * `-o` - the file path which points to the file where the converted trace should be saved.
   If not provided, the JSON will be printed to STDOUT.
@@ -324,7 +328,7 @@ The `MODEL` {{TEF_Metadata}} event contains following information:
   * `index` - the ID of the operation,
   * `inputs` and `outputs` - lists with indices pointing to `tensors` with input and output data (respectively),
   * `inputs_types` and `outputs_types` - the operation's input and output data types,
-  * `inputs_shapes` and `outputs_shapes` - the operation's input and output shapes.
+  * `inputs_shapes` and `outputs_shapes` - the operation's input and output shapes,
   * `parameters` - operation's parameters (e.g. `padding` or `fused_activation_function`).
 
 :::{example} Example event of Magic Wand model for TFLite Micro runtime
