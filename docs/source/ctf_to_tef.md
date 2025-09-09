@@ -11,6 +11,8 @@ west zpl-prepare-trace \
   [-h] -o OUTPUT [--zephyr-base ZEPHYR_BASE] [--build-dir BUILD_DIR] \
   [--tflm-model-path TFLM_MODEL_PATH] [--tvm-model-path TVM_MODEL_PATH] \
   [--tvm-model-metadata-path TVM_MODEL_METADATA_PATH] \
+  [--tvm-model-op-remove-prefix TVM_MODEL_OP_REMOVE_PREFIX] \
+  [--tvm-model-op-remove-suffix TVM_MODEL_OP_REMOVE_SUFFIX] \
   [--instrumentation]
   ctf_trace
 ```
@@ -21,9 +23,11 @@ There are several optional arguments available:
 * `--build-dir` - the directory storing the results of the build and [ram_report](https://docs.zephyrproject.org/latest/develop/optimizations/tools.html#build-target-ram-report).
 * `--tflm-model-path` - the provided TFLite Micro model is processed to extract information about its layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} event.
 * `--tvm-model-path` - the provided microTVM graph JSON file is processed to extract information about model's layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} Event,
-* `--tvm-model-path` - the provided microTVM graph JSON file is processed to extract information about model's layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} Event.
 * `--tvm-model-metadata-path` - the provided microTVM Intermediate Representation file is processed to extract more information about operators parameters. It can be obtained from the compiled module
 (see [export_tvm_metadata.py](https://github.com/antmicro/zephelin/blob/main/scripts/export_tvm_metadata.py) for reference). Verified TVM versions: `v0.14.dev273` - `v0.18.0`.
+* `--tvm-model-op-remove-prefix` - the provided regular expression is used to remove microTVM operator prefixes. Applied on both operator types and instances. Default value is `^tvmgen_default_`.
+* `--tvm-model-op-remove-suffix` - the provided regular expression is used to remove microTVM operator type suffixes. Applied on operator types. Default value is `_\d*$`.
+
 * `--instrumentation` - the option indicating `ctf_trace` was produced by the instrumentation subsystem.
 * `-o` - the file path which points to the file where the converted trace should be saved.
   If not provided, the JSON will be printed to STDOUT.
