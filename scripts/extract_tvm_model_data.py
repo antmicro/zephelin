@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
 
 PARAM_NODE_RE = re.compile(r"p\d+")
+DEFAULT_OP_SUFFIX_RE = re.compile(r"_\d*$")
+DEFAULT_OP_PREFIX_RE = re.compile("^tvmgen_default_")
 
 
 class IRParser:
@@ -220,7 +222,12 @@ class IRParser:
         return ops_parameters
 
 
-def extract_model_data(model_graph_path: Path, model_metadata_path: Path | None = None) -> dict:
+def extract_model_data(
+    model_graph_path: Path,
+    model_metadata_path: Path | None = None,
+    model_op_remove_prefix: re.Pattern = DEFAULT_OP_PREFIX_RE,
+    model_op_remove_suffix: re.Pattern = DEFAULT_OP_SUFFIX_RE,
+) -> dict:
     """
     Extracts model hyperparameters from model graph file.
 
@@ -230,6 +237,10 @@ def extract_model_data(model_graph_path: Path, model_metadata_path: Path | None 
         Path to the model graph.
     model_metadata_path : Path | None
         Path to the model metadata, which contains operator parameters.
+    model_op_remove_prefix : re.Pattern
+        Pattern removing TVM operator prefix.
+    model_op_remove_suffix : re.Pattern
+        Pattern removing TVM operator type suffix.
 
     Returns
     -------
@@ -257,12 +268,20 @@ def extract_model_data(model_graph_path: Path, model_metadata_path: Path | None 
     for head, _, _ in model_graph["heads"]:
         output_nodes.append((head, model_graph["nodes"][head]))
 
+    def get_op_type_name(name: str):
+        name = model_op_remove_prefix.sub("", name)
+        name = model_op_remove_suffix.sub("", name)
+        return name
+
+    def get_op_type(name: str):
+        return model_op_remove_prefix.sub("", name)
+
     for io_type, io_nodes in (("inputs", input_nodes), ("outputs", output_nodes)):
         model_data[io_type] = []
         for node_idx, node in io_nodes:
             io_data = dict()
 
-            io_data["name"] = node["name"]
+            io_data["name"] = get_op_type(node["name"])
             io_data["shape"] = shapes[node_idx][:]
             io_data["dtype"] = dtypes[node_idx][:]
 
@@ -294,7 +313,7 @@ def extract_model_data(model_graph_path: Path, model_metadata_path: Path | None 
     for node_idx, node in enumerate(model_graph["nodes"]):
         tensor_data = dict()
 
-        tensor_data["name"] = node["name"]
+        tensor_data["name"] = get_op_type(node["name"])
         tensor_data["index"] = node_idx
         tensor_data["shape"] = shapes[node_idx][:]
         tensor_data["dtype"] = dtypes[node_idx][:]
@@ -305,7 +324,8 @@ def extract_model_data(model_graph_path: Path, model_metadata_path: Path | None 
         if node["op"] != "null":
             op_data = dict()
 
-            op_data["op_name"] = node["attrs"]["func_name"]
+            name = node["attrs"]["func_name"]
+            op_data["op_name"] = get_op_type_name(name)
             op_data["index"] = node_idx
 
             op_data["inputs"] = [inp[0] for inp in node["inputs"]]
@@ -315,7 +335,7 @@ def extract_model_data(model_graph_path: Path, model_metadata_path: Path | None 
             op_data["inputs_shapes"] = {inp: shapes[inp][:] for inp in op_data["inputs"]}
             op_data["output_shapes"] = {inp: shapes[inp][:] for inp in op_data["outputs"]}
 
-            op_parameters = ops_parameters.get(op_data["op_name"], {})
+            op_parameters = ops_parameters.get(name, {})
             op_parameters["flatten"] = node["attrs"]["flatten_data"] == "1"
             op_parameters |= {
                 attr: value
@@ -328,6 +348,14 @@ def extract_model_data(model_graph_path: Path, model_metadata_path: Path | None 
             model_data["ops"].append(op_data)
 
     return model_data
+
+
+def argparse_regex(value: str) -> re.Pattern:
+    """Custom `argparse` type for validating regex patterns."""
+    try:
+        return re.compile(value)
+    except re.error as error:
+        raise argparse.ArgumentTypeError(f"Invalid regex: {error}")
 
 
 if __name__ == "__main__":
@@ -347,6 +375,18 @@ if __name__ == "__main__":
         help="Path to the microTVM model metadata",
     )
     parser.add_argument(
+        "--model-op-remove-prefix",
+        type=argparse_regex,
+        help="Pattern removing TVM operator prefix",
+        default=DEFAULT_OP_PREFIX_RE,
+    )
+    parser.add_argument(
+        "--model-op-remove-suffix",
+        type=argparse_regex,
+        help="Pattern removing TVM operator type suffix.",
+        default=DEFAULT_OP_SUFFIX_RE,
+    )
+    parser.add_argument(
         "--output-path",
         type=Path,
         required=True,
@@ -355,7 +395,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    model_data = extract_model_data(args.model_graph_path, args.model_metadata_path)
+    model_data = extract_model_data(
+        args.model_graph_path,
+        args.model_metadata_path,
+        args.model_op_remove_prefix,
+        args.model_op_remove_suffix,
+    )
 
     with open(args.output_path, "w") as out_f:
         yaml.safe_dump(model_data, out_f, sort_keys=False)

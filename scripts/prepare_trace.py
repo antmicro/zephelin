@@ -10,10 +10,12 @@ Script preparing trace (in TEF) based on the CTF trace and metadata, e.g. TFLM m
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
+from typing import TYPE_CHECKING, Callable
 
 from ctf2tef import (
     CustomEventDefinition,
@@ -24,49 +26,109 @@ from ctf2tef import (
     prepare_dir,
     prepare_dir_for_instrumentation,
 )
+from extract_tvm_model_data import (
+    DEFAULT_OP_PREFIX_RE,
+    DEFAULT_OP_SUFFIX_RE,
+    argparse_regex,
+)
 
-
-def layer_name(msg) -> str:
-    """
-    Generates suffix for model event name.
-    """
-    fields = msg.event.payload_field
-    if not fields:
-        return ""
-    name = str(fields.get("tag", ""))
-    if name.startswith("tvmgen_default_"):
-        name = name[15:]
-    if "subgraph_idx" in fields:
-        name += f"_{fields['subgraph_idx']}"
-    if "op_idx" in fields:
-        name += f"_{fields['op_idx']}"
-    return name
+if TYPE_CHECKING:
+    import bt2
 
 
 # The list of custom events definitions
-CUSTOM_EVENTS = [
-    CustomEventDefinition(
-        "MODEL::",
-        "zpl_tflm_enter",
-        "zpl_tflm_exit",
-        layer_name,
-        lambda _: {"runtime": "TFLite Micro"},
-    ),
-    CustomEventDefinition(
-        "MODEL::",
-        "zpl_tvm_enter",
-        "zpl_tvm_exit",
-        layer_name,
-        lambda _: {"runtime": "microTVM"},
-    ),
-    CustomEventDefinition(
-        "SCOPE::",
-        "zpl_scope_enter",
-        "zpl_scope_exit",
-        lambda msg: msg.event.payload_field.get("scope_name", ""),
-        None,
-    ),
-]
+def create_custom_events(
+    tvm_op_remove_prefix: re.Pattern = DEFAULT_OP_PREFIX_RE,
+    tvm_op_remove_suffix: re.Pattern = DEFAULT_OP_SUFFIX_RE,
+) -> list[CustomEventDefinition]:
+    """
+    Creates custom events.
+
+    Parameters
+    ----------
+    tvm_op_remove_prefix : re.Pattern
+        Pattern removing TVM operator prefix.
+    tvm_op_remove_suffix : re.Pattern
+        Pattern removing TVM operator type suffix.
+
+    Returns
+    -------
+    list[CustomEventDefinition]
+        Created events.
+    """
+
+    def tflm_op_name(msg: "bt2._EventMessageConst") -> str:
+        fields = msg.event.payload_field
+        if not fields:
+            return ""
+        name = str(fields.get("tag", ""))
+
+        # Add subgraph index at the end, if exists
+        if "subgraph_idx" in fields:
+            name += f"_{fields['subgraph_idx']}"
+
+        # Add operator index at the end, if exists
+        if "op_idx" in fields:
+            name += f"_{fields['op_idx']}"
+
+        return name
+
+    def tvm_op_name(msg: "bt2._EventMessageConst") -> str:
+        """
+        Generates suffix for model event name.
+        """
+        fields = msg.event.payload_field
+        if not fields:
+            return ""
+        name = str(fields.get("tag", ""))
+        name = tvm_op_remove_prefix.sub("", name)
+
+        return name
+
+    def modify_op_type_name(
+        args: dict,
+        *patterns: re.Pattern,
+    ) -> Callable[["bt2._EventMessageConst"], dict]:
+        def arg_func(msg: "bt2._EventMessageConst"):
+            fields = msg.event.payload_field or {}
+            tag = str(fields.get("tag", ""))
+            if not tag:
+                return args
+
+            for pattern in patterns:
+                tag = pattern.sub("", tag)
+            return args | {"tag": tag}
+
+        return arg_func
+
+    return [
+        CustomEventDefinition(
+            "MODEL::",
+            "zpl_tflm_enter",
+            "zpl_tflm_exit",
+            tflm_op_name,
+            lambda _: {"runtime": "TFLite Micro"},
+        ),
+        CustomEventDefinition(
+            "MODEL::",
+            "zpl_tvm_enter",
+            "zpl_tvm_exit",
+            tvm_op_name,
+            modify_op_type_name(
+                {"runtime": "microTVM"},
+                tvm_op_remove_prefix,
+                tvm_op_remove_suffix,
+            ),
+        ),
+        CustomEventDefinition(
+            "SCOPE::",
+            "zpl_scope_enter",
+            "zpl_scope_exit",
+            lambda msg: msg.event.payload_field.get("scope_name", ""),
+            None,
+        ),
+    ]
+
 
 # Mapping of memory regions initial addresses to their sizes in bytes,
 # used for extracting region symbols from built Zephyr ELF
@@ -204,6 +266,18 @@ def setup_parser(parser: argparse.ArgumentParser):
         "to the final trace as a metadata",
     )
     parser.add_argument(
+        "--tvm-model-op-remove-prefix",
+        type=argparse_regex,
+        help="Pattern removing TVM operator prefix",
+        default=DEFAULT_OP_PREFIX_RE,
+    )
+    parser.add_argument(
+        "--tvm-model-op-remove-suffix",
+        type=argparse_regex,
+        help="Pattern removing TVM operator type suffix",
+        default=DEFAULT_OP_SUFFIX_RE,
+    )
+    parser.add_argument(
         "--build-dir",
         type=Path,
         help="Path to the build directory",
@@ -279,7 +353,15 @@ def prepare(args: argparse.Namespace):
             ).tef["traceEvents"]
     else:
         with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
-            results = ctf_to_tef(str(tmp_dir), False, CUSTOM_METADATA, CUSTOM_EVENTS)
+            results = ctf_to_tef(
+                path=str(tmp_dir),
+                skip_args=False,
+                custom_metadata=CUSTOM_METADATA,
+                custom_events=create_custom_events(
+                    tvm_op_remove_prefix=args.tvm_model_op_remove_prefix,
+                    tvm_op_remove_suffix=args.tvm_model_op_remove_suffix,
+                ),
+            )
             tef_trace, thread_name = results.tef, results.thread_names
 
     if thread_name:
@@ -308,7 +390,12 @@ def prepare(args: argparse.Namespace):
 
         add_model_metadata(
             tef_trace,
-            extract_model_data(args.tvm_model_path, args.tvm_model_metadata_path),
+            extract_model_data(
+                args.tvm_model_path,
+                args.tvm_model_metadata_path,
+                args.tvm_model_op_remove_prefix,
+                args.tvm_model_op_remove_suffix,
+            ),
         )
 
     # Metadata with memory symbols

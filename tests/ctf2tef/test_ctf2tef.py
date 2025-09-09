@@ -29,7 +29,7 @@ def test_ctf2tef():
     """Tests CTF to TEF conversion."""
     with ctf2tef.prepare_dir(Path("./tests/ctf2tef/trace.ctf"), zephyr_base) as d:
         ctf2tef.ctf_to_tef(
-            str(d), False, prepare_trace.CUSTOM_METADATA, prepare_trace.CUSTOM_EVENTS
+            str(d), False, prepare_trace.CUSTOM_METADATA, prepare_trace.create_custom_events()
         )
 
 
