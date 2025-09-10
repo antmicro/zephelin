@@ -44,7 +44,7 @@ public:
 	/**
 	 * Dumps events from buffer to trace backend.
 	 */
-	void DumpEvents();
+	virtual void DumpEvents() override;
 	/**
 	 * Sets MicroInterpreter which will be used to obtain more data.
 	 *
