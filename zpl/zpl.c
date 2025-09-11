@@ -61,6 +61,12 @@ SYS_INIT(zpl_ctf_start_tag_emit, APPLICATION, 0);
 	*/
 
 #ifdef CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT
+void sys_trace_k_heap_sys_k_aligned_alloc_enter(struct k_heap *h, size_t align,
+		size_t size)
+{ }
+void sys_trace_k_heap_sys_k_aligned_alloc_exit(struct k_heap *h, size_t align, size_t size,
+		void *ret)
+{ }
 void sys_trace_k_heap_sys_k_malloc_enter(struct k_heap *h, size_t size) { }
 void sys_trace_k_heap_sys_k_malloc_exit(struct k_heap *h, size_t size, void *ret) { }
 void sys_trace_k_thread_foreach_enter(k_thread_user_cb_t user_cb, void *user_data) { }
