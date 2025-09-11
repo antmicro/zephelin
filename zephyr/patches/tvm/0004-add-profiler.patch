@@ -1,5 +1,5 @@
 diff --git a/include/tvm/runtime/crt/graph_executor.h b/include/tvm/runtime/crt/graph_executor.h
-index 1353d8e06..da7f16f2b 100644
+index 1353d8e06..cbbc5d4ed 100644
 --- a/include/tvm/runtime/crt/graph_executor.h
 +++ b/include/tvm/runtime/crt/graph_executor.h
 @@ -31,6 +31,7 @@ extern "C" {
@@ -10,64 +10,168 @@ index 1353d8e06..da7f16f2b 100644
  
  struct TVMModule;
  
-@@ -113,8 +114,9 @@ int TVMGraphExecutor_LoadParams(TVMGraphExecutor* executor, const char* param_bl
- /*!
-  * \brief Execute the graph.
-  * \param executor The graph executor.
-+ * \param profiler TVMProfiler struct.
-  */
--void TVMGraphExecutor_Run(TVMGraphExecutor* executor);
-+void TVMGraphExecutor_Run(TVMGraphExecutor* executor, const TVMProfiler *profiler);
+@@ -69,6 +70,10 @@ typedef struct TVMGraphExecutor TVMGraphExecutor;
+ int TVMGraphExecutor_Create(const char* sym_json, TVMModuleHandle module_handle,
+                             const DLDevice* devices, TVMGraphExecutor** executor);
+ 
++int TVMGraphExecutor_CreateWithProfiler(const char* sym_json, TVMModuleHandle module_handle,
++                                        const DLDevice* devices, TVMGraphExecutor** executor,
++                                        TVMProfiler* profiler);
++
+ int TVMGraphExecutor_GetInputIndex(TVMGraphExecutor* executor, const char* name);
  
  /*!
-  * \brief Release memory associated with the graph executor.
 diff --git a/include/tvm/runtime/crt/profiler.h b/include/tvm/runtime/crt/profiler.h
 new file mode 100644
-index 000000000..534996eea
+index 000000000..73889e6ac
 --- /dev/null
 +++ b/include/tvm/runtime/crt/profiler.h
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,11 @@
 +#ifndef TVM_RUNTIME_CRT_PROFILER_H_
 +#define TVM_RUNTIME_CRT_PROFILER_H_
 +
 +typedef struct {
-+   int (*begin_event_cb)(int, const char*);
-+   void (*end_event_cb)(int);
++  int (*begin_event_cb)(void*, int, const char*);
++  void (*end_event_cb)(void*, int);
++  void (*dump_events_cb)(void*);
++  void *state;
 +} TVMProfiler;
 +
 +#endif // TVM_RUNTIME_CRT_PROFILER_H_
 diff --git a/src/runtime/crt/graph_executor/graph_executor.c b/src/runtime/crt/graph_executor/graph_executor.c
-index 395a343cc..ebb6dc34d 100644
+index 395a343cc..08c252d4d 100644
 --- a/src/runtime/crt/graph_executor/graph_executor.c
 +++ b/src/runtime/crt/graph_executor/graph_executor.c
-@@ -877,8 +926,9 @@ int TVMGraphExecutor_LoadParams(TVMGraphExecutor* executor, const char* param_bl
- /*!
-  * \brief Run all the operations one by one.
+@@ -33,6 +33,14 @@
+ 
+ #include "crt_config.h"
+ 
++#ifdef CONFIG_ZPL_INFERENCE_PROFILING
++#include <zpl/inference_event.h>
++#endif /* CONFIG_ZPL_INFERENCE_PROFILING */
++
++#ifdef CONFIG_ZPL_TVM_PROFILER
++#include <zpl/tvm_profiler.h>
++#endif /* CONFIG_ZPL_TVM_PROFILER */
++
+ #ifndef MAX
+ #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+ #endif  // MAX
+@@ -879,6 +887,16 @@ int TVMGraphExecutor_LoadParams(TVMGraphExecutor* executor, const char* param_bl
   * \param executor The graph executor.
-+ * \param profiler TVMProfiler struct.
   */
--void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
-+void TVMGraphExecutor_Run(TVMGraphExecutor* executor, const TVMProfiler* profiler) {
+ void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
++#ifdef CONFIG_ZPL_INFERENCE_PROFILING
++  zpl_inference_enter();
++#endif /* CONFIG_ZPL_INFERENCE_PROFILING */
++
++  void* profiler_state;
++  TVMProfiler* profiler = executor->profiler;
++  if (NULL != profiler) {
++    profiler_state = executor->profiler->state;
++  }
++
    // setup the array and requirements.
    uint32_t idx;
    for (idx = 0; idx < executor->op_execs_count; ++idx) {
-@@ -886,7 +886,14 @@ void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
+@@ -886,9 +904,22 @@ void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
  #if TVM_CRT_DEBUG
        printf("calling: %s (%d)\n", executor->op_execs[idx].name, idx);
  #endif  // TVM_CRT_DEBUG
 +      int event_handle = -1;
 +      if (NULL != profiler && NULL != profiler->begin_event_cb) {
-+        event_handle = profiler->begin_event_cb(idx, executor->op_execs[idx].name);
++        event_handle = profiler->begin_event_cb(profiler_state, idx, executor->op_execs[idx].name);
 +      }
        executor->op_execs[idx].Call(&(executor->op_execs[idx]));
 +      if (-1 != event_handle && NULL != profiler->end_event_cb) {
-+        profiler->end_event_cb(event_handle);
++        profiler->end_event_cb(profiler_state, event_handle);
 +      }
      }
    }
++  if (NULL != profiler) {
++    profiler->dump_events_cb(profiler_state);
++  }
++#ifdef CONFIG_ZPL_INFERENCE_PROFILING
++  zpl_inference_exit();
++#endif /* CONFIG_ZPL_INFERENCE_PROFILING */
  }
+ 
+ /*!
+@@ -1159,10 +1190,12 @@ int32_t TVMGraphExecutor_CreateTVMOp(TVMGraphExecutor* executor, const TVMOpPara
+  * processor.
+  * \param devs The device of the host and devices where graph nodes will be
+  * executed on.
++ * \param profiler The optional profiler.
+  * \return 0 on success.
+  */
+ int TVMGraphExecutor_Init(TVMGraphExecutor* executor, const char* graph_json,
+-                          TVMModuleHandle module_handle, const DLDevice* devs) {
++                          TVMModuleHandle module_handle, const DLDevice* devs,
++                          TVMProfiler* profiler) {
+   JSONReader reader;
+   tvm_crt_error_t err = JSONReader_Create(graph_json, &reader);
+   if (err != kTvmErrorNoError) {
+@@ -1183,12 +1216,27 @@ int TVMGraphExecutor_Init(TVMGraphExecutor* executor, const char* graph_json,
+     return status;
+   }
+   status = TVMGraphExecutor_SetupOpExecs(executor);
++  if (status != 0) {
++    return status;
++  }
++
++#ifdef CONFIG_ZPL_TVM_PROFILER
++  if (NULL == profiler) {
++    executor->own_profiler = true;
++    status = zpl_tvm_profiler_create(&executor->profiler);
++  } else {
++    executor->profiler = profiler;
++  }
++#else /* CONFIG_ZPL_TVM_PROFILER */
++  executor->profiler = profiler;
++#endif /* CONFIG_ZPL_TVM_PROFILER */
+ 
+   return status;
+ }
+ 
+-int TVMGraphExecutor_Create(const char* sym_json, TVMModuleHandle module_handle,
+-                            const DLDevice* devs, TVMGraphExecutor** executor) {
++int TVMGraphExecutor_CreateWithProfiler(const char* sym_json, TVMModuleHandle module_handle,
++                                        const DLDevice* devs, TVMGraphExecutor** executor,
++                                        TVMProfiler* profiler) {
+   DLDevice dev = {kDLCPU, 0};
+   tvm_crt_error_t err = TVMPlatformMemoryAllocate(sizeof(TVMGraphExecutor), dev, (void**)executor);
+   if (err != kTvmErrorNoError) {
+@@ -1198,7 +1246,12 @@ int TVMGraphExecutor_Create(const char* sym_json, TVMModuleHandle module_handle,
+ 
+   memset(*executor, 0, sizeof(TVMGraphExecutor));
+   // init
+-  return TVMGraphExecutor_Init(*executor, sym_json, module_handle, devs);
++  return TVMGraphExecutor_Init(*executor, sym_json, module_handle, devs, profiler);
++}
++
++int TVMGraphExecutor_Create(const char* sym_json, TVMModuleHandle module_handle,
++                            const DLDevice* devs, TVMGraphExecutor** executor) {
++  return TVMGraphExecutor_CreateWithProfiler(sym_json, module_handle, devs, executor, NULL);
+ }
+ 
+ int TVMGraphExecutor_Release(TVMGraphExecutor** pptr) {
+@@ -1258,6 +1311,14 @@ int TVMGraphExecutor_Release(TVMGraphExecutor** pptr) {
+   if (status != 0) {
+     return status;
+   }
++#ifdef CONFIG_ZPL_TVM_PROFILER
++  if (executor->own_profiler && NULL != executor->profiler) {
++    status = zpl_tvm_profiler_release(executor->profiler);
++    if (status != 0) {
++      return status;
++    }
++  }
++#endif /* CONFIG_ZPL_TVM_PROFILER */
+   status = TVMPlatformMemoryFree(*pptr, dev);
+   if (status != 0) {
+     return status;
 diff --git a/src/runtime/crt/include/tvm/runtime/crt/internal/graph_executor/graph_executor.h b/src/runtime/crt/include/tvm/runtime/crt/internal/graph_executor/graph_executor.h
-index d4429308b..d345974ec 100644
+index d4429308b..cfcfb57a4 100644
 --- a/src/runtime/crt/include/tvm/runtime/crt/internal/graph_executor/graph_executor.h
 +++ b/src/runtime/crt/include/tvm/runtime/crt/internal/graph_executor/graph_executor.h
 @@ -32,6 +32,7 @@ extern "C" {
@@ -78,12 +182,14 @@ index d4429308b..d345974ec 100644
  
  // Memory pool entry.
  typedef struct TVMGraphExecutorPoolEntry {
-@@ -115,7 +116,7 @@ uint32_t TVMGraphExecutor_GetEntryId(TVMGraphExecutor* executor, uint32_t nid, u
- void TVMGraphExecutor_SetInput(TVMGraphExecutor* executor, const char* name, DLTensor* data_in);
- int TVMGraphExecutor_LoadParams(TVMGraphExecutor* executor, const char* param_blob,
-                                 const uint32_t param_size);
--void TVMGraphExecutor_Run(TVMGraphExecutor* executor);
-+void TVMGraphExecutor_Run(TVMGraphExecutor* executor, const TVMProfiler* profiler);
- int TVMGraphExecutor_GetOutput(TVMGraphExecutor* executor, const int32_t idx, DLTensor* out);
+@@ -106,6 +107,10 @@ typedef struct TVMGraphExecutor {
+   /*! \brief Operator on each node. */
+   TVMPackedFunc* op_execs;
+   uint32_t op_execs_count;
++  TVMProfiler* profiler;
++#ifdef CONFIG_ZPL_TVM_PROFILER
++  bool own_profiler;
++#endif /* CONFIG_ZPL_TVM_PROFILER */
+ } TVMGraphExecutor;
  
- int32_t TVMGraphExecutor_CreateTVMOp(TVMGraphExecutor* executor, const TVMOpParam* param,
+ typedef DLTensor* DLTensorPtr;

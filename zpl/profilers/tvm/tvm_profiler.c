@@ -9,25 +9,61 @@
 #include <zpl/tvm_event.h>
 #include <zpl/tvm_profiler.h>
 
+#include <dlpack/dlpack.h>
 #include <tvm/runtime/crt/profiler.h>
+#include <tvm/runtime/crt/platform.h>
 
-TVMProfiler tvm_profiler = {
-	.begin_event_cb = zpl_tvm_profiler_begin_event,
-	.end_event_cb = zpl_tvm_profiler_end_event,
-};
+
+int zpl_tvm_profiler_create(TVMProfiler **profiler)
+{
+	DLDevice dev = {kDLCPU, 0};
+	ZPL_TVMProfilerState *state;
+
+	int status = 0;
+
+	status = TVMPlatformMemoryAllocate(sizeof(ZPL_TVMProfilerState), dev, (void **)(&state));
+	if (status) {
+		return status;
+	}
+
+	status = TVMPlatformMemoryAllocate(sizeof(TVMProfiler), dev, (void **)(profiler));
+	if (status) {
+		return status;
+	}
+
+	memset(state, 0, sizeof(ZPL_TVMProfilerState));
+	(**profiler) = (TVMProfiler){
+		.begin_event_cb = zpl_tvm_profiler_begin_event,
+		.end_event_cb = zpl_tvm_profiler_end_event,
+		.dump_events_cb = zpl_tvm_profiler_dump_events,
+		.state = state,
+	};
+
+	return 0;
+}
+
+int zpl_tvm_profiler_release(TVMProfiler *profiler)
+{
+	int status = 0;
+	DLDevice dev = {kDLCPU, 0};
+
+	status = TVMPlatformMemoryFree(profiler->state, dev);
+	if (status) {
+		return status;
+	}
+
+	return TVMPlatformMemoryFree(profiler, dev);
+}
 
 #if defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE)
 
-static int num_events_;
-static uint8_t op_idx_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
-static const char *tags_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
-
-
 LOG_MODULE_REGISTER(tvm_profiler, CONFIG_ZPL_LOG_LEVEL);
 
-int zpl_tvm_profiler_begin_event(int op_idx, const char *tag)
+int zpl_tvm_profiler_begin_event(void *state, int op_idx, const char *tag)
 {
-	if (num_events_ >= CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS) {
+	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
+
+	if (zpl_state->num_events_ >= CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS) {
 		LOG_WRN_ONCE(
 		  "The number of TVM events exceeded the maximum value (%d), "
 		  "resulting trace may be incompleate, please consider "
@@ -35,22 +71,22 @@ int zpl_tvm_profiler_begin_event(int op_idx, const char *tag)
 		  CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS);
 		return -1;
 	}
-	int event_handle = num_events_;
+	int event_handle = zpl_state->num_events_;
 
-	op_idx_[event_handle] = op_idx;
-	tags_[event_handle] = tag;
+	zpl_state->op_idx_[event_handle] = op_idx;
+	zpl_state->tags_[event_handle] = tag;
 
 	zpl_emit_tvm_enter_event(
 		k_cycle_get_32(),
 		op_idx,
 		tag);
 
-	++num_events_;
+	++(zpl_state->num_events_);
 
 	return event_handle;
 }
 
-void zpl_tvm_profiler_end_event(int event_handle)
+void zpl_tvm_profiler_end_event(void *state, int event_handle)
 {
 	if (event_handle >= CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS) {
 		return;
@@ -58,21 +94,21 @@ void zpl_tvm_profiler_end_event(int event_handle)
 
 	zpl_emit_tvm_exit_event(
 		k_cycle_get_32(),
-		op_idx_[event_handle],
-		tags_[event_handle]);
+		((ZPL_TVMProfilerState *)(state))->op_idx_[event_handle],
+		((ZPL_TVMProfilerState *)(state))->tags_[event_handle]);
 }
 
-void zpl_tvm_profiler_dump_events(void)
+void zpl_tvm_profiler_dump_events(void *state)
 {
-	num_events_ = 0;
+	((ZPL_TVMProfilerState *)(state))->num_events_ = 0;
 }
 
 #else /* defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE) */
 
-int zpl_tvm_profiler_begin_event(int op_idx, const char *tag) { return -1; }
+int zpl_tvm_profiler_begin_event(void *state, int op_idx, const char *tag) { return -1; }
 
-void zpl_tvm_profiler_end_event(int event_handle) {}
+void zpl_tvm_profiler_end_event(void *state, int event_handle) {}
 
-void zpl_tvm_profiler_dump_events(void) {}
+void zpl_tvm_profiler_dump_events(void *state) {}
 
 #endif /* defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE) */

@@ -17,8 +17,6 @@
 #include "model.h"
 #include "magic_wand.h"
 
-extern TVMProfiler tvm_profiler;
-
 static const DLDevice g_device = {kDLCPU, 1};
 static TVMGraphExecutor *gp_tvm_graph_executor = NULL;
 static TVMModuleHandle g_tvm_module_handle;
@@ -87,11 +85,7 @@ int model_load_input(const uint8_t *input, uint32_t input_size)
 
 int model_run(void)
 {
-	zpl_inference_enter();
-	TVMGraphExecutor_Run(gp_tvm_graph_executor, &tvm_profiler);
-	zpl_inference_exit();
-
-	zpl_tvm_profiler_dump_events();
+	TVMGraphExecutor_Run(gp_tvm_graph_executor);
 	return 0;
 }
 

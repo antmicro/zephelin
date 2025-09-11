@@ -121,7 +121,7 @@ patches:
     email: mtorhan@antmicro.com
     date: 2025-06-06
   - path: tvm/0004-add-profiler.patch
-    sha256sum: 7bde44554b575ec9f2a9e2634d3931b7e02a67160eac32a037d644b3831e3a70
+    sha256sum: daa919dd3c63730d4d1079371e75225ba9c531da8953f3e248be8149a0f89cd8
     module: tvm
     author: Maciej Torhan
     email: mtorhan@antmicro.com
