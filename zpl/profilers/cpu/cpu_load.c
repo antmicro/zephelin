@@ -11,13 +11,16 @@
 #include <zephyr/debug/cpu_load.h>
 #include <zephyr/tracing/tracing_format.h>
 
+#include <zpl/time.h>
+
 void zpl_emit_cpu_load_event(void)
 {
 	int cpu_load = cpu_load_get(true);
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
+	int key = irq_lock();
 	zpl_cpu_load_event_t zpl_cpu_load_event = {
-		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
+		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
 		.id = ZPL_CPU_LOAD_EVENT,
 		.cpu_load = cpu_load,
 		.stream_id = 0,
@@ -26,6 +29,7 @@ void zpl_emit_cpu_load_event(void)
 	tracing_format_raw_data(
 		(uint8_t *)&zpl_cpu_load_event, sizeof(zpl_cpu_load_event_t)
 	);
+	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("zpl_cpu_load_event: cpu_load=%d.%d%\n", cpu_load / 10, cpu_load % 10);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */

@@ -18,8 +18,9 @@
 #define ZPL_TVM_END_EVENT 0xB1
 
 typedef struct __packed {
-	uint16_t stream_id, packet_size;
-	uint32_t timestamp;
+	uint16_t stream_id;
+	uint16_t packet_size;
+	uint64_t timestamp;
 	uint8_t id;
 	uint32_t thread_id;
 	uint8_t op_idx;
@@ -28,8 +29,8 @@ typedef struct __packed {
 } zpl_tvm_event_t;
 #endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) */
 
-void zpl_emit_tvm_enter_event(uint32_t cycles, uint8_t op_idx, const char *tag);
+void zpl_emit_tvm_enter_event(uint64_t cycles, uint8_t op_idx, const char *tag);
 
-void zpl_emit_tvm_exit_event(uint32_t cycles, uint8_t op_idx, const char *tag);
+void zpl_emit_tvm_exit_event(uint64_t cycles, uint8_t op_idx, const char *tag);
 
 #endif /* ZPL_TVM_EVENTS_H_ */

@@ -12,7 +12,7 @@
 #include <zephyr/tracing/tracing_format.h>
 
 
-void __zpl_emit_tvm_event(uint32_t cycles, uint8_t op_idx, const char *tag, bool is_exit)
+void __zpl_emit_tvm_event(uint64_t cycles, uint8_t op_idx, const char *tag, bool is_exit)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	zpl_tvm_event_t zpl_tvm_enter_event = {
@@ -35,12 +35,12 @@ void __zpl_emit_tvm_event(uint32_t cycles, uint8_t op_idx, const char *tag, bool
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
 }
 
-void zpl_emit_tvm_enter_event(uint32_t cycles, uint8_t op_idx, const char *tag)
+void zpl_emit_tvm_enter_event(uint64_t cycles, uint8_t op_idx, const char *tag)
 {
 	__zpl_emit_tvm_event(cycles, op_idx, tag, false);
 }
 
-void zpl_emit_tvm_exit_event(uint32_t cycles, uint8_t op_idx, const char *tag)
+void zpl_emit_tvm_exit_event(uint64_t cycles, uint8_t op_idx, const char *tag)
 {
 	__zpl_emit_tvm_event(cycles, op_idx, tag, true);
 }

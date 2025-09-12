@@ -6,6 +6,7 @@
  */
 
 #include <zpl/scope_event.h>
+#include <zpl/time.h>
 
 #include <string.h>
 #include <zephyr/kernel.h>
@@ -22,7 +23,8 @@ void zpl_emit_scope_event(char *scope_name, uint8_t is_exit)
 			scope_name, strlen(scope_name), ZPL_MAX_SCOPE_NAME_LENGTH);
 	}
 
-	uint32_t cycles = k_cycle_get_32();
+	int key = irq_lock();
+	uint64_t cycles = soft_cycle_get_64();
 
 	zpl_scope_event_t scope_event = {
 		.id = (is_exit) ? ZPL_SCOPE_EXIT_EVENT : ZPL_SCOPE_ENTER_EVENT,
@@ -35,9 +37,10 @@ void zpl_emit_scope_event(char *scope_name, uint8_t is_exit)
 	};
 	strncpy((char *)&scope_event.scope_name, scope_name, ZPL_MAX_SCOPE_NAME_LENGTH);
 	tracing_format_raw_data((uint8_t *)&scope_event, sizeof(zpl_scope_event_t));
+	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("zpl_scope_%s %lld %s %#x\n", is_exit ? "exit" : "enter",
-			k_cyc_to_ns_floor64(k_cycle_get_32()), scope_name,
+			k_cyc_to_ns_floor64(soft_cycle_get_64()), scope_name,
 			(uint32_t)k_current_get());
 #endif
 }

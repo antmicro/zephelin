@@ -28,8 +28,9 @@ extern "C" {
  * DIE temperature event structure.
  */
 typedef struct __packed {
-	uint16_t stream_id, packet_size;
-	uint32_t timestamp;
+	uint16_t stream_id;
+	uint16_t packet_size;
+	uint64_t timestamp;
 	uint8_t id;
 	uint16_t sensor_count;
 	float die_temp[CONFIG_ZPL_DIE_TEMP_PROFILING_SENSORS_COUNT];

@@ -29,8 +29,9 @@ extern "C" {
  * Inference event structure.
  */
 typedef struct __packed {
-	uint16_t stream_id, packet_size;
-	uint32_t timestamp;
+	uint16_t stream_id;
+	uint16_t packet_size;
+	uint64_t timestamp;
 	uint8_t id;
 	uint32_t thread_id;
 } zpl_inference_event_t;

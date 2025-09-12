@@ -11,7 +11,7 @@
 #include <zephyr/tracing/tracing_format.h>
 
 void __zpl_emit_tflm_event(
-	uint32_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
+	uint64_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
 	uint32_t arena_used_bytes, uint32_t arena_tail_usage, bool is_exit)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
@@ -42,7 +42,7 @@ void __zpl_emit_tflm_event(
 }
 
 void zpl_emit_tflm_enter_event(
-	uint32_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
+	uint64_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
 	uint32_t arena_used_bytes, uint32_t arena_tail_usage)
 {
 	__zpl_emit_tflm_event(cycles, subgraph_idx, op_idx, tag,
@@ -50,7 +50,7 @@ void zpl_emit_tflm_enter_event(
 }
 
 void zpl_emit_tflm_exit_event(
-	uint32_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
+	uint64_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
 	uint32_t arena_used_bytes, uint32_t arena_tail_usage)
 {
 	__zpl_emit_tflm_event(cycles, subgraph_idx, op_idx, tag,

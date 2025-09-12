@@ -6,6 +6,7 @@
  */
 
 #include <zephyr/logging/log.h>
+#include <zpl/time.h>
 #include <zpl/tvm_event.h>
 #include <zpl/tvm_profiler.h>
 
@@ -97,7 +98,7 @@ void zpl_tvm_profiler_dump_events(void *state)
 {
 	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
 
-	for (int i = 0; i < num_events_; ++i) {
+	for (int i = 0; i < zpl_state->num_events_; ++i) {
 		zpl_emit_tvm_enter_event(
 			zpl_state->begin_cycles_[i],
 			zpl_state->op_idx_[i],

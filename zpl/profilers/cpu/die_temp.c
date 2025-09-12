@@ -6,6 +6,7 @@
  */
 
 #include <zpl/die_temp_event.h>
+#include <zpl/time.h>
 
 #include <stdio.h>
 #include <math.h>
@@ -52,8 +53,9 @@ void zpl_emit_die_temp_event(void)
 	}
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
+	int key = irq_lock();
 	zpl_die_temp_event_t zpl_die_temp_event = {
-		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
+		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
 		.id = ZPL_DIE_TEMP_EVENT,
 		.sensor_count = SENSORS_COUNT,
 		.stream_id = 0,
@@ -63,6 +65,7 @@ void zpl_emit_die_temp_event(void)
 		zpl_die_temp_event.die_temp[i] = die_temp[i];
 	}
 	tracing_format_raw_data((uint8_t *)&zpl_die_temp_event, sizeof(zpl_die_temp_event_t));
+	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 #define APPEND_TO_STR(str_, str_p_, fmt_, ...) snprintf(str_p_, \
 		MAX(0, sizeof(str_) - (int)(str_p_ - str_)), \

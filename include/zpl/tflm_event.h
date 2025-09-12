@@ -22,8 +22,9 @@ extern "C" {
 #define ZPL_TFLM_EXIT_EVENT 0xA1
 
 typedef struct __packed {
-	uint16_t stream_id, packet_size;
-	uint32_t timestamp;
+	uint16_t stream_id;
+	uint16_t packet_size;
+	uint64_t timestamp;
 	uint8_t id;
 	uint32_t thread_id;
 	uint16_t subgraph_idx;
@@ -36,11 +37,11 @@ typedef struct __packed {
 #endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) */
 
 void zpl_emit_tflm_enter_event(
-	uint32_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
+	uint64_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
 	uint32_t arena_used_bytes, uint32_t arena_tail_usage);
 
 void zpl_emit_tflm_exit_event(
-	uint32_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
+	uint64_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
 	uint32_t arena_used_bytes, uint32_t arena_tail_usage);
 
 #ifdef __cplusplus

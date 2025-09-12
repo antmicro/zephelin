@@ -131,7 +131,7 @@ event {
 	fields := struct {
 		uint16_t scope_name_len;
 		ctf_bounded_string_t scope_name[scope_name_len];
-		uint32_t cycles;
+		uint64_t cycles;
 		uint32_t thread_id;
 	};
 };
@@ -143,7 +143,7 @@ event {
 	fields := struct {
 		uint16_t scope_name_len;
 		ctf_bounded_string_t scope_name[scope_name_len];
-		uint32_t cycles;
+		uint64_t cycles;
 		uint32_t thread_id;
 	};
 };

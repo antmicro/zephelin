@@ -20,8 +20,8 @@ extern "C" {
 typedef struct {
 	int num_events_;
 	uint8_t op_idx_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
-    uint64_t begin_cycles_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
-    uint64_t end_cycles_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
+	uint64_t begin_cycles_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
+	uint64_t end_cycles_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 	const char *tags_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 } ZPL_TVMProfilerState;
 #endif /* defined(CONFIG_ZPL_TVM_PROFILER) */

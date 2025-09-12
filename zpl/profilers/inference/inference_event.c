@@ -10,11 +10,14 @@
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>
 
+#include <zpl/time.h>
+
 void zpl_inference_enter(void)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
+	int key = irq_lock();
 	zpl_inference_event_t zpl_inference_enter_event = {
-		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
+		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
 		.id = ZPL_INFERENCE_ENTER_EVENT,
 		.thread_id = (uint32_t)k_current_get(),
 		.stream_id = 0,
@@ -24,6 +27,7 @@ void zpl_inference_enter(void)
 	tracing_format_raw_data(
 		(uint8_t *)&zpl_inference_enter_event, sizeof(zpl_inference_event_t)
 	);
+	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("%s:\n", __func__);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
@@ -32,8 +36,9 @@ void zpl_inference_enter(void)
 void zpl_inference_exit(void)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
+	int key = irq_lock();
 	zpl_inference_event_t zpl_inference_exit_event = {
-		.timestamp = k_cyc_to_ns_floor64(k_cycle_get_32()),
+		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
 		.id = ZPL_INFERENCE_EXIT_EVENT,
 		.thread_id = (uint32_t)k_current_get(),
 		.stream_id = 0,
@@ -43,6 +48,7 @@ void zpl_inference_exit(void)
 	tracing_format_raw_data(
 		(uint8_t *)&zpl_inference_exit_event, sizeof(zpl_inference_event_t)
 	);
+	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("%s:\n", __func__);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */

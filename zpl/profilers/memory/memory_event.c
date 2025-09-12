@@ -10,13 +10,15 @@
 #include <zephyr/kernel.h>
 #include <zephyr/tracing/tracing_format.h>
 
+#include <zpl/time.h>
+
 void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region,
 		uintptr_t memory_addr, uint32_t used_memory, uint32_t unused_memory,
 		uint32_t for_thread_id)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
-	uint32_t cycles = k_cycle_get_32();
-
+	int key = irq_lock();
+	uint64_t cycles = soft_cycle_get_64();
 	zpl_memory_event_t memory_event = {
 		.timestamp = k_cyc_to_ns_floor64(cycles),
 		.id = ZPL_MEMORY_EVENT,
@@ -32,6 +34,7 @@ void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region,
 	tracing_format_raw_data(
 		(uint8_t *)&memory_event, sizeof(zpl_memory_event_t)
 	);
+	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("zpl_memory_event %s (%#x) %uB %uB 0x%x\n",
 			zpl_memory_region_enum_to_string(memory_region),

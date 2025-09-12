@@ -66,8 +66,8 @@ private:
 	uint16_t subgraph_idx_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
 	uint16_t op_idx_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
 	const char* tags_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
-	uint32_t begin_cycles_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
-	uint32_t end_cycles_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
+	uint64_t begin_cycles_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
+	uint64_t end_cycles_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
 	uint32_t begin_arena_used_bytes_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
 	uint32_t end_arena_used_bytes_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
 	uint32_t begin_arena_tail_usage_[CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS];
