@@ -104,13 +104,12 @@ if __name__ == "__main__":
 
     # create pty terminal for UART with logs
     console_uart = get_zephyr_chosen("console")
-    emulation.CreateUartPtyTerminal("console_uart_term", "/tmp/uart-log")
-    emulation.Connector.Connect(
-        getattr(platform.sysbus, console_uart).internal,
-        emulation.externals.console_uart_term,
-    )
-
     if console_uart != trace_uart:
+        emulation.CreateUartPtyTerminal("console_uart_term", "/tmp/uart-log")
+        emulation.Connector.Connect(
+            getattr(platform.sysbus, console_uart).internal,
+            emulation.externals.console_uart_term,
+        )
         console_serial = serial.Serial("/tmp/uart-log", baudrate=115200)
         print(f"Writing console ({console_uart}) output to stdout")
     else:
@@ -196,6 +195,8 @@ if __name__ == "__main__":
         if trace_f is not None:
             trace_f.close()
 
+        if console_serial:
+            console_serial.close()
         trace_serial.close()
         emulation.clear()
 
