@@ -194,7 +194,7 @@ Depending on the tracing backend used, the following commands can be used for tr
 
 * Config option - `CONFIG_ZPL_TRACE_BACKEND_UART`
 * Command:
-  ```bash
+  ```
   west zpl-uart-capture [-h] serial_port serial_baudrate output_path
 
   Capture traces using UART. This command capures traces using the serial interface.
@@ -212,7 +212,7 @@ Depending on the tracing backend used, the following commands can be used for tr
 
 * Config option - `CONFIG_ZPL_TRACE_BACKEND_USB`
 * Command:
-  ```bash
+  ```
   west zpl-usb-capture [-h] [-t TIMEOUT] [-w] vendor_id product_id output_path
 
   Capture traces using USB. This command capures traces using USB.
@@ -234,17 +234,19 @@ Depending on the tracing backend used, the following commands can be used for tr
 
 * Config option - `CONFIG_ZPL_TRACE_BACKEND_DEBUGGER`
 * Command:
-  ```bash
-  west zpl-gdb-capture [-h] elf_path output_path
+  ```
+  west zpl-gdb-capture [-h] [--no-debug-server] [--gdb-port GDB_PORT] elf_path output_path
 
   Capture traces using GDB. This command captures traces using GDB from RAM using the `dump` command.
 
   positional arguments:
-  elf_path     Zephyr ELF path
-  output_path  Capture output path
+  elf_path             Zephyr ELF path
+  output_path          Capture output path
 
   options:
-  -h, --help   show this help message and exit
+  -h, --help           show this help message and exit
+  --no-debug-server    Don't set up the debug server
+  --gdb-port GDB_PORT  GDB server port
   ```
 
 #### Trivial UART in Renode

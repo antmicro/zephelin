@@ -39,16 +39,25 @@ class ZplGdbCapture(WestCommand):
 
         parser.add_argument("elf_path", help="Zephyr ELF path")
         parser.add_argument("output_path", help="Capture output path")
+        parser.add_argument(
+            "--no-debug-server", help="Don't set up the debug server", action="store_true"
+        )
+        parser.add_argument("--gdb-port", help="GDB server port", type=int, default=3333)
 
         return parser
 
     def do_run(self, args, unknown_args):
         self.inf(f"Capturing traces to {args.output_path}...")
 
-        cmd_debugserver = "west debugserver".split()
-        proc_debugserver = subprocess.Popen(
-            cmd_debugserver, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
+        if args.gdb_port not in range(65536):
+            self.die(f"The GDB port ({args.gdb_port}) is invalid. Should be a 0-65535 value.")
+
+        if not args.no_debug_server:
+            self.inf(f"Setting up the debug server on port {args.gdb_port}...")
+            cmd_debugserver = f"west debugserver --gdb-port {args.gdb_port}".split()
+            proc_debugserver = subprocess.Popen(
+                cmd_debugserver, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
 
         self.inf("Waiting for the debugserver to start...")
         time.sleep(2)
@@ -59,7 +68,7 @@ class ZplGdbCapture(WestCommand):
             "-ex",
             "set pagination off",
             "-ex",
-            "target remote :3333",
+            f"target remote :{args.gdb_port}",
             "-ex",
             "set $start = &ram_tracing",
             "-ex",
@@ -80,8 +89,9 @@ class ZplGdbCapture(WestCommand):
             self.err(output)
             self.die("Failed to capture tracing data!")
 
-        self.inf("Stopping the debugserver...")
-        proc_debugserver.send_signal(signal.SIGINT)
+        if not args.no_debug_server:
+            self.inf("Stopping the debugserver...")
+            proc_debugserver.send_signal(signal.SIGINT)
 
         self.inf("Done.")
 
