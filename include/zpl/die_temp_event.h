@@ -13,6 +13,7 @@
  * DIE temperature profiling.
  */
 
+#include <zephyr/kernel.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

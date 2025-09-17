@@ -9,6 +9,7 @@
 #ifndef ZPL_SCOPE_EVENT_H_
 #define ZPL_SCOPE_EVENT_H_
 
+#include <zephyr/kernel.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

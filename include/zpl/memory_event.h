@@ -9,6 +9,7 @@
 #ifndef ZEPHYR_PROFILING_LIB_MEMORY_EVENT_H_
 #define ZEPHYR_PROFILING_LIB_MEMORY_EVENT_H_
 
+#include <zephyr/kernel.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
