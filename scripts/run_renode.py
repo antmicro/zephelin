@@ -184,9 +184,9 @@ if __name__ == "__main__":
                 logs = console_serial.read_all()
                 print(logs.decode(errors="ignore"), end="", flush=True)
 
-        if args.timeout:
-            if time.time() - simulation_start >= args.timeout:
-                raise KeyboardInterrupt
+            if args.timeout:
+                if time.time() - simulation_start >= args.timeout:
+                    raise KeyboardInterrupt
 
     except KeyboardInterrupt:
         if trace_f is not None:
