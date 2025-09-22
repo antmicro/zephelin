@@ -19,8 +19,45 @@ from tempfile import TemporaryDirectory
 import numpy as np
 import yaml
 from ai_edge_litert.interpreter import Interpreter
+from west.configuration import MalformedConfig
+from west.manifest import Manifest
+from west.util import WestNotFound
 
 WARNING_MSG_OPS_PARAMETERS = "Skipping operators parameters parsing: {}"
+
+
+def find_tflite_micro_path(workspace_path: Path) -> Path | None:
+    """
+    Finds "tflite-micro" module path.
+
+    Parameters
+    ----------
+    workspace_path : Path
+        Path to Zephyr workspace
+
+    Returns
+    -------
+    Path | None
+        Path if module was found, None if it was not found.
+    """
+    # Find manifest
+    try:
+        manifest = Manifest.from_topdir(workspace_path)
+    except (MalformedConfig, WestNotFound) as ex:
+        print(WARNING_MSG_OPS_PARAMETERS.format(f"Could not find West manifest file ({ex})"))
+        return None
+
+    # Find "tflite-micro" module
+    tflite_project = None
+    for project in manifest.projects:
+        if project.name == "tflite-micro":
+            tflite_project = project
+            break
+    else:
+        print(WARNING_MSG_OPS_PARAMETERS.format("Could not find 'tflite-micro' module"))
+        return None
+
+    return Path(manifest.topdir) / tflite_project.path
 
 
 def extract_ops_parameters(model_path: Path, zephyr_base: Path | None = None) -> list[dict] | None:
@@ -47,7 +84,10 @@ def extract_ops_parameters(model_path: Path, zephyr_base: Path | None = None) ->
         return
 
     workspace = zephyr_base.parent if zephyr_base else Path(__file__).parent.parent.parent
-    tflite_micro_path = workspace / "optional/modules/lib/tflite-micro"
+    tflite_micro_path = find_tflite_micro_path(workspace)
+    if not tflite_micro_path:
+        return
+
     schema_path = tflite_micro_path / "tensorflow/compiler/mlir/lite/schema/schema.fbs"
 
     with TemporaryDirectory() as tmpdir:
