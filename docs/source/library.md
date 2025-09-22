@@ -44,12 +44,42 @@ west packages pip --install
 
 For testing without hardware in the loop, download Renode portable and add the download path to `PATH` environment variable:
 
+```{Warning}
+Make sure to use Renode version v1.16.0.4276 or newer.
+```
+
+(setup-renode)=
+::::{tabs}
+
+:::{group-tab} Linux
 ```bash
 wget https://builds.renode.io/renode-latest.linux-portable-dotnet.tar.gz
 mkdir renode-portable
 tar --strip-components=1 -C ./renode-portable -xvf renode-latest.linux-portable-dotnet.tar.gz
 export PATH=$(pwd)/renode-portable:$PATH
+export PYRENODE_BIN="$PWD/renode-portable/renode"
+export PYRENODE_RUNTIME=coreclr
 ```
+:::
+
+:::{group-tab} Mac OS
+```bash
+wget https://dot.net/v1/dotnet-install.sh
+chmod +x dotnet-install.sh
+./dotnet-install.sh --version 8.0.410
+export PATH="$HOME/.dotnet:$PATH"
+
+git clone https://github.com/renode/renode.git
+pushd renode
+./build.sh --net -t -n --host-arch arm64
+popd
+
+export PATH="$(pwd)/renode:$PATH"
+export PYRENODE_BUILD_DIR="$PWD/renode"
+export PYRENODE_RUNTIME=coreclr
+```
+:::
+::::
 
 Finally, download Zephyr SDK:
 
@@ -130,15 +160,7 @@ west build -p -b max32690evkit/max32690/m4 samples/demo
 
 And then, to flash the board, run:
 ```bash
-openocd \
-    -c 'source [find interface/cmsis-dap.cfg]' \
-    -c 'source [find target/max32690.cfg]' \
-    -c 'init' \
-    -c 'targets' \
-    -c 'reset init' \
-    -c 'flash write_image erase ./build/zephyr/zephyr.hex' \
-    -c 'reset run' \
-    -c 'shutdown'
+west flash --openocd=${MSDK_OPENOCD}
 ```
 using `openocd` from [Analog Devices MSDK](https://github.com/analogdevicesinc/msdk).
 
@@ -195,9 +217,9 @@ Depending on the tracing backend used, the following commands can be used for tr
 * Config option - `CONFIG_ZPL_TRACE_BACKEND_UART`
 * Command:
   ```
-  west zpl-uart-capture [-h] serial_port serial_baudrate output_path
+  usage: west zpl-uart-capture [-h] [--send-enable] serial_port serial_baudrate output_path
 
-  Capture traces using UART. This command capures traces using the serial interface.
+  Capture traces using UART. This command captures traces using the serial interface.
 
   positional arguments:
     serial_port      Seral port
@@ -206,6 +228,8 @@ Depending on the tracing backend used, the following commands can be used for tr
 
   options:
     -h, --help       show this help message and exit
+    --send-enable    Send 'enable' to device before collecting data to enable tracing, requires
+                     CONFIG_TRACING_HANDLE_HOST_CMD to be enabled in the app
   ```
 
 #### USB
@@ -213,9 +237,9 @@ Depending on the tracing backend used, the following commands can be used for tr
 * Config option - `CONFIG_ZPL_TRACE_BACKEND_USB`
 * Command:
   ```
-  west zpl-usb-capture [-h] [-t TIMEOUT] [-w] vendor_id product_id output_path
+  usage: west zpl-usb-capture [-h] [-t TIMEOUT] [-w] vendor_id product_id output_path
 
-  Capture traces using USB. This command capures traces using USB.
+  Capture traces using USB. This command captures traces using USB.
 
   positional arguments:
     vendor_id             Vendor ID
@@ -224,7 +248,7 @@ Depending on the tracing backend used, the following commands can be used for tr
 
   options:
     -h, --help            show this help message and exit
-    -t, --timeout TIMEOUT
+    -t TIMEOUT, --timeout TIMEOUT
                           Timeout of the USB capture in seconds
     -w, --wait-for-device
                           When this flag is set, the command will wait for the device to connect
@@ -235,18 +259,25 @@ Depending on the tracing backend used, the following commands can be used for tr
 * Config option - `CONFIG_ZPL_TRACE_BACKEND_DEBUGGER`
 * Command:
   ```
-  west zpl-gdb-capture [-h] [--no-debug-server] [--gdb-port GDB_PORT] elf_path output_path
+  usage: west zpl-gdb-capture [-h] [--elf-path ELF_PATH] [--gdb-port GDB_PORT] [--gdb GDB]
+                            [--no-debug-server] [--openocd OPENOCD]
+                            [--buffer-full | --n-bytes N_BYTES]
+                            output_path
 
   Capture traces using GDB. This command captures traces using GDB from RAM using the `dump` command.
 
   positional arguments:
-  elf_path             Zephyr ELF path
-  output_path          Capture output path
+    output_path          Capture output path
 
   options:
-  -h, --help           show this help message and exit
-  --no-debug-server    Don't set up the debug server
-  --gdb-port GDB_PORT  GDB server port
+    -h, --help           show this help message and exit
+    --elf-path ELF_PATH  Zephyr ELF path, by default deduced from Zephyr build dir
+    --gdb-port GDB_PORT  GDB server port
+    --gdb GDB            Path to GDB
+    --no-debug-server    Don't set up the debug server
+    --openocd OPENOCD    Path to custom OpenOCD
+    --buffer-full        Run application until trace buffer is full
+    --n-bytes N_BYTES    Run application until there is at least n in trace buffer
   ```
 
 #### Trivial UART in Renode

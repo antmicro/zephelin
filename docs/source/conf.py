@@ -51,7 +51,7 @@ sphinx_immaterial_override_builtin_admonitions = False
 numfig = True
 
 # If you need to add extensions just add to those lists
-extensions = default_extensions
+extensions = default_extensions + ["sphinx_tabs.tabs"]
 myst_enable_extensions = default_myst_enable_extensions
 myst_fence_as_directive = default_myst_fence_as_directive
 
@@ -76,6 +76,8 @@ html_theme = "sphinx_immaterial"
 html_last_updated_fmt = today_fmt
 
 html_static_path = ["_static"]
+
+html_css_files = ["css/styles.css"]
 
 html_show_sphinx = False
 

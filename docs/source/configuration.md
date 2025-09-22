@@ -17,7 +17,7 @@ CONFIG_ZPL_MEMORY_USAGE_TRACE=y
 
 Or appended to the build command:
 
-```
+```bash
 west build -b stm32f429i_disc1/stm32f429xx samples/trace/memory_profiling -- -DCONFIG_ZPL_MEMORY_USAGE_TRACE=y
 ```
 
