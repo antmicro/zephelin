@@ -1,2 +1,5 @@
 *.tflite binary
 *.bin binary
+
+# Always use LF line endings on Zephyr patch files
+zephyr/patches/**/*.patch text eol=lf
