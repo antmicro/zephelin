@@ -170,7 +170,6 @@ if __name__ == "__main__":
                         trace_written = False
 
                     trace_buff = trace_buff[tag_idx + len(CTF_TRACE_START_TAG) :]
-                    trace_f.write(trace_buff)
 
                 elif len(trace_buff) > len(CTF_TRACE_START_TAG):
                     trace_f.write(trace_buff[: -len(CTF_TRACE_START_TAG)])

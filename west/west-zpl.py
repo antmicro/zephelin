@@ -148,7 +148,7 @@ class ZplUartCapture(WestCommand):
 
         try:
             while True:
-                data = ser.read()
+                data = ser.read_all()
                 progress_bar.update(len(data))
 
                 if args.send_enable:
@@ -169,7 +169,6 @@ class ZplUartCapture(WestCommand):
                     buff = buff[tag_idx + len(CTF_TRACE_START_TAG) :]
                     progress_bar.reset()
                     progress_bar.update(len(buff))
-                    f.write(buff)
                     trace_idx += 1
 
                 elif len(buff) > len(CTF_TRACE_START_TAG):
