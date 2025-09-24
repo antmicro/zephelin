@@ -6,6 +6,7 @@
  */
 
 #include <zpl/tflm_profiler.hpp>
+#include <zephyr/logging/log.h>
 
 extern "C" {
 #include <zpl/tflm_event.h>
@@ -16,8 +17,15 @@ namespace zpl {
 
 #if defined(CONFIG_ZPL_TRACE_FULL_MODE) || defined(CONFIG_ZPL_TRACE_LAYER_PROFILING_MODE)
 
+LOG_MODULE_REGISTER(tflm_profiler, CONFIG_ZPL_LOG_LEVEL);
+
 uint32_t TFLMProfiler::BeginEvent(uint16_t subgraph_idx, uint16_t op_idx, const char *tag) {
 	if (num_events_ >= CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS) {
+		LOG_WRN_ONCE(
+		  "The number of TFLM events exceeded the maximum value (%d), "
+		  "resulting trace may be incompleate, please consider "
+		  "increasing CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS",
+		  CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS);
 		return -1;
 	}
 	int event_handle = num_events_;

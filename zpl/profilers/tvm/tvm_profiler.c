@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zephyr/logging/log.h>
 #include <zpl/tvm_event.h>
 #include <zpl/tvm_profiler.h>
 
@@ -22,9 +23,16 @@ static uint8_t op_idx_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 static const char *tags_[CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS];
 
 
+LOG_MODULE_REGISTER(tvm_profiler, CONFIG_ZPL_LOG_LEVEL);
+
 int zpl_tvm_profiler_begin_event(int op_idx, const char *tag)
 {
 	if (num_events_ >= CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS) {
+		LOG_WRN_ONCE(
+		  "The number of TVM events exceeded the maximum value (%d), "
+		  "resulting trace may be incompleate, please consider "
+		  "increasing CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS",
+		  CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS);
 		return -1;
 	}
 	int event_handle = num_events_;
