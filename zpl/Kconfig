@@ -46,3 +46,7 @@ config ZPL_TRACE_CTF_MAX_LONG_STR_LEN
 	int "Maximum long string length for CTF events"
 	default 60
 	depends on ZPL_TRACE_FORMAT_CTF
+
+module = ZPL
+module-str = Zephelin
+source "subsys/logging/Kconfig.template.log_config"
