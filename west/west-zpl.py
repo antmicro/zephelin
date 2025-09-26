@@ -43,6 +43,19 @@ class ZplGdbCapture(WestCommand):
             "--no-debug-server", help="Don't set up the debug server", action="store_true"
         )
         parser.add_argument("--gdb-port", help="GDB server port", type=int, default=3333)
+        parser.add_argument("--gdb", help="Path to GDB", type=str, default="gdb-multiarch")
+        parser.add_argument("--openocd", help="Path to custom OpenOCD", type=Path, default=None)
+        stop_condition_group = parser.add_mutually_exclusive_group()
+        stop_condition_group.add_argument(
+            "--buffer-full",
+            help="Run application until trace buffer is full",
+            action="store_true",
+        )
+        stop_condition_group.add_argument(
+            "--n-bytes",
+            help="Run application until there is at least n in trace buffer",
+            type=int,
+        )
 
         return parser
 
@@ -55,24 +68,38 @@ class ZplGdbCapture(WestCommand):
         if not args.no_debug_server:
             self.inf(f"Setting up the debug server on port {args.gdb_port}...")
             cmd_debugserver = f"west debugserver --gdb-port {args.gdb_port}".split()
+            if args.openocd and args.openocd.exists():
+                cmd_debugserver += ["--openocd", str(args.openocd.resolve())]
             proc_debugserver = subprocess.Popen(
                 cmd_debugserver, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
 
-        self.inf("Waiting for the debugserver to start...")
-        time.sleep(2)
+            self.inf("Waiting for the debugserver to start...")
+            time.sleep(2)
+            if (return_code := proc_debugserver.poll()) is not None:
+                self.die(f"The debug server exited with code: {return_code}")
 
         cmd_gdb = [
-            "gdb-multiarch",
+            args.gdb,
             "-batch",
             "-ex",
             "set pagination off",
             "-ex",
             f"target remote :{args.gdb_port}",
+        ]
+
+        if args.buffer_full or args.n_bytes:
+            if args.buffer_full:
+                cmd_gdb += ["-ex", "rwatch buffer_full if buffer_full"]
+            else:
+                cmd_gdb += ["-ex", f"rwatch pos if pos >= {args.n_bytes}"]
+            cmd_gdb += ["-ex", "continue"]
+
+        cmd_gdb += [
             "-ex",
             "set $start = &ram_tracing",
             "-ex",
-            "set $end = (char*)&ram_tracing + sizeof(ram_tracing)",
+            "set $end = (char*)&ram_tracing + pos",
             "-ex",
             f"dump binary memory {args.output_path} $start $end",
             "-ex",
