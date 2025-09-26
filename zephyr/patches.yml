@@ -156,3 +156,9 @@ patches:
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
     date: 2025-07-08
+  - path: zephyr/0005-remove-unsupported-args-by-openocd.patch
+    sha256sum: bc7e8c92497d912060eb365e6d9590d2923a91bb27c7507503293be366c94e64
+    module: zephyr
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-09-26
