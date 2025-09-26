@@ -13,6 +13,7 @@ from pathlib import Path
 from subprocess import run
 from textwrap import dedent
 
+from utils import zephyr_build_dir
 from west.commands import WestCommand
 from west.util import west_topdir
 
@@ -66,19 +67,14 @@ class ZplPrepareTrace(WestCommand):
         invalid_zephyr_base = not args.zephyr_base or not args.zephyr_base.exists()
         if invalid_build_dir or invalid_zephyr_base:
             self.dbg("Trying to find build dir")
-            # Extend PYTHONPATH with Zephyr West scripts directory
-            # and import helper functions
-            topdir = Path(west_topdir())
-            sys.path.insert(1, str((topdir / "zephyr" / "scripts" / "west_commands").resolve()))
-            from build_helpers import find_build_dir
 
-            build_dir = find_build_dir(None)
+            build_dir = zephyr_build_dir()
             if invalid_build_dir and build_dir is not None:
                 args.build_dir = Path(build_dir)
                 self.dbg(f"Found build dir: {args.build_dir}")
 
             if invalid_zephyr_base:
-                args.zephyr_base = topdir / "zephyr"
+                args.zephyr_base = Path(west_topdir()) / "zephyr"
                 self.dbg(f"Found ZEPHYR_BASE: {args.zephyr_base}")
 
         self.inf("Preparing trace")

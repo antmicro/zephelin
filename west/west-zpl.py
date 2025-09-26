@@ -8,6 +8,7 @@
 import signal
 import subprocess
 import time
+from argparse import ArgumentParser
 from pathlib import Path
 from textwrap import dedent
 
@@ -15,9 +16,33 @@ import serial
 import usb.core
 import usb.util
 from tqdm import tqdm
+from utils import zephyr_build_dir
 from west.commands import WestCommand
 
 CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
+
+
+def add_gdb_common_args(parser: ArgumentParser):
+    """
+    Adds common arguments required for GDB.
+    """
+    parser.add_argument(
+        "--elf-path",
+        help="Zephyr ELF path, by default deduced from Zephyr build dir",
+        default=None,
+    )
+    parser.add_argument("--gdb-port", help="GDB server port", type=int, default=3333)
+    parser.add_argument("--gdb", help="Path to GDB", type=str, default="gdb-multiarch")
+
+
+def get_zephyr_elf():
+    """
+    Returns deduced Zephyr ELF path, based on Zephyr build directory.
+    """
+    build_dir = zephyr_build_dir()
+    if build_dir is None or not (elf := build_dir / "zephyr" / "zephyr.elf").exists():
+        return None
+    return elf
 
 
 class ZplGdbCapture(WestCommand):
@@ -35,15 +60,15 @@ class ZplGdbCapture(WestCommand):
         )
 
     def do_add_parser(self, parser_adder):
-        parser = parser_adder.add_parser(self.name, help=self.help, description=self.description)
+        parser: ArgumentParser = parser_adder.add_parser(
+            self.name, help=self.help, description=self.description
+        )
 
-        parser.add_argument("elf_path", help="Zephyr ELF path")
         parser.add_argument("output_path", help="Capture output path")
+        add_gdb_common_args(parser)
         parser.add_argument(
             "--no-debug-server", help="Don't set up the debug server", action="store_true"
         )
-        parser.add_argument("--gdb-port", help="GDB server port", type=int, default=3333)
-        parser.add_argument("--gdb", help="Path to GDB", type=str, default="gdb-multiarch")
         parser.add_argument("--openocd", help="Path to custom OpenOCD", type=Path, default=None)
         stop_condition_group = parser.add_mutually_exclusive_group()
         stop_condition_group.add_argument(
@@ -64,6 +89,12 @@ class ZplGdbCapture(WestCommand):
 
         if args.gdb_port not in range(65536):
             self.die(f"The GDB port ({args.gdb_port}) is invalid. Should be a 0-65535 value.")
+
+        if args.elf_path is None:
+            elf = get_zephyr_elf()
+            if elf is None:
+                self.die("Cannot deduce Zephyr ELF path, please provide it with --elf-path")
+            args.elf_path = elf
 
         if not args.no_debug_server:
             self.inf(f"Setting up the debug server on port {args.gdb_port}...")
@@ -88,11 +119,11 @@ class ZplGdbCapture(WestCommand):
             f"target remote :{args.gdb_port}",
         ]
 
+        if args.buffer_full:
+            cmd_gdb += ["-ex", "rwatch buffer_full if buffer_full"]
+        else:
+            cmd_gdb += ["-ex", f"rwatch pos if pos >= {args.n_bytes}"]
         if args.buffer_full or args.n_bytes:
-            if args.buffer_full:
-                cmd_gdb += ["-ex", "rwatch buffer_full if buffer_full"]
-            else:
-                cmd_gdb += ["-ex", f"rwatch pos if pos >= {args.n_bytes}"]
             cmd_gdb += ["-ex", "continue"]
 
         cmd_gdb += [
@@ -307,22 +338,28 @@ class ZplDebugConfig(WestCommand):
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(self.name, help=self.help, description=self.description)
 
-        parser.add_argument("elf_path", help="Zephyr ELF path")
         parser.add_argument("config", help="Config to set")
         parser.add_argument("value", help="Value of the config (enable/disable)")
+        add_gdb_common_args(parser)
 
         return parser
 
     def do_run(self, args, unknown_args):
         self.inf(f"Setting {args.config} config to {args.value}")
 
+        if args.elf_path is None:
+            elf = get_zephyr_elf()
+            if elf is None:
+                self.die("Cannot deduce Zephyr ELF path, please provide it with --elf-path")
+            args.elf_path = elf
+
         cmd = [
-            "gdb-multiarch",
+            args.gdb,
             "-batch",
             "-ex",
             "set pagination off",
             "-ex",
-            "target remote :3333",
+            f"target remote :{args.gdb_port}",
             "-ex",
             f"set var debug_configs.{args.config} = {1 if args.value == 'enable' else 0}",
             "-ex",
