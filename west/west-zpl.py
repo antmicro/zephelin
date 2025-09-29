@@ -165,7 +165,7 @@ class ZplUartCapture(WestCommand):
             dedent("""
                 Capture traces using UART.
 
-                This command capures traces using the serial interface."""),
+                This command captures traces using the serial interface."""),
         )
 
     def do_add_parser(self, parser_adder):
@@ -175,7 +175,7 @@ class ZplUartCapture(WestCommand):
         parser.add_argument("serial_baudrate", help="Seral baudrate")
         parser.add_argument("output_path", help="Capture output path", type=Path)
         parser.add_argument(
-            "--send_enable",
+            "--send-enable",
             action="store_true",
             help=(
                 "Send 'enable' to device before collecting data to enable tracing, requires "
@@ -252,7 +252,7 @@ class ZplUsbCapture(WestCommand):
             dedent("""
                 Capture traces using USB.
 
-                This command capures traces using USB."""),
+                This command captures traces using USB."""),
         )
 
     def do_add_parser(self, parser_adder):
@@ -308,13 +308,15 @@ class ZplUsbCapture(WestCommand):
             == usb.util.ENDPOINT_OUT,
         )
         write_ep.write("enable")
+        progress_bar = tqdm(unit="B", unit_scale=True)
 
         with open(args.output_path, "wb") as f:
+            buf = usb.util.create_buffer(10 * 1024)
             while True:
                 try:
-                    buf = usb.util.create_buffer(10 * 1024)
-                    read_ep.read(buf, args.timeout * 1000)
-                    f.write("".join([chr(x) for x in buf]).encode())
+                    n_bytes = read_ep.read(buf, args.timeout * 1000)
+                    f.write(buf[:n_bytes])
+                    progress_bar.update(n_bytes)
                 except usb.core.USBTimeoutError:
                     self.die("USB operation timeout!")
                 except KeyboardInterrupt:
