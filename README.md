@@ -63,13 +63,15 @@ west sdk install
 source zpl_env.sh
 ```
 
-In the end, download [Renode](https://renode.io) and configure environment variables for [pyrenode3](https://github.com/antmicro/pyrenode3) package:
+In the end, download [Renode](https://renode.io) (version `v1.16.0.4276` or newer) and configure environment variables for [pyrenode3](https://github.com/antmicro/pyrenode3) package:
 
 <!-- name="renode-prepare" -->
 ```bash
 wget https://builds.renode.io/renode-latest.pkg.tar.xz
 export PYRENODE_PKG=$(pwd)/renode-latest.pkg.tar.xz
 ```
+
+> NOTE: For setting up Renode on Mac OS, check out [the documentation](https://antmicro.github.io/zephelin/library.html#setup-renode)
 
 ## Building samples
 
@@ -138,6 +140,8 @@ west zpl-prepare-trace [-h] -o OUTPUT [--zephyr-base ZEPHYR_BASE]
 ```
 
 ## Setting up USB device permissions for Zephelin
+
+>NOTE: This step is not required for Mac OS
 
 To use the USB backend and its associated `west zpl-usb-capture` command seamlessly,
 use the following udev rule (example):
