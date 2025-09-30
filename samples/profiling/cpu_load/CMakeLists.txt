@@ -9,4 +9,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../common/boards.cmake)
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(app)
+
+if(CONFIG_CPP)
+  set_source_files_properties(src/main.c PROPERTIES LANGUAGE CXX)
+endif()
+
 target_sources(app PRIVATE ../../common/src/main.c)
