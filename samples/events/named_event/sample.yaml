@@ -14,16 +14,40 @@ tests:
       type: one_line
       regex:
         - "zpl_named_event"
+  sample.trace.named_event.plaintext.cpp:
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "zpl_named_event"
+    extra_configs:
+      - CONFIG_CPP=y
   sample.trace.named_event.plaintext.robot:
     harness: robot
     harness_config:
       robot_testsuite: named_event_plaintext.robot
+  sample.trace.named_event.plaintext.cpp.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: named_event_plaintext.robot
+    extra_configs:
+      - CONFIG_CPP=y
   sample.trace.named_event.ctf.robot:
     extra_configs:
       - CONFIG_TRACING_BUFFER_SIZE=4096
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
       - CONFIG_BOOT_BANNER=n
       - CONFIG_PRINTK=n
+    harness: robot
+    harness_config:
+      robot_testsuite: named_event_ctf.robot
+  sample.trace.named_event.ctf.cpp.robot:
+    extra_configs:
+      - CONFIG_TRACING_BUFFER_SIZE=4096
+      - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
+      - CONFIG_CPP=y
     harness: robot
     harness_config:
       robot_testsuite: named_event_ctf.robot
@@ -35,13 +59,36 @@ tests:
     harness: robot
     harness_config:
       robot_testsuite: named_event_plaintext_trivial_uart.robot
+  sample.trace.named_event.trivial_uart.cpp.robot:
+    platform_allow:
+      - max78002evkit/max78002/m4
+    extra_configs:
+      - CONFIG_ZPL_TRACE_BACKEND_TRIVIAL_UART=y
+      - CONFIG_CPP=y
+    harness: robot
+    harness_config:
+      robot_testsuite: named_event_plaintext_trivial_uart.robot
   sample.trace.named_event.usb:
     platform_allow:
       - stm32f429i_disc1/stm32f429xx
     build_only: true
     extra_configs:
       - CONFIG_ZPL_TRACE_BACKEND_USB=y
+  sample.trace.named_event.usb.cpp:
+    platform_allow:
+      - stm32f429i_disc1/stm32f429xx
+    build_only: true
+    extra_configs:
+      - CONFIG_ZPL_TRACE_BACKEND_USB=y
+      - CONFIG_CPP=y
   sample.trace.named_event.debugger:
+    extra_configs:
+      - CONFIG_ZPL_TRACE_BACKEND_DEBUGGER=y
+      - CONFIG_RAM_TRACING_BUFFER_SIZE=10240
+    harness: robot
+    harness_config:
+      robot_testsuite: named_event_plaintext_debugger.robot
+  sample.trace.named_event.debugger.cpp:
     extra_configs:
       - CONFIG_ZPL_TRACE_BACKEND_DEBUGGER=y
       - CONFIG_RAM_TRACING_BUFFER_SIZE=10240
