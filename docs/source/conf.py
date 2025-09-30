@@ -79,6 +79,8 @@ html_static_path = ["_static"]
 
 html_css_files = ["css/styles.css"]
 
+html_favicon = "_static/favicon.ico"
+
 html_show_sphinx = False
 
 (html_logo, html_theme_options, html_context) = antmicro_html(pdf_url=f"{basic_filename}.pdf")
