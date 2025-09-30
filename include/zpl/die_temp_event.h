@@ -15,6 +15,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* DIE temp event ID */
 #define ZPL_DIE_TEMP_EVENT 0xC1
@@ -34,5 +38,9 @@ typedef struct __packed {
  * Emits DIE temperature event.
  */
 void zpl_emit_die_temp_event(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_DIE_TEMP_EVENT_H_ */

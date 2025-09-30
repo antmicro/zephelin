@@ -12,6 +12,10 @@
 #include <stdint.h>
 #include <zephyr/tracing/tracing.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct zpl_code_scope_conf {
 	char *conf_name;
 	bool is_enabled;
@@ -37,5 +41,9 @@ int __zpl_scope_enter_exit(int is_leaving, struct zpl_code_scope_conf scope_conf
 #define sys_trace_named_event(name, arg0, arg1) zpl_named_event(name, arg0, arg1)
 void zpl_named_event(const char *name, uint32_t arg0, uint32_t arg1);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_LIB_H_ */

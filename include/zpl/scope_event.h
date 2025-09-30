@@ -11,6 +11,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ZPL_SCOPE_ENTER_EVENT 0xEF
 #define ZPL_SCOPE_EXIT_EVENT 0xF0
 #define ZPL_MAX_SCOPE_NAME_LENGTH 30
@@ -25,5 +29,9 @@ typedef struct __packed {
 } zpl_scope_event_t;
 
 void zpl_emit_scope_event(char *scope_name, uint8_t is_exit);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_SCOPE_EVENT_H_ */

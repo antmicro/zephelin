@@ -16,6 +16,10 @@
 #include <zephyr/kernel.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* Inference events IDs */
 #define ZPL_INFERENCE_ENTER_EVENT 0xD0
@@ -40,5 +44,9 @@ void zpl_inference_enter(void);
  * Marks inference exit.
  */
 void zpl_inference_exit(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_INFERENCE_EVENT_H_ */

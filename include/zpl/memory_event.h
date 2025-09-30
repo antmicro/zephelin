@@ -11,6 +11,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ZPL_MEMORY_EVENT 0xEE
 
 enum zpl_memory_region {
@@ -36,5 +40,9 @@ void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region,
 		uintptr_t memory_addr, uint32_t used_memory,
 		uint32_t unused_memory, uint32_t for_thread_id);
 const char *zpl_memory_region_enum_to_string(enum zpl_memory_region memory_region);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZEPHYR_PROFILING_LIB_MEMORY_EVENT_H_ */

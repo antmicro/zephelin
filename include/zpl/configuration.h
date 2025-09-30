@@ -11,6 +11,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ZPL_WAIT_FOR_CONF_DEC(name)  void zpl_wait_for_##name(void);
 #define ZPL_WAIT_FOR_CONF(name)      zpl_wait_for_##name()
 
@@ -19,5 +23,9 @@
 
 ZPL_WAIT_FOR_CONF_DEC(mem_usage_trace)
 ZPL_CHECK_IF_CONF_DEC(mem_usage_trace)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZEPHYR_PROFILING_LIB_CONFIGURATION_H_ */

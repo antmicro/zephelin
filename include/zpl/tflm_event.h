@@ -12,6 +12,10 @@
 #include <zephyr/kernel.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* TFLite Micro events IDs */
 #define ZPL_TFLM_ENTER_EVENT 0xA0
@@ -37,5 +41,9 @@ void zpl_emit_tflm_enter_event(
 void zpl_emit_tflm_exit_event(
 	uint32_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
 	uint32_t arena_used_bytes, uint32_t arena_tail_usage);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_TFLM_EVENTS_H_ */

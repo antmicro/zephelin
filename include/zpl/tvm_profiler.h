@@ -10,6 +10,10 @@
 #define ZPL_TVM_PROFILER_H_
 #include <tvm/runtime/crt/profiler.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(CONFIG_ZPL_TVM_PROFILER)
 #include <stdint.h>
 
@@ -59,5 +63,9 @@ void zpl_tvm_profiler_end_event(void *state, int event_handle);
  * Dumps events from buffer to trace backend.
  */
 void zpl_tvm_profiler_dump_events(void *state);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_TVM_PROFILER_H_ */

@@ -15,6 +15,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* CPU load event ID */
 #define ZPL_CPU_LOAD_EVENT 0xC0
@@ -33,5 +37,9 @@ typedef struct __packed {
  * Emits CPU load event.
  */
 void zpl_emit_cpu_load_event(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_CPU_LOAD_EVENT_H_ */
