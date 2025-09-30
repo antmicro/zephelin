@@ -107,6 +107,7 @@ It is created from the CTF events `zpl_inference_enter` and `zpl_inference_exit`
 ```
 :::
 
+(model-layer-event)=
 #### `MODEL::{LAYER_OP}[_{SUBGRAPH_IDX}]_{OP_IDX}`
 
 The `MODEL::*` {{TEF_Duration}} event is unique to each layer of a model, described with:

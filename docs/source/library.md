@@ -89,8 +89,8 @@ west sdk install
 
 ## Running a sample project with Zephelin
 
-To collect traces and visualize them using Zephelin Trace Viewer, you can run [a simple demo with gesture recognition](./samples/demo), based on the data from an accelerometer.
-The default [configuration](./samples/demo/prj.conf) in this demo collects traces along with all possible additional information, like memory usage, die temperature, inference statistics, and more.
+To collect traces and visualize them using Zephelin Trace Viewer, you can run {zpl_repo}`a simple demo with gesture recognition <samples/demo>`, based on the data from an accelerometer.
+The default {zpl_repo}`configuration <samples/demo/prj.conf>` in this demo collects traces along with all possible additional information, like memory usage, die temperature, inference statistics, and more.
 One UART provides logs from the application, whereas the other UART returns CTF traces.
 
 ### Running the demo in Renode simulation
