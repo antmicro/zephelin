@@ -162,3 +162,9 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-09-26
+  - path: zephyr/instrumentation-subsystem/0008-use-objdump-from-sdk-for-elf32-little.patch
+    sha256sum: 29761717f763ae783f060726e30c02f8c007a75094444ecc1e41d5fe911bd7ba
+    module: zephyr
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-01
