@@ -168,3 +168,9 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-10-01
+  - path: zephyr/0006-update-repl-version.patch
+    sha256sum: 1335564523e975bd320afc514bbeaef7f08fadab23bc60ea6003a30ff66a2362
+    module: zephyr
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-02
