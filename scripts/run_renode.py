@@ -47,7 +47,7 @@ def get_zephyr_chosen(chosen: str) -> str:
 
 
 CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
-ZEPHYR_DASHBOARD_URL = "https://zephyr-dashboard.renode.io/zephyr_sim/54b826336bae437f851fcba332481e24a7e1532d/0e512aebf21a8c51bda51fa67354277811f10a40"
+ZEPHYR_DASHBOARD_URL = "https://zephyr-dashboard.renode.io/zephyr_sim/d90d71c42c6d3a81b10b17b5eb5ab3d686b7512f/58aef12522b98e26da67642f9935efa38b6369df"
 REPLS = {
     "max32690fthr": f"{ZEPHYR_DASHBOARD_URL}/max32690fthr_max32690_m4/hello_world/hello_world.repl",
     "max78002evkit": f"{ZEPHYR_DASHBOARD_URL}/max78002evkit_max78002_m4/hello_world/hello_world.repl",  # noqa: E501
