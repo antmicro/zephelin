@@ -44,7 +44,7 @@ class ZplInstrumentationUartCapture(WestCommand):
             dedent("""
                 Capture instrumentation traces using UART.
 
-                This command capures traces using the serial interface."""),
+                This command captures traces using the serial interface."""),
         )
 
     def do_add_parser(self, parser_adder):
