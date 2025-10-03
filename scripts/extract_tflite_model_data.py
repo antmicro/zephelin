@@ -258,7 +258,18 @@ def extract_model_data(
             tensor_data["index"] = tensor["index"]
             tensor_data["shape"] = tensor["shape"].tolist()
             tensor_data["shape_signature"] = tensor["shape_signature"].tolist()
-            tensor_data["size"] = int(np.dtype(tensor["dtype"]).itemsize * tensor["shape"].prod())
+            # Size calculation
+            scales_arr = tensor.get("quantization_parameters", {}).get(
+                "scales", np.array([], dtype=np.float32)
+            )
+            zero_points_arr = tensor.get("quantization_parameters", {}).get(
+                "zero_points", np.array([], dtype=np.float32)
+            )
+            tensor_data["size"] = int(
+                np.dtype(tensor["dtype"]).itemsize * tensor["shape"].prod()
+                + scales_arr.itemsize * np.prod(scales_arr.shape)
+                + zero_points_arr.itemsize * np.prod(zero_points_arr.shape)
+            )
             tensor_data["dtype"] = tensor["dtype"].__name__
             tensor_data["quantization"] = tensor["quantization"]
             tensor_data["quantization_parameters"] = {
