@@ -11,3 +11,4 @@ west init -l .
 west update
 west patch apply
 west zephyr-export
+west packages pip --install

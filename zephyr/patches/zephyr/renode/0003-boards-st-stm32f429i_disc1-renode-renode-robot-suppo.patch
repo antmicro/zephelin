@@ -1,8 +1,7 @@
-From 4fe97d06d2bc7670c80a507a9c4deffa851eec25 Mon Sep 17 00:00:00 2001
+From 70c05cf98d5a7c98ff4c7834f755511b9450bb1e Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Fri, 6 Jun 2025 14:40:39 +0200
-Subject: [PATCH 3/3] boards: st: stm32f429i_disc1: renode/renode-robot
- support
+Subject: [PATCH 3/4] boards: st: stm32f429i_disc1: renode/renode-robot support
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
 ---

@@ -1,3 +1,18 @@
+From 18bff2defced148c89c61a08dcc8cc6c745aed7c Mon Sep 17 00:00:00 2001
+From: Filip Kokosinski <fkokosinski@antmicro.com>
+Date: Mon, 6 Oct 2025 12:46:51 +0200
+Subject: [PATCH 4/4] boards: st: stm32f746g_disco: renode/renode-robot support
+
+Signed-off-by: Filip Kokosinski <fkokosinski@antmicro.com>
+---
+ boards/st/stm32f746g_disco/board.cmake        |   9 ++
+ .../st/stm32f746g_disco/stm32f746g_disco.yaml |   7 +
+ .../support/stm32f746g_disco.repl             | 151 ++++++++++++++++++
+ .../support/stm32f746g_disco.resc             |  13 ++
+ 4 files changed, 180 insertions(+)
+ create mode 100644 boards/st/stm32f746g_disco/support/stm32f746g_disco.repl
+ create mode 100644 boards/st/stm32f746g_disco/support/stm32f746g_disco.resc
+
 diff --git a/boards/st/stm32f746g_disco/board.cmake b/boards/st/stm32f746g_disco/board.cmake
 index 05504d07722..25d48a77e12 100644
 --- a/boards/st/stm32f746g_disco/board.cmake
@@ -208,3 +223,6 @@ index 00000000000..d38ada716b1
 +    cpu0 VectorTableOffset `sysbus GetSymbolAddress "_vector_table"`
 +"""
 +runMacro $reset
+-- 
+2.43.0
+

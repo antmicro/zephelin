@@ -1,7 +1,7 @@
-From d96238276bcddf5e95cf56227284ee04ce2aa4f0 Mon Sep 17 00:00:00 2001
+From 1b8dd23510b11c8531c8d943776a46dc3c69b777 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Fri, 1 Aug 2025 13:06:32 +0200
-Subject: [PATCH 2/3] boards: adi: max32690fthr: add renode/renode-robot
+Subject: [PATCH 2/4] boards: adi: max32690fthr: add renode/renode-robot
  support
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
@@ -34,12 +34,12 @@ index 43b3efb7b59..edd5214d31f 100644
  
  include(${ZEPHYR_BASE}/boards/common/openocd-adi-max32.boards.cmake)
 diff --git a/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml b/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
-index 7b802ab4795..69a5ee8b676 100644
+index d779aa2140b..2fc03352b59 100644
 --- a/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
 +++ b/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
-@@ -17,3 +17,10 @@ supported:
-   - flash
- ram: 1024
+@@ -18,3 +18,10 @@ supported:
+   - usbd
+ ram: 128
  flash: 3072
 +simulation:
 +  - name: renode
@@ -50,7 +50,7 @@ index 7b802ab4795..69a5ee8b676 100644
 +    resc: boards/adi/max32690fthr/support/max32690.resc
 diff --git a/boards/adi/max32690fthr/support/max32690.resc b/boards/adi/max32690fthr/support/max32690.resc
 new file mode 100644
-index 00000000000..8aa5b991a0f
+index 00000000000..3a412cb3274
 --- /dev/null
 +++ b/boards/adi/max32690fthr/support/max32690.resc
 @@ -0,0 +1,19 @@
@@ -74,5 +74,5 @@ index 00000000000..8aa5b991a0f
 +"""
 +runMacro $reset
 -- 
-2.48.1
+2.43.0
 

@@ -1,67 +1,25 @@
 # yamllint disable rule:line-length
 patches:
-  - path: zephyr/instrumentation-subsystem/0001-arch-arm-aarch32-Refresh-CORTEX_M_DWT-in-menuconfig.patch
-    sha256sum: ea030271458e9b4dc0cb860cb671dafe35206683e2ed736316b6e79e26033748
-    module: zephyr
-    author: Gustavo Romero
-    email: gustavo.romero@linaro.org
-    date: 2025-06-04
-  - path: zephyr/instrumentation-subsystem/0002-cmake-compiler-Add-func_instrumentation-flag.patch
-    sha256sum: ca9d43e38465608d44e8f824604bc705ed3d3edc9dad0c5aa3581fb2bbffdca6
-    module: zephyr
-    author: Kevin Townsend
-    email: kevin.townsend@linaro.org
-    date: 2025-06-04
-  - path: zephyr/instrumentation-subsystem/0003-toolchain-gcc-Add-__no_instrumentation__-definition.patch
-    sha256sum: c54af867ad607965eb30ea196b1ed222f5f8a239a2855e56a2de6b4c61fb3269
-    module: zephyr
-    author: Kevin Townsend
-    email: kevin.townsend@linaro.org
-    date: 2025-06-04
-  - path: zephyr/instrumentation-subsystem/0004-instrumentation-Add-instrumentation-subsystem.patch
-    sha256sum: d930fb319dd517df8dec62f6ea101eb8fe399ceb721367f55c8963f7ecb35f2d
-    module: zephyr
-    author: Gustavo Romero
-    email: gustavo.romero@linaro.org
-    date: 2025-06-04
-  - path: zephyr/instrumentation-subsystem/0005-cmake-emu-Allow-QEMU-to-serve-serial-on-a-TCP-IP-por.patch
-    sha256sum: ea3536fa6bbdc472ab1e63c7be0342478ed59dd30c445a54b86d123c3e959a58
-    module: zephyr
-    author: Gustavo Romero
-    email: gustavo.romero@linaro.org
-    date: 2025-06-04
-  - path: zephyr/instrumentation-subsystem/0006-scripts-zaru-Add-instrumentation-CLI-tool.patch
-    sha256sum: a83ebabd0b2d8a536dc8ea86d3dec058244705000ac468d6c2ffdedc5ed2268f
-    module: zephyr
-    author: Gustavo Romero
-    email: gustavo.romero@linaro.org
-    date: 2025-06-04
-  - path: zephyr/instrumentation-subsystem/0007-samples-instrumentation-Add-a-sample-for-instrumenta.patch
-    sha256sum: ac9d2a1b41a11c298d2bfb662fc154c1c2b280a310a8cb2a616234df0799159a
-    module: zephyr
-    author: Gustavo Romero
-    email: gustavo.romero@linaro.org
-    date: 2025-06-04
   - path: zephyr/renode/0001-boards-adi-max78002evkit-add-renode-renode-robot-sup.patch
-    sha256sum: 62f5dcd3f26640c99d4026af2a8c5d520ab1d2f58db18d3fd3399b0317bdfc6e
+    sha256sum: 76038ce2e0b81e965107cd7f5fcc09780dbac9454e42c42738a68aeef18de3a6
     module: zephyr
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
     date: 2025-06-06
   - path: zephyr/renode/0002-boards-adi-max32690fthr-add-renode-renode-robot-supp.patch
-    sha256sum: 1522a3d523cdc54ca586c6e74c4a4edc32a337043473280cbeb766c6052c0224
+    sha256sum: ef2d9db790a7e2fd9c78564f8662df583a8e1c5b308067be3ea0998e73f72474
     module: zephyr
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
     date: 2025-06-06
   - path: zephyr/renode/0003-boards-st-stm32f429i_disc1-renode-renode-robot-suppo.patch
-    sha256sum: 7b6b4d0edd795fa2afcb93290fa904e01692c655cc8a5e2f5ce9015bea50ea48
+    sha256sum: 1a9567cc47fdbdd44d3e01efa443b5888ad934b8054b115c884683f41f6731d9
     module: zephyr
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
     date: 2025-06-06
   - path: zephyr/renode/0004-boards-st-stm32f746g_disco-renode-renode-robot-suppo.patch
-    sha256sum: f8ad11422eaeb613758217cb740b8f8690bbb0e4adae420bd779a5fea1747b14
+    sha256sum: e0c81331c12db017c7fb27d8f194a2ab431560d4b79365b94455e9e165adaf4c
     module: zephyr
     author: Maciej Torhan
     email: mtorhan@antmicro.com
