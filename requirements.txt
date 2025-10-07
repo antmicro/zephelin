@@ -1,5 +1,6 @@
 ai-edge-litert>=1.3.0; sys_platform != "darwin"
 ai-edge-litert==1.3.0; sys_platform == "darwin"
+tflite
 psutil==5.9.3
 pyrenode3 @ git+https://github.com/antmicro/pyrenode3.git
 pyserial==3.5

@@ -1,3 +1,5 @@
 tensorflow==2.17.0
 tflite==2.18.0
 pytest==8.4.2
+numpy<2.0.0
+apache-tvm; python_version <= '3.11'
