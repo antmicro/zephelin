@@ -43,7 +43,7 @@ All of the above can be analyzed with [Zephelin Trace Viewer](https://antmicro.g
 
 ## Installing project's requirements
 
-Install `west` with `pip`:
+Configure a virtual environment and install `west` with `pip`:
 
 <!-- name="pip-init" -->
 ```shell

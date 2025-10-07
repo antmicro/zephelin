@@ -13,17 +13,26 @@ if [ -z "${RENODE_VERSION:-}" ]; then
 fi
 
 # install deps with apt
-apt update -qq
-apt install -yqq xxd gdb-multiarch mono-complete
+sudo apt update -qq
+sudo apt install -yqq --no-install-recommends gdb-multiarch mono-complete \
+  ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk \
+  xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
+  xxd git-lfs swig libelf-dev libdw-dev python3-packaging \
+  policykit-1 libgtk2.0-0 screen uml-utilities gtk-sharp2 libc6-dev libicu-dev \
+  python3 python3-pip git cmake ninja-build gperf
+
+pip3 install --upgrade pip
 
 # install deps with pip
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # install recent flatbuffers-compiler
-wget https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g++-13.zip -O flatc.zip
-unzip flatc.zip -d /usr/bin && rm flatc.zip
+FLATC_URL=https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g++-13.zip
+wget ${FLATC_URL} -O flatc.zip
+sudo unzip flatc.zip -d /usr/bin
+rm flatc.zip
 
 # install Renode
 wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.deb
-dpkg -i renode.deb
+sudo dpkg -i renode.deb
 rm renode.deb

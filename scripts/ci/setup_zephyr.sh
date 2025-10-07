@@ -11,4 +11,6 @@ west init -l .
 west update
 west patch apply
 west zephyr-export
-west packages pip --install
+west packages pip --install --ignore-venv-check
+
+west sdk install
