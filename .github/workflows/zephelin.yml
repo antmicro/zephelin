@@ -11,19 +11,28 @@ env:
   RENODE_VERSION: "renode_1.16.0+20250929gitc16006c94_amd64.deb"
   DEBIAN_FRONTEND: noninteractive
   CMAKE_PREFIX_PATH: /opt/toolchains
+
 jobs:
   Run-Tuttest:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    runs-on: ubuntu-22.04
     steps:
+      - name: Free space on runner
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ggc
+          sudo rm -rf /usr/local/.ghcup
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
       - name: Install dependencies
         run: |
           ./scripts/ci/install_deps.sh
           pip install git+https://github.com/antmicro/tuttest
       - name: Run Tuttest
         run: |
+          python3 -m venv venv
+          source venv/bin/activate
           tuttest README.md "pip-init" | bash -
           tuttest README.md "west-init" | bash -
           tuttest README.md "build-samples" | bash -
@@ -31,9 +40,7 @@ jobs:
           tuttest README.md "build-demo" | bash -
 
   Run-Twister:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -42,7 +49,15 @@ jobs:
           - max78002evkit/max78002/m4
           - stm32f429i_disc1/stm32f429xx
     steps:
+      - name: Free space on runner
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ggc
+          sudo rm -rf /usr/local/.ghcup
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
       - name: Install dependencies
         run: |
           ./scripts/ci/install_deps.sh
@@ -62,11 +77,19 @@ jobs:
               twister-out
 
   Run-Lint:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    runs-on: ubuntu-22.04
+    env:
+      BASE_REF: ${{ github.base_ref || 'main' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
           ./scripts/ci/setup_zephyr.sh
@@ -74,29 +97,47 @@ jobs:
         run: |
           git config --global --add safe.directory $(pwd)
           excludes="-e SysbuildKconfig -e GitLint -e Identity -e ClangFormat -e BinaryFiles"
-          ../zephyr/scripts/ci/check_compliance.py -c origin/main..HEAD $excludes
+          ../zephyr/scripts/ci/check_compliance.py $excludes -c origin/${BASE_REF}..
 
   Run-PyTest:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    runs-on: ubuntu-22.04
     steps:
+      - name: Free space on runner
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ggc
+          sudo rm -rf /usr/local/.ghcup
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
           ./scripts/ci/setup_zephyr.sh
       - name: Install PyTest
         run: |
-          pip install --no-cache-dir pytest -r requirements.txt
+          pip install --no-cache-dir pytest -r requirements.txt -r tests/requirements.txt
       - run: |
           pytest
 
   Run-PrepareTrace:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.2
+    runs-on: ubuntu-22.04
     steps:
+      - name: Free space on runner
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ggc
+          sudo rm -rf /usr/local/.ghcup
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
           ./scripts/ci/setup_zephyr.sh
