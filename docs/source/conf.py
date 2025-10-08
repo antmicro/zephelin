@@ -18,6 +18,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
 
 from datetime import datetime
+from os import environ
 from pathlib import Path
 
 from antmicro_sphinx_utils.defaults import antmicro_html, antmicro_latex
@@ -83,7 +84,10 @@ html_favicon = "_static/favicon.ico"
 
 html_show_sphinx = False
 
-(html_logo, html_theme_options, html_context) = antmicro_html(pdf_url=f"{basic_filename}.pdf")
+(html_logo, html_theme_options, html_context) = antmicro_html(
+    pdf_url=f"{basic_filename}.pdf",
+    gh_slug=environ.get("GITHUB_REPOSITORY", None),
+)
 
 html_title = project
 
