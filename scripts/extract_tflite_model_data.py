@@ -63,6 +63,91 @@ def find_tflite_micro_path(workspace_path: Path) -> Path | None:
     return Path(manifest.topdir) / tflite_project.path
 
 
+def check_type(ops_param_name: str, properties: dict) -> str:
+    """
+    Returns a string literal representing type of parameter `ops_param_name`,
+    based on `properties` dict containing type properties.
+
+    Parameters
+    ----------
+    ops_param_name : str
+        Name of the parameter, such as `padding`, `stride_h`, `stride_w`, etc.
+    properties : dict
+        A dict containing necessary information to infer type, e.g. minimal and maximal
+        value of the type.
+
+    Returns
+    -------
+    str
+        Type representation for provided parameter.
+    """
+    property_dict = properties[ops_param_name]
+    match property_dict:
+        case {"type": "number"}:
+            return "FLOAT32"
+        case {"type": "integer", "minimum": min_val, "maximum": max_val}:
+            if min_val == 0 and max_val == 2**8 - 1:
+                return "UINT8"
+            elif min_val == 0 and max_val == 2**16 - 1:
+                return "UINT16"
+            elif min_val == 0 and max_val == 2**32 - 1:
+                return "UINT32"
+            elif min_val == 0 and max_val == 2**64 - 1:
+                return "UINT64"
+            elif min_val == -(2 ** (16 - 1)) and max_val == 2 ** (16 - 1) - 1:
+                return "INT16"
+            elif min_val == -(2 ** (32 - 1)) and max_val == 2 ** (32 - 1) - 1:
+                return "INT32"
+            elif min_val == -(2 ** (64 - 1)) and max_val == 2 ** (64 - 1) - 1:
+                return "INT64"
+        case _:  # default to byte (e.g. for enums)
+            return "INT8"
+
+
+def annotate_ops_types(
+    ops_params: list[dict], ops_layer_types: list[str], type_definitions: dict
+) -> list[dict]:
+    """
+    Annotates parameters of supplied list of layers with type information.
+
+    Parameters
+    ----------
+    ops_params : list[dict]
+        Original parameters to process.
+    ops_layer_types : list[str]
+        Names of layer types, such as `Conv2DOptions`, `Pool2DOptions`.
+    type_definitions : dict
+        Type information obtained from jsonschema.
+
+    Returns
+    -------
+    list[dict]
+        List of dicts containing original parameter value and type of that value.
+    """
+    annotated_ops = []
+
+    for ops_param_dict, layer_type in zip(ops_params, ops_layer_types, strict=True):
+        if (def_key := f"tflite_{layer_type}") not in type_definitions:
+            annotated_ops.append({})
+            continue
+        definition = type_definitions[def_key]
+
+        if (key_properties := "properties") not in definition:
+            annotated_ops.append({})
+            continue
+        properties = definition[key_properties]
+
+        annotated_ops.append({
+            ops_param_name: {
+                "value": ops_param_value,
+                "type": check_type(ops_param_name, properties),
+            }
+            for ops_param_name, ops_param_value in ops_param_dict.items()
+        })
+
+    return annotated_ops
+
+
 def extract_ops_parameters(model_path: Path, zephyr_base: Path | None = None) -> list[dict] | None:
     """
     Extracts operators parameters from tflite model file.
@@ -94,14 +179,38 @@ def extract_ops_parameters(model_path: Path, zephyr_base: Path | None = None) ->
     schema_path = tflite_micro_path / "tensorflow/compiler/mlir/lite/schema/schema.fbs"
 
     with TemporaryDirectory() as tmpdir:
-        cmd = ["flatc", "-o", tmpdir, "--strict-json", "--json", str(schema_path), "--", model_path]
+        cmd = [
+            "flatc",
+            "-o",
+            tmpdir,
+            "--strict-json",
+            "--json",
+            "--jsonschema",
+            str(schema_path),
+            "--",
+            model_path,
+        ]
+
         ret = run(cmd, capture_output=True)
 
         if ret.returncode == 0:
             with (Path(tmpdir) / model_path.stem).with_suffix(".json").open() as f:
                 model_json = json.load(f)
+
+            with (Path(tmpdir) / "schema.schema.json").open() as f:
+                schema_json = json.load(f)
+
             subgraph, *_ = model_json["subgraphs"]
-            return [op.get("builtin_options", {}) for op in subgraph["operators"]]
+            operators = subgraph["operators"]
+            definitions = schema_json["definitions"]
+
+            ops_params = [op.get("builtin_options", {}) for op in operators]
+            ops_layer_types = [op.get("builtin_options_type", "") for op in operators]
+
+            ops_params = annotate_ops_types(ops_params, ops_layer_types, definitions)
+
+            return ops_params
+
         else:
             msg = ret.stderr.decode()
             try:
@@ -187,6 +296,35 @@ def deduce_model_addr(
     addr += edt.chosen_nodes["zephyr,flash"].regs[0].addr
 
     return addr
+
+
+def params_size(parameters: dict) -> int:
+    """
+    Compute sum of parameters size in bytes.
+
+    Parameters
+    ----------
+    parameters : dict
+        Annotated layer parameters.
+
+    Returns
+    -------
+    int
+        Size of all parameters in bytes.
+    """
+    size = 0
+    for info in parameters.values():
+        match info["type"]:
+            case "INT8" | "UINT8":
+                size += 1
+            case "INT16" | "UINT16":
+                size += 2
+            case "INT32" | "UINT32" | "FLOAT32":
+                size += 4
+            case "INT64" | "UINT64":
+                size += 8
+
+    return size
 
 
 def extract_model_data(
@@ -283,7 +421,7 @@ def extract_model_data(
 
     ops_parameters = extract_ops_parameters(model_path, zephyr_base) or cycle([{}])
 
-    for op, parameters in zip(interpreter._get_ops_details(), ops_parameters):
+    for op, parameters in zip(interpreter._get_ops_details(), ops_parameters, strict=True):
         op_data = {}
         op_data["op_name"] = op["op_name"]
         op_data["index"] = op["index"]
@@ -298,6 +436,8 @@ def extract_model_data(
             idx: model_data["tensors"][idx]["shape"][:] for idx in op_data["outputs"]
         }
         op_data["parameters"] = parameters
+
+        op_data["size"] = params_size(parameters)
 
         model_data["ops"].append(op_data)
 
