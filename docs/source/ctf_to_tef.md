@@ -73,44 +73,49 @@ The remaining Zephyr events are of {{TEF_Instant}} type, but since Speedscope do
 ```
 :::
 
-#### `zpl_inference`
+(model-inference-event)=
+#### `INFERENCE::MODEL[NUMBER]`
 
 The {{TEF_Duration}} event marking the beginning and end of model's inference.
-It is created from the CTF events `zpl_inference_enter` and `zpl_inference_exit`.
+It is created from the CTF events `zpl_inference_enter` and `zpl_inference_exit` and creates `INFERENCE::MODEL[NUMBER]` event containing ID of the model that is executed.
+Where `NUMBER` is an optional model number (assigned based on the model ID starting from 0), shown only when trace contains more than one model.
 
 :::{example} `zpl_inference` events examples
 :collapsible:
 ```json
 {
-  "name": "zpl_inference",
+  "name": "INFERENCE::MODEL2",
   "cat": "zephyr",
   "ph": "B",
-  "ts": 0.0,
+  "ts": 5582.45,
   "pid": 0,
-  "tid": 536912424,
+  "tid": 536893200,
   "args": {
-    "thread_id": 536912424
+    "thread_id": 536893200,
+    "model_id": 268506268
   }
 },
 "...",
 {
-  "name": "zpl_inference",
+  "name": "INFERENCE::MODEL2",
   "cat": "zephyr",
   "ph": "E",
-  "ts": 110497.391,
+  "ts": 393496.442,
   "pid": 0,
-  "tid": 536912424,
+  "tid": 536893200,
   "args": {
-    "thread_id": 536912424
+    "thread_id": 536893200,
+    "model_id": 268506268
   }
 }
 ```
 :::
 
 (model-layer-event)=
-#### `MODEL::{LAYER_OP}[_{SUBGRAPH_IDX}]_{OP_IDX}`
+#### `MODEL[NUMBER]::{LAYER_OP}[_{SUBGRAPH_IDX}]_{OP_IDX}`
 
-The `MODEL::*` {{TEF_Duration}} event is unique to each layer of a model, described with:
+The `MODEL[NUMBER]::*` {{TEF_Duration}} event is unique to each layer of a model, described with:
+* `NUMBER` - an optional model number - the same as in [](model-inference-event), shown only when more than one model is present in the trace,
 * `LAYER_OP` - a tag of operation like `CONV_2D` or `MAX_POOL_2D`,
 * `SUBGRAPH_IDX` - an optional number representing the ID of a subgraph to which a given layer belongs,
 * `OP_IDX` - a number representing the ID of the operation in a subgraph.
@@ -128,7 +133,7 @@ This event is converted from TFLite micro (`zpl_tflm_(enter|exit)`) and microTVM
 :collapsible:
 ```json
 {
-  "name": "MODEL::CONV_2D_0_0",
+  "name": "MODEL2::CONV_2D_0_0",
   "cat": "zephyr",
   "ph": "B",
   "ts": 4294973.212,
@@ -138,6 +143,7 @@ This event is converted from TFLite micro (`zpl_tflm_(enter|exit)`) and microTVM
     "thread_id": 536912424,
     "subgraph_idx": 0,
     "op_idx": 0,
+    "tag_len": 20,
     "tag": "CONV_2D",
     "arena_used_bytes": 15408,
     "arena_tail_usage": 88,
@@ -145,7 +151,7 @@ This event is converted from TFLite micro (`zpl_tflm_(enter|exit)`) and microTVM
   }
 },
 {
-  "name": "MODEL::CONV_2D_0_0",
+  "name": "MODEL2::CONV_2D_0_0",
   "cat": "zephyr",
   "ph": "E",
   "ts": 4359202.146,
@@ -155,6 +161,7 @@ This event is converted from TFLite micro (`zpl_tflm_(enter|exit)`) and microTVM
     "thread_id": 536912424,
     "subgraph_idx": 0,
     "op_idx": 0,
+    "tag_len": 20,
     "tag": "CONV_2D",
     "arena_used_bytes": 15408,
     "arena_tail_usage": 88,
