@@ -1,0 +1,33 @@
+*** Settings ***
+Resource			${KEYWORDS}
+
+*** Test Cases ***
+Should Display TFLM Events
+	Prepare Machine
+
+	Wait For Line On Uart	zpl_inference_enter: model_id
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=0 tag=CONV_2D
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=0 tag=CONV_2D
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=1 tag=MAX_POOL_2D
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=1 tag=MAX_POOL_2D
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=2 tag=CONV_2D
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=2 tag=CONV_2D
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=3 tag=MAX_POOL_2D
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=3 tag=MAX_POOL_2D
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=4 tag=RESHAPE
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=4 tag=RESHAPE
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=5 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=5 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=6 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=6 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=7 tag=SOFTMAX
+	Wait For Line On Uart	zpl_inference_exit: model_id
+	Wait For Line On Uart	zpl_inference_enter: model_id
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=0 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=0 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=1 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=1 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_enter_event: subgraph_idx=0 op_idx=2 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_tflm_exit_event: subgraph_idx=0 op_idx=2 tag=FULLY_CONNECTED
+	Wait For Line On Uart	zpl_inference_exit: model_id

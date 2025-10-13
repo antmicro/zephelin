@@ -1,0 +1,36 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: tflm_multi_model
+common:
+  tags: profiling
+tests:
+  sample.trace.tflm_multi_model.plaintext:
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "zpl_inference_enter: model_id"
+        - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=0 tag=CONV_2D"
+        - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=0 tag=CONV_2D"
+        - "zpl_inference_exit: model_id"
+        - "zpl_inference_enter: model_id"
+        - "zpl_tflm_enter_event: subgraph_idx=0 op_idx=0 tag=FULLY_CONNECTED"
+        - "zpl_tflm_exit_event: subgraph_idx=0 op_idx=0 tag=FULLY_CONNECTED"
+        - "zpl_inference_exit: model_id"
+  sample.trace.tflm_multi_model.plaintext.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: tflm_multi_plaintext.robot
+  sample.trace.tflm_multi_model.ctf.robot:
+    extra_configs:
+      - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
+      - CONFIG_LOG=n
+    harness: robot
+    harness_config:
+      robot_testsuite: tflm_multi_ctf.robot
