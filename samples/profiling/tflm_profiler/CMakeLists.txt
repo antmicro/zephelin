@@ -9,7 +9,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../common/boards.cmake)
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(app)
-target_sources(app PRIVATE ../../common/src/tflm_inference.c)
+target_sources(app PRIVATE ../../common/src/tflm_inference.cpp)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../common/tflm ${CMAKE_CURRENT_BINARY_DIR}/tflm)
 zephyr_link_libraries(tflm_model)

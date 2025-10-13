@@ -5,9 +5,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+extern "C" {
 #include <zephyr/kernel.h>
 #include <zephyr/random/random.h>
-#include <generated/model_data.h>
+#include <generated/model0_data.h>
+}
 #include <model.h>
 
 #define N_SAMPLES     10
@@ -29,7 +31,7 @@ int main(void)
 	int status = 0;
 
 	model_init();
-	status = model_load(model_data, model_data_len);
+	status = model_load(model0_data);
 	if (status) {
 		printk("Model load failed %d\n", status);
 		return 1;

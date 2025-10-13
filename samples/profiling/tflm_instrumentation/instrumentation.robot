@@ -1,7 +1,7 @@
 *** Variables ***
 ${ZEPHYR_INSTRUMENTATION_SCRIPT}    scripts/zaru.py
 ${SOCKET_PORT}                      4321
-${TRIGGER_FUNCTION}                 loop
+${TRIGGER_FUNCTION}                 _Z4loopv
 
 *** Settings ***
 Resource                            ${KEYWORDS}
