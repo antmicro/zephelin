@@ -1,6 +1,6 @@
 # Adding support for new AI inference libraries
 
-This chapter describes a few ways to trace a new AI runtime:
+const This chapter describes a few ways to trace a new AI runtime:
 * [Using dedicated runtime events](runtime-support) - requires more work, but provides the most complex information and visualization,
 * [Using instrumentation subsystem](runtime-instrumentation) - can be used as is, but does not provide all information, therefor making some visualization unavailable.
 
@@ -48,7 +48,7 @@ event {
 
 There are several things to keep in mind when adding new events:
 * Each event inherits `id` and `timestamp` fields from header defined in [Zephyr](https://github.com/zephyrproject-rtos/zephyr/blob/c77e5a60fdd17941ad57ec7617c00b053ba4b359/subsys/tracing/ctf/tsdl/metadata#L10-L13),
-* The `id` has to be unique,
+* The `id` has to be unique across the given model,
 * Two events are defined to represent a beginning and an end of an operation,
 * A runtime event has to have:
   * `op_idx` - ID of the operation instance in the graph,
@@ -65,7 +65,7 @@ The same structure has to be mirrored in the code (full example can be found in 
 #define ZPL_TFLM_EXIT_EVENT 0xA1
 
 typedef struct __packed {
-  // Event header define by Zephyr
+  // Event header defined by Zephyr
 	uint32_t timestamp;
 	uint8_t id;
 	// Event fields
@@ -135,6 +135,9 @@ The implementation for TFLM can be found in {zpl_repo}`zpl/profilers/tflm/tflm_p
 Moreover, it is advised to emit `zpl_inference_enter` and `zpl_inference_exit` events, respectively before and after an inference, in order to keep track of a whole model inference time.
 To emit them, functions from {zpl_repo}`include/zpl/inference_event.h` can be used.
 
+The `zpl_inference` events require information about model ID, which is used in scenarios when more than one model is executed.
+In case of TFLM, the model address is used as the ID.
+
 :::{note}
 Similar effect can be achieved with [](code_scopes), but this approach is not as extensible as the one described above, making it harder to work with.
 :::
@@ -191,6 +194,11 @@ if args.tflm_model_path is not None:
     add_model_metadata(tef_trace, extract_model_data(args.tflm_model_path, args.zephyr_base))
 ```
 
+If the runtime will be used with multiple models at once, it is suggested to prepare mechanism that will deduce IDs of models automatically.
+Otherwise, users will have to provide them manually during conversion.
+For TFLM, it is done by finding model data in Zephyr ELF file and offsetting it by flash region address.
+As this method does not work when model data are not present in the flash, there is also an additional parameter to provide the IDs manually - see `--tflm-model-ids` of `west zpl-prepare-trace` command.
+
 :::{only} html and trace_viewer
 With implementation like this, the Trace Viewer will have enabled all runtime-specific visualizations, like in the <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json">TFLM runtime example</a>.
 :::
@@ -222,6 +230,16 @@ CONFIG_INSTRUMENTATION_DYNAMIC_TRIGGER=n
 The instrumentation subsystem supports only traces in CTF format, so there is no need to define `ZPL_TRACE_FORMAT` config.
 :::
 
+To focus at specific part of the application, a trigger and stopper function can be set to capture trace only within selected scope.
+For instance, in order to trace the main inference loop of TFLM instrumentation sample, its symbol has to be extracted from the Zephyr ELF (e.g. with `nm` or `objdump`).
+Then, after the board is flashed, the trigger and stopper can be set with the `zaru` script:
+```bash
+# Sets main loop as a trigger and stopper
+${ZEPHYR_BASE}/scripts/zaru.py --serial ${UART_PORT} trace -c ${LOOP_SYMBOL}
+# Reboot the board, to capture the trace with selected
+${ZEPHYR_BASE}/scripts/zaru.py --serial ${UART_PORT} reboot
+```
+
 Currently, trace from instrumentation subsystem can only be captured via UART, with separate command:
 
 ```bash
@@ -249,7 +267,7 @@ The resulting TEF trace can be visualized with [](visual_interface).
 :::{figure-md} instrumentation_visualization
 ![](./imgs/trace_viewer_instrumentation.png)
 
-The trace from instrumentation subsystem executing TFLM runtime
+The trace from instrumentation subsystem executing the main inference loop of TFLM runtime
 :::
 
 The instrumentation subsystem does not filter out not runtime-related events, therefor the trace will contain a lot of data.
