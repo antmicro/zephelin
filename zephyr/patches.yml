@@ -144,3 +144,9 @@ patches:
     author: Mikołaj Klikowicz
     email: mklikowicz@antmicro.com
     date: 2025-09-12
+  - path: tflite-micro/0003-report-model-address-in-zpl_inference-events.patch
+    sha256sum: eb9d50ea93f2da2df23150450a1064f377344fc69a12ff9a7d7554901b0221e7
+    module: tflite-micro
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-08

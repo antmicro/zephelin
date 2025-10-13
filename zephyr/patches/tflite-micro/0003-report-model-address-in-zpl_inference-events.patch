@@ -1,0 +1,77 @@
+From 3a9d55e7d7d5c4f62bd050f8a9a7902751ba55f9 Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Wed, 8 Oct 2025 11:15:53 +0200
+Subject: [PATCH] Report model address in zpl_inference events
+
+Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
+---
+ tensorflow/lite/micro/micro_interpreter.cc |  8 +++++++-
+ tensorflow/lite/micro/micro_interpreter.h  | 10 +++++++---
+ 2 files changed, 14 insertions(+), 4 deletions(-)
+
+diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
+index bfd54ba7..42762cc8 100644
+--- a/tensorflow/lite/micro/micro_interpreter.cc
++++ b/tensorflow/lite/micro/micro_interpreter.cc
+@@ -33,6 +33,7 @@ limitations under the License.
+ #include "tensorflow/lite/schema/schema_utils.h"
+ 
+ #ifdef CONFIG_ZPL_TFLM_PROFILER
++#include <zephyr/logging/log.h>
+ #include <zpl/tflm_profiler.hpp>
+ #endif /* CONFIG_ZPL_TFLM_PROFILER */
+ 
+@@ -47,6 +48,10 @@ MemoryPlannerType FlagToMemoryPlannerType(bool preserve_all_tensors) {
+ }
+ }  // namespace
+ 
++#ifdef CONFIG_ZPL_TFLM_PROFILER
++LOG_MODULE_REGISTER(tflite_micro_interpreter, CONFIG_ZPL_LOG_LEVEL);
++#endif /* CONFIG_ZPL_TFLM_PROFILER */
++
+ MicroInterpreter::MicroInterpreter(const Model* model,
+                                    const MicroOpResolver& op_resolver,
+                                    uint8_t* tensor_arena,
+@@ -293,7 +298,8 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
+ 
+ TfLiteStatus MicroInterpreter::Invoke() {
+ #ifdef CONFIG_ZPL_INFERENCE_PROFILING
+-  ScopedMicroInterpreterInvoke _;
++  LOG_INF("Starting inference for model %p", model_);
++  ScopedMicroInterpreterInvoke _(model_);
+ #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+   if (initialization_status_ != kTfLiteOk) {
+     MicroPrintf("Invoke() called after initialization failed\n");
+diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
+index e9a3de04..fa25b0d8 100644
+--- a/tensorflow/lite/micro/micro_interpreter.h
++++ b/tensorflow/lite/micro/micro_interpreter.h
+@@ -17,6 +17,7 @@ limitations under the License.
+ 
+ #include <cstddef>
+ #include <cstdint>
++#include "flatbuffers/base.h"
+ 
+ #ifdef USE_TFLM_COMPRESSION
+ 
+@@ -215,11 +216,14 @@ class MicroInterpreter {
+ 
+ #ifdef CONFIG_ZPL_INFERENCE_PROFILING
+ struct ScopedMicroInterpreterInvoke {
+-  explicit ScopedMicroInterpreterInvoke() {
+-    zpl_inference_enter();
++  const Model *model_;
++
++  explicit ScopedMicroInterpreterInvoke(const Model* model) {
++    model_ = model;
++    zpl_inference_enter((uint32_t) model_);
+   }
+   ~ScopedMicroInterpreterInvoke() {
+-    zpl_inference_exit();
++    zpl_inference_exit((uint32_t) model_);
+   }
+ };
+ #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+-- 
+2.50.1
+
