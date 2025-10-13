@@ -12,7 +12,7 @@
 
 #include <zpl/time.h>
 
-void zpl_inference_enter(void)
+void zpl_inference_enter(uint32_t model_id)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
@@ -22,6 +22,7 @@ void zpl_inference_enter(void)
 		.thread_id = (uint32_t)k_current_get(),
 		.stream_id = 0,
 		.packet_size = sizeof(zpl_inference_event_t) * 8,
+		.model_id = model_id,
 	};
 
 	tracing_format_raw_data(
@@ -29,11 +30,11 @@ void zpl_inference_enter(void)
 	);
 	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
-	TRACING_STRING("%s:\n", __func__);
+	TRACING_STRING("%s: model_id=0x%x\n", __func__, model_id);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
 }
 
-void zpl_inference_exit(void)
+void zpl_inference_exit(uint32_t model_id)
 {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
@@ -43,6 +44,7 @@ void zpl_inference_exit(void)
 		.thread_id = (uint32_t)k_current_get(),
 		.stream_id = 0,
 		.packet_size = sizeof(zpl_inference_event_t) * 8,
+		.model_id = model_id,
 	};
 
 	tracing_format_raw_data(
@@ -50,6 +52,6 @@ void zpl_inference_exit(void)
 	);
 	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
-	TRACING_STRING("%s:\n", __func__);
+	TRACING_STRING("%s: model_id=0x%x\n", __func__, model_id);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
 }

@@ -34,18 +34,19 @@ typedef struct __packed {
 	uint64_t timestamp;
 	uint8_t id;
 	uint32_t thread_id;
+	uint32_t model_id;
 } zpl_inference_event_t;
 #endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) */
 
 /**
  * Marks inference enter.
  */
-void zpl_inference_enter(void);
+void zpl_inference_enter(uint32_t model_id);
 
 /**
  * Marks inference exit.
  */
-void zpl_inference_exit(void);
+void zpl_inference_exit(uint32_t model_id);
 
 #ifdef __cplusplus
 }
