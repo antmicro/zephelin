@@ -17,6 +17,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 
+import bt2
 from ctf2tef import (
     CustomEventDefinition,
     CustomMetadataDefinition,
@@ -36,10 +37,15 @@ if TYPE_CHECKING:
     import bt2
 
 
+# Mapping of models IDs to consecustive numbers
+MODEL_IDS_MAPPING = {}
+
+
 # The list of custom events definitions
 def create_custom_events(
     tvm_op_remove_prefix: re.Pattern = DEFAULT_OP_PREFIX_RE,
     tvm_op_remove_suffix: re.Pattern = DEFAULT_OP_SUFFIX_RE,
+    multi_model_trace: bool = False,
 ) -> list[CustomEventDefinition]:
     """
     Creates custom events.
@@ -50,12 +56,16 @@ def create_custom_events(
         Pattern removing TVM operator prefix.
     tvm_op_remove_suffix : re.Pattern
         Pattern removing TVM operator type suffix.
+    multi_model_trace : bool
+        Whether the trace contains more than one model.
 
     Returns
     -------
     list[CustomEventDefinition]
         Created events.
     """
+    # The mapping of thread ID to model ID
+    ACTIVE_INFERENCES = {}
 
     def tflm_op_name(msg: "bt2._EventMessageConst") -> str:
         fields = msg.event.payload_field
@@ -71,7 +81,12 @@ def create_custom_events(
         if "op_idx" in fields:
             name += f"_{fields['op_idx']}"
 
-        return name
+        model_num = ""
+        if multi_model_trace:
+            thread_id = fields.get("thread_id", None)
+            model_num = ACTIVE_INFERENCES.get(thread_id, "") if thread_id else ""
+
+        return f"{model_num}::{name}"
 
     def tvm_op_name(msg: "bt2._EventMessageConst") -> str:
         """
@@ -101,9 +116,27 @@ def create_custom_events(
 
         return arg_func
 
+    def inference_model_number(msg: "bt2._EventMessageConst") -> str:
+        """
+        Generates suffix for inference event.
+        """
+        fields = msg.event.payload_field
+        if not fields:
+            return ""
+        model_id = int(fields.get("model_id", None))
+        if model_id not in MODEL_IDS_MAPPING:
+            MODEL_IDS_MAPPING[model_id] = len(MODEL_IDS_MAPPING)
+        start = msg.event.name.endswith("_enter")
+        thread_id = fields.get("thread_id", None)
+        if thread_id and start:
+            ACTIVE_INFERENCES[thread_id] = MODEL_IDS_MAPPING[model_id]
+        elif thread_id:
+            ACTIVE_INFERENCES[thread_id] = None
+        return str(MODEL_IDS_MAPPING[model_id])
+
     return [
         CustomEventDefinition(
-            "MODEL::",
+            "MODEL",
             "zpl_tflm_enter",
             "zpl_tflm_exit",
             tflm_op_name,
@@ -125,6 +158,13 @@ def create_custom_events(
             "zpl_scope_enter",
             "zpl_scope_exit",
             lambda msg: msg.event.payload_field.get("scope_name", ""),
+            None,
+        ),
+        CustomEventDefinition(
+            "INFERENCE::MODEL",
+            "zpl_inference_enter",
+            "zpl_inference_exit",
+            inference_model_number if multi_model_trace else lambda _: "",
             None,
         ),
     ]
@@ -248,10 +288,18 @@ def setup_parser(parser: argparse.ArgumentParser):
         "otherwise will be deduced based on the script path",
     )
     parser.add_argument(
-        "--tflm-model-path",
+        "--tflm-model-paths",
         type=Path,
-        help="Path to the TFLM model, extracted information will be appedened "
+        nargs="+",
+        help="Paths to TFLM models, extracted information will be appedened "
         "to the final trace as a metadata",
+    )
+    parser.add_argument(
+        "--tflm-model-ids",
+        type=str,
+        nargs="+",
+        help="IDs of TFLM models in HEX format (0x[0-9a-zA-Z]+) in the same order "
+        "as --tflm-model-paths, Model IDs are printed right before the inference",
     )
     parser.add_argument(
         "--tvm-model-path",
@@ -343,6 +391,8 @@ def prepare(args: argparse.Namespace):
     if args.zephyr_elf_path is None:
         args.zephyr_elf_path = Path(".") / "build" / "zephyr" / "zephyr.elf"
 
+    multiple_models = False
+
     # Convert CTF
     if args.instrumentation:
         with prepare_dir_for_instrumentation(
@@ -353,6 +403,23 @@ def prepare(args: argparse.Namespace):
             ).tef["traceEvents"]
     else:
         with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
+            # Detect whether more than one model is used in the trace
+            model_ids = set()
+            msg_it = bt2.TraceCollectionMessageIterator(str(tmp_dir))
+            for msg in msg_it:
+                if not hasattr(msg, "event"):
+                    continue
+                name = str(msg.event.name)
+                if name != "zpl_inference_enter":
+                    continue
+                fields = msg.event.payload_field
+                model_id = int(fields.get("model_id", None))
+                if model_id and model_id not in model_ids:
+                    model_ids.add(model_id)
+                    if len(model_ids) >= 2:
+                        break
+            multiple_models = len(model_ids) >= 2
+            # Convert CTF to TEF
             results = ctf_to_tef(
                 path=str(tmp_dir),
                 skip_args=False,
@@ -360,6 +427,7 @@ def prepare(args: argparse.Namespace):
                 custom_events=create_custom_events(
                     tvm_op_remove_prefix=args.tvm_model_op_remove_prefix,
                     tvm_op_remove_suffix=args.tvm_model_op_remove_suffix,
+                    multi_model_trace=multiple_models,
                 ),
             )
             tef_trace, thread_name = results.tef, results.thread_names
@@ -378,11 +446,32 @@ def prepare(args: argparse.Namespace):
             for t_name, tid in thread_name.items()
         ]
 
-    # Metadata about TFLM model
-    if args.tflm_model_path is not None:
+    # Metadata for TFLM models
+    if args.tflm_model_paths:
         from extract_tflite_model_data import extract_model_data
 
-        add_model_metadata(tef_trace, extract_model_data(args.tflm_model_path, args.zephyr_base))
+        if args.tflm_model_ids:
+            if len(args.tflm_model_ids) != len(args.tflm_model_paths):
+                raise ValueError(
+                    "Number of elements in --tflm-model-ids does not match with --tflm-model-paths"
+                )
+            args.tflm_model_ids = [int(model_id, 16) for model_id in args.tflm_model_ids]
+        else:
+            args.tflm_model_ids = [None] * len(args.tflm_model_paths)
+
+        for tflm_model, model_id in zip(args.tflm_model_paths, args.tflm_model_ids):
+            metadata = extract_model_data(
+                tflm_model, args.zephyr_base, args.zephyr_elf_path, model_id
+            )
+            if multiple_models:
+                if "id" not in metadata or metadata["id"] not in MODEL_IDS_MAPPING:
+                    print(
+                        f"Cannot match model ID (0x{metadata['id']:x}) with IDs reported in"
+                        f" the trace ({', '.join([f'0x{k:x}' for k in MODEL_IDS_MAPPING.keys()])}) "
+                        f"for `{tflm_model}`. The trace may not be displayed correctly, please "
+                        "provide valid model IDs manually with --tflm-model-ids flag"
+                    )
+            add_model_metadata(tef_trace, metadata)
 
     # Metadata about TVM model
     if args.tvm_model_path is not None:
