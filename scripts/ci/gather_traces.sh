@@ -41,3 +41,10 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_marking_code_scopes.json
 west build -p -b $BOARD samples/profiling/cpu_load -- ${CTF_CONFS}
 python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
 west zpl-prepare-trace ./channel0_0 -o ./tef_cpu_load.json
+
+### TFLM multi model
+west build -p -b $BOARD samples/profiling/tflm_multi_model -- ${CTF_CONFS}
+python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
+west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_multi_model.json \
+  --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite \
+    ./samples/common/tflm/model/sine.tflite
