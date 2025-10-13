@@ -150,3 +150,9 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-10-08
+  - path: tvm/0007-specify-model-id-for-zpl_inference.patch
+    sha256sum: 63203036cb870babccbd9b526e61de8f54d6fb6ed645eaf9379acaa528aa69c0
+    module: tvm
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-08
