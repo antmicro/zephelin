@@ -10,7 +10,10 @@ Provides LiteRT (TFLite) model data extractor.
 import argparse
 import json
 import os
+import pickle
 import shutil
+import sys
+from contextlib import contextmanager
 from itertools import cycle
 from pathlib import Path
 from subprocess import run
@@ -110,7 +113,88 @@ def extract_ops_parameters(model_path: Path, zephyr_base: Path | None = None) ->
             print(WARNING_MSG_OPS_PARAMETERS.format(error))
 
 
-def extract_model_data(model_path: Path, zephyr_base: Path | None = None) -> dict:
+@contextmanager
+def extend_path(*p: list[Path]):
+    """
+    Context manager extending PYTHONPATH with provided arguments.
+
+    Parameters
+    ----------
+    p: list[Path]
+        The paths that will be inserted to PYTHONPATH.
+    """
+    sys_path = sys.path[:]
+    sys.path = [str(_p.resolve()) for _p in p] + sys.path
+    try:
+        yield
+    finally:
+        sys.path = sys_path
+
+
+def deduce_model_addr(
+    model_path: Path, zephyr_base: Path | None = None, zephyr_elf: Path | None = None
+) -> int | None:
+    """
+    Decudes the model address based on model data placement in zephyr.bin,
+    address of flash region and flatbuffer offset.
+
+    Parameters
+    ----------
+    model_path : Path
+        Path to the model.
+    zephyr_base : Path | None
+        Path to a Zephyr repository
+    zephyr_elf : Path | None
+        Path to a Zephyr ELF
+
+    Returns
+    -------
+    int | None
+        The model address or None if it cannot be found.
+    """
+    from flatbuffers.packer import uoffset
+
+    if not model_path.exists():
+        raise ValueError(f"Provided model path does not exist {model_path}")
+    if not zephyr_elf or not zephyr_elf.exists():
+        raise ValueError("Missing path to Zephyr ELF")
+
+    zephyr_bin = zephyr_elf.with_suffix(".bin")
+
+    with model_path.open("rb") as fd:
+        model_bin = fd.read()
+
+    with zephyr_bin.open("rb") as fd:
+        zephyr_data = fd.read()
+
+    idx = zephyr_data.find(model_bin)
+    if idx <= 0:
+        return None
+
+    offset = uoffset.unpack(zephyr_data[idx : idx + uoffset.size])[0]
+    addr = idx + offset
+
+    edt = None
+    with (
+        # Extend path to use Zephyr's devicetree
+        extend_path(zephyr_base / "scripts" / "dts" / "python-devicetree" / "src"),
+        (zephyr_elf.parent / "edt.pickle").open("rb") as fd,
+    ):
+        edt = pickle.load(fd)
+
+    if edt is None or "zephyr,flash" not in edt.chosen_nodes:
+        return None
+    addr += edt.chosen_nodes["zephyr,flash"].regs[0].addr
+
+    return addr
+
+
+def extract_model_data(
+    model_path: Path,
+    zephyr_base: Path | None = None,
+    zephyr_elf: Path | None = None,
+    model_id: int | None = None,
+) -> dict:
     """
     Extracts model hyperparameters from tflite model file.
 
@@ -120,6 +204,10 @@ def extract_model_data(model_path: Path, zephyr_base: Path | None = None) -> dic
         Path to the model.
     zephyr_base : Path | None
         Path to a Zephyr repository
+    zephyr_elf : Path | None
+        Path to a Zephyr ELF
+    model_id : int | None
+        ID of the model, if not provided will be deduced based on model data in zephyr.bin
 
     Returns
     -------
@@ -202,7 +290,41 @@ def extract_model_data(model_path: Path, zephyr_base: Path | None = None) -> dic
 
         model_data["ops"].append(op_data)
 
+    if model_id:
+        model_data["id"] = model_id
+    elif zephyr_elf and zephyr_elf.exists():
+        addr = deduce_model_addr(model_path, zephyr_base, zephyr_elf)
+        if addr:
+            model_data["id"] = addr
+        else:
+            print(f"Model address cannot be deduced for {model_path}")
+    else:
+        print("Missing zephyr.elf file, cannot deduce model address")
+
     return model_data
+
+
+def extract_models_data(
+    *models_path: list[Path], zephyr_base: Path | None = None, zephyr_elf: Path | None = None
+) -> list[dict]:
+    """
+    Extracts model hyperparameters from tflite model file.
+
+    Parameters
+    ----------
+    models_path : list[Path]
+        Path to the model.
+    zephyr_base : Path | None
+        Path to a Zephyr repository
+    zephyr_elf : Path | None
+        Path to a Zephyr ELF
+
+    Returns
+    -------
+    list[dict]
+        List with models data.
+    """
+    return [extract_model_data(model, zephyr_base, zephyr_elf) for model in models_path]
 
 
 if __name__ == "__main__":
@@ -217,6 +339,7 @@ if __name__ == "__main__":
         help="The path to a Zephyr repository, can be passed with $ZEPHYR_BASE, "
         "otherwise will be deduced based on the script path",
     )
+    parser.add_argument("--zephyr-elf", type=Path, default=None, help="The path to a Zephyr ELF")
     parser.add_argument(
         "--output-path",
         type=Path,
@@ -226,7 +349,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    model_data = extract_model_data(args.model_path, args.zephyr_base)
+    model_data = extract_model_data(args.model_path, args.zephyr_base, args.zephyr_elf)
 
     with open(args.output_path, "w") as out_f:
         yaml.safe_dump(model_data, out_f, sort_keys=False)
