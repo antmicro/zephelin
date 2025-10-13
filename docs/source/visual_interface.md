@@ -48,6 +48,7 @@ To checked out an iterative version of the Zephelin Trace Viewer select one of t
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_marking_code_scopes.json">marking code scopes example</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_memory_profiling.json">memory profiling example</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./advanced.json">combined example</a>
+* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_multi_model.json">LiteRT runtime with two models</a>
 
 :::
 
