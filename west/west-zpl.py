@@ -121,7 +121,7 @@ class ZplGdbCapture(WestCommand):
 
         if args.buffer_full:
             cmd_gdb += ["-ex", "rwatch buffer_full if buffer_full"]
-        else:
+        elif args.n_bytes:
             cmd_gdb += ["-ex", f"rwatch pos if pos >= {args.n_bytes}"]
         if args.buffer_full or args.n_bytes:
             cmd_gdb += ["-ex", "continue"]
