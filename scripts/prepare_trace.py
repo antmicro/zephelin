@@ -401,6 +401,9 @@ def prepare(args: argparse.Namespace):
             tef_trace += instrumentation_ctf_to_tef(
                 str(tmp_dir), args.zephyr_elf_path, args.zephyr_base
             ).tef["traceEvents"]
+        # Convert timestamps to us
+        for event in tef_trace:
+            event["ts"] = float(event["ts"]) * 1e-3
     else:
         with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
             # Detect whether more than one model is used in the trace
