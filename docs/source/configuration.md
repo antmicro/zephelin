@@ -114,6 +114,16 @@ You can choose how the traces will be delivered to the host PC by selecting one 
 
 Depending on the tracing backend used, the following commands can be used for trace capture.
 
+## Adding new trace backends
+
+The `TRACING_BACKEND_DEFINE` from `tracing_backend.h` can be used. Two symbols
+need to be provided to this macro:
+* `tracing_backend_init`, which initializes the backend, and
+* `tracing_backend_output`, which is used to output data through the backend.
+
+The Renode Trivial UART backend ({zpl_repo}`zpl/backends/trivial_uart_backend.c`) can be
+used as an example of adding new backends in Zephelin.
+
 ## Profiling tiers
 
 The library supports three distinct profiling tiers, each offering a different balance of performance impact and tracing detail:
