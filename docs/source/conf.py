@@ -92,7 +92,10 @@ html_show_sphinx = False
 html_title = project
 
 extlinks = {
-    "zpl_repo": ((html_context["commit_url"] if "commit_url" in html_context else "") + "%s", "%s"),
+    "zpl_repo": (
+        (html_context["commit_url"] if "commit_url" in html_context else "") + "/%s",
+        "%s",
+    ),
 }
 
 (latex_elements, latex_documents, latex_logo, latex_additional_files) = antmicro_latex(
