@@ -17,6 +17,7 @@ LOG_MODULE_REGISTER(memory_profiler, CONFIG_ZPL_LOG_LEVEL);
 
 void zpl_profile_stack(const struct k_thread *thread, void *user_data)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(memory_profiler);
 	size_t unused;
 	int err = k_thread_stack_space_get(thread, &unused);
 
@@ -32,6 +33,7 @@ void zpl_profile_stack(const struct k_thread *thread, void *user_data)
 
 void zpl_profile_heap(void)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(memory_profiler);
 	struct sys_heap **ha;
 	size_t i;
 	struct sys_memory_stats stats;
@@ -59,6 +61,7 @@ void zpl_profile_heap(void)
 
 void zpl_profile_memory_slabs(void)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(memory_profiler);
 	STRUCT_SECTION_FOREACH(k_mem_slab, slab) {
 		zpl_emit_memory_event(ZPL_MEM_SLAB, (uintptr_t)slab,
 				slab->info.num_used * slab->info.block_size,
@@ -69,6 +72,7 @@ void zpl_profile_memory_slabs(void)
 
 void zpl_profile_k_heaps(void)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(memory_profiler);
 	struct sys_memory_stats stats;
 
 	STRUCT_SECTION_FOREACH(k_heap, heap) {
@@ -81,7 +85,7 @@ void zpl_profile_k_heaps(void)
 void zpl_profile_memory(void)
 {
 	while (true) {
-		ZPL_WAIT_FOR_CONF(mem_usage_trace);
+		ZPL_CONF_WAIT(memory_profiler);
 		k_thread_foreach(zpl_profile_stack, NULL);
 		zpl_profile_heap();
 		zpl_profile_k_heaps();

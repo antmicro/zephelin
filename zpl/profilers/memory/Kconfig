@@ -11,6 +11,7 @@ config ZPL_MEMORY_PROFILING
 	select THREAD_STACK_INFO
 	select THREAD_MONITOR
 	select INIT_STACKS
+	imply ZPL_MEMORY_PROFILING_CONF_THREADING
 	help
 	  Say 'Y' if you want to enable support for the Memory Profiling.
 
@@ -33,3 +34,9 @@ config ZPL_MEMORY_PROFILING_THREAD_DELAY
 	int "Memory profiling thread delay"
 	default 0
 	depends on ZPL_MEMORY_PROFILING
+
+config ZPL_MEMORY_PROFILING_CONF_THREADING
+	bool "Memory profiling runtime configuration threading"
+	depends on ZPL_MEMORY_PROFILING
+	help
+	  Say 'Y' if you want to enable runtime configuration threading features for memory profiling.
