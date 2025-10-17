@@ -56,14 +56,6 @@ ZTEST(zpl, test_library_init_fail)
 }
 #endif /* CONFIG_ZPL_TRACE_BACKEND_USB */
 
-ZTEST(zpl, test_runtime_check_conf)
-{
-	zassert_equal(IS_ENABLED(CONFIG_ZPL_MEMORY_USAGE_TRACE),
-			ZPL_CHECK_IF_CONF(mem_usage_trace),
-			"ZPL_CHECK_IF_CONF(mem_usage_trace) returned an incorrect value");
-}
-
-
 ZPL_CODE_SCOPE_DEFINE(code_scope_enabled, 1);
 ZPL_CODE_SCOPE_DEFINE(code_scope_disabled, 0);
 

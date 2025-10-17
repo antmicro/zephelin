@@ -9,7 +9,7 @@ Change Memory Usage Config
 	${DEBUG_CONFIGS_ADDR}=  Execute Command  sysbus GetSymbolAddress "debug_configs"
 
   IF  "${state}" == "enable"
-    Execute Command  sysbus WriteWord ${DEBUG_CONFIGS_ADDR} 0x0101
+    Execute Command  sysbus WriteWord ${DEBUG_CONFIGS_ADDR} 0x0100
   ELSE
     Execute Command  sysbus WriteWord ${DEBUG_CONFIGS_ADDR} 0x0000
   END

@@ -9,6 +9,8 @@ Wait For Memory Event On Uart
 	Wait For Line On Uart	zpl_memory_event mem_slab \\(${MEMORY_ADDRESS}\\) \\d+B \\d+B ${MEMORY_ADDRESS}  treatAsRegex=true
 
 Test Runtime Config
+	Wait For Line On Uart  Booting Zephyr OS
+	Change Memory Usage Config  disable
 	Wait For Line On Uart	zpl_named_event: counter (5; 0)
 	Wait For Line On Uart	zpl_named_event: counter (4; 0)
 	Change Memory Usage Config  enable
@@ -23,4 +25,5 @@ Test Runtime Config
 	Change Memory Usage Config  disable
 	Run Keyword And Expect Error  *Terminal tester failed*  Wait For Line On Uart  zpl_memory_event  timeout=2
 	Change Memory Usage Config  enable
+	Sleep  2s
 	Wait For Memory Event On Uart

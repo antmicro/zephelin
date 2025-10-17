@@ -4,8 +4,8 @@ Resource			common_keywords.resource
 
 *** Keywords ***
 Change Memory Usage Config
-	[Arguments]		${state}
-	Write Line To Uart  memory_profiler ${state}  waitForEcho=false
+	[Arguments]		${_}
+	No Operation
 
 *** Test Cases ***
 Should Display Memory Usage

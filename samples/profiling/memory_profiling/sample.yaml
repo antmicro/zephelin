@@ -52,19 +52,16 @@ tests:
     harness_config:
       robot_testsuite: memory_profiling_uart_conf.robot
     extra_configs:
-      - CONFIG_ZPL_MEMORY_USAGE_TRACE=n
       - CONFIG_ZPL_RUNTIME_CONFIG_UART=y
   sample.trace.memory_profiling.debug_conf.robot:
     harness: robot
     harness_config:
       robot_testsuite: memory_profiling_debug_conf.robot
     extra_configs:
-      - CONFIG_ZPL_MEMORY_USAGE_TRACE=n
-      - CONFIG_ZPL_RUNTIME_CONFIG_DEBUG=y
-  sample.trace.memory_profiling.none_conf.robot:
+      - CONFIG_ZPL_MEMORY_PROFILING_CONF_THREADING=n
+  sample.trace.memory_profiling.c_conf.robot:
     harness: robot
     harness_config:
-      robot_testsuite: memory_profiling_none_conf.robot
+      robot_testsuite: memory_profiling_c_conf.robot
     extra_configs:
-      - CONFIG_ZPL_MEMORY_USAGE_TRACE=n
-      - CONFIG_ZPL_RUNTIME_CONFIG_NONE=y
+      - CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING=y

@@ -9,6 +9,7 @@
 #include <zephyr/kernel.h>
 #include <stdlib.h>
 #include <zpl.h>
+#include <zpl/configuration.h>
 
 K_MEM_SLAB_DEFINE(test_mem_slab, 256, 32, 4);
 K_HEAP_DEFINE(test_k_heap, 1024);
@@ -29,6 +30,13 @@ void recursive_function(int counter)
 
 	sys_trace_named_event("counter", counter, 0);
 	if (counter > 0) {
+#ifdef CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING
+		if (counter == 4) {
+			ZPL_CONF_SET(memory_profiler, true);
+		} else if (counter == 2) {
+			ZPL_CONF_SET(memory_profiler, false);
+		}
+#endif /* CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING */
 		k_msleep(200);
 		recursive_function(counter - 1);
 	}
@@ -40,7 +48,15 @@ void recursive_function(int counter)
 
 int main(void)
 {
+#ifdef CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING
+	ZPL_CONF_SET(memory_profiler, false);
+#endif /* CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING */
 	zpl_init();
 	recursive_function(5);
+	k_msleep(5000);
+#ifdef CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING
+	ZPL_CONF_SET(memory_profiler, true);
+#endif /* CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING */
+	k_msleep(200);
 	return 0;
 }

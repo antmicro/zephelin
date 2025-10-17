@@ -1,0 +1,11 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config ZPL_SAMPLE_RUNTIME_CONF_PROFILING
+	bool "Runtime runtime profiling configuration from C API"
+	help
+	  Say 'Y' if you want to enable runtime configuration threading features.
+
+source "Kconfig.zephyr"
