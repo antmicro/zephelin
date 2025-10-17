@@ -12,6 +12,10 @@
 #include <zephyr/kernel.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* TVM events IDs */
 #define ZPL_TVM_BEGIN_EVENT 0xB0
@@ -33,5 +37,9 @@ typedef struct __packed {
 void zpl_emit_tvm_enter_event(uint64_t cycles, uint8_t op_idx, const char *tag);
 
 void zpl_emit_tvm_exit_event(uint64_t cycles, uint8_t op_idx, const char *tag);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ZPL_TVM_EVENTS_H_ */
