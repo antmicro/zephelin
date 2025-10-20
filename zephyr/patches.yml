@@ -157,7 +157,7 @@ patches:
     email: mtorhan@antmicro.com
     date: 2025-10-23
   - path: tflite-micro/0003-report-model-address-in-zpl_inference-events.patch
-    sha256sum: eb9d50ea93f2da2df23150450a1064f377344fc69a12ff9a7d7554901b0221e7
+    sha256sum: b8c520f58505ee9aa87955a5012d34e4ebe776d1253e68f8953564dcb1a2502c
     module: tflite-micro
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com

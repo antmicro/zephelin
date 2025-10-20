@@ -44,17 +44,7 @@ index bfd54ba7..42762cc8 100644
      MicroPrintf("Invoke() called after initialization failed\n");
 diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
 index e9a3de04..fa25b0d8 100644
---- a/tensorflow/lite/micro/micro_interpreter.h
-+++ b/tensorflow/lite/micro/micro_interpreter.h
-@@ -17,6 +17,7 @@ limitations under the License.
- 
- #include <cstddef>
- #include <cstdint>
-+#include "flatbuffers/base.h"
- 
- #ifdef USE_TFLM_COMPRESSION
- 
-@@ -215,11 +216,14 @@ class MicroInterpreter {
+@@ -215,11 +215,14 @@ class MicroInterpreter {
  
  #ifdef CONFIG_ZPL_INFERENCE_PROFILING
  struct ScopedMicroInterpreterInvoke {
