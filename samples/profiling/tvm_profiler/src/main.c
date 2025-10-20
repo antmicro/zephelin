@@ -34,7 +34,7 @@ int main(void)
 		return 1;
 	}
 
-	status = model_load(model_data_graph, model_data_graph_len, model_data_params, model_data_params_len);
+	status = model_load(model_data_graph, model_data_graph_len, model_data_params, model_data_params_len, NULL, NULL, false);
 	if (status) {
 		printk("Model load failed %d\n", status);
 		return 1;
@@ -42,13 +42,13 @@ int main(void)
 
 	for (int batch_index = 0; batch_index < N_SAMPLES; ++batch_index) {
 		rand_input(model_input);
-		status = model_load_input((uint8_t *)model_input, sizeof(float) * INPUT_SHAPE_0 * INPUT_SHAPE_1);
+		status = model_load_input((uint8_t *)model_input, sizeof(float) * INPUT_SHAPE_0 * INPUT_SHAPE_1, NULL, false);
 		if (status) {
 			printk("Model load input failed %d\n", status);
 			break;
 		}
 
-		status = model_run();
+		status = model_run(NULL);
 		if (status) {
 			printk("Model run failed %d\n", status);
 			break;

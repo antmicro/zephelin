@@ -55,7 +55,7 @@ int main(void)
 	}
 
 	status = model_load(model_data_graph, model_data_graph_len, model_data_params,
-			    model_data_params_len);
+			    model_data_params_len, NULL, NULL, false);
 	if (status) {
 		printk("Model load failed %d\n", status);
 		return 1;
@@ -70,19 +70,19 @@ int main(void)
 		read_input((float *)model_input);
 
 		status = model_load_input((uint8_t *)model_input,
-					  sizeof(float) * INPUT_SHAPE_0 * INPUT_SHAPE_1);
+					  sizeof(float) * INPUT_SHAPE_0 * INPUT_SHAPE_1, NULL, false);
 		if (status) {
 			printk("Model load input failed %d\n", status);
 			break;
 		}
 
-		status = model_run();
+		status = model_run(NULL);
 		if (status) {
 			printk("Model run failed %d\n", status);
 			break;
 		}
 
-		status = model_get_output((uint8_t *)model_output);
+		status = model_get_output((uint8_t *)model_output, NULL, false);
 		if (status) {
 			printk("Model get output failed %d\n", status);
 			break;
@@ -139,9 +139,9 @@ void read_accel_data(float *x, float *y, float *z)
 			break;
 		}
 
-		*x = sensor_value_to_float(&val[0]) / (2 * 9.807);
-		*y = sensor_value_to_float(&val[1]) / (2 * 9.807);
-		*z = sensor_value_to_float(&val[2]) / (2 * 9.807);
+		*x = sensor_value_to_float(&val[0]) / (2 * 9.807f);
+		*y = sensor_value_to_float(&val[1]) / (2 * 9.807f);
+		*z = sensor_value_to_float(&val[2]) / (2 * 9.807f);
 
 		printk("%s: ", accelerometer->name);
 		printk(
