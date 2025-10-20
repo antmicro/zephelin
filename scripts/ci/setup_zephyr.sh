@@ -13,4 +13,11 @@ west patch apply
 west zephyr-export
 west packages pip --install --ignore-venv-check
 
-west sdk install
+SDK_INSTALL_ARGS=""
+if [[ ! -z "${ZEPHYR_SDK_VERSION:-}" ]]; then
+  SDK_INSTALL_ARGS="--version ${ZEPHYR_SDK_VERSION}"
+fi
+
+if [[ -z "${ZEPHYR_SDK_SKIP_INSTALLATION:-}" ]]; then
+  west sdk install $SDK_INSTALL_ARGS
+fi
