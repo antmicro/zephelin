@@ -9,8 +9,11 @@
 
 #include <stdio.h>
 #include <zephyr/kernel.h>
+#include <zephyr/logging/log.h>
 #include <zephyr/tracing/tracing_format.h>
 
+
+LOG_MODULE_REGISTER(tvm_event, CONFIG_ZPL_LOG_LEVEL);
 
 void __zpl_emit_tvm_event(uint64_t cycles, uint8_t op_idx, const char *tag, bool is_exit)
 {
@@ -25,6 +28,13 @@ void __zpl_emit_tvm_event(uint64_t cycles, uint8_t op_idx, const char *tag, bool
 		.stream_id = 1,
 		.packet_size = sizeof(zpl_tvm_event_t) * 8,
 	};
+
+	if (strlen(tag) > CONFIG_ZPL_TRACE_CTF_MAX_LONG_STR_LEN) {
+		LOG_WRN_ONCE(
+		  "The tag is longer than max length available in CTF event, "
+		  "please consider increasing CONFIG_ZPL_TRACE_CTF_MAX_LONG_STR_LEN"
+		);
+	}
 	snprintf(&(zpl_tvm_enter_event.tag[0]), CONFIG_ZPL_TRACE_CTF_MAX_LONG_STR_LEN, "%s", tag);
 
 	tracing_format_raw_data(
