@@ -5,20 +5,39 @@
 
 """Tests TVM model data conversion/extraction functions."""
 
+from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import yaml
 from export_tvm_metadata import sample_tvm_metadata_export
-from extract_tvm_model_data import IRParser
+from extract_tvm_model_data import IRParser, get_graph_tvmgen_prefix
+from pytest import mark
+
+ZEPHELIN_ROOT = Path(__file__).parents[2]
+TVM_MODELS_DIR = ZEPHELIN_ROOT / "samples" / "common" / "tvm" / "model"
+TFLM_MODELS_DIR = ZEPHELIN_ROOT / "samples" / "common" / "tflm" / "model"
+
+
+@contextmanager
+def generate_metadata(model_path: Path | None = None, module_name: str | None = None):
+    """
+    Context manager creating temporary file with model's metadata.
+    """
+    with NamedTemporaryFile() as file:
+        sample_tvm_metadata_export(
+            tflite_model_path=model_path,
+            tvm_model_metadata_path=Path(file.name),
+            module_name=module_name,
+        )
+        yield Path(file.name)
 
 
 def test_metadata_export():
     """Tests metadata extraction and parsing."""
-    with NamedTemporaryFile() as file:
-        sample_tvm_metadata_export(tvm_model_metadata_path=Path(file.name))
-        params = IRParser(tvm_error_ok=False).parse_ops_parameters(Path(file.name))
+    with generate_metadata() as metadata:
+        params, module_prefix = IRParser(tvm_error_ok=False).parse_ops_parameters(metadata)
     assert params == {
-        "tvmgen_default_fused_reshape_1": {"allowzero": "0", "newshape": [-1, 16]},
         "tvmgen_default_fused_nn_dense": {"units": 4},
         "tvmgen_default_fused_nn_max_pool2d_1": {
             "ceil_mode": "0",
@@ -40,7 +59,6 @@ def test_metadata_export():
             "axis": "3",
         },
         "tvmgen_default_fused_nn_dense_nn_relu": {"units": 16},
-        "tvmgen_default_fused_reshape": {"allowzero": "0", "newshape": [1, 224]},
         "tvmgen_default_fused_nn_softmax": {"axis": "-1"},
         "tvmgen_default_fused_nn_max_pool2d": {
             "ceil_mode": "0",
@@ -62,3 +80,43 @@ def test_metadata_export():
             "axis": "3",
         },
     }
+    assert module_prefix == "tvmgen_default_fused_nn_"
+
+
+def test_magic_wand_module_name():
+    """
+    Tests module name extraction with custom value.
+    """
+    with generate_metadata(TFLM_MODELS_DIR / "magic-wand.tflite", "test") as metadata:
+        _, module_prefix = IRParser(tvm_error_ok=False).parse_ops_parameters(metadata)
+    assert module_prefix == "tvmgen_test_fused_nn_"
+
+
+@mark.parametrize(
+    "graph_file,metadata_file,module_name",
+    [
+        (
+            TVM_MODELS_DIR / "magic-wand-graph.json",
+            TVM_MODELS_DIR / "magic-wand-metadata.json",
+            "tvmgen_default_fused_nn_",
+        ),
+        (
+            TVM_MODELS_DIR / "sine-graph.json",
+            TVM_MODELS_DIR / "sine-metadata.json",
+            "tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast",
+        ),
+    ],
+)
+def test_graph_metadata_module_name(graph_file: Path, metadata_file: Path, module_name: str):
+    """
+    Tests whether module names extracted from graph and metadata files are the same
+    and matches the true value.
+    """
+    _, metadata_module_prefix = IRParser(tvm_error_ok=False).parse_ops_parameters(metadata_file)
+
+    with graph_file.open() as model_graph_f:
+        model_graph = yaml.safe_load(model_graph_f)
+    graph_module_prefix = get_graph_tvmgen_prefix(model_graph)
+
+    assert graph_module_prefix == metadata_module_prefix
+    assert graph_module_prefix == module_name
