@@ -1,0 +1,40 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: tvm_multi_model
+common:
+  tags: profiling
+  min_ram: 110
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
+tests:
+  sample.trace.tvm_multi_model.plaintext:
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "zpl_inference_enter: model_id"
+        - "zpl_tvm_enter_event: op_idx=3 tag=tvmgen_default_fused_nn_conv2d_add_nn_relu"
+        - "zpl_tvm_exit_event: op_idx=3 tag=tvmgen_default_fused_nn_conv2d_add_nn_relu"
+        - "zpl_inference_exit: model_id"
+        - "zpl_inference_enter: model_id"
+        - "zpl_tvm_enter_event: op_idx=6 tag=tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast"
+        - "zpl_tvm_exit_event: op_idx=6 tag=tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast"
+        - "zpl_inference_exit: model_id"
+  sample.trace.tvm_multi_model.plaintext.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: tvm_multi_model_plaintext.robot
+  sample.trace.tvm_multi_model.ctf.robot:
+    extra_configs:
+      - CONFIG_TRACING_BUFFER_SIZE=4096
+      - CONFIG_ZPL_TRACE_FORMAT_CTF=y
+      - CONFIG_BOOT_BANNER=n
+      - CONFIG_PRINTK=n
+      - CONFIG_LOG=n
+    harness: robot
+    harness_config:
+      robot_testsuite: tvm_multi_model_ctf.robot
