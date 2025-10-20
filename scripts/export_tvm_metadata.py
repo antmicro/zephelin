@@ -43,14 +43,18 @@ def sample_tflite_model() -> bytes:
     return tf.lite.TFLiteConverter.from_keras_model(model).convert()
 
 
-def sample_tvm_compile(tflite_model: tflite.Model) -> GraphExecutorFactoryModule:
+def sample_tvm_compile(
+    tflite_model: tflite.Model, module_name: str | None = None
+) -> GraphExecutorFactoryModule:
     """
     Compiles TFLite model with default parameters.
     """
     import tvm.relay
 
     mod, params = tvm.relay.frontend.from_tflite(tflite_model)
-    return tvm.relay.build(mod, params=params, target="c")
+    return tvm.relay.build(
+        mod, params=params, target="c", mod_name=module_name if module_name else "default"
+    )
 
 
 def sample_tvm_metadata_export(
@@ -58,6 +62,7 @@ def sample_tvm_metadata_export(
     tvm_model_path: Path | None = None,
     tvm_model_graph_path: Path | None = None,
     tvm_model_metadata_path: Path | None = None,
+    module_name: str | None = None,
 ):
     """
     Builds TVM model from TFLite one and extracts metadata.
@@ -72,6 +77,8 @@ def sample_tvm_metadata_export(
         Path to the TVM model graph to extract
     tvm_model_metadata_path : Path | None
         Path to the model metadata to extract
+    module_name : str | None
+        The name of the generated module, changes the prefix of received functions
     """
     import tflite
     import tvm.ir
@@ -86,7 +93,7 @@ def sample_tvm_metadata_export(
     tflite_model = tflite.Model.GetRootAsModel(buf)
 
     # Compile and extract metadata
-    module = sample_tvm_compile(tflite_model)
+    module = sample_tvm_compile(tflite_model, module_name)
     metadata = module.function_metadata
 
     # Optionally, save TVM model
@@ -131,6 +138,13 @@ if __name__ == "__main__":
         type=Path,
         help="Path to the model metadata to extract",
     )
+    parser.add_argument(
+        "--tvm-module-name",
+        type=str,
+        default=None,
+        help="Name of TVM module, "
+        "it has to match with the name used to generate functions representing the model",
+    )
 
     args = parser.parse_args()
 
@@ -139,4 +153,5 @@ if __name__ == "__main__":
         tvm_model_path=args.tvm_model_path,
         tvm_model_graph_path=args.tvm_model_graph_path,
         tvm_model_metadata_path=args.tvm_model_metadata_path,
+        module_name=args.tvm_module_name,
     )
