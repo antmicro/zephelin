@@ -199,6 +199,11 @@ Otherwise, users will have to provide them manually during conversion.
 For TFLM, it is done by finding model data in Zephyr ELF file and offsetting it by flash region address.
 As this method does not work when model data are not present in the flash, there is also an additional parameter to provide the IDs manually - see `--tflm-model-ids` of `west zpl-prepare-trace` command.
 
+On the other hand, models can also be differentiate based on events' arguments.
+For microTVM, it can be achieved with module name included in `tag` argument of [`MODEL` event](model-layer-event) - each function starting with `tvmgen_{MODULE_NAME}_`.
+Based on that, [`INFERENCE` events](model-inference-event) are updated to contain model ID associated with the module name (see `tvm_recalculate_model_numbers` in {zpl_repo}`scripts/extract_tvm_model_data.py`).
+Moreover, in the same way, model's ID can be matched to model's metadata.
+
 :::{only} html and trace_viewer
 With implementation like this, the Trace Viewer will have enabled all runtime-specific visualizations, like in the <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json">TFLM runtime example</a>.
 :::
