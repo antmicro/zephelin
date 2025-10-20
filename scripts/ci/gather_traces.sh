@@ -48,3 +48,13 @@ python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
 west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_multi_model.json \
   --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite \
     ./samples/common/tflm/model/sine.tflite
+
+### TVM multi model
+west build -p -b $BOARD samples/profiling/tvm_multi_model -- ${CTF_CONFS}
+python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
+west zpl-prepare-trace ./channel0_0 -o ./tef_tvm_multi_model.json \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z]+_fused_' \
+  --tvm-model-paths ./samples/common/tvm/model/magic-wand-graph.json \
+    ./samples/common/tvm/model/sine-graph.json \
+  --tvm-model-metadata-paths ./samples/common/tvm/model/magic-wand-metadata.json \
+    ./samples/common/tvm/model/sine-metadata.json
