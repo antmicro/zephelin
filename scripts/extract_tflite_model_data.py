@@ -441,7 +441,7 @@ def extract_model_data(
 
         model_data["ops"].append(op_data)
 
-    if model_id:
+    if model_id is not None:
         model_data["id"] = model_id
     elif zephyr_elf and zephyr_elf.exists():
         addr = deduce_model_addr(model_path, zephyr_base, zephyr_elf)

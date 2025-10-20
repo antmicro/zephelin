@@ -195,22 +195,40 @@ class IRParser:
             serialized[name] = self.ir_to_JSON_serializable(value)
         return serialized
 
-    def parse_ops_parameters(self, model_metadata_path: Path) -> dict:
-        """Loads TVM IR, and parses it, and extracts operators parameters."""
+    def parse_ops_parameters(self, model_metadata_path: Path) -> tuple[dict, str | None]:
+        """
+        Loads TVM IR, parses it, and extracts operators parameters.
+
+        Parameters
+        ----------
+        model_metadata_path : Path
+            The path to file with model's metadata.
+
+        Returns
+        -------
+        dict
+            Extracted operators parameters
+        str | None
+            Common prefix of TVM functions or None
+        """
         import tvm.ir
 
         if not model_metadata_path.exists():
             raise ValueError(f"Provided model metadata path does not exist {model_metadata_path}")
 
         ops_parameters = {}
+        func_names = set()
         try:
             data = json.loads(model_metadata_path.read_text())
             function_metadata = tvm.ir.load_json(json.dumps(data))
 
             for op_name, op in function_metadata.items():
-                if op_name == "__tvm_main__":
+                # Skip generic tvm_main function
+                # and all reshape functions as they are the same as __nop
+                if op_name == "__tvm_main__" or re.match(r".*_reshape(?:_[0-9]+)?", op_name):
                     continue
 
+                func_names.add(op_name)
                 for attrs in self.find_parameters(op.relay_primfuncs.items()):
                     ops_parameters[op_name] = ops_parameters.get(op_name, {})
                     ops_parameters[op_name] |= self.convert_attrs(attrs)
@@ -219,14 +237,161 @@ class IRParser:
                 raise
             print(f"Failed to analyze model metadata: {ex}")
 
-        return ops_parameters
+        return ops_parameters, get_common_prefix(list(func_names))
+
+
+def common_prefix_bisect(a: str, b: str) -> str | None:
+    """
+    Bisects two strings in order to find common prefix.
+
+    Parameters
+    ----------
+    a : str
+        First string
+    b : str
+        Second string
+
+    Returns
+    -------
+    str | None
+        Found common prefix or None
+    """
+    lo = 0
+    hi = min(len(a), len(b)) + 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if b[:mid] != a[:mid]:
+            hi = mid
+        else:
+            lo = mid + 1
+    return a[: lo - 1] if lo >= 1 else None
+
+
+def get_common_prefix(func_names: list[str]) -> str | None:
+    """
+    Updates common prefix with a new string.
+
+    Parameters
+    ----------
+    func_names : list[str]
+        List of strings from which common prefix will be find
+
+    Returns
+    -------
+    str | None
+        Found common prefix
+    """
+    common_prefix = None
+    if len(func_names) >= 2:
+        common_prefix = common_prefix_bisect(func_names[0], func_names[1])
+        for func_name in func_names[2:]:
+            if func_name.startswith(common_prefix):
+                continue
+            ln = min(len(common_prefix), len(func_name))
+            common_prefix = common_prefix_bisect(common_prefix[:ln], func_name[:ln])
+            if common_prefix is None:
+                break
+    elif len(func_names) == 1:
+        common_prefix = func_names[0]
+    else:
+        print("Missing tvm_op functions, common prefix will not be deduced")
+    return common_prefix
+
+
+def get_graph_tvmgen_prefix(model_graph: dict) -> str | None:
+    """
+    Calculates common prefix of tvmgen function from model graph file.
+
+    Parameters
+    ----------
+    model_graph : dict
+        The JSON representation of model's graph
+
+    Returns
+    -------
+    str | None
+        The common prefix or None
+    """
+    op_nodes = [n for n in model_graph["nodes"] if n["op"] == "tvm_op"]
+    op_func_name = [n["attrs"]["func_name"] for n in op_nodes if n["attrs"]["func_name"] != "__nop"]
+    return get_common_prefix(op_func_name)
+
+
+def tvm_recalculate_model_numbers(tef_trace: list[dict]) -> tuple[list[dict], dict[str, int]]:
+    """
+    Adjusts names and arguments of INFERENCE and MODEL events based on used functions' prefixes.
+
+    Parameters
+    ----------
+    tef_trace : list[dict]
+        The trace in Trace Event Format
+
+    Returns
+    -------
+    list[dict]
+        Updated TEF trace
+    dict[str, int]
+        Mapping of tvmgen prefix to the ID of model
+    """
+    from prepare_trace import INFERENCE_EVENT_NAME, MODEL_EVENT_NAME, TVMGEN_PREFIX_ARG
+
+    thread_inference_start = {}
+    prefix_to_model_number = {}
+    for i, event in enumerate(tef_trace):
+        if not event["name"].startswith(INFERENCE_EVENT_NAME):
+            continue
+        # Processing INFERENCE::MODEL events
+        thread_id = event["tid"]
+        # Remember beginning of inference
+        if event["ph"] == "B":
+            thread_inference_start[thread_id] = i
+            continue
+        if event["ph"] != "E":
+            continue
+        # Processing INFERENCE::MODEL end events
+        if thread_inference_start.get(thread_id, None) is None:
+            continue
+        common_prefix = event["args"].get(TVMGEN_PREFIX_ARG, None)
+        if common_prefix is None:
+            thread_inference_start[thread_id] = None
+            continue
+        if common_prefix not in prefix_to_model_number:
+            # When inference was interrupted common_prefix can be too long,
+            # therefore we need to check, whether it is not one of the already existing ones
+            for prefix in prefix_to_model_number:
+                if common_prefix.startswith(prefix):
+                    common_prefix = prefix
+                    break
+        if common_prefix not in prefix_to_model_number:
+            prefix_to_model_number[common_prefix] = len(prefix_to_model_number)
+        model_num = prefix_to_model_number[common_prefix]
+        inference_start_id = thread_inference_start[thread_id]
+        # Update model events names to contain new model number
+        for model_event in [
+            e
+            for e in tef_trace[inference_start_id + 1 : i]
+            if e["name"].startswith(MODEL_EVENT_NAME) and e["tid"] == thread_id
+        ]:
+            model_event["name"] = re.sub(
+                rf"{MODEL_EVENT_NAME}[0-9]*::",
+                f"{MODEL_EVENT_NAME}{model_num}::",
+                model_event["name"],
+            )
+        # Update inference events and its model ids
+        for e in (event, tef_trace[thread_inference_start[thread_id]]):
+            e["name"] = f"{INFERENCE_EVENT_NAME}{model_num}"
+            e["args"]["model_id"] = model_num
+        del event["args"][TVMGEN_PREFIX_ARG]
+        thread_inference_start[thread_id] = None
+    return tef_trace, prefix_to_model_number
 
 
 def extract_model_data(
     model_graph_path: Path,
-    model_metadata_path: Path | None = None,
+    prefix_to_model_metadata: dict[str, dict] | None = None,
     model_op_remove_prefix: re.Pattern = DEFAULT_OP_PREFIX_RE,
     model_op_remove_suffix: re.Pattern = DEFAULT_OP_SUFFIX_RE,
+    prefix_to_model_id: dict[str, int] | None = None,
 ) -> dict:
     """
     Extracts model hyperparameters from model graph file.
@@ -235,12 +400,14 @@ def extract_model_data(
     ----------
     model_graph_path : Path
         Path to the model graph.
-    model_metadata_path : Path | None
-        Path to the model metadata, which contains operator parameters.
+    prefix_to_model_metadata : dict[str, dict] | None
+        Mapping of functions' common prefix to model metadata.
     model_op_remove_prefix : re.Pattern
         Pattern removing TVM operator prefix.
     model_op_remove_suffix : re.Pattern
         Pattern removing TVM operator type suffix.
+    prefix_to_model_id : dict[str, int] | None
+        Mapping of common prefix to model's ID.
 
     Returns
     -------
@@ -252,6 +419,15 @@ def extract_model_data(
 
     with open(model_graph_path) as model_graph_f:
         model_graph = yaml.safe_load(model_graph_f)
+
+    model_id = None
+    tvmgen_prefix = get_graph_tvmgen_prefix(model_graph)
+    if prefix_to_model_id and tvmgen_prefix not in prefix_to_model_id:
+        print(f"Prefix {tvmgen_prefix} not in map")
+    elif not prefix_to_model_id:
+        print("Missing prefix_to_model_id, metadata may not be matched properly with the model")
+    else:
+        model_id = prefix_to_model_id[tvmgen_prefix]
 
     model_data = dict()
 
@@ -301,12 +477,7 @@ def extract_model_data(
         def set_dtype_size(data: dict):
             pass
 
-    ops_parameters = {}
-    if model_metadata_path is not None:
-        try:
-            ops_parameters = IRParser(tvm_error_ok=True).parse_ops_parameters(model_metadata_path)
-        except ModuleNotFoundError:
-            print("TVM python package is not installed, skipping metadata parsing")
+    ops_parameters = prefix_to_model_metadata.get(tvmgen_prefix, {})
 
     model_data["tensors"] = []
     model_data["ops"] = []
@@ -347,7 +518,65 @@ def extract_model_data(
 
             model_data["ops"].append(op_data)
 
+    if model_id is not None:
+        model_data["id"] = model_id
+
     return model_data
+
+
+def extract_models_data(
+    model_graph_paths: list[Path],
+    model_metadata_paths: list[Path] | None = None,
+    model_op_remove_prefix: re.Pattern = DEFAULT_OP_PREFIX_RE,
+    model_op_remove_suffix: re.Pattern = DEFAULT_OP_SUFFIX_RE,
+    prefix_to_model_id: dict[str, int] | None = None,
+) -> list[dict]:
+    """
+    Extracts model hyperparameters from model graph file.
+
+    Parameters
+    ----------
+    model_graph_paths : list[Path]
+        List with path to the model graph.
+    model_metadata_paths : list[Path] | None
+        List with path to the model metadata.
+    model_op_remove_prefix : re.Pattern
+        Pattern removing TVM operator prefix.
+    model_op_remove_suffix : re.Pattern
+        Pattern removing TVM operator type suffix.
+    prefix_to_model_id : dict[str, int] | None
+        Mapping of common prefix to model's ID.
+
+    Returns
+    -------
+    list[dict]
+        List with model data.
+    """
+    prefix_to_metadata = {}
+
+    for model_metadata_path in model_metadata_paths or []:
+        ops_parameters = {}
+        tvmgen_prefix = None
+        if model_metadata_path is not None:
+            try:
+                ops_parameters, tvmgen_prefix = IRParser(tvm_error_ok=True).parse_ops_parameters(
+                    model_metadata_path
+                )
+            except ModuleNotFoundError:
+                print("TVM python package is not installed, skipping metadata parsing")
+        if tvmgen_prefix in prefix_to_metadata:
+            print(f"Prefix {tvmgen_prefix} overlaps for metadata")
+        prefix_to_metadata[tvmgen_prefix] = ops_parameters
+    return [
+        extract_model_data(
+            model_path,
+            prefix_to_metadata,
+            model_op_remove_prefix,
+            model_op_remove_suffix,
+            prefix_to_model_id,
+        )
+        for model_path in model_graph_paths
+    ]
 
 
 def argparse_regex(value: str) -> re.Pattern:

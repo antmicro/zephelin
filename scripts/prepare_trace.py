@@ -37,6 +37,14 @@ if TYPE_CHECKING:
     import bt2
 
 
+# Name of TEF Model event
+MODEL_EVENT_NAME = "MODEL"
+# Name of TEF Inference event
+INFERENCE_EVENT_NAME = "INFERENCE::MODEL"
+# Key of the argument used to store tvmgen functions prefix
+TVMGEN_PREFIX_ARG = "_tvmgen_prefix"
+# Whether TVM event were detected in a trace
+TVM_EVENTS = False
 # Mapping of models IDs to consecustive numbers
 MODEL_IDS_MAPPING = {}
 
@@ -66,6 +74,8 @@ def create_custom_events(
     """
     # The mapping of thread ID to model ID
     ACTIVE_INFERENCES = {}
+    # The mapping of currently processed TVM events, grouped by thread ID
+    CURRENT_TVM_INFERENCE = {}
 
     def tflm_op_name(msg: "bt2._EventMessageConst") -> str:
         fields = msg.event.payload_field
@@ -92,10 +102,19 @@ def create_custom_events(
         """
         Generates suffix for model event name.
         """
+        nonlocal CURRENT_TVM_INFERENCE
+        global TVM_EVENTS
+
+        TVM_EVENTS = True
         fields = msg.event.payload_field
         if not fields:
             return ""
         name = str(fields.get("tag", ""))
+        if msg.event.name.endswith("_enter"):
+            thread_id = int(str(fields.get("thread_id", None)))
+            if thread_id not in CURRENT_TVM_INFERENCE:
+                CURRENT_TVM_INFERENCE[thread_id] = []
+            CURRENT_TVM_INFERENCE[thread_id].append(name)
         name = tvm_op_remove_prefix.sub("", name)
 
         return name
@@ -116,7 +135,7 @@ def create_custom_events(
 
         return arg_func
 
-    def inference_model_number(msg: "bt2._EventMessageConst") -> str:
+    def inference_model_number(msg: bt2._EventMessageConst) -> str:
         """
         Generates suffix for inference event.
         """
@@ -134,16 +153,34 @@ def create_custom_events(
             ACTIVE_INFERENCES[thread_id] = None
         return str(MODEL_IDS_MAPPING[model_id])
 
+    def inference_additional_args(msg: bt2._EventMessageConst) -> dict:
+        nonlocal CURRENT_TVM_INFERENCE
+
+        fields = msg.event.payload_field
+        if not fields:
+            return {}
+        thread_id = int(fields.get("thread_id", None))
+        if msg.event.name.endswith("_enter"):
+            return {}
+        if func_names := CURRENT_TVM_INFERENCE.get(thread_id, []):
+            from extract_tvm_model_data import get_common_prefix
+
+            common_prefix = get_common_prefix(func_names)
+            CURRENT_TVM_INFERENCE[thread_id] = []
+            if common_prefix:
+                return {TVMGEN_PREFIX_ARG: common_prefix}
+        return {}
+
     return [
         CustomEventDefinition(
-            "MODEL",
+            MODEL_EVENT_NAME,
             "zpl_tflm_enter",
             "zpl_tflm_exit",
             tflm_op_name,
             lambda _: {"runtime": "TFLite Micro"},
         ),
         CustomEventDefinition(
-            "MODEL::",
+            f"{MODEL_EVENT_NAME}::",
             "zpl_tvm_enter",
             "zpl_tvm_exit",
             tvm_op_name,
@@ -161,11 +198,11 @@ def create_custom_events(
             None,
         ),
         CustomEventDefinition(
-            "INFERENCE::MODEL",
+            INFERENCE_EVENT_NAME,
             "zpl_inference_enter",
             "zpl_inference_exit",
             inference_model_number if multi_model_trace else lambda _: "",
-            None,
+            inference_additional_args,
         ),
     ]
 
@@ -302,14 +339,16 @@ def setup_parser(parser: argparse.ArgumentParser):
         "as --tflm-model-paths, Model IDs are printed right before the inference",
     )
     parser.add_argument(
-        "--tvm-model-path",
+        "--tvm-model-paths",
         type=Path,
+        nargs="+",
         help="Path to the TVM graph file, extracted information will be appedened "
         "to the final trace as a metadata",
     )
     parser.add_argument(
-        "--tvm-model-metadata-path",
+        "--tvm-model-metadata-paths",
         type=Path,
+        nargs="+",
         help="Path to the TVM metadata file, extracted information will be appedened "
         "to the final trace as a metadata",
     )
@@ -435,6 +474,14 @@ def prepare(args: argparse.Namespace):
             )
             tef_trace, thread_name = results.tef, results.thread_names
 
+    # If TVM inference was detected, scan through trace and recalculate model numbers
+    # based on common prefix of used TVM functions
+    tvm_prefix_to_model_id = None
+    if TVM_EVENTS:
+        from extract_tvm_model_data import tvm_recalculate_model_numbers
+
+        tef_trace, tvm_prefix_to_model_id = tvm_recalculate_model_numbers(tef_trace)
+
     if thread_name:
         # Custom metadata event supported by Speedscope to associate ID with thread name
         tef_trace += [
@@ -477,18 +524,17 @@ def prepare(args: argparse.Namespace):
             add_model_metadata(tef_trace, metadata)
 
     # Metadata about TVM model
-    if args.tvm_model_path is not None:
-        from extract_tvm_model_data import extract_model_data
+    if args.tvm_model_paths is not None:
+        from extract_tvm_model_data import extract_models_data
 
-        add_model_metadata(
-            tef_trace,
-            extract_model_data(
-                args.tvm_model_path,
-                args.tvm_model_metadata_path,
-                args.tvm_model_op_remove_prefix,
-                args.tvm_model_op_remove_suffix,
-            ),
-        )
+        for metadata in extract_models_data(
+            args.tvm_model_paths,
+            args.tvm_model_metadata_paths,
+            args.tvm_model_op_remove_prefix,
+            args.tvm_model_op_remove_suffix,
+            tvm_prefix_to_model_id,
+        ):
+            add_model_metadata(tef_trace, metadata)
 
     # Metadata with memory symbols
     if REGION_SIZES:
