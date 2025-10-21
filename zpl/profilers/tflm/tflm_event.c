@@ -18,6 +18,7 @@ void __zpl_emit_tflm_event(
 	zpl_tflm_event_t zpl_tflm_exit_event = {
 		.timestamp = k_cyc_to_ns_floor64(cycles),
 		.id = is_exit ? ZPL_TFLM_EXIT_EVENT : ZPL_TFLM_ENTER_EVENT,
+		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)k_current_get(),
 		.subgraph_idx = subgraph_idx,
 		.op_idx = op_idx,

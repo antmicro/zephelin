@@ -19,6 +19,7 @@ void zpl_inference_enter(uint32_t model_id)
 	zpl_inference_event_t zpl_inference_enter_event = {
 		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
 		.id = ZPL_INFERENCE_ENTER_EVENT,
+		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)k_current_get(),
 		.stream_id = 0,
 		.packet_size = sizeof(zpl_inference_event_t) * 8,
@@ -41,6 +42,7 @@ void zpl_inference_exit(uint32_t model_id)
 	zpl_inference_event_t zpl_inference_exit_event = {
 		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
 		.id = ZPL_INFERENCE_EXIT_EVENT,
+		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)k_current_get(),
 		.stream_id = 0,
 		.packet_size = sizeof(zpl_inference_event_t) * 8,

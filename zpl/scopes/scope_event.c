@@ -27,13 +27,14 @@ void zpl_emit_scope_event(char *scope_name, uint8_t is_exit)
 	uint64_t cycles = soft_cycle_get_64();
 
 	zpl_scope_event_t scope_event = {
-		.id = (is_exit) ? ZPL_SCOPE_EXIT_EVENT : ZPL_SCOPE_ENTER_EVENT,
-		.cycles = cycles,
 		.timestamp = k_cyc_to_ns_floor64(cycles),
+		.id = (is_exit) ? ZPL_SCOPE_EXIT_EVENT : ZPL_SCOPE_ENTER_EVENT,
+		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)k_current_get(),
 		.scope_name_len = ZPL_MAX_SCOPE_NAME_LENGTH + 1,
 		.stream_id = 0,
 		.packet_size = sizeof(zpl_scope_event_t) * 8,
+		.cycles = cycles,
 	};
 	strncpy((char *)&scope_event.scope_name, scope_name, ZPL_MAX_SCOPE_NAME_LENGTH);
 	tracing_format_raw_data((uint8_t *)&scope_event, sizeof(zpl_scope_event_t));

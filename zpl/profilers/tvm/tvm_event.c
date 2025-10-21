@@ -17,9 +17,10 @@ void __zpl_emit_tvm_event(uint64_t cycles, uint8_t op_idx, const char *tag, bool
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	zpl_tvm_event_t zpl_tvm_enter_event = {
 		.timestamp = k_cyc_to_ns_floor64(cycles),
-		.op_idx = op_idx,
 		.id = is_exit ? ZPL_TVM_END_EVENT : ZPL_TVM_BEGIN_EVENT,
+		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)k_current_get(),
+		.op_idx = op_idx,
 		.tag_len = CONFIG_ZPL_TRACE_CTF_MAX_LONG_STR_LEN,
 		.stream_id = 1,
 		.packet_size = sizeof(zpl_tvm_event_t) * 8,

@@ -18,6 +18,7 @@ event {
 	name = zpl_tflm_enter;
 	id = 0xA0;
 	fields := struct {
+		uint8_t cpu_id;
 		uint32_t thread_id;
 		uint16_t subgraph_idx;
 		uint16_t op_idx;
@@ -33,6 +34,7 @@ event {
 	name = zpl_tflm_exit;
 	id = 0xA1;
 	fields := struct {
+		uint8_t cpu_id;
 		uint32_t thread_id;
 		uint16_t subgraph_idx;
 		uint16_t op_idx;
@@ -55,6 +57,7 @@ event {
 	name = zpl_tvm_enter;
 	id = 0xB0;
 	fields := struct {
+		uint8_t cpu_id;
 		uint32_t thread_id;
 		uint8_t op_idx;
 		uint16_t tag_len;
@@ -67,6 +70,7 @@ event {
 	name = zpl_tvm_exit;
 	id = 0xB1;
 	fields := struct {
+		uint8_t cpu_id;
 		uint32_t thread_id;
 		uint8_t op_idx;
 		uint16_t tag_len;
@@ -79,6 +83,7 @@ event {
 	name = zpl_inference_enter;
 	id = 0xD0;
 	fields := struct {
+		uint8_t cpu_id;
 		uint32_t thread_id;
 		uint32_t model_id;
 	};
@@ -89,6 +94,7 @@ event {
 	name = zpl_inference_exit;
 	id = 0xD1;
 	fields := struct {
+		uint8_t cpu_id;
 		uint32_t thread_id;
 		uint32_t model_id;
 	};
@@ -112,6 +118,7 @@ event {
 	name = zpl_cpu_load_event;
 	id = 0xC0;
 	fields := struct {
+		uint8_t cpu_id;
 		uint16_t cpu_load;
 	};
 };
@@ -131,10 +138,11 @@ event {
 	name = zpl_scope_enter;
 	id = 0xEF;
 	fields := struct {
+		uint8_t cpu_id;
+		uint32_t thread_id;
 		uint16_t scope_name_len;
 		ctf_bounded_string_t scope_name[scope_name_len];
 		uint64_t cycles;
-		uint32_t thread_id;
 	};
 };
 
@@ -143,9 +151,10 @@ event {
 	name = zpl_scope_exit;
 	id = 0xF0;
 	fields := struct {
+		uint8_t cpu_id;
+		uint32_t thread_id;
 		uint16_t scope_name_len;
 		ctf_bounded_string_t scope_name[scope_name_len];
 		uint64_t cycles;
-		uint32_t thread_id;
 	};
 };

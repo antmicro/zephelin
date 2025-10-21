@@ -22,6 +22,7 @@ void zpl_emit_cpu_load_event(void)
 	zpl_cpu_load_event_t zpl_cpu_load_event = {
 		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
 		.id = ZPL_CPU_LOAD_EVENT,
+		.cpu_id = arch_curr_cpu()->id,
 		.cpu_load = cpu_load,
 		.stream_id = 0,
 		.packet_size = sizeof(zpl_cpu_load_event_t) * 8,

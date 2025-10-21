@@ -33,6 +33,7 @@ typedef struct __packed {
 	uint16_t packet_size;
 	uint64_t timestamp;
 	uint8_t id;
+	uint8_t cpu_id;
 	uint32_t thread_id;
 	uint32_t model_id;
 } zpl_inference_event_t;

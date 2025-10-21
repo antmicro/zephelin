@@ -25,10 +25,11 @@ typedef struct __packed {
 	uint16_t packet_size;
 	uint64_t timestamp;
 	uint8_t id;
+	uint8_t cpu_id;
+	uint32_t thread_id;
 	uint16_t scope_name_len;
 	uint8_t scope_name[ZPL_MAX_SCOPE_NAME_LENGTH + 1];
 	uint64_t cycles;
-	uint32_t thread_id;
 } zpl_scope_event_t;
 
 void zpl_emit_scope_event(char *scope_name, uint8_t is_exit);
