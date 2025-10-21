@@ -287,7 +287,7 @@ def ctf_to_tef(
     converted = []
 
     thread_name = {}
-    current_thread = 0  # By default use 0 as main thread ID
+    current_thread = defaultdict(int)
     msg_it = bt2.TraceCollectionMessageIterator(path)
     # Try to get main thread ID
     while True:
@@ -304,7 +304,7 @@ def ctf_to_tef(
         if not msg.event.name.startswith("thread_") or fields.get("name", None) != "main":
             continue
         thread_name["main"] = int(fields.get("thread_id", 0))
-        current_thread = thread_name["main"]
+        current_thread[msg.event.payload_field["cpu_id"]] = thread_name["main"]
         break
     # Restart the iterator
     msg_it = bt2.TraceCollectionMessageIterator(path)
@@ -320,7 +320,9 @@ def ctf_to_tef(
         if not hasattr(msg, "event"):
             continue
         fields = msg.event.payload_field if msg.event.payload_field else {}
-        thread_id = int(fields.get("thread_id", current_thread))
+        thread_id = int(
+            fields.get("thread_id", current_thread[msg.event.payload_field.get("cpu_id", -1)])
+        )
         # Process custom metadata
         if msg.event.name in custom_metadata:
             m = custom_metadata[msg.event.name]
@@ -392,12 +394,17 @@ def ctf_to_tef(
             thread_name[str(fields["name"])] = int(fields["thread_id"])
         # Check whether thread has changed
         if msg.event.name == "thread_switched_in":
-            current_thread = thread_id = int(fields["thread_id"])
+            current_thread[msg.event.payload_field["cpu_id"]] = thread_id = int(fields["thread_id"])
         # Add instantaneous event representation
         converted += [
             emit_event(msg, msg.event.name, thread_id, EventPhase.BEGIN, skip_args=skip_args),
             emit_event(
-                msg, msg.event.name, thread_id, EventPhase.END, INSTANT_EVENT_LENGTH, skip_args
+                msg,
+                msg.event.name,
+                thread_id,
+                EventPhase.END,
+                INSTANT_EVENT_LENGTH,
+                skip_args,
             ),
         ]
     return CTFConversionResult(converted, thread_name)
@@ -462,7 +469,24 @@ def prepare_dir(trace: Path, zephyr_base: Path | None = None):
         tmp_dir = Path(tmp_dir)
 
         tmp_ctf = tmp_dir / trace.name
-        copy2(trace, tmp_ctf)
+        with open(trace, "rb") as trace_in_f, open(tmp_ctf, "wb") as trace_out_f:
+            # iterate over packets to remove last, partially written packet
+            while True:
+                stream_id = trace_in_f.read(2)
+                packet_size = trace_in_f.read(2)
+                packet_size_bytes = int.from_bytes(packet_size, "little", signed=False) // 8
+                if packet_size_bytes <= 4:
+                    break
+
+                packet = trace_in_f.read(packet_size_bytes - 4)
+
+                if len(packet) != packet_size_bytes - 4:
+                    # partially written packet detected
+                    break
+
+                trace_out_f.write(stream_id)
+                trace_out_f.write(packet_size)
+                trace_out_f.write(packet)
 
         base = Path(__file__).parent.parent
         zephyr_base = zephyr_base if zephyr_base else base.parent / "zephyr"
