@@ -1,0 +1,21 @@
+/ {
+	chosen {
+		zephyr,console = &uart0;
+		zephyr,tracing-uart = &uart1;
+	};
+
+	cpus {
+		cpu@1 {
+			status = "okay";
+		};
+		cpu@2 {
+			status = "okay";
+		};
+		cpu@3 {
+			status = "okay";
+		};
+		cpu@4 {
+			status = "okay";
+		};
+	};
+};

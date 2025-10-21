@@ -1,0 +1,16 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: smp
+common:
+  tags: profiling
+  platform_allow:
+    - mpfs_icicle/polarfire/u54/smp
+tests:
+  sample.trace.smp.ctf.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: smp_ctf.robot
