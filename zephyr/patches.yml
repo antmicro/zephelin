@@ -144,6 +144,12 @@ patches:
     author: Mikołaj Klikowicz
     email: mklikowicz@antmicro.com
     date: 2025-09-12
+  - path: zephyr/ctf/0003-subsys-tracing-ctf-add-CPU-ID-to-CTF-events.patch
+    sha256sum: 1478037c388cb57b84f33b801dba49e8196dee4f95af42a36235f0b8fd574eb2
+    module: zephyr
+    author: Maciej Torhan
+    email: mtorhan@antmicro.com
+    date: 2025-10-23
   - path: tflite-micro/0003-report-model-address-in-zpl_inference-events.patch
     sha256sum: eb9d50ea93f2da2df23150450a1064f377344fc69a12ff9a7d7554901b0221e7
     module: tflite-micro
