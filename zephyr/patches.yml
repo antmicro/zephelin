@@ -24,6 +24,12 @@ patches:
     author: Maciej Torhan
     email: mtorhan@antmicro.com
     date: 2025-08-14
+  - path: zephyr/renode/0005-boards-microchip-mpfs_icicle-add-renode-renode-robot.patch
+    sha256sum: ce11f5be42ed9b507e02b76451183b2e73af3c37f41cdd56990a3ccf8159768f
+    module: zephyr
+    author: Maciej Torhan
+    email: mtorhan@antmicro.com
+    date: 2025-10-23
   - path: zephyr/0004-add-adc1-to-stm32f4_disc1-board.patch
     sha256sum: 35f1d3e8a703c61aa9a42ca460cb4ef1c25b0eb7e91e3889b9724535445a5ec8
     module: zephyr
