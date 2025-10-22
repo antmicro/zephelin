@@ -317,7 +317,9 @@ def get_graph_tvmgen_prefix(model_graph: dict) -> str | None:
     return get_common_prefix(op_func_name)
 
 
-def tvm_recalculate_model_numbers(tef_trace: list[dict]) -> tuple[list[dict], dict[str, int]]:
+def tvm_recalculate_model_numbers(
+    tef_trace: list[dict], first_available_model_id: int = 0
+) -> tuple[list[dict], dict[str, int]]:
     """
     Adjusts names and arguments of INFERENCE and MODEL events based on used functions' prefixes.
 
@@ -325,6 +327,8 @@ def tvm_recalculate_model_numbers(tef_trace: list[dict]) -> tuple[list[dict], di
     ----------
     tef_trace : list[dict]
         The trace in Trace Event Format
+    first_available_model_id : int
+        The smallest number that is not assigned to a model
 
     Returns
     -------
@@ -363,7 +367,9 @@ def tvm_recalculate_model_numbers(tef_trace: list[dict]) -> tuple[list[dict], di
                     common_prefix = prefix
                     break
         if common_prefix not in prefix_to_model_number:
-            prefix_to_model_number[common_prefix] = len(prefix_to_model_number)
+            prefix_to_model_number[common_prefix] = (
+                len(prefix_to_model_number) + first_available_model_id
+            )
         model_num = prefix_to_model_number[common_prefix]
         inference_start_id = thread_inference_start[thread_id]
         # Update model events names to contain new model number

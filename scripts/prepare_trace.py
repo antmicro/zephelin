@@ -480,7 +480,12 @@ def prepare(args: argparse.Namespace):
     if TVM_EVENTS:
         from extract_tvm_model_data import tvm_recalculate_model_numbers
 
-        tef_trace, tvm_prefix_to_model_id = tvm_recalculate_model_numbers(tef_trace)
+        tef_trace, tvm_prefix_to_model_id = tvm_recalculate_model_numbers(
+            tef_trace,
+            # Decrease by one to exclude ID 0 reported by TVM for all models
+            len(MODEL_IDS_MAPPING) - 1,
+        )
+        MODEL_IDS_MAPPING.update(tvm_prefix_to_model_id)
 
     if thread_name:
         # Custom metadata event supported by Speedscope to associate ID with thread name
