@@ -2,9 +2,10 @@ diff --git a/scripts/ci/check_compliance.py b/scripts/ci/check_compliance.py
 index d49a8607711..87f90a48bc0 100755
 --- a/scripts/ci/check_compliance.py
 +++ b/scripts/ci/check_compliance.py
-@@ -1270,2 +1270,5 @@ flagged.
+@@ -1270,2 +1270,6 @@ flagged.
                                   # documentation
 +        "ZPL_SAMPLE_TFLM_MODEL",
 +        "ZPL_SAMPLE_TFLM_BUFFER_SIZE",
 +        "ZPL_SAMPLE_TVM_QUANTIZED_MODEL",
++        "ZPL_SAMPLE_TVM_HEAP_SIZE",
          "ZTEST_FAIL_TEST_",  # regex in tests/ztest/fail/CMakeLists.txt

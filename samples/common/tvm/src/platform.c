@@ -17,7 +17,7 @@
 
 #include "tvm_model.h"
 
-K_HEAP_DEFINE(tvm_heap, 1024 * TVM_HEAP_SIZE);
+K_HEAP_DEFINE(tvm_heap, 1024 * CONFIG_ZPL_SAMPLE_TVM_HEAP_SIZE);
 
 volatile timing_t g_microtvm_start_time, g_microtvm_end_time;
 int g_microtvm_timer_running = 0;

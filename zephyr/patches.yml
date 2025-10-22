@@ -61,7 +61,7 @@ patches:
     email: mtorhan@antmicro.com
     date: 2025-06-09
   - path: zephyr/ci/0001-exclude-kconfig-symbols-in-check.patch
-    sha256sum: 858cb1b907977075ed5dae263418ae5f6591e69180cd257a0bf34ace444559ad
+    sha256sum: 4228b785ebf914b66824443c8ee2ee5e5c44520c38207b38fbfc5be71a318587
     module: zephyr
     author: Maciej Torhan
     email: mtorhan@antmicro.com

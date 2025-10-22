@@ -5,3 +5,7 @@
 
 config ZPL_SAMPLE_TVM_QUANTIZED_MODEL
 	bool "Whether to also prepare quantized TVM model"
+
+config ZPL_SAMPLE_TVM_HEAP_SIZE
+	int "Size of the TVM heap in KB"
+	default 90
