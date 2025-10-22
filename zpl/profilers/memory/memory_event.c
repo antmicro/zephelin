@@ -47,7 +47,7 @@ void zpl_emit_memory_event(enum zpl_memory_region memory_region, uintptr_t memor
 		uint32_t used_memory, uint32_t unused_memory)
 {
 	zpl_emit_memory_for_thread_event(memory_region, memory_addr,
-			used_memory, unused_memory, (uint32_t)NULL);
+			used_memory, unused_memory, 0);
 }
 
 const char *zpl_memory_region_enum_to_string(enum zpl_memory_region memory_region)

@@ -30,8 +30,8 @@ typedef struct __packed {
 	uint16_t packet_size;
 	uint64_t timestamp;
 	uint8_t id;
-	enum zpl_memory_region memory_region;
-	uintptr_t memory_addr;
+	uint8_t memory_region;
+	uint32_t memory_addr;
 	uint32_t used;
 	uint32_t unused;
 	uint32_t for_thread_id;
