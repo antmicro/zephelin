@@ -10,7 +10,7 @@ extern "C" {
 #include <zephyr/sys/printk.h>
 }
 
-#include <model.h>
+#include <tflm_model.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
 #include <tensorflow/lite/micro/micro_mutable_op_resolver.h>
 #include <tensorflow/lite/micro/system_setup.h>
@@ -22,7 +22,7 @@ static tflite::MicroInterpreter *gp_interpreter_;
 static uint8_t __attribute__((aligned(32))) g_tflite_buffer[CONFIG_ZPL_SAMPLE_TFLM_BUFFER_SIZE * 1024];
 static size_t buffer_pos = 0;
 
-void model_init(void)
+void tflm::model_init(void)
 {
 	g_tflite_resolver.AddConv2D();
 	g_tflite_resolver.AddFullyConnected();
@@ -31,7 +31,7 @@ void model_init(void)
 	g_tflite_resolver.AddSoftmax();
 }
 
-int model_load(const uint8_t *model, tflite::MicroInterpreter*& gp_interpreter = gp_interpreter_, size_t tensor_arena_size = 0)
+int tflm::model_load(const uint8_t *model, tflite::MicroInterpreter*& gp_interpreter = gp_interpreter_, size_t tensor_arena_size = 0)
 {
 	if (gp_interpreter != nullptr) {
 		printk("GP interpreter is already initialized\n");
@@ -65,15 +65,15 @@ int model_load(const uint8_t *model, tflite::MicroInterpreter*& gp_interpreter =
 	return 0;
 }
 
-int model_load(const uint8_t *model, tflite::MicroInterpreter*& gp_interpreter = gp_interpreter_) {
+int tflm::model_load(const uint8_t *model, tflite::MicroInterpreter*& gp_interpreter = gp_interpreter_) {
 	return model_load(model, gp_interpreter, 0);
 }
 
-int model_load(const uint8_t *model) {
+int tflm::model_load(const uint8_t *model) {
 	return model_load(model, gp_interpreter_, 0);
 }
 
-int model_load_input(tflite::MicroInterpreter * const gp_interpreter, const uint8_t *input, uint32_t input_size)
+int tflm::model_load_input(tflite::MicroInterpreter * const gp_interpreter, const uint8_t *input, uint32_t input_size)
 {
 	if (gp_interpreter == nullptr) {
 		printk("Provided uninitialized interpreter\n");
@@ -88,11 +88,11 @@ int model_load_input(tflite::MicroInterpreter * const gp_interpreter, const uint
 	return 0;
 }
 
-int model_load_input(const uint8_t *input, uint32_t input_size) {
+int tflm::model_load_input(const uint8_t *input, uint32_t input_size) {
 	return model_load_input(gp_interpreter_, input, input_size);
 }
 
-int model_run(tflite::MicroInterpreter * const gp_interpreter)
+int tflm::model_run(tflite::MicroInterpreter * const gp_interpreter)
 {
 	if (gp_interpreter == nullptr) {
 		printk("Provided uninitialized interpreter\n");
@@ -106,11 +106,11 @@ int model_run(tflite::MicroInterpreter * const gp_interpreter)
 	return 0;
 }
 
-int model_run() {
+int tflm::model_run() {
 	return model_run(gp_interpreter_);
 }
 
-int model_get_output(tflite::MicroInterpreter * const gp_interpreter, uint8_t *output, uint32_t output_size)
+int tflm::model_get_output(tflite::MicroInterpreter * const gp_interpreter, uint8_t *output, uint32_t output_size)
 {
 	if (gp_interpreter == nullptr) {
 		printk("Provided uninitialized interpreter\n");
@@ -124,6 +124,6 @@ int model_get_output(tflite::MicroInterpreter * const gp_interpreter, uint8_t *o
 	return 0;
 }
 
-int model_get_output(uint8_t *output, uint32_t output_size) {
+int tflm::model_get_output(uint8_t *output, uint32_t output_size) {
 	return model_get_output(gp_interpreter_, output, output_size);
 }

@@ -12,13 +12,15 @@ extern "C" {
 #include <zephyr/random/random.h>
 #include <generated/model0_data.h>
 }
-#include <model.h>
+#include <tflm_model.h>
 
 #define N_SAMPLES 2
 #define INPUT_SHAPE_0 128
 #define INPUT_SHAPE_1 3
 #define INPUT_MIN_VAL -2040.0f
 #define INPUT_MAX_VAL 2040.0f
+
+using namespace tflm;
 
 void rand_input(float model_input[][INPUT_SHAPE_1]);
 

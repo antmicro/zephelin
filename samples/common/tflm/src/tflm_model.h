@@ -14,6 +14,7 @@
 
 #define TFLITE_RESOLVER_SIZE 5
 
+namespace tflm {
 void model_init(void);
 
 int model_load(const uint8_t *model);
@@ -31,5 +32,6 @@ int model_run(tflite::MicroInterpreter * const gp_interpreter);
 int model_get_output(uint8_t *output, uint32_t output_size);
 int model_get_output(tflite::MicroInterpreter * const gp_interpreter, uint8_t *output,
 	uint32_t output_size);
+}
 
 #endif /* SAMPLE_COMMON_TFLM_MOLDE_H_ */

@@ -14,7 +14,7 @@ extern "C" {
 #include <generated/model1_data.h>
 }
 
-#include <model.h>
+#include <tflm_model.h>
 
 #define N_SAMPLES 10
 #define INPUT0_SHAPE_0 128
@@ -26,6 +26,8 @@ extern "C" {
 #define INPUT1_MAX_VAL (2.0f * 3.14159265359f)
 #define INPUT1_SCALE 0.024573976173996925f
 #define INPUT1_ZERO  -128
+
+using namespace tflm;
 
 void rand_input0(float model_input[][INPUT0_SHAPE_1]);
 void rand_input1(float *model_input);

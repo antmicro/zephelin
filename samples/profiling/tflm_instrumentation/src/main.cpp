@@ -10,7 +10,7 @@ extern "C" {
 #include <zephyr/random/random.h>
 #include <generated/model0_data.h>
 }
-#include <model.h>
+#include <tflm_model.h>
 
 #define N_SAMPLES     10
 #define INPUT_MIN_VAL 0.0f
@@ -21,6 +21,8 @@ extern "C" {
 
 #define OUTPUT_SCALE 0.008472034707665443f
 #define OUTPUT_ZERO  4
+
+using namespace tflm;
 
 void loop();
 

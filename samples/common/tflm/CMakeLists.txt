@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 zephyr_library_named(tflm_model)
-zephyr_library_sources(src/model.cpp)
+zephyr_library_sources(src/tflm_model.cpp)
 zephyr_include_directories("${CMAKE_CURRENT_BINARY_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 # generate header with model data
