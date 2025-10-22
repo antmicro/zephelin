@@ -7,6 +7,8 @@ sample:
   name: tflm_profiler
 common:
   tags: profiling
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
 tests:
   sample.trace.tflm_profiler.plaintext:
     harness: console

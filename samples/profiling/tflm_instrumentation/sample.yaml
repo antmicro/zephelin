@@ -8,6 +8,8 @@ sample:
   name: hello world tensorflow instrumentation
 common:
   tags: tensorflow profiling
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
   modules:
     - tflite-micro
 tests:

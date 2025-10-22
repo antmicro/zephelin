@@ -7,6 +7,8 @@ sample:
   name: tvm_profiler
 common:
   tags: profiling
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
 tests:
   sample.trace.tvm_profiler.plaintext:
     harness: console

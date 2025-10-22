@@ -7,6 +7,8 @@ sample:
   name: named_event
 common:
   tags: events
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
 tests:
   sample.trace.named_event.plaintext:
     harness: console

@@ -7,6 +7,8 @@ sample:
   name: tiers
 common:
   tags: profiling
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
 tests:
   sample.trace.tiers.plaintext.minimal:
     harness: console

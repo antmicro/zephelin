@@ -7,6 +7,8 @@ sample:
   name: tflm_events
 common:
   tags: events
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
 tests:
   sample.trace.tflm_events.plaintext:
     harness: console
