@@ -1,5 +1,5 @@
 zephyr_library_named(tvm_model)
-zephyr_library_sources(src/model.c src/magic_wand.c src/platform.c)
+zephyr_library_sources(src/tvm_model.c src/magic_wand.c src/platform.c)
 if(CONFIG_ZPL_SAMPLE_TVM_QUANTIZED_MODEL)
   zephyr_library_sources(src/sine.c)
 endif()
@@ -8,14 +8,7 @@ zephyr_include_directories("${CMAKE_CURRENT_BINARY_DIR}/src" "${CMAKE_CURRENT_SO
 
 # Generates model specific data for microTVM, using magic-wand if `quantized` is not selected,
 # or using sine otherwise
-function(generate_tvm_model quantized)
-
-set(suffix "")
-set(model_name "magic-wand")
-if(${quantized})
-  set(suffix "_int8")
-  set(model_name "sine")
-endif()
+function(generate_tvm_model model_name suffix)
 
 set(model_path_graph "${CMAKE_CURRENT_LIST_DIR}/model/${model_name}-graph.json")
 set(model_path_params "${CMAKE_CURRENT_LIST_DIR}/model/${model_name}-params.bin")
@@ -74,8 +67,9 @@ add_custom_target(
 add_dependencies(tvm_model generate_model_data${suffix}_h)
 endfunction()
 
-generate_tvm_model(false)
+generate_tvm_model("magic-wand" "")
 
 if(CONFIG_ZPL_SAMPLE_TVM_QUANTIZED_MODEL)
-  generate_tvm_model(true)
+  generate_tvm_model("sine" "_int8")
+  generate_tvm_model("sine2" "_sine2")
 endif()

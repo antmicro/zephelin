@@ -17,7 +17,8 @@
 #include <generated/model_data_params.h>
 #include <generated/model_data_int8_graph.h>
 #include <generated/model_data_int8_params.h>
-#include <model.h>
+#include <tvm_model.h>
+#include <sine.h>
 
 #define N_SAMPLES 10
 #define INPUT_SHAPE_0 128
@@ -49,13 +50,13 @@ int main(void)
 	TVMGraphExecutor *executor_quantized = malloc(sizeof(TVMGraphExecutor));
 	TVMModuleHandle handle = NULL, handle_quantized = NULL;
 
-	status = model_load(model_data_graph, model_data_graph_len, model_data_params, model_data_params_len, &executor, &handle, false);
+	status = model_load(model_data_graph, model_data_graph_len, model_data_params, model_data_params_len, &executor, &handle, NULL);
 	if (status) {
 		printk("Model load failed %d\n", status);
 		return 1;
 	}
 
-	status = model_load(model_data_int8_graph, model_data_int8_graph_len, model_data_int8_params, model_data_int8_params_len, &executor_quantized, &handle_quantized, true);
+	status = model_load(model_data_int8_graph, model_data_int8_graph_len, model_data_int8_params, model_data_int8_params_len, &executor_quantized, &handle_quantized, TVMQuantizedLibEntryPoint());
 	if (status) {
 		printk("Quantized model load failed %d\n", status);
 		return 1;

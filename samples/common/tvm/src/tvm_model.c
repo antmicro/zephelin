@@ -15,22 +15,21 @@
 #include <zephyr/sys/printk.h>
 #include <zpl/tvm_profiler.h>
 #include <zpl/inference_event.h>
-#include "model.h"
+#include <tvm/runtime/crt/module.h>
+#include "tvm_model.h"
 #include "magic_wand.h"
-#ifdef CONFIG_ZPL_SAMPLE_TVM_QUANTIZED_MODEL
-#include "sine.h"
-#endif
 
 static const DLDevice g_device = {kDLCPU, 1};
-static TVMGraphExecutor *gp_tvm_graph_executor = NULL;
+static TVMGraphExecutor *gp_tvm_graph_executor;
 static TVMModuleHandle g_tvm_module_handle;
 
 int model_init(void)
 {
+	gp_tvm_graph_executor = NULL;
 	return TVMInitializeRuntime();
 }
 
-int model_load(const uint8_t *model_graph, uint32_t model_graph_size, const uint8_t *model_params, uint32_t model_params_size, TVMGraphExecutor **tvm_graph_executor, TVMModuleHandle *tvm_module_handle, bool quantized)
+int model_load(const uint8_t *model_graph, uint32_t model_graph_size, const uint8_t *model_params, uint32_t model_params_size, TVMGraphExecutor **tvm_graph_executor, TVMModuleHandle *tvm_module_handle, const TVMModule *tvm_module)
 {
 	int status = 0;
 
@@ -40,42 +39,31 @@ int model_load(const uint8_t *model_graph, uint32_t model_graph_size, const uint
 	if (tvm_module_handle == NULL) {
 		tvm_module_handle = &g_tvm_module_handle;
 	}
+	if (tvm_module == NULL) {
+		tvm_module = TVMSystemLibEntryPoint();
+	}
 
 	do {
-		const TVMModule *tvm_module;
-		if (*tvm_module_handle == NULL) {
-			if (quantized) {
-#ifdef CONFIG_ZPL_SAMPLE_TVM_QUANTIZED_MODEL
-				tvm_module = TVMQuantizedLibEntryPoint();
-#else
-				printk("Quantized models has not been enabled, use CONFIG_ZPL_SAMPLE_TVM_QUANTIZED_MODEL\n");
-#endif
-			} else {
-				tvm_module = TVMSystemLibEntryPoint();
-			}
-			if (NULL == tvm_module) {
-			    status = 1;
-			    break;
-			}
-
-			status = TVMModCreateFromCModule(tvm_module, tvm_module_handle);
-			if (status) {
-			    break;
-			}
+		status = TVMModCreateFromCModule(tvm_module, tvm_module_handle);
+		if (status) {
+				printk("CreateFromCModule\n");
+		    break;
 		}
 
 		status = TVMGraphExecutor_Create(model_graph, *tvm_module_handle, &g_device,
 													 tvm_graph_executor);
-		if (status){
+		if (status) {
+				printk("GraphExecutor_Create\n");
 		    break;
 		}
 
 		status = TVMGraphExecutor_LoadParams(*tvm_graph_executor, model_params,
-		                                     model_params_size);
-		if (status){
+														 model_params_size);
+		if (status) {
+				printk("GraphExecutor_LoadParams\n");
 		    break;
 		}
-	} while(0);
+	} while (0);
 
 	return status;
 }
@@ -108,7 +96,7 @@ int model_load_input(const uint8_t *input, uint32_t input_size, TVMGraphExecutor
 
 	tensor_in.data = (void *)input;
 
-	// TVM does not allow setting input by index, so we need to retrieve its name
+	/* TVM does not allow setting input by index, so we need to retrieve its name */
 	uint32_t input_node_id = tvm_graph_executor->input_nodes[0];
 	char *input_name = tvm_graph_executor->nodes[input_node_id].name;
 

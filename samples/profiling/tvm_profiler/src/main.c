@@ -11,7 +11,7 @@
 #include <zephyr/random/random.h>
 #include <generated/model_data_graph.h>
 #include <generated/model_data_params.h>
-#include <model.h>
+#include <tvm_model.h>
 
 #define N_SAMPLES 10
 #define INPUT_SHAPE_0 128
@@ -34,7 +34,7 @@ int main(void)
 		return 1;
 	}
 
-	status = model_load(model_data_graph, model_data_graph_len, model_data_params, model_data_params_len, NULL, NULL, false);
+	status = model_load(model_data_graph, model_data_graph_len, model_data_params, model_data_params_len, NULL, NULL, NULL);
 	if (status) {
 		printk("Model load failed %d\n", status);
 		return 1;

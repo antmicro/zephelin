@@ -15,7 +15,7 @@
 #include <zephyr/sys/reboot.h>
 #include <zephyr/timing/timing.h>
 
-#include "model.h"
+#include "tvm_model.h"
 
 K_HEAP_DEFINE(tvm_heap, 1024 * TVM_HEAP_SIZE);
 
