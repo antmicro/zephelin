@@ -301,6 +301,23 @@ def extract_memory_symbols(zephyr_elf_path: Path):
     return mem_symbols
 
 
+def trim_metadata(tef_trace: list[dict]):
+    """
+    Creates trace with removed metadata events
+    that were emitted after the last beginning or end event.
+    """
+    last_event_ts = max([
+        float(e["ts"])
+        for e in tef_trace
+        if e["ph"] in (EventPhase.BEGIN.value, EventPhase.END.value)
+    ])
+    return [
+        e
+        for e in tef_trace
+        if e["ph"] != EventPhase.METADATA.value or float(e.get("ts", -1)) <= last_event_ts
+    ]
+
+
 def setup_parser(parser: argparse.ArgumentParser):
     """
     Sets up parser for prepare trace script.
@@ -378,6 +395,11 @@ def setup_parser(parser: argparse.ArgumentParser):
         "--instrumentation",
         help="Whether trace is received from instrumentation subsystem",
         action="store_true",
+    )
+    parser.add_argument(
+        "--trim-metadata",
+        action="store_true",
+        help="Discards all metadata that were emitted after the last trace event",
     )
     return parser
 
@@ -530,6 +552,8 @@ def prepare(args: argparse.Namespace):
             if "id" not in metadata:
                 add_model_metadata(tef_trace, metadata)
             else:
+                # If multiple model IDs were found, create metadata event
+                # for each one of them
                 for model_id in metadata["id"]:
                     add_model_metadata(tef_trace, metadata | {"id": model_id})
 
@@ -578,6 +602,9 @@ def prepare(args: argparse.Namespace):
                     "args": ram["size"],
                 },
             )
+
+    if args.trim_metadata:
+        tef_trace = trim_metadata(tef_trace)
 
     # Print or save the result
     if args.output is not None:
