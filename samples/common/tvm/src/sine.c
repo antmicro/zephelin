@@ -1612,6 +1612,14 @@ TVM_DLL int32_t tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multipl
 #ifdef __cplusplus
 extern "C"
 #endif
+TVM_DLL int32_t tvmgen_sine2_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
+{
+	return tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast(args, arg_type_ids, num_args, out_ret_value, out_ret_tcode, resource_handle);
+}
+
+#ifdef __cplusplus
+extern "C"
+#endif
 TVM_DLL int32_t tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast_1(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
 {
 	void *p0 = (((TVMValue *)args)[0].v_handle);
@@ -1661,6 +1669,14 @@ TVM_DLL int32_t tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multipl
 #ifdef __cplusplus
 extern "C"
 #endif
+TVM_DLL int32_t tvmgen_sine2_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast_1(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
+{
+	return tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast_1(args, arg_type_ids, num_args, out_ret_value, out_ret_tcode, resource_handle);
+}
+
+#ifdef __cplusplus
+extern "C"
+#endif
 TVM_DLL int32_t tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast_2(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
 {
 	void *p0 = (((TVMValue *)args)[0].v_handle);
@@ -1704,6 +1720,14 @@ TVM_DLL int32_t tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multipl
 #ifdef __cplusplus
 extern "C"
 #endif
+TVM_DLL int32_t tvmgen_sine2_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast_2(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
+{
+	return tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast_2(args, arg_type_ids, num_args, out_ret_value, out_ret_tcode, resource_handle);
+}
+
+#ifdef __cplusplus
+extern "C"
+#endif
 TVM_DLL int32_t tvmgen_quantized_fused_reshape(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
 {
 	void *p0 = (((TVMValue *)args)[0].v_handle);
@@ -1719,6 +1743,14 @@ TVM_DLL int32_t tvmgen_quantized_fused_reshape(void *args, int32_t *arg_type_ids
 	}
 	((int8_t *)T_reshape_1)[0] = ((int8_t *)p0_1)[0];
 	return 0;
+}
+
+#ifdef __cplusplus
+extern "C"
+#endif
+TVM_DLL int32_t tvmgen_sine2_fused_reshape(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
+{
+	return tvmgen_quantized_fused_reshape(args, arg_type_ids, num_args, out_ret_value, out_ret_tcode, resource_handle);
 }
 
 #ifdef __cplusplus
@@ -1741,4 +1773,12 @@ TVM_DLL int32_t tvmgen_quantized_fused_reshape_1(void *args, int32_t *arg_type_i
 	  ((int8_t *)T_reshape_1)[ax1_inner] = ((int8_t *)p0_1)[ax1_inner];
 	}
 	return 0;
+}
+
+#ifdef __cplusplus
+extern "C"
+#endif
+TVM_DLL int32_t tvmgen_sine2_fused_reshape_1(void *args, int32_t *arg_type_ids, int32_t num_args, void *out_ret_value, int32_t *out_ret_tcode, void *resource_handle)
+{
+	return tvmgen_quantized_fused_reshape_1(args, arg_type_ids, num_args, out_ret_value, out_ret_tcode, resource_handle);
 }
