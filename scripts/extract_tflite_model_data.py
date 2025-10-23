@@ -242,7 +242,7 @@ def extend_path(*p: list[Path]):
 
 def deduce_model_addr(
     model_path: Path, zephyr_base: Path | None = None, zephyr_elf: Path | None = None
-) -> int | None:
+) -> list[int]:
     """
     Decudes the model address based on model data placement in zephyr.bin,
     address of flash region and flatbuffer offset.
@@ -258,8 +258,8 @@ def deduce_model_addr(
 
     Returns
     -------
-    int | None
-        The model address or None if it cannot be found.
+    list[int]
+        The list with model addresses that matches the model data.
     """
     from flatbuffers.packer import uoffset
 
@@ -276,13 +276,6 @@ def deduce_model_addr(
     with zephyr_bin.open("rb") as fd:
         zephyr_data = fd.read()
 
-    idx = zephyr_data.find(model_bin)
-    if idx <= 0:
-        return None
-
-    offset = uoffset.unpack(zephyr_data[idx : idx + uoffset.size])[0]
-    addr = idx + offset
-
     edt = None
     with (
         # Extend path to use Zephyr's devicetree
@@ -293,9 +286,19 @@ def deduce_model_addr(
 
     if edt is None or "zephyr,flash" not in edt.chosen_nodes:
         return None
-    addr += edt.chosen_nodes["zephyr,flash"].regs[0].addr
 
-    return addr
+    addresses = []
+    begin, idx = 0, 0
+    while True:
+        idx = zephyr_data.find(model_bin, begin)
+        if idx <= 0:
+            break
+
+        offset = uoffset.unpack(zephyr_data[idx : idx + uoffset.size])[0]
+        begin = idx + offset
+        addresses.append(begin + edt.chosen_nodes["zephyr,flash"].regs[0].addr)
+
+    return addresses
 
 
 def params_size(parameters: dict) -> int:

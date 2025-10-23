@@ -519,14 +519,19 @@ def prepare(args: argparse.Namespace):
                 tflm_model, args.zephyr_base, args.zephyr_elf_path, model_id
             )
             if multiple_models:
-                if "id" not in metadata or metadata["id"] not in MODEL_IDS_MAPPING:
-                    print(
-                        f"Cannot match model ID (0x{metadata['id']:x}) with IDs reported in"
-                        f" the trace ({', '.join([f'0x{k:x}' for k in MODEL_IDS_MAPPING.keys()])}) "
-                        f"for `{tflm_model}`. The trace may not be displayed correctly, please "
-                        "provide valid model IDs manually with --tflm-model-ids flag"
-                    )
-            add_model_metadata(tef_trace, metadata)
+                for model_id in metadata.get("id", []):
+                    if model_id not in MODEL_IDS_MAPPING:
+                        print(
+                            f"Cannot match model ID (0x{metadata['id']:x}) with IDs reported in the"
+                            f" trace ({', '.join([f'0x{k:x}' for k in MODEL_IDS_MAPPING.keys()])})"
+                            f" for `{tflm_model}`. The trace may not be displayed correctly, please"
+                            " provide valid model IDs manually with --tflm-model-ids flag"
+                        )
+            if "id" not in metadata:
+                add_model_metadata(tef_trace, metadata)
+            else:
+                for model_id in metadata["id"]:
+                    add_model_metadata(tef_trace, metadata | {"id": model_id})
 
     # Metadata about TVM model
     if args.tvm_model_paths is not None:
