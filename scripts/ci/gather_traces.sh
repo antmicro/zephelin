@@ -53,8 +53,20 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_multi_model.json \
 west build -p -b $BOARD samples/profiling/tvm_multi_model -- ${CTF_CONFS}
 python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
 west zpl-prepare-trace ./channel0_0 -o ./tef_tvm_multi_model.json \
-  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z]+_fused_' \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z]+_fused_nn_dense_subtract_add_fixed_point_' \
   --tvm-model-paths ./samples/common/tvm/model/magic-wand-graph.json \
     ./samples/common/tvm/model/sine-graph.json \
   --tvm-model-metadata-paths ./samples/common/tvm/model/magic-wand-metadata.json \
     ./samples/common/tvm/model/sine-metadata.json
+
+# TFLM and TVM models
+west build -p -b $BOARD samples/profiling/tflm_tvm_models -- ${CTF_CONFS}
+python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
+west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_tvm_models.json \
+  --tflm-model-paths ./samples/common/tflm/model/sine.tflite \
+  --tvm-model-paths ./samples/common/tvm/model/sine-graph.json \
+    ./samples/common/tvm/model/sine2-graph.json \
+  --tvm-model-metadata-paths ./samples/common/tvm/model/sine-metadata.json \
+    ./samples/common/tvm/model/sine2-metadata.json \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_nn_dense_subtract_add_fixed_point_' \
+  --trim-metadata
