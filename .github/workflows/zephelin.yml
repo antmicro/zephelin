@@ -48,6 +48,7 @@ jobs:
           - qemu_cortex_m3
           - max78002evkit/max78002/m4
           - stm32f429i_disc1/stm32f429xx
+          - mpfs_icicle/polarfire/u54/smp
     steps:
       - name: Free space on runner
         run: |
