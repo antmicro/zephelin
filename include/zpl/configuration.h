@@ -22,9 +22,20 @@ extern "C" {
 #define ZPL_IMPL_IF_ENABLED(FLAG, CONFIG) \
 	CONCAT(ZPL_IMPL_, IS_ENABLED(FLAG))(CONFIG)
 
-#define CONFIGS(CONFIG)                                                          \
-	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_MEMORY_PROFILING,    CONFIG)(memory_profiler, \
-			IS_ENABLED(CONFIG_ZPL_MEMORY_PROFILING_CONF_THREADING))
+#define CONFIGS(CONFIG)                                                               \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_CPU_LOAD_PROFILING,  CONFIG)(cpu_load, 0)          \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_CPU_LOAD_TRACE,      CONFIG)(cpu_load_profiler, 1) \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_DIE_TEMP_PROFILING,  CONFIG)(die_temp, 0)          \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_DIE_TEMP_TRACE,      CONFIG)(die_temp_profiler, 1) \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_INFERENCE_PROFILING, CONFIG)(inference, 0)         \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_MEMORY_PROFILING,    CONFIG)(memory, 0)            \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_MEMORY_PROFILING,    CONFIG)                       \
+		(memory_profiler, IS_ENABLED(CONFIG_ZPL_MEMORY_PROFILING_CONF_THREADING))     \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_TFLM_EVENTS,	        CONFIG)(tflm, 0)              \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_TFLM_PROFILER,       CONFIG)(tflm_profiler, 0)     \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_TVM_EVENTS,          CONFIG)(tvm, 0)               \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_TVM_PROFILER,        CONFIG)(tvm_profiler, 0)      \
+	ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_SCOPE_MARKING,       CONFIG)(code_scope, 0)
 
 #define ZPL_CONF_WAIT(name)               zpl_conf_wait_##name()
 #define ZPL_CONF_WAIT_DECLARE(name)  void zpl_conf_wait_##name(void);

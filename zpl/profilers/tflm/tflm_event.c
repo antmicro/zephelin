@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/configuration.h>
 #include <zpl/tflm_event.h>
 
 #include <zephyr/kernel.h>
@@ -14,6 +15,7 @@ void __zpl_emit_tflm_event(
 	uint64_t cycles, uint16_t subgraph_idx, uint16_t op_idx, const char *tag,
 	uint32_t arena_used_bytes, uint32_t arena_tail_usage, bool is_exit)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(tflm);
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	zpl_tflm_event_t zpl_tflm_exit_event = {
 		.timestamp = k_cyc_to_ns_floor64(cycles),

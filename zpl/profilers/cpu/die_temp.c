@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/configuration.h>
 #include <zpl/die_temp_event.h>
 #include <zpl/time.h>
 
@@ -24,6 +25,7 @@ static const struct device *const sensors[] = {LISTIFY(SENSORS_COUNT, DIE_TEMPER
 
 void zpl_emit_die_temp_event(void)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(die_temp);
 	struct sensor_value val;
 	int rc = 0;
 	float die_temp[SENSORS_COUNT];
@@ -100,6 +102,7 @@ void zpl_emit_die_temp_event(void)
 static void zpl_profile_die_temp(void)
 {
 	while (true) {
+		ZPL_CONF_WAIT(die_temp_profiler);
 		zpl_emit_die_temp_event();
 		k_msleep(CONFIG_ZPL_DIE_TEMP_PROFILING_INTERVAL);
 	}

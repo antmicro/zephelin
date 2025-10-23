@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/configuration.h>
 #include <zpl/scope_event.h>
 #include <zpl/time.h>
 
@@ -17,6 +18,7 @@ LOG_MODULE_REGISTER(zpl_scope_event);
 
 void zpl_emit_scope_event(char *scope_name, uint8_t is_exit)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(code_scope);
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	if (strlen(scope_name) > ZPL_MAX_SCOPE_NAME_LENGTH) {
 		LOG_WRN("Scope name \"%s\" is too long (%d > %d), might get truncated\n",

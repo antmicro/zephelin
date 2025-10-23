@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/configuration.h>
 #include <zpl/tflm_profiler.hpp>
 #include <zephyr/logging/log.h>
 
@@ -65,6 +66,7 @@ void TFLMProfiler::EndEvent(uint32_t event_handle) {
 }
 
 void TFLMProfiler::DumpEvents() {
+	ZPL_CONF_RETURN_IF_DISABLED(tflm_profiler);
 	for (int i = 0; i < num_events_; ++i) {
 		zpl_emit_tflm_enter_event(
 			begin_cycles_[i],

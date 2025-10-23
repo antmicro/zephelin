@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/configuration.h>
 #include <zpl/memory_event.h>
 
 #include <zephyr/kernel.h>
@@ -16,6 +17,7 @@ void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region,
 		uintptr_t memory_addr, uint32_t used_memory, uint32_t unused_memory,
 		uint32_t for_thread_id)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(memory);
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
 	uint64_t cycles = soft_cycle_get_64();

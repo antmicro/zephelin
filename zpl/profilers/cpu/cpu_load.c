@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl/configuration.h>
 #include <zpl/cpu_load_event.h>
 
 #include <zephyr/kernel.h>
@@ -15,6 +16,7 @@
 
 void zpl_emit_cpu_load_event(void)
 {
+	ZPL_CONF_RETURN_IF_DISABLED(cpu_load);
 	int cpu_load = cpu_load_get(true);
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
@@ -41,6 +43,7 @@ void zpl_emit_cpu_load_event(void)
 static void zpl_profile_cpu_load(void)
 {
 	while (true) {
+		ZPL_CONF_WAIT(cpu_load_profiler);
 		zpl_emit_cpu_load_event();
 		k_msleep(CONFIG_ZPL_CPU_LOAD_PROFILING_INTERVAL);
 	}
