@@ -12,24 +12,96 @@ The build-time configuration can only be selected during build-time.
 The configuration can either be appended to the conf files:
 
 ```
-CONFIG_ZPL_MEMORY_USAGE_TRACE=y
+CONFIG_ZPL_MEMORY_PROFILING=y
 ```
 
 Or appended to the build command:
 
 ```bash
-west build -b stm32f429i_disc1/stm32f429xx samples/trace/memory_profiling -- -DCONFIG_ZPL_MEMORY_USAGE_TRACE=y
+west build -b stm32f429i_disc1/stm32f429xx samples/trace/tflm_profiler -- -DCONFIG_ZPL_MEMORY_PROFILING=y
 ```
 
 ### Runtime configuration
 
-By default, the runtime configuration is turned off with a Kconfig option `CONFIG_ZPL_RUNTIME_CONFIG_NONE`.
-To turn it on, select one of the following runtime configuration types:
+A set of configuration flags defines runtime configuration.
+Each flag denotes whether a corresponding configuration (e.g. memory profiling) is enabled or disabled.
 
-* `CONFIG_ZPL_RUNTIME_CONFIG_UART` - UART shell commands
-* `CONFIG_ZPL_RUNTIME_CONFIG_DEBUG` - In-memory debug configuration
+By default, all flags are set.
 
-#### UART commands
+#### Guards
+
+In the code, there are two ways to use the runtime configuration as guards for the functionalities.
+
+##### Wait-for function
+
+The "wait-for" function stops the thread, and waits for a signal.
+Once the signal arrives, the thread is woken up, and continues execution.
+This is useful when the functionality which this configuration guards is in a separate thread.
+This "wait-for" functionality can be called using the macro `ZPL_CONF_WAIT`.
+Example:
+
+```c
+while (true) {
+    ZPL_CONF_WAIT(memory_profiler);
+    // ... Guarded code
+}
+```
+
+:::{note}
+Code is guarded only if the given configuration is defined with `threading` parameter set to `1`.
+See [adding new configuration entry](#new-configuration-entry) for details.
+:::
+
+##### Is-enabled function
+
+The "is-enabled" functionality doesn't stop the thread, and only checks if the configuration is turned on.
+The function returns a boolean value, which can be checked in a standard "if", to create a guard for the functionality.
+The "is-enabled" function can be called using the macro `ZPL_CHECK_IF_CONF`.
+Example:
+
+```c
+if (ZPL_CONF_IS_ENABLED(memory_profiler)) {
+    // ... Guarded code
+}
+```
+
+##### Return-if-disabled function
+
+The "return-if-disabled" is a convenience macro using `ZPL_CONF_IS_ENABLED` to return if it evaluates to `false`.
+The check-if function can be called using the macro `ZPL_CONF_RETURN_IF_DISABLED`.
+Example:
+
+```c
+void zpl_profile_stack(const struct k_thread *thread, void *user_data) {
+    ZPL_CONF_RETURN_IF_DISABLED(memory_profiler);
+    // ... Guarded code
+}
+```
+
+#### Interfaces
+
+The runtime configuration supports the following interfaces:
+
+* C API,
+* UART shell commands,
+* debug flags.
+
+##### C API
+
+To toggle configuration from code, use `ZPL_CONF_SET` macro, e.g.:
+
+```c
+#include <zpl/configuration.h>
+
+int main(void) {
+    ZPL_CONF_SET(inference, false);
+    /* ... */
+    ZPL_CONF_SET(inference, true);
+    /* ... */
+}
+```
+
+##### UART commands
 
 UART commands runtime configuration can be enabled by selecting the Kconfig option `CONFIG_ZPL_RUNTIME_CONFIG_UART`.
 This option enables runtime configuration via shell module with custom configuration commands.
@@ -40,7 +112,9 @@ To display the available configs type `help`:
 uart:~$ help
 Available commands:
   help
-  mem_usage_trace
+  inference
+  memory
+  memory_profiler
 ```
 
 Each config can then be either enabled or disabled using the following syntax:
@@ -50,16 +124,15 @@ Each config can then be either enabled or disabled using the following syntax:
 <command> disable
 ```
 
-For example, the memory usage configuration:
+For example, the memory profiler configuration:
 
 ```
-mem_usage_trace enable
-mem_usage_trace disable
+memory_profiler enable
+memory_profiler disable
 ```
 
-#### Debug interface
+##### Debug interface
 
-Debug runtime configuration can be enabled by selecting the Kconfig option `CONFIG_ZPL_RUNTIME_CONFIG_DEBUG`.
 You can use the debug configuration either directly from GDB, or using the west command `zpl-debug-config`.
 To use it directly in GDB, make sure to load the ELF file with debug symbols.
 Then set the desired config to `0` (disable) or `1` (enable):
@@ -71,7 +144,7 @@ set var debug_configs.<config> = <value>
 For example, to enable the memory usage tracing, use the command:
 
 ```
-set var debug_configs.mem_usage_trace = 1
+set var debug_configs.memory_profiler = 1
 ```
 
 You can also use the west command `zpl-debug-config`:
@@ -93,7 +166,7 @@ options:
 For example, to enable the memory usage tracing, use the command:
 
 ```
-west zpl-debug-config build/zephyr/zephyr.elf mem_usage_trace enable
+west zpl-debug-config build/zephyr/zephyr.elf memory_profiler enable
 ```
 
 ## Trace formats
@@ -161,53 +234,84 @@ The config should follow the Kconfig standard.
 For example:
 
 ```
-config ZPL_RUNTIME_CONFIG_NONE
-	bool "No runtime configuration"
+config ZPL_RUNTIME_CONFIG_UART
+    bool "Runtime configuration via UART"
+```
+
+It can later be used to decide whether a corresponding functionality should be defined:
+
+* in code, e.g. for functions declarations:
+
+```c
+#ifdef CONFIG_ZPL_RUNTIME_CONFIG_UART
+/* ... */
+#endif
+```
+
+* in CMake, e.g. for including sources with functions definitions:
+
+```cmake
+zephyr_library_sources_ifdef(CONFIG_ZPL_RUNTIME_CONFIG_UART configuration_uart.c)
 ```
 
 ### Runtime configuration
 
 New runtime configurations can be defined in the configuration source files.
-To add a new config, first, using macros, declare two functions in `include/zpl/configuration.h`:
 
-```c
-ZPL_WAIT_FOR_CONF_DEC(config_name)
-ZPL_CHECK_IF_CONF_DEC(config_name)
+#### New configuration entry
+
+To add a new configuration entry, add it to the list of existing ones in `include/zpl/configuration.h`, e.g.:
+
+```C
+#define CONFIGS(CONFIG)                                                           \
+    /* ... */                                                                     \
+    ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_MEMORY_PROFILING,    CONFIG)                   \
+        (memory_profiler, IS_ENABLED(CONFIG_ZPL_MEMORY_PROFILING_CONF_THREADING)) \
+    /* ... */
 ```
 
-Then, in each configuration type's source file, define those functions, using the same name, and its corresponding Kconfig option.
-For example in the `configuration_uart.c` file:
+where:
+
+* `CONFIG` is macro defining configuration functionality,
+* `ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_MEMORY_PROFILING,    CONFIG)` decides whether a provided `CONFIG` should be expanded,
+* `(memory_profiler, IS_ENABLED(CONFIG_ZPL_MEMORY_PROFILING_CONF_THREADING))` defines `CONFIG` arguments:
+    1. name of the configuration,
+    2. threading flag indicating whether a given configuration should define
+       mutexes, conditional variables, and thread-safe mechanisms.
+
+This will automatically attach existing logic to a given configuration entry.
+
+#### New configuration functionality
+
+To extend the configuration capabilities, add new `CONFIGS` invocations or change definition of an argument macro:
+
+* adding declaration:
 
 ```c
-ZPL_CONF_UART_DEF(config_name, kconfig_option)
+// include/zpl/configuration.h
+
+#define ZPL_CONF_WAIT_DECLARE(name)  /* ... */
+#define ZPL_CONF_DECLARE(name, ...) \
+    /* ... */                       \
+    ZPL_CONF_WAIT_DECLARE(name)     \
+    /* ... */
+CONFIGS(ZPL_CONF_DECLARE)
 ```
 
-In the code, there are two ways to use the runtime configuration as guards for the functionalities.
-
-#### Wait-for function
-
-The "wait-for" function stops the thread, and waits for a signal.
-Once the signal arrives, the thread is woken up, and continues execution.
-This is useful when the functionality which this configuration guards is in a separate thread.
-This wait-for functionality can be called using the macro `ZPL_WAIT_FOR_CONF`.
-Example:
+* adding definition:
 
 ```c
-while (true) {
-    ZPL_WAIT_FOR_CONF(mem_usage_trace);
-    // ... Guarded code
-}
-```
+// zpl/configuration.c
 
-#### Check-if function
+#define ZPL_CONF_WAIT_DEFINE(name)  /* ... */
+#define ZPL_CONF_DEFINE(name, threading, ...) \
+    /* ... */                                 \
+    ZPL_CONF_WAIT_DEFINE(name, threading)     \
+    /* ... */
+CONFIGS(ZPL_CONF_DEFINE)
 
-The "check-if" functionality doesn't stop the thread, and only checks if the configuration is turned on.
-The function returns a boolean value, which can be checked in a standard "if", to create a guard for the functionality.
-The check-if function can be called using the macro `ZPL_CHECK_IF_CONF`.
-Example:
+// or invoke `CONFIGS` separately, e.g. in zpl/configuration_uart.c
 
-```c
-if (ZPL_CHECK_IF_CONF(mem_usage_trace)) {
-    // ... Guarded code
-}
+#define ZPL_CONF_SHELL_DEFINE(name, ...) /* ... */
+CONFIGS(ZPL_CONF_SHELL_DEFINE)
 ```
