@@ -168,3 +168,15 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-10-08
+  - path: tflite-micro/0004-emit-zpl_inference_exit-before-dumping-other-events.patch
+    sha256sum: e6d0d94cb2ddb75a6b310a20136d9b8a7d982da36dcba02094214b0121fbd218
+    module: tflite-micro
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-24
+  - path: tvm/0008-emit-zpl_inference_exit-before-dumping-other-events.patch
+    sha256sum: 81f62a31b2051d576366e53f3f333c16dfe1da464393a4c41a537a2359535c39
+    module: tvm
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-24

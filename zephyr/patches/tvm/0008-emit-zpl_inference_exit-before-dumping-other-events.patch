@@ -1,0 +1,33 @@
+From e0bdcd0147714bc79bd4efb57294473903522b3b Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Fri, 24 Oct 2025 12:01:48 +0200
+Subject: [PATCH] Emit zpl_inference_exit before dumping events from inferece
+
+Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
+---
+ src/runtime/crt/graph_executor/graph_executor.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/runtime/crt/graph_executor/graph_executor.c b/src/runtime/crt/graph_executor/graph_executor.c
+index a31087893..c518ff12d 100644
+--- a/src/runtime/crt/graph_executor/graph_executor.c
++++ b/src/runtime/crt/graph_executor/graph_executor.c
+@@ -963,12 +963,12 @@ void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
+       }
+     }
+   }
+-  if (NULL != profiler) {
+-    profiler->dump_events_cb(profiler_state);
+-  }
+ #ifdef CONFIG_ZPL_INFERENCE_PROFILING
+   zpl_inference_exit(0);
+ #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
++  if (NULL != profiler) {
++    profiler->dump_events_cb(profiler_state);
++  }
+ }
+ 
+ /*!
+-- 
+2.51.0
+
