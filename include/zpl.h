@@ -32,7 +32,7 @@ int __zpl_scope_enter_exit(int is_leaving, struct zpl_code_scope_conf scope_conf
 
 #define ZPL_CODE_SCOPE_DEFINE(name, enabled) \
 	STRUCT_SECTION_ITERABLE(zpl_code_scope_conf, name) = { \
-		.conf_name = #name, \
+		.conf_name = (char *) #name, \
 		.is_enabled = enabled, \
 	}
 
