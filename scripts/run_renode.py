@@ -69,6 +69,11 @@ if __name__ == "__main__":
     parser.add_argument("--trace-output", type=Path, help="Path to file where traces will be saved")
     parser.add_argument("--trace-output-stdout", action="store_true", help="Write trace to stdout")
     parser.add_argument(
+        "--simulation-only",
+        help="Only runs the simulation, without capturing the output",
+        action="store_true",
+    )
+    parser.add_argument(
         "--timeout", type=int, help="Defines for how long the simulation should run in seconds."
     )
     args = parser.parse_args()
@@ -90,32 +95,41 @@ if __name__ == "__main__":
     if args.debug:
         platform.StartGdbServer(3333)
         print("gdb server started at :3333")
-        print("Press ENTER to start simulation")
-
-        input()
+        if not args.simulation_only:
+            print("Press ENTER to start simulation")
+            input()
 
     # create pty terminal for UART with traces
-    trace_uart = get_zephyr_chosen("tracing-uart")
-    emulation.CreateUartPtyTerminal("trace_uart_term", "/tmp/uart-trace")
-    emulation.Connector.Connect(
-        getattr(platform.sysbus, trace_uart).internal,
-        emulation.externals.trace_uart_term,
-    )
+    trace_uart = None
+    try:
+        trace_uart = get_zephyr_chosen("tracing-uart")
+        emulation.CreateUartPtyTerminal("trace_uart_term", "/tmp/uart-trace")
+        emulation.Connector.Connect(
+            getattr(platform.sysbus, trace_uart).internal,
+            emulation.externals.trace_uart_term,
+        )
+    except Exception:
+        if not args.simulation_only:
+            # Tracing UART is not required for a simulation only run
+            raise
 
-    trace_serial = serial.Serial("/tmp/uart-trace", baudrate=115200)
+    trace_serial = None
+    if not args.simulation_only:
+        trace_serial = serial.Serial("/tmp/uart-trace", baudrate=115200)
 
     # create pty terminal for UART with logs
     console_uart = get_zephyr_chosen("console")
+    console_serial = None
     if console_uart != trace_uart:
         emulation.CreateUartPtyTerminal("console_uart_term", "/tmp/uart-log")
         emulation.Connector.Connect(
             getattr(platform.sysbus, console_uart).internal,
             emulation.externals.console_uart_term,
         )
-        console_serial = serial.Serial("/tmp/uart-log", baudrate=115200)
-        print(f"Writing console ({console_uart}) output to stdout")
-    else:
-        console_serial = None
+        if not args.simulation_only:
+            console_serial = serial.Serial("/tmp/uart-log", baudrate=115200)
+        else:
+            print(f"Writing console ({console_uart}) output to stdout")
 
     if args.sensor is not None:
         if args.sensor_samples is None:
@@ -152,6 +166,12 @@ if __name__ == "__main__":
     simulation_start = time.time()
     try:
         while True:
+            if args.simulation_only:
+                time.sleep(args.timeout if args.timeout else 30)
+                if args.timeout:
+                    break
+                continue
+
             traces = trace_serial.read_all()
             if trace_f is not None:
                 trace_buff += traces
@@ -197,9 +217,10 @@ if __name__ == "__main__":
         if trace_f is not None:
             trace_f.close()
 
-        if console_serial:
+        if console_serial is not None:
             console_serial.close()
-        trace_serial.close()
+        if trace_serial is not None:
+            trace_serial.close()
         emulation.clear()
 
     print("\nExiting...")
