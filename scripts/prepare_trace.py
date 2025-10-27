@@ -326,6 +326,8 @@ def setup_parser(parser: argparse.ArgumentParser):
         "ctf_trace",
         type=Path,
         help="The path to a trace in CTF format",
+        default=None,
+        nargs="?",
     )
     parser.add_argument(
         "-o",
@@ -392,9 +394,11 @@ def setup_parser(parser: argparse.ArgumentParser):
         help="Path to the built Zephyr ELF, required for extracting symbols of memory regions",
     )
     parser.add_argument(
+        "-i",
         "--instrumentation",
-        help="Whether trace is received from instrumentation subsystem",
-        action="store_true",
+        help="The path to a trace received from instrumentation",
+        type=Path,
+        default=None,
     )
     parser.add_argument(
         "--trim-metadata",
@@ -454,18 +458,11 @@ def prepare(args: argparse.Namespace):
 
     multiple_models = False
 
+    if args.ctf_trace is None and args.instrumentation is None:
+        raise argparse.ArgumentError(None, "Please provide at least one trace file")
+
     # Convert CTF
-    if args.instrumentation:
-        with prepare_dir_for_instrumentation(
-            args.ctf_trace, args.build_dir / "ctf_metadata"
-        ) as tmp_dir:
-            tef_trace += instrumentation_ctf_to_tef(
-                str(tmp_dir), args.zephyr_elf_path, args.zephyr_base
-            ).tef["traceEvents"]
-        # Convert timestamps to us
-        for event in tef_trace:
-            event["ts"] = float(event["ts"]) * 1e-3
-    else:
+    if args.ctf_trace:
         with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
             # Detect whether more than one model is used in the trace
             model_ids = set()
@@ -495,6 +492,20 @@ def prepare(args: argparse.Namespace):
                 ),
             )
             tef_trace, thread_name = results.tef, results.thread_names
+    if args.instrumentation:
+        with prepare_dir_for_instrumentation(
+            args.instrumentation, args.build_dir / "ctf_metadata"
+        ) as tmp_dir:
+            instr_trace = instrumentation_ctf_to_tef(
+                str(tmp_dir), args.zephyr_elf_path, args.zephyr_base
+            ).tef["traceEvents"]
+        # Convert timestamps to us
+        for event in instr_trace:
+            # print(event["ph"], event["ts"])
+            event["ts"] = float(event["ts"]) * 1e-3
+            # Set all process ID to 0
+            event["pid"] = 0
+        tef_trace += instr_trace
 
     # If TVM inference was detected, scan through trace and recalculate model numbers
     # based on common prefix of used TVM functions
