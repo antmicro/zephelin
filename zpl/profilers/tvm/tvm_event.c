@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl.h>
 #include <zpl/configuration.h>
 #include <zpl/tvm_event.h>
 
@@ -19,6 +20,7 @@ LOG_MODULE_REGISTER(tvm_event, CONFIG_ZPL_LOG_LEVEL);
 void __zpl_emit_tvm_event(uint64_t cycles, uint8_t op_idx, const char *tag, bool is_exit)
 {
 	ZPL_CONF_RETURN_IF_DISABLED(tvm);
+	ZPL_DISABLE_INSTRUMENTATION {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	zpl_tvm_event_t zpl_tvm_enter_event = {
 		.timestamp = k_cyc_to_ns_floor64(cycles),
@@ -46,6 +48,7 @@ void __zpl_emit_tvm_event(uint64_t cycles, uint8_t op_idx, const char *tag, bool
 	TRACING_STRING("zpl_tvm_%s_event: op_idx=%d tag=%s\n",
 			is_exit ? "exit" : "enter", op_idx, tag);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
+	}
 }
 
 void zpl_emit_tvm_enter_event(uint64_t cycles, uint8_t op_idx, const char *tag)

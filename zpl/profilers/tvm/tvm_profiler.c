@@ -7,6 +7,7 @@
 
 #include <zephyr/logging/log.h>
 #include <zpl/configuration.h>
+#include <zpl.h>
 #include <zpl/time.h>
 #include <zpl/tvm_event.h>
 #include <zpl/tvm_profiler.h>
@@ -75,11 +76,13 @@ int zpl_tvm_profiler_begin_event(void *state, int op_idx, const char *tag)
 	}
 	int event_handle = zpl_state->num_events_;
 
-	zpl_state->begin_cycles_[event_handle] = soft_cycle_get_64();
-	zpl_state->op_idx_[event_handle] = op_idx;
-	zpl_state->tags_[event_handle] = tag;
+	ZPL_DISABLE_INSTRUMENTATION {
+		zpl_state->begin_cycles_[event_handle] = soft_cycle_get_64();
+		zpl_state->op_idx_[event_handle] = op_idx;
+		zpl_state->tags_[event_handle] = tag;
 
-	++(zpl_state->num_events_);
+		++(zpl_state->num_events_);
+	}
 
 	return event_handle;
 }
@@ -92,7 +95,9 @@ void zpl_tvm_profiler_end_event(void *state, int event_handle)
 
 	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
 
-	zpl_state->end_cycles_[event_handle] = soft_cycle_get_64();
+	ZPL_DISABLE_INSTRUMENTATION {
+		zpl_state->end_cycles_[event_handle] = soft_cycle_get_64();
+	}
 }
 
 void zpl_tvm_profiler_dump_events(void *state)

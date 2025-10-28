@@ -23,14 +23,18 @@ int __zpl_scope_enter_exit(int is_leaving, struct zpl_code_scope_conf config)
 
 void zpl_code_scope_enter(struct zpl_code_scope_conf config)
 {
-	if (config.is_enabled) {
-		zpl_emit_scope_event(config.conf_name, 0);
+	ZPL_DISABLE_INSTRUMENTATION {
+		if (config.is_enabled) {
+			zpl_emit_scope_event(config.conf_name, 0);
+		}
 	}
 }
 
 void zpl_code_scope_exit(struct zpl_code_scope_conf config)
 {
-	if (config.is_enabled) {
-		zpl_emit_scope_event(config.conf_name, 1);
+	ZPL_DISABLE_INSTRUMENTATION {
+		if (config.is_enabled) {
+			zpl_emit_scope_event(config.conf_name, 1);
+		}
 	}
 }

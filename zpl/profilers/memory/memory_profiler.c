@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl.h>
 #include <zpl/memory_event.h>
 #include <zpl/configuration.h>
 
@@ -86,10 +87,12 @@ void zpl_profile_memory(void)
 {
 	while (true) {
 		ZPL_CONF_WAIT(memory_profiler);
-		k_thread_foreach(zpl_profile_stack, NULL);
-		zpl_profile_heap();
-		zpl_profile_k_heaps();
-		zpl_profile_memory_slabs();
+		ZPL_DISABLE_INSTRUMENTATION {
+			k_thread_foreach(zpl_profile_stack, NULL);
+			zpl_profile_heap();
+			zpl_profile_k_heaps();
+			zpl_profile_memory_slabs();
+		}
 		k_msleep(CONFIG_ZPL_MEMORY_PROFILING_INTERVAL);
 	}
 }

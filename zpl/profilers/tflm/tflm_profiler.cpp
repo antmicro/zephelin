@@ -10,6 +10,7 @@
 #include <zephyr/logging/log.h>
 
 extern "C" {
+#include <zpl.h>
 #include <zpl/tflm_event.h>
 #include <zpl/time.h>
 #include <zephyr/kernel.h>
@@ -32,17 +33,19 @@ uint32_t TFLMProfiler::BeginEvent(uint16_t subgraph_idx, uint16_t op_idx, const 
 	}
 	int event_handle = num_events_;
 
-	begin_cycles_[event_handle] = soft_cycle_get_64();
-	subgraph_idx_[event_handle] = subgraph_idx;
-	op_idx_[event_handle] = op_idx;
-	tags_[event_handle] = tag;
-	begin_arena_used_bytes_[event_handle] = -1;
-	begin_arena_tail_usage_[event_handle] = -1;
-	if (nullptr != allocator_) {
-		begin_arena_used_bytes_[event_handle] = allocator_->used_bytes();
-		begin_arena_tail_usage_[event_handle] = allocator_->GetDefaultTailUsage(true);
-	} else if (nullptr != interpreter_) {
-		begin_arena_used_bytes_[event_handle] = interpreter_->arena_used_bytes();
+	ZPL_DISABLE_INSTRUMENTATION {
+		begin_cycles_[event_handle] = soft_cycle_get_64();
+		subgraph_idx_[event_handle] = subgraph_idx;
+		op_idx_[event_handle] = op_idx;
+		tags_[event_handle] = tag;
+		begin_arena_used_bytes_[event_handle] = -1;
+		begin_arena_tail_usage_[event_handle] = -1;
+		if (nullptr != allocator_) {
+			begin_arena_used_bytes_[event_handle] = allocator_->used_bytes();
+			begin_arena_tail_usage_[event_handle] = allocator_->GetDefaultTailUsage(true);
+		} else if (nullptr != interpreter_) {
+			begin_arena_used_bytes_[event_handle] = interpreter_->arena_used_bytes();
+		}
 	}
 
 	++num_events_;
@@ -54,14 +57,16 @@ void TFLMProfiler::EndEvent(uint32_t event_handle) {
 		return;
 	}
 
-	end_cycles_[event_handle] = soft_cycle_get_64();
-	end_arena_used_bytes_[event_handle] = -1;
-	end_arena_tail_usage_[event_handle] = -1;
-	if (nullptr != allocator_) {
-		end_arena_used_bytes_[event_handle] = allocator_->used_bytes();
-		end_arena_tail_usage_[event_handle] = allocator_->GetDefaultTailUsage(true);
-	} else if (nullptr != interpreter_) {
-		end_arena_used_bytes_[event_handle] = interpreter_->arena_used_bytes();
+	ZPL_DISABLE_INSTRUMENTATION {
+		end_cycles_[event_handle] = soft_cycle_get_64();
+		end_arena_used_bytes_[event_handle] = -1;
+		end_arena_tail_usage_[event_handle] = -1;
+		if (nullptr != allocator_) {
+			end_arena_used_bytes_[event_handle] = allocator_->used_bytes();
+			end_arena_tail_usage_[event_handle] = allocator_->GetDefaultTailUsage(true);
+		} else if (nullptr != interpreter_) {
+			end_arena_used_bytes_[event_handle] = interpreter_->arena_used_bytes();
+		}
 	}
 }
 

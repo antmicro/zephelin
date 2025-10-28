@@ -19,8 +19,17 @@ config ZPL_TRACE
 	bool "Support for integration with Zephyr tracing subsystem"
 	select TRACING
 
+config ZPL_INSTRUMENTATION
+	bool "Enables instrumentation subsystem"
+	select INSTRUMENTATION
+	select INSTRUMENTATION_CTF_TIMER
+	help
+	  Enables instrumentation subsystem and selects proper time measurements mechanism,
+	  as well as CTF trace format.
+
 choice
 	prompt "Zephelin trace format"
+	default ZPL_TRACE_FORMAT_CTF if ZPL_INSTRUMENTATION
 	default ZPL_TRACE_FORMAT_PLAINTEXT
 	depends on ZPL_TRACE
 
@@ -46,6 +55,14 @@ config ZPL_TRACE_CTF_MAX_LONG_STR_LEN
 	int "Maximum long string length for CTF events"
 	default 60
 	depends on ZPL_TRACE_FORMAT_CTF
+
+config ZPL_INTERNALS_INSTRUMENTATION
+	bool "Instrumentation of Zephelin internal functions"
+	depends on ZPL_INSTRUMENTATION
+	help
+	  Say 'Y' if you want to enable instrumentation of Zephelin internal function,
+	  otherwise all Zephelin files will be excluded from instrumentation.
+	depends on INSTRUMENTATION
 
 module = ZPL
 module-str = Zephelin

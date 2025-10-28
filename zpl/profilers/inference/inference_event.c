@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zpl.h>
 #include <zpl/configuration.h>
 #include <zpl/inference_event.h>
 
@@ -16,6 +17,7 @@
 void zpl_inference_enter(uint32_t model_id)
 {
 	ZPL_CONF_RETURN_IF_DISABLED(inference);
+	ZPL_DISABLE_INSTRUMENTATION {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
 	zpl_inference_event_t zpl_inference_enter_event = {
@@ -35,11 +37,13 @@ void zpl_inference_enter(uint32_t model_id)
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("%s: model_id=0x%x\n", __func__, model_id);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
+	}
 }
 
 void zpl_inference_exit(uint32_t model_id)
 {
 	ZPL_CONF_RETURN_IF_DISABLED(inference);
+	ZPL_DISABLE_INSTRUMENTATION {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
 	zpl_inference_event_t zpl_inference_exit_event = {
@@ -59,4 +63,5 @@ void zpl_inference_exit(uint32_t model_id)
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("%s: model_id=0x%x\n", __func__, model_id);
 #endif /* CONFIG_ZPL_TRACE_FORMAT_* */
+	}
 }
