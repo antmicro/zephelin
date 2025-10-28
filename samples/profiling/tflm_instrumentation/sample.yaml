@@ -14,7 +14,6 @@ common:
     - tflite-micro
 tests:
   sample.tensorflow.helloworld:
-    filter: CONFIG_FULL_LIBC_SUPPORTED
     harness: console
     harness_config:
       type: multi_line
@@ -23,6 +22,12 @@ tests:
         - "x_value:.*, y_value:.*"
         - ""
   sample.tensorflow.helloworld.instrumentation.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: instrumentation.robot
+  sample.tensorflow.helloworld.instrumentation_zpl.robot:
+    min_ram: 100
+    extra_args: EXTRA_CONF_FILE=zpl.conf
     harness: robot
     harness_config:
       robot_testsuite: instrumentation.robot

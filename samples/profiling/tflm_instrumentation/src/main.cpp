@@ -8,6 +8,7 @@
 extern "C" {
 #include <zephyr/kernel.h>
 #include <zephyr/random/random.h>
+#include <zpl.h>
 #include <generated/model0_data.h>
 }
 #include <tflm_model.h>
@@ -24,6 +25,8 @@ extern "C" {
 
 using namespace tflm;
 
+ZPL_CODE_SCOPE_DEFINE(prepare_model, true);
+
 void loop();
 
 void rand_input(float *model_input);
@@ -32,15 +35,21 @@ int main(void)
 {
 	int status = 0;
 
-	model_init();
-	status = model_load(model0_data);
+	ZPL_MARK_CODE_SCOPE(prepare_model) {
+		model_init();
+		status = model_load(model0_data);
+	}
 	if (status) {
 		printk("Model load failed %d\n", status);
 		return 1;
 	}
 
+	unsigned int lock_key;
 	for (int batch_index = 0; batch_index < N_SAMPLES; ++batch_index) {
+		/* Lock IRQ to make sure sys_clock_isr will not be present in the trace */
+		lock_key = irq_lock();
 		loop();
+		irq_unlock(lock_key);
 	}
 
 	return 0;
