@@ -36,6 +36,19 @@ int __zpl_scope_enter_exit(int is_leaving, struct zpl_code_scope_conf scope_conf
 		.is_enabled = enabled, \
 	}
 
+#ifdef CONFIG_INSTRUMENTATION
+#include <zephyr/instrumentation/instrumentation.h>
+
+int __zpl_disable_instr(int __zpl_disable_instr_iter, bool __zpl_instr_enabled);
+
+#define ZPL_DISABLE_INSTRUMENTATION \
+	for (struct {int i; bool enabled;} __zpl_instr = {0, instr_enabled()}; \
+		__zpl_instr.i < __zpl_disable_instr(__zpl_instr.i, __zpl_instr.enabled); \
+		++__zpl_instr.i)
+#else
+#define ZPL_DISABLE_INSTRUMENTATION
+#endif
+
 #ifdef CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT
 #undef sys_trace_named_event
 #define sys_trace_named_event(name, arg0, arg1) zpl_named_event(name, arg0, arg1)
