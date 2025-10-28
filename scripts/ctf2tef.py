@@ -27,9 +27,6 @@ from typing import Any, Callable, NamedTuple
 
 import bt2  # From the babeltrace2 package.
 
-# The first timestamp of the trace
-BASE_TIME = None
-
 
 class EventPhase(Enum):
     """
@@ -122,11 +119,8 @@ def extract_us(msg: bt2._EventMessageConst) -> float:
         The timestamp in microseconds.
     """
     assert msg.default_clock_snapshot.clock_class.frequency == 1e9
-    global BASE_TIME
     ns = msg.default_clock_snapshot.value
-    if BASE_TIME is None:
-        BASE_TIME = ns
-    return (ns - BASE_TIME) * 1e-3
+    return ns * 1e-3
 
 
 def convert_from_bt2(x: Any) -> str | int | float | bool | dict:
