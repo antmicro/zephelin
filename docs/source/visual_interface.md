@@ -44,12 +44,11 @@ The main page of Trace viewer
 To checked out an iterative version of the Zephelin Trace Viewer select one of the examples below:
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json">LiteRT runtime example</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_profiler.json">microTVM runtime example</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_cpu_load.json">CPU load example</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_marking_code_scopes.json">marking code scopes example</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_memory_profiling.json">memory profiling example</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./advanced.json">combined example</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_multi_model.json">LiteRT runtime with two models</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_multi_model.json">microTVM runtime with two models</a>
+* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_tvm_models.json">Running different runtimes at the same time</a>
 
 :::
 
