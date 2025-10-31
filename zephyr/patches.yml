@@ -186,3 +186,15 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-10-31
+  - path: zephyr/instrumentation-subsystem/fixes/0003-use-full-thread-id.patch
+    sha256sum: b2283f0ff045c14581ba2e34f01f7ec6fe12f46fce7e5c0d7d0ae22424879a12
+    module: zephyr
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-31
+  - path: zephyr/instrumentation-subsystem/0009-add-config-to-use-the-same-timer-as-ctf.patch
+    sha256sum: c5a81e81e4bb75835bd17323d631dcaf8ee10a3856e4687621157cca8534d0bc
+    module: zephyr
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-11-05
