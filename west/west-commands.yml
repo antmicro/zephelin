@@ -28,3 +28,6 @@ west-commands:
       - name: zpl-instrumentation-uart-capture
         class: ZplInstrumentationUartCapture
         help: Capture instrumentation traces using UART
+      - name: zpl-instrumentation-uart-gdb-capture
+        class: ZplInstrumentationUartGdbCapture
+        help: Capture instrumentation traces using UART and ZPL traces using GDB
