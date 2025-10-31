@@ -180,3 +180,9 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-10-24
+  - path: tflite-micro/0005-disable-instrumentation-of-custom-methods.patch
+    sha256sum: 866c4a39eeabe10cd3660f614914c09ac4215e79b42d1ba42a77f0ba4d78a6ce
+    module: tflite-micro
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-10-31
