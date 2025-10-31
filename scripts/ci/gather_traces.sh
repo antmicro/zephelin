@@ -53,7 +53,7 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_multi_model.json \
 west build -p -b $BOARD samples/profiling/tvm_multi_model -- ${CTF_CONFS}
 python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
 west zpl-prepare-trace ./channel0_0 -o ./tef_tvm_multi_model.json \
-  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z]+_fused_nn_dense_subtract_add_fixed_point_' \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
   --tvm-model-paths ./samples/common/tvm/model/magic-wand-graph.json \
     ./samples/common/tvm/model/sine-graph.json \
   --tvm-model-metadata-paths ./samples/common/tvm/model/magic-wand-metadata.json \
@@ -68,7 +68,7 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_tvm_models.json \
     ./samples/common/tvm/model/sine2-graph.json \
   --tvm-model-metadata-paths ./samples/common/tvm/model/sine-metadata.json \
     ./samples/common/tvm/model/sine2-metadata.json \
-  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_nn_dense_subtract_add_fixed_point_' \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
   --trim-metadata
 
 ### SMP TVM sample
@@ -80,4 +80,33 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_smp_tvm_models.json \
   --tvm-model-metadata-paths ./samples/common/tvm/model/sine-metadata.json \
     ./samples/common/tvm/model/magic-wand-metadata.json \
   --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
+  --trim-metadata
+
+# TFLM instrumentation with ZPL events
+west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE=zpl.conf
+python3 ./scripts/run_renode.py --simulation-only \
+  --debug &> run_renode_tflm_instrumentation.log &
+RENODE_SIM=$!
+sleep 5
+west zpl-instrumentation-uart-gdb-capture \
+  /tmp/uart-log 115200 ./renode_tflm.instr.ctf ./renode_tflm.gdb.ctf \
+  --no-debug-server --n-bytes 1000
+kill $RENODE_SIM && rm /tmp/uart-log
+west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr.ctf renode_tflm.gdb.ctf \
+  --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
+
+# TVM instrumentation with ZPL events
+west build -p -b $BOARD samples/profiling/tvm_instrumentation -- -DEXTRA_CONF_FILE=zpl.conf
+python3 ./scripts/run_renode.py --simulation-only \
+  --debug &> run_renode_tvm_instrumentation.log &
+RENODE_SIM=$!
+sleep 5
+west zpl-instrumentation-uart-gdb-capture \
+  /tmp/uart-log 115200 ./renode_tvm.instr.ctf ./renode_tvm.gdb.ctf \
+  --no-debug-server --n-bytes 1000
+kill $RENODE_SIM && rm /tmp/uart-log
+west zpl-prepare-trace -o tef_tvm_instrumentation.json -i renode_tvm.instr.ctf renode_tvm.gdb.ctf \
+  --tvm-model-path ./samples/common/tvm/model/sine-graph.json \
+  --tvm-model-metadata ./samples/common/tvm/model/sine-metadata.json \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]*_fused_' \
   --trim-metadata
