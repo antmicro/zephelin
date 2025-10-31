@@ -59,7 +59,7 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_tvm_multi_model.json \
   --tvm-model-metadata-paths ./samples/common/tvm/model/magic-wand-metadata.json \
     ./samples/common/tvm/model/sine-metadata.json
 
-# TFLM and TVM models
+### TFLM and TVM models
 west build -p -b $BOARD samples/profiling/tflm_tvm_models -- ${CTF_CONFS}
 python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
 west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_tvm_models.json \
@@ -69,4 +69,15 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_tvm_models.json \
   --tvm-model-metadata-paths ./samples/common/tvm/model/sine-metadata.json \
     ./samples/common/tvm/model/sine2-metadata.json \
   --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_nn_dense_subtract_add_fixed_point_' \
+  --trim-metadata
+
+### SMP TVM sample
+west build -p -b  mpfs_icicle/polarfire/u54/smp samples/profiling/smp_tvm
+python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
+west zpl-prepare-trace ./channel0_0 -o ./tef_smp_tvm_models.json \
+  --tvm-model-paths ./samples/common/tvm/model/sine-graph.json \
+    ./samples/common/tvm/model/magic-wand-graph.json \
+  --tvm-model-metadata-paths ./samples/common/tvm/model/sine-metadata.json \
+    ./samples/common/tvm/model/magic-wand-metadata.json \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
   --trim-metadata

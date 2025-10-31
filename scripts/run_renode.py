@@ -39,7 +39,7 @@ def get_zephyr_chosen(chosen: str) -> str:
     with open("./build/zephyr/zephyr.dts") as dts_file:
         board_dts = dts_file.read()
 
-    match = re.findall(rf"zephyr,{chosen} = &([a-zA-Z0-9]*);", board_dts, re.MULTILINE)
+    match = re.findall(rf"zephyr,{chosen} = &?([a-zA-Z0-9]*);", board_dts, re.MULTILINE)
     if len(match):
         return match[0]
 
@@ -48,11 +48,13 @@ def get_zephyr_chosen(chosen: str) -> str:
 
 CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 ZEPHYR_DASHBOARD_URL = "https://zephyr-dashboard.renode.io/zephyr_sim/d90d71c42c6d3a81b10b17b5eb5ab3d686b7512f/58aef12522b98e26da67642f9935efa38b6369df"
+REPO_ROOT = str(Path(__file__).parent.parent.resolve())
 REPLS = {
     "max32690fthr": f"{ZEPHYR_DASHBOARD_URL}/max32690fthr_max32690_m4/hello_world/hello_world.repl",
     "max78002evkit": f"{ZEPHYR_DASHBOARD_URL}/max78002evkit_max78002_m4/hello_world/hello_world.repl",  # noqa: E501
     "qemu_cortex_m3": f"{ZEPHYR_DASHBOARD_URL}/qemu_cortex_m3/hello_world/hello_world.repl",
     "stm32f429i_disc1": f"{ZEPHYR_DASHBOARD_URL}/stm32f429i_disc1/hello_world/hello_world.repl",
+    "mpfs_icicle": f"{REPO_ROOT}/samples/profiling/smp_tvm/boards/mpfs_icicle_polarfire_u54_smp.repl",  # noqa: E501
 }
 
 
