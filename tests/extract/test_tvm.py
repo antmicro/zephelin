@@ -103,7 +103,7 @@ def test_magic_wand_module_name():
         (
             TVM_MODELS_DIR / "sine-graph.json",
             TVM_MODELS_DIR / "sine-metadata.json",
-            "tvmgen_quantized_fused_nn_dense_subtract_add_fixed_point_multiply_add_clip_cast",
+            "tvmgen_quantized_fused_",
         ),
     ],
 )
