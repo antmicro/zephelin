@@ -23,7 +23,7 @@ index 000000000..912201dce
 +#define TVM_CRT_GLOBAL_FUNC_REGISTRY_SIZE_BYTES 256
 +
 +/* Maximum number of registered modules. */
-+#define TVM_CRT_MAX_REGISTERED_MODULES 2
++#define TVM_CRT_MAX_REGISTERED_MODULES 4
 +
 +/* Maximum packet size, in bytes, including the length header. */
 +#define TVM_CRT_MAX_PACKET_SIZE_BYTES 32

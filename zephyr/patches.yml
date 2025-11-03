@@ -67,7 +67,7 @@ patches:
     email: mtorhan@antmicro.com
     date: 2025-08-28
   - path: tvm/0001-add-zephyr-files.patch
-    sha256sum: 699117c2caedfe46949ad436b4a228dcfd4c069bbdbe937692d29a786d83c8af
+    sha256sum: 80f8ab2d05ed6f3518104298afe7cf1208f556fdd1fbbe31524ba19f283b2315
     module: tvm
     author: Maciej Torhan
     email: mtorhan@antmicro.com
