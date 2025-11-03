@@ -16,10 +16,12 @@ choice
 config ZPL_TRACE_MINIMAL_MODE
 	bool "Extremely lightweight profiling mode with no persistent trace"
 	imply ZPL_INFERENCE_PROFILING
+	imply TRACING_THREAD if SMP
 
 config ZPL_TRACE_LAYER_PROFILING_MODE
 	bool "Layer-level timing with optional runtime hooks"
 	imply ZPL_INFERENCE_PROFILING
+	imply TRACING_THREAD if SMP
 
 config ZPL_TRACE_FULL_MODE
 	bool "Full profiling mode that enables complete CTF tracing"
