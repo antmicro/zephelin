@@ -10,6 +10,7 @@ This documentation describes the following aspects of Zephelin and the associate
 * {doc}`code_scopes` - describes the use of tracing code scopes
 * {doc}`smp` - describes tracing of multithreading applications
 * {doc}`debug_capture` - provides information on the debug interface for capturing traces
+* {doc}`instrumentation` - shows how to use instrumentation subsystem with Zephelin
 * {doc}`ctf_to_tef` - describes how traces are converted and processed
 * {doc}`visual_interface` - describes the tool for trace visualization
 * {doc}`new_runtime` - depicts how to track a new runtime

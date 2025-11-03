@@ -49,6 +49,8 @@ To checked out an iterative version of the Zephelin Trace Viewer select one of t
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_multi_model.json">LiteRT runtime with two models</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_multi_model.json">microTVM runtime with two models</a>
 * <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_tvm_models.json">Running different runtimes at the same time</a>
+* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json">LiteRT runtime with combined instrumentation subsystem and Zephelin features</a>
+* <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_instrumentation.json">microTVM runtime with combined instrumentation subsystem and Zephelin features</a>
 
 :::
 

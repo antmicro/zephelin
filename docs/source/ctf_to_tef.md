@@ -12,7 +12,7 @@ usage: west zpl-prepare-trace \
   [--tflm-model-paths TFLM_MODEL_PATHS [TFLM_MODEL_PATHS ...]] [--tflm-model-ids TFLM_MODEL_IDS [TFLM_MODEL_IDS ...]] \
   [--tvm-model-paths TVM_MODEL_PATHS [TVM_MODEL_PATHS ...]] [--tvm-model-metadata-paths TVM_MODEL_METADATA_PATHS [TVM_MODEL_METADATA_PATHS ...]] \
   [--tvm-model-op-remove-prefix TVM_MODEL_OP_REMOVE_PREFIX] [--tvm-model-op-remove-suffix TVM_MODEL_OP_REMOVE_SUFFIX] \
-  [--build-dir BUILD_DIR] [--zephyr-elf-path ZEPHYR_ELF_PATH] [--instrumentation] \
+  [--build-dir BUILD_DIR] [--zephyr-elf-path ZEPHYR_ELF_PATH] [-i INSTRUMENTATION] \
   ctf_trace
 ```
 
@@ -34,13 +34,18 @@ There are several optional arguments available:
 * `--tvm-model-op-remove-suffix` - the provided regular expression is used to remove microTVM operator type suffixes.
   Applied on operator types. Default value is `_\d*$`.
 
-* `--instrumentation` - the option indicating `ctf_trace` was produced by the instrumentation subsystem.
+* `-i` or `--instrumentation` - the option to provide traces produced by the instrumentation subsystem.
+* `ctf_trace` - path to the trace produced by Zephelin, the script requires at least one trace either from Zephelin or instrumentation.
 * `-o` - the file path which points to the file where the converted trace should be saved.
   If not provided, the JSON will be printed to STDOUT.
 
 Apart from changing the format, this involves a custom logic which can group elements into {{TEF_Duration}} events, and extend their arguments (see [](converted-events)).
 Completely new events can be added to the trace, extending the context, and improving the trace visualization capabilities (see [](optional-events)).
 Furthermore, the command also converts timestamps from nanoseconds (used in CTF) to microseconds, which are valid for Zephelin Trace Viewer and Speedscope (it assumes that the timestamps are provided in such unit).
+
+When two traces are provided, from Zephelin and instrumentation, the script will try to combine them.
+If the instrumentation trace has unfinished events, they will be automatically closed ensuring they do not collide with Zephelin events.
+Also, events without a beginning will be removed.
 
 ## Events
 
