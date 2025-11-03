@@ -225,7 +225,7 @@ class IRParser:
             for op_name, op in function_metadata.items():
                 # Skip generic tvm_main function
                 # and all reshape functions as they are the same as __nop
-                if op_name == "__tvm_main__" or re.match(r".*_reshape(?:_[0-9]+)?", op_name):
+                if op_name == "__tvm_main__" or re.match(r"^.*_reshape(?:_[0-9]+)?$", op_name):
                     continue
 
                 func_names.add(op_name)
