@@ -24,7 +24,7 @@ void __zpl_emit_tvm_event(uint64_t cycles, uint8_t op_idx, const char *tag, bool
 		.timestamp = k_cyc_to_ns_floor64(cycles),
 		.id = is_exit ? ZPL_TVM_END_EVENT : ZPL_TVM_BEGIN_EVENT,
 		.cpu_id = arch_curr_cpu()->id,
-		.thread_id = (uint32_t)k_current_get(),
+		.thread_id = (uint32_t)(uintptr_t)k_current_get(),
 		.op_idx = op_idx,
 		.tag_len = CONFIG_ZPL_TRACE_CTF_MAX_LONG_STR_LEN,
 		.stream_id = 1,
