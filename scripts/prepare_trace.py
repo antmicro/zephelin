@@ -502,10 +502,13 @@ def prepare(args: argparse.Namespace):
     if TVM_EVENTS:
         from extract_tvm_model_data import tvm_recalculate_model_numbers
 
+        # Exclude ID 0 reported by TVM for all models, as TVM models' IDs are recalculated
+        # based on the OP prefixes and the trace is updated to contain these IDs
+        if 0 in MODEL_IDS_MAPPING:
+            MODEL_IDS_MAPPING.pop(0)
+
         tef_trace, tvm_prefix_to_model_id = tvm_recalculate_model_numbers(
-            tef_trace,
-            # Decrease by one to exclude ID 0 reported by TVM for all models
-            len(MODEL_IDS_MAPPING) - 1,
+            tef_trace, len(MODEL_IDS_MAPPING)
         )
         MODEL_IDS_MAPPING.update(tvm_prefix_to_model_id)
 
