@@ -1,0 +1,22 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: tvm_instrumentation
+common:
+  tags: profiling
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
+tests:
+  sample.profiling.tvm_instrumentation.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: instrumentation.robot
+  sample.profiling.tvm_instrumentation_zpl.robot:
+    min_ram: 100
+    extra_args: EXTRA_CONF_FILE=zpl.conf
+    harness: robot
+    harness_config:
+      robot_testsuite: instrumentation.robot

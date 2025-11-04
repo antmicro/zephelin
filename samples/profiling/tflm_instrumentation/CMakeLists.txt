@@ -5,6 +5,8 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../common/instrumentation/boards.cmake)
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(tensorflow_hello_world)
 
