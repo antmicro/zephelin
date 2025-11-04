@@ -27,11 +27,6 @@ from typing import Any, Callable, NamedTuple
 
 import bt2  # From the babeltrace2 package.
 
-# Currently neither Speedscope nor Perfetto support
-# instantaneous event, therefore a small "quant" of time is used
-# to represent event length.
-# Later on, a separate visualization feature can be added for such events.
-INSTANT_EVENT_LENGTH = 1.0
 # The first timestamp of the trace
 BASE_TIME = None
 
@@ -395,18 +390,7 @@ def ctf_to_tef(
         # Check whether thread has changed
         if msg.event.name == "thread_switched_in":
             current_thread[msg.event.payload_field["cpu_id"]] = thread_id = int(fields["thread_id"])
-        # Add instantaneous event representation
-        converted += [
-            emit_event(msg, msg.event.name, thread_id, EventPhase.BEGIN, skip_args=skip_args),
-            emit_event(
-                msg,
-                msg.event.name,
-                thread_id,
-                EventPhase.END,
-                INSTANT_EVENT_LENGTH,
-                skip_args,
-            ),
-        ]
+
     return CTFConversionResult(converted, thread_name)
 
 
