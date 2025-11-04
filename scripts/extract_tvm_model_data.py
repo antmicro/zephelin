@@ -372,10 +372,14 @@ def tvm_recalculate_model_numbers(
             )
         model_num = prefix_to_model_number[common_prefix]
         inference_start_id = thread_inference_start[thread_id]
+        # Calculate end margin, as events with the same timestamp can be placed in random order
+        for end_margin, e in enumerate(tef_trace[i + 1 :]):
+            if e["tid"] == event["tid"] and e["ts"] > event["ts"]:
+                break
         # Update model events names to contain new model number
         for model_event in [
             e
-            for e in tef_trace[inference_start_id + 1 : i]
+            for e in tef_trace[inference_start_id + 1 : i + end_margin + 1]
             if e["name"].startswith(MODEL_EVENT_NAME) and e["tid"] == thread_id
         ]:
             model_event["name"] = re.sub(
