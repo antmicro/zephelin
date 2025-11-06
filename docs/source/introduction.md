@@ -8,6 +8,7 @@ This documentation describes the following aspects of Zephelin and the associate
 * {doc}`configuration` - describes build-time and runtime configuration of Zephelin library
 * {doc}`memory_profiling` - describes memory profiling, along with memory events
 * {doc}`code_scopes` - describes the use of tracing code scopes
+* {doc}`smp` - describes tracing of multithreading applications
 * {doc}`debug_capture` - provides information on the debug interface for capturing traces
 * {doc}`ctf_to_tef` - describes how traces are converted and processed
 * {doc}`visual_interface` - describes the tool for trace visualization
