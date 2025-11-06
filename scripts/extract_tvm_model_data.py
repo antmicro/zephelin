@@ -339,6 +339,17 @@ def tvm_recalculate_model_numbers(
     """
     from prepare_trace import INFERENCE_EVENT_NAME, MODEL_EVENT_NAME, TVMGEN_PREFIX_ARG
 
+    def update_model_event(model_event, model_num):
+        model_event["name"] = re.sub(
+            rf"{MODEL_EVENT_NAME}[0-9]*::",
+            f"{MODEL_EVENT_NAME}{model_num}::",
+            model_event["name"],
+        )
+
+    def update_inference_event(inference_event, model_num):
+        inference_event["name"] = f"{INFERENCE_EVENT_NAME}{model_num}"
+        inference_event["args"]["model_id"] = model_num
+
     thread_inference_start = {}
     prefix_to_model_number = {}
     for i, event in enumerate(tef_trace):
@@ -382,17 +393,53 @@ def tvm_recalculate_model_numbers(
             for e in tef_trace[inference_start_id + 1 : i + end_margin + 1]
             if e["name"].startswith(MODEL_EVENT_NAME) and e["tid"] == thread_id
         ]:
-            model_event["name"] = re.sub(
-                rf"{MODEL_EVENT_NAME}[0-9]*::",
-                f"{MODEL_EVENT_NAME}{model_num}::",
-                model_event["name"],
-            )
+            update_model_event(model_event, model_num)
         # Update inference events and its model ids
         for e in (event, tef_trace[thread_inference_start[thread_id]]):
-            e["name"] = f"{INFERENCE_EVENT_NAME}{model_num}"
-            e["args"]["model_id"] = model_num
+            update_inference_event(e, model_num)
         del event["args"][TVMGEN_PREFIX_ARG]
         thread_inference_start[thread_id] = None
+
+    # Try to deduce model ID for unfinished INFERENCE:: events
+    to_remove = []
+    for thread_id, inference_start in thread_inference_start.items():
+        if inference_start is None:
+            continue
+
+        model_events = [
+            e
+            for e in tef_trace[inference_start + 1 :]
+            if e["tid"] == thread_id and e["name"].startswith(MODEL_EVENT_NAME)
+        ]
+        if not model_events:
+            to_remove.append(inference_start)
+            continue
+
+        inference_event = tef_trace[inference_start]
+        op_names = [e["args"]["tag"] for e in model_events]
+        common_prefix = get_common_prefix(op_names)
+        # As there is no guarantee that all OP events were captured,
+        # common prefix can be longer than the real prefix of the whole model
+        matching_prefixes = [common_prefix.startswith(k) for k in prefix_to_model_number.keys()]
+        if (matches := sum(matching_prefixes)) > 1 or matches == 0:
+            print(
+                f"{inference_event['name']} ({inference_event['ts']:.2f}us) "
+                "cannot be matched to a one model"
+            )
+            continue
+
+        model_num = prefix_to_model_number[matching_prefixes.index(True)]
+        for e in model_events:
+            update_model_event(e, model_num)
+        update_inference_event(inference_event, model_num)
+
+    for idx in sorted(to_remove, reverse=True):
+        e = tef_trace.pop(idx)
+        print(
+            f"{e['name']} ({e['ts']:.2f}us) does not have any MODEL events - "
+            "model ID cannot be deduced; removing the event"
+        )
+
     return tef_trace, prefix_to_model_number
 
 
