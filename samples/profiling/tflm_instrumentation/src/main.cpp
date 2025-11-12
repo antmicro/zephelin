@@ -9,6 +9,7 @@ extern "C" {
 #include <zephyr/kernel.h>
 #include <zephyr/random/random.h>
 #include <zpl.h>
+#include <zpl/configuration.h>
 #include <generated/model0_data.h>
 }
 #include <tflm_model.h>
