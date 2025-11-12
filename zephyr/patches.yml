@@ -204,3 +204,9 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-11-05
+  - path: zephyr/instrumentation-subsystem/0010-add-option-to-dump-events-when-buffer-is-full.patch
+    sha256sum: af906f3e934b1c93f30b0e794d50297ca6f1cafb3ba08da02cf560ac7fcb0401
+    module: zephyr
+    author: Eryk Szpotanski
+    email: eszpotanski@antmicro.com
+    date: 2025-11-12
