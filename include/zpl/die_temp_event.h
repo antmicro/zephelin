@@ -10,7 +10,7 @@
 #define ZPL_DIE_TEMP_EVENT_H_
 
 /**
- * DIE temperature profiling.
+ * Die temperature profiling.
  */
 
 #include <zephyr/kernel.h>
@@ -21,11 +21,11 @@ extern "C" {
 #endif
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
-/* DIE temp event ID */
+/* Die temp event ID */
 #define ZPL_DIE_TEMP_EVENT 0xC1
 
 /**
- * DIE temperature event structure.
+ * Die temperature event structure.
  */
 typedef struct __packed {
 	uint16_t stream_id;
@@ -38,7 +38,7 @@ typedef struct __packed {
 #endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) */
 
 /**
- * Emits DIE temperature event.
+ * Emits Die temperature event.
  */
 void zpl_emit_die_temp_event(void);
 

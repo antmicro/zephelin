@@ -235,7 +235,7 @@ It is converted from the CTF event `zpl_cpu_load_event`.
 (die-temp-event)=
 #### `DIE_TEMP`
 
-The {{TEF_Metadata}} event providing DIE temperatures (`die_temp` array with at most two measurements, in degrees Celsius) for a given timestamp (`ts`).
+The {{TEF_Metadata}} event providing die temperatures (`die_temp` array with at most two measurements, in degrees Celsius) for a given timestamp (`ts`).
 It is converted from the CTF event `zpl_die_temp_event`.
 
 :::{example} `DIE_TEMP` metadata example

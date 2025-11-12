@@ -76,12 +76,12 @@ The microTVM model information example
 
 ### Plot panels
 
-The trace viewer can also visualize resource usage (like memory or CPU load) or data from sensors (such as DIE temperature) using plots ({numref}`plots_fig`).
+The trace viewer can also visualize resource usage (like memory or CPU load) or data from sensors (such as die temperature) using plots ({numref}`plots_fig`).
 
 Panels with these plots are automatically created whenever a trace with necessary data is loaded:
 * [](memory-event) events for memory plots,
 * [](cpu-load-event) events for CPU load plot,
-* [](die-temp-event) events for DIE temperature plot.
+* [](die-temp-event) events for die temperature plot.
 
 
 :::{figure-md} plots_fig

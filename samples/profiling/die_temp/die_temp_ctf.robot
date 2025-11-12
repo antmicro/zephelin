@@ -8,7 +8,7 @@ Resource			../../common/socket.robot
 Library				../../common/TraceTester.py
 
 *** Test Cases ***
-Should Display DIE Temp
+Should Display Die Temp
 	Prepare Machine
 
 	Set Up Socket Terminal
