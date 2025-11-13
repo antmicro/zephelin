@@ -2,3 +2,4 @@ https://github.com/antmicro/antmicro-sphinx-utils/archive/main.zip
 sphinx-tabs
 tqdm
 requests
+pipeline_manager[to-image] @ https://github.com/antmicro/kenning-pipeline-manager/archive/main.zip
