@@ -65,6 +65,7 @@ if (ZPL_CONF_IS_ENABLED(memory_profiler)) {
 }
 ```
 
+(return-if-disabled)=
 ##### Return-if-disabled function
 
 The "return-if-disabled" is a convenience macro using `ZPL_CONF_IS_ENABLED` to return if it evaluates to `false`.
@@ -187,16 +188,6 @@ You can choose how the traces will be delivered to the host PC by selecting one 
 
 Depending on the tracing backend used, the following commands can be used for trace capture.
 
-## Adding new trace backends
-
-The `TRACING_BACKEND_DEFINE` from `tracing_backend.h` can be used. Two symbols
-need to be provided to this macro:
-* `tracing_backend_init`, which initializes the backend, and
-* `tracing_backend_output`, which is used to output data through the backend.
-
-The Renode Trivial UART backend ({zpl_repo}`zpl/backends/trivial_uart_backend.c`) can be
-used as an example of adding new backends in Zephelin.
-
 ## Profiling tiers
 
 The library supports three distinct profiling tiers, each offering a different balance of performance impact and tracing detail:
@@ -223,13 +214,14 @@ The library supports three distinct profiling tiers, each offering a different b
     * networking (core, sockets),
     * various hardware interfaces (GPIO, idle state tracking).
 
+(adding-new-configurations)=
 ## Adding new configurations
 
 Depending on the selected Zephelin integration, the source files in projects need to be adjusted, as described in the following subsections.
 
 ### Build-time configuration
 
-The build-time configurations can be added to the `zpl/Kconfig` file.
+The build-time configurations can be added to the {zpl_repo}`zpl/Kconfig` file.
 The config should follow the Kconfig standard.
 For example:
 
@@ -260,7 +252,7 @@ New runtime configurations can be defined in the configuration source files.
 
 #### New configuration entry
 
-To add a new configuration entry, add it to the list of existing ones in `include/zpl/configuration.h`, e.g.:
+To add a new configuration entry, add it to the list of existing ones in {zpl_repo}`include/zpl/configuration.h`, e.g.:
 
 ```C
 #define CONFIGS(CONFIG)                                                           \

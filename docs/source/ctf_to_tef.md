@@ -47,6 +47,7 @@ When two traces are provided, from Zephelin and instrumentation, the script will
 If the instrumentation trace has unfinished events, they will be automatically closed ensuring they do not collide with Zephelin events.
 Also, events without a beginning will be removed.
 
+(trace-events)=
 ## Events
 
 (converted-events)=
