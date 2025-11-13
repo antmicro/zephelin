@@ -1,13 +1,47 @@
-# Zephelin project
+# Zephelin
 
-Zephelin is implemented as a West module.
-The Zephelin repository consists of the following elements:
+Zephyr Profiling Library, or Zephelin for short, is a Zephyr RTOS library which enables capturing and reporting runtime performance metrics with a special focus on AI runtimes.
 
-* Zephelin library
-* Custom configurations of boards based on MAX78002 and MAX32690 - for testing purposes
-* Sample applications, which also serve as integration tests
-* Unit tests
-* Patches to Zephyr RTOS
+It collects traces from execution with either:
+
+* **Tracing subsystem and predefined or user-provided events** - allowing to track functions, sections of code, loops, ...
+* **Instrumentation subsystem** - allowing to leverage compiler's instrumentation feature to automatically trace functions defined in the source, with a possibility to filter functions of interest
+
+Zephelin is an [official external module for Zephyr RTOS](https://docs.zephyrproject.org/latest/develop/manifest/external/zephelin.html).
+
+## Use cases for Zephelin
+
+Zephelin can be used to analyze:
+
+* Regular Zephyr applications
+* Internals of the Zephyr RTOS with the help of [Instrumentation subsystem](instrumentation)
+* AI models
+* AI runtimes
+* Multithreaded applications
+
+## Data collected by Zephelin
+
+```{pipeline_manager}
+:spec: ./zephelin-flow-spec.json
+:graph: ./zephelin-flow-graph.json
+:preview: true
+```
+
+Zephelin collects:
+
+* Traces
+* User-defined code scopes
+* CPU load
+* Memory usage (from runtime and RAM/ROM reports)
+* Die temperature
+* Model-related data:
+    * Global - inference time
+    * Per-layer:
+        * Memory consumption
+        * Total time of individual layers and layers' types
+        * Dimensions of tensors
+
+The above data is later processed by `west zpl-<backend>-capture` commands (described in [Trace collection](#trace-collection)) and enhanced using `west zpl-prepare-trace` (described in [CTF and TEF trace processing](ctf_to_tef)).
 
 ## Initializing the workspace
 
