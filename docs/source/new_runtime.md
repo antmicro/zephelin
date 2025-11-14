@@ -205,7 +205,7 @@ Based on that, [`INFERENCE` events](model-inference-event) are updated to contai
 Moreover, in the same way, model's ID can be matched to model's metadata.
 
 :::{only} html and trace_viewer
-With implementation like this, the Trace Viewer will have enabled all runtime-specific visualizations, like in the <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json">TFLM runtime example</a>.
+With implementation like this, the Trace Viewer will have enabled all runtime-specific visualizations, like in the [TFLM runtime example](_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json){.external}.
 :::
 
 

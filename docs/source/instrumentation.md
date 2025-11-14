@@ -42,8 +42,8 @@ The merging mechanism also ensures that traces do not collide and can be visuali
 
 :::{only} html and trace_viewer
 Interactive version of instrumentation examples:
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json">LiteRT runtime</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_instrumentation.json">microTVM runtime</a>
+* [LiteRT runtime](_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json){.external}
+* [microTVM runtime](_static/trace_viewer/index.html#profileURL=./tef_tvm_instrumentation.json){.external}
 :::
 
 ## Additional options

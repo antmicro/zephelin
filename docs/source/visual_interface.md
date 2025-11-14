@@ -42,15 +42,16 @@ The main page of Trace viewer
 :::{only} html and trace_viewer
 
 To checked out an iterative version of the Zephelin Trace Viewer select one of the examples below:
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json">LiteRT runtime example</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_profiler.json">microTVM runtime example</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_marking_code_scopes.json">marking code scopes example</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./advanced.json">combined example</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_multi_model.json">LiteRT runtime with two models</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_multi_model.json">microTVM runtime with two models</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_tvm_models.json">Running different runtimes at the same time</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json">LiteRT runtime with combined instrumentation subsystem and Zephelin features</a>
-* <a href="_static/trace_viewer/index.html#profileURL=./tef_tvm_instrumentation.json">microTVM runtime with combined instrumentation subsystem and Zephelin features</a>
+* [LiteRT runtime example](_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json){.external}
+* [microTVM runtime example](_static/trace_viewer/index.html#profileURL=./tef_tvm_profiler.json){.external}
+* [marking code scopes example](_static/trace_viewer/index.html#profileURL=./tef_marking_code_scopes.json){.external}
+* [combined example](_static/trace_viewer/index.html#profileURL=./advanced.json){.external}
+* [LiteRT runtime with two models](_static/trace_viewer/index.html#profileURL=./tef_tflm_multi_model.json){.external}
+* [microTVM runtime with two models](_static/trace_viewer/index.html#profileURL=./tef_tvm_multi_model.json){.external}
+* [Running different runtimes at the same time](_static/trace_viewer/index.html#profileURL=./tef_tflm_tvm_models.json){.external}
+* [LiteRT runtime with combined instrumentation subsystem and Zephelin features](_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json){.external}
+* [microTVM runtime with combined instrumentation subsystem and Zephelin features](_static/trace_viewer/index.html#profileURL=./tef_tvm_instrumentation.json){.external}
+* [Multithreaded application running multiple models in parallel](_static/trace_viewer/index.html#profileURL=./tef_smp_tvm_models.json){.external}
 
 :::
 
