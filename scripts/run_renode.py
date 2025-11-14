@@ -62,6 +62,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(__doc__, allow_abbrev=False)
     parser.add_argument("--debug", action="store_true", help="Enable GDB server")
     parser.add_argument(
+        "--debug-start-immediately",
+        action="store_true",
+        help="Do not wait for input after spawning GDB server",
+    )
+    parser.add_argument(
         "--repl", type=Path, help="Path to board REPL, if not specified then default is used"
     )
     parser.add_argument("--sensor", type=str, help="DTS path to sensor, i.e. i2c1.lis2ds12")
@@ -91,13 +96,6 @@ if __name__ == "__main__":
         platform.load_repl(str(args.repl.resolve()))
 
     platform.load_elf(f"{build_path}/zephyr/zephyr.elf")
-
-    if args.debug:
-        platform.StartGdbServer(3333)
-        print("gdb server started at :3333")
-        if not args.simulation_only:
-            print("Press ENTER to start simulation")
-            input()
 
     # create pty terminal for UART with traces
     trace_uart = None
@@ -155,6 +153,18 @@ if __name__ == "__main__":
         print(f"Writing tracing-uart ({trace_uart}) output to {args.trace_output} file")
     else:
         trace_f = None
+
+    if args.debug:
+        platform.StartGdbServer(3333)
+        print("gdb server started at :3333")
+        if not args.debug_start_immediately:
+            print("Press ENTER to start simulation")
+            inp = None
+            try:
+                inp = input()
+            except EOFError:
+                # Assuming the run_renode.py was used inside the script, waiting for 20s
+                time.sleep(20)
 
     trace_idx = 0
     trace_buff = b""
