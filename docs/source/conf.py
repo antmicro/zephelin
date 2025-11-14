@@ -57,7 +57,7 @@ extensions = default_extensions + [
     "sphinx_tabs.tabs",
     "pipeline_manager.sphinxext.draw_graph",
 ]
-myst_enable_extensions = default_myst_enable_extensions
+myst_enable_extensions = default_myst_enable_extensions + ["attrs_inline"]
 myst_fence_as_directive = default_myst_fence_as_directive
 
 myst_substitutions = {
