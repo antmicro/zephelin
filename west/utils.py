@@ -70,3 +70,31 @@ def start_debugserver(gdb_port: int, openocd: Path | None = None) -> subprocess.
 
     time.sleep(2)
     return proc_debugserver
+
+
+def get_kconfigs(build_dir: Path | None = None) -> dict[str, str | None]:
+    """
+    Returns configs used for the current build application.
+    """
+    if build_dir is None:
+        build_dir = zephyr_build_dir()
+
+    config_file = build_dir / "zephyr" / ".config"
+    if not config_file.exists():
+        return []
+
+    with config_file.open("r") as fd:
+        configs = fd.read()
+
+    configs = [c for c in configs.splitlines() if "CONFIG_" in c]
+    conf_val = {}
+    for c_line in configs:
+        if c_line.startswith("# ") and c_line.endswith(" is not set"):
+            conf_val[c_line[2:-11]] = None
+            continue
+        if c_line.startswith("# "):
+            continue
+        c, val = c_line.split("=", 1)
+        conf_val[c] = val
+
+    return conf_val
