@@ -4,7 +4,7 @@ This chapter covers and links to resources and paths related to development and 
 
 ## General Zephyr development guidelines
 
-With regard to code styling and configuration, this project follows Zephyr's development guidelines and linting rules - for more details check [General guidelines for Zephyr](https://docs.zephyrproject.org/latest/contribute/index.html)
+With regard to code styling and configuration, this project follows Zephyr's development guidelines and linting rules - for more details check [General guidelines for Zephyr](https://docs.zephyrproject.org/latest/contribute/index.html).
 
 For setting up development environment check the [Zephelin project introduction](library).
 
@@ -101,7 +101,7 @@ void zpl_emit_cpu_load_event(void);
 #endif
 ```
 
-The `ZPL_CPU_LOAD_EVENT 0xC0` is a unique event ID - for the list of existing events' IDs check either {zpl_repo}`zpl/metadata` events' metadata file or in [Events documentation](trace-events).
+The `ZPL_CPU_LOAD_EVENT 0xC0` is a unique event ID - for the list of existing events' IDs check either {zpl_repo}`zpl/metadata` events' metadata file or in [Events documentation](trace-events), which describe events for both CTF and TEF format.
 The `zpl_cpu_load_event_t` structure holds:
 
 * `stream_id` - ID of the stream for data, currently `1` is used for AI runtimes and `0` for the remaining events
@@ -183,4 +183,4 @@ K_THREAD_DEFINE(zpl_cpu_load_profiling,
 ```
 
 This will emit events either in text or CTF format.
-The CTF traces later will be parsed by {zpl_repo}`scripts/ctf2tef.py` script to generate TEF traces for Trace Viewer to obtain.
+The CTF traces later will be parsed by {zpl_repo}`scripts/ctf2tef.py` script to generate TEF traces for Trace Viewer to obtain - check {doc}`ctf_to_tef` for more details.

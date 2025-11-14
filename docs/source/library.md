@@ -43,6 +43,7 @@ Zephelin collects:
 
 The above data is later processed by `west zpl-<backend>-capture` commands (described in [Trace collection](#trace-collection)) and enhanced using `west zpl-prepare-trace` (described in [CTF and TEF trace processing](ctf_to_tef)).
 
+(setting-up-workspace)=
 ## Initializing the workspace
 
 First, make sure all dependencies required by [Zephyr RTOS](https://www.zephyrproject.org/) are installed - follow the [Getting started guide](https://docs.zephyrproject.org/latest/develop/getting_started/index.html).
@@ -121,6 +122,7 @@ Finally, download Zephyr SDK:
 west sdk install
 ```
 
+(running-samples)=
 ## Running a sample project with Zephelin
 
 To collect traces and visualize them using Zephelin Trace Viewer, you can run {zpl_repo}`a simple demo with gesture recognition <samples/demo>`, based on the data from an accelerometer.
