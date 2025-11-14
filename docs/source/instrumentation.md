@@ -69,3 +69,16 @@ It is achieved by adding source files to the exclude file list and using:
 
 In order to enable instrumentation for Zephelin's internal functions the `CONFIG_ZPL_INTERNALS_INSTRUMENTATION` can be used.
 It prevents source file from being added in the exclude list and disables both `__no_zpl_instrumentation__` and `ZPL_DISABLE_INSTRUMENTATION`.
+
+### Dumping events when instrumentation buffer is full
+
+Instead of disabling instrumentation subsystem when buffer is filled or overwriting the existing data, the subsystem can also dump all events to make space in the buffer.
+This option can be enabled with `CONFIG_INSTRUMENTATION_MODE_CALLGRAPH_DUMP_ON_FULL=y`.
+
+The `zpl-instrumentation-uart-capture` and `zpl-instrumentation-uart-gdb-capture` commands can automatically detect whether `DUMP_ON_FULL` was used and adjust capturing mechanism accordingly.
+Similarly to Zephelin, instrumentation subsystem sends init tag at the start of the application.
+It is detected by the West commands, to save traces into separate file, therefore it is advised to start `zpl-instrumentation-uart-capture` command before flashing or restarting the board.
+Next, the commands wait for binary messages until user stops it or there is no new message received in specified timeout.
+Also, to make sure all events are captured, after the timeout, the commands send `dump_trace` and gather remaining data from the buffer.
+
+The example of this mechanism can be found in {zpl_repo}`samples/profiling/tflm_instrumentation`.
