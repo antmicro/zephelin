@@ -340,7 +340,7 @@ def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict])
         instr_trace.pop(i)
     if removed:
         print(
-            "Removed ends of following events as they do not had beginnings:\n\t"
+            "Removed ends of following events as they do not have beginnings:\n\t"
             + "\n\t".join(f"{e['name']} ({e['ts']:.2f}us)" for e in removed)
         )
     # Find last timestamps per thread
@@ -368,19 +368,26 @@ def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict])
     # Scan instrumentation events and fix timestamps
     # making sure parents do not end before children
     adjusted = []
+    to_remove = []
     for instr_id, instr_beg_ev in enumerate(instr_trace[:]):
         if instr_beg_ev["ph"] != "B":
             continue
         # Get end instrumentation event
-        instr_end_ev = next(
+        instr_end_id, instr_end_ev = next(
             filter(
-                lambda e: matching_events(e, instr_beg_ev) and e["ph"] == "E",
-                instr_trace[instr_id + 1 :],
+                lambda ie: matching_events(ie[1], instr_beg_ev) and ie[1]["ph"] == "E",
+                enumerate(instr_trace[instr_id + 1 :]),
             ),
-            None,
+            (None, None),
         )
         if instr_end_ev is None:
             print(f"Cannot find end of {e['name']} event")
+            continue
+        instr_end_id += instr_id + 1
+        # Remove events with invalid timestamp
+        # Events from the instrumentation should be reported consecutively across threads
+        if instr_end_ev["ts"] < instr_beg_ev["ts"]:
+            to_remove.extend((instr_end_id, instr_id))
             continue
 
         ts = instr_beg_ev["ts"]
@@ -417,6 +424,9 @@ def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict])
                 adjusted.append(instr_end_ev)
                 break
             ts = zpl_end_ev["ts"]
+    if to_remove:
+        removed = set([instr_trace.pop(i)["name"] for i in sorted(to_remove, reverse=True)])
+        print("Removed events whose ends are before beginnings:\n\t" + "\n\t".join(removed))
     if adjusted:
         print(
             "Adjusted ends for following instrumentation events, "
