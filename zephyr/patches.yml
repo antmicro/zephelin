@@ -66,6 +66,12 @@ patches:
     author: Maciej Torhan
     email: mtorhan@antmicro.com
     date: 2025-08-28
+  - path: zephyr/twister/0001-twister-scripts-add-missing-failure-reason-in-Robot-.patch
+    sha256sum: aaa8938104682a9806d4d533ed351aeef41795a8d1a30e8edb53653ea8c7671e
+    module: zephyr
+    author: Maciej Torhan
+    email: mtorhan@antmicro.com
+    date: 2025-11-14
   - path: tvm/0001-add-zephyr-files.patch
     sha256sum: 80f8ab2d05ed6f3518104298afe7cf1208f556fdd1fbbe31524ba19f283b2315
     module: tvm

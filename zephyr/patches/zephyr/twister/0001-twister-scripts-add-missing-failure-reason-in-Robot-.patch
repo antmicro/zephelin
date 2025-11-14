@@ -1,0 +1,28 @@
+From fc4512f892d1148bb4823968fedd7761741cddaa Mon Sep 17 00:00:00 2001
+From: Maciej Torhan <mtorhan@antmicro.com>
+Date: Fri, 14 Nov 2025 11:50:45 +0100
+Subject: [PATCH] twister: scripts: add missing failure reason in Robot test
+ runner
+
+Add failure reason with return code when Renode process fails
+
+Signed-off-by: Maciej Torhan <mtorhan@antmicro.com>
+---
+ scripts/pylib/twister/twisterlib/harness.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/scripts/pylib/twister/twisterlib/harness.py b/scripts/pylib/twister/twisterlib/harness.py
+index 3e8511e9d61..aa55af865eb 100644
+--- a/scripts/pylib/twister/twisterlib/harness.py
++++ b/scripts/pylib/twister/twisterlib/harness.py
+@@ -243,6 +243,7 @@ class Robot(Harness):
+                     f"Robot test failure: {handler.sourcedir} for {self.instance.platform.name}"
+                 )
+                 self.instance.status = TwisterStatus.FAIL
++                self.instance.reason = f"Exited with {renode_test_proc.returncode}"
+                 self.instance.testcases[0].status = TwisterStatus.FAIL
+ 
+             if out:
+-- 
+2.51.2
+
