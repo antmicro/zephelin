@@ -16,7 +16,7 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: 16f4d6c23e401eaa0664c3f3b606f988b6b9dada
+      revision: v4.3.0
       import:
         name-allowlist:
           - cmsis_6
