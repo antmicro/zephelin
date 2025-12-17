@@ -240,9 +240,9 @@ For instance, in order to trace the main inference loop of TFLM instrumentation 
 Then, after the board is flashed, the trigger and stopper can be set with the `zaru` script:
 ```bash
 # Sets main loop as a trigger and stopper
-${ZEPHYR_BASE}/scripts/zaru.py --serial ${UART_PORT} trace -c ${LOOP_SYMBOL}
+${ZEPHYR_BASE}/scripts/instrumentation/zaru.py --serial ${UART_PORT} trace -c ${LOOP_SYMBOL}
 # Reboot the board, to capture the trace with selected
-${ZEPHYR_BASE}/scripts/zaru.py --serial ${UART_PORT} reboot
+${ZEPHYR_BASE}/scripts/instrumentation/zaru.py --serial ${UART_PORT} reboot
 ```
 
 Currently, trace from instrumentation subsystem can only be captured via UART, with separate command:

@@ -41,7 +41,7 @@ def test_instrumentation_ctf2tef():
         else Path(__file__).parent.parent.parent.parent / "zephyr"
     )
     assert base is not None
-    sys.path.append(str(base / "scripts"))
+    sys.path.append(str(base / "scripts/instrumentation"))
     import zaru
 
     with ctf2tef.prepare_dir_for_instrumentation(

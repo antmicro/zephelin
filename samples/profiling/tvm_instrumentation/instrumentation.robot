@@ -1,5 +1,5 @@
 *** Variables ***
-${ZEPHYR_INSTRUMENTATION_SCRIPT}    scripts/zaru.py
+${ZEPHYR_INSTRUMENTATION_SCRIPT}    scripts/instrumentation/zaru.py
 ${SOCKET_PORT}                      4321
 ${TRIGGER_FUNCTION}                 model_run
 

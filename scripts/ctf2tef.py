@@ -426,7 +426,7 @@ def instrumentation_ctf_to_tef(
     assert zephyr_base is not None and zephyr_base.exists(), (
         f"Missing or invalid path to Zephyr repository: {zephyr_base}"
     )
-    sys.path.insert(1, f"{zephyr_base}/scripts")
+    sys.path.insert(1, f"{zephyr_base}/scripts/instrumentation")
     import zaru
 
     converted, _ = zaru.get_traces_in_trace_event_format(path, instrumentation_elf, True)
