@@ -5,13 +5,13 @@ Subject: [PATCH] Use full thread ID
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---
- scripts/zaru.py | 4 ----
+ scripts/instrumentation/zaru.py | 4 ----
  1 file changed, 4 deletions(-)
 
-diff --git a/scripts/zaru.py b/scripts/zaru.py
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
 index 2251dd4840d..248aa2ecf43 100755
---- a/scripts/zaru.py
-+++ b/scripts/zaru.py
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
 @@ -768,11 +768,7 @@ def get_traces_in_trace_event_format(tmpdir, elf, demangle, verbose=False):
      named_thread_list = []
      for trace in ge:

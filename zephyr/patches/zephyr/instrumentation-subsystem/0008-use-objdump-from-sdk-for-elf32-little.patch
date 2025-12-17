@@ -1,7 +1,7 @@
-diff --git a/scripts/zaru.py b/scripts/zaru.py
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
 index c527437d337..f491afbd843 100755
---- a/scripts/zaru.py
-+++ b/scripts/zaru.py
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
 @@ -24,6 +24,8 @@ import re
  import shutil
  import subprocess

@@ -5,17 +5,17 @@ Subject: [PATCH] Add option to dump events when buffer is full
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---
- scripts/zaru.py                               | 173 +++++++-----------
+ scripts/instrumentation/zaru.py                               | 173 +++++++-----------
  subsys/instrumentation/Kconfig                |  22 ++-
  subsys/instrumentation/common/instr_common.c  |  31 +++-
  subsys/instrumentation/include/instr_buffer.h |   5 +
  .../instrumentation/ringbuffer/ringbuffer.c   |   5 +
  5 files changed, 122 insertions(+), 114 deletions(-)
 
-diff --git a/scripts/zaru.py b/scripts/zaru.py
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
 index 248aa2ecf43..7424ee7f12b 100755
---- a/scripts/zaru.py
-+++ b/scripts/zaru.py
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
 @@ -496,65 +496,76 @@ def get_stream(port):
  # Generator for getting an event with symbols resolved.
  # The event returned is a dict().

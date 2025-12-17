@@ -1,19 +1,19 @@
 From 65c7b81ff08014bfcba255bf7a81adaf491e3a9d Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Tue, 22 Jul 2025 17:35:46 +0200
-Subject: [PATCH] scripts/zaru.py: deduplicate code, rename perfetto to trace
+Subject: [PATCH] scripts/instrumentation/zaru.py: deduplicate code, rename perfetto to trace
  event
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
 Signed-off-by: Krzysztof Sychla <ksychla@antmicro.com>
 ---
- scripts/zaru.py | 874 ++++++++++++++++++++++--------------------------
+ scripts/instrumentation/zaru.py | 874 ++++++++++++++++++++++--------------------------
  1 file changed, 399 insertions(+), 475 deletions(-)
 
-diff --git a/scripts/zaru.py b/scripts/zaru.py
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
 index 3681df0173e..0a76a886063 100755
---- a/scripts/zaru.py
-+++ b/scripts/zaru.py
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
 @@ -57,7 +57,7 @@ SERIAL = "/dev/ttyACM0"
  NUM_PING_ATTEMPTS = 20
  

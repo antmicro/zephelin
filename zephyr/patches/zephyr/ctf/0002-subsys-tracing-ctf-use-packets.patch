@@ -12,28 +12,28 @@ Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
  2 files changed, 120 insertions(+), 2 deletions(-)
 
 diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
-index 4fad14beb3e..75b55fb1058 100644
+index fa49b0e32bb..b79ceb5fbf8 100644
 --- a/subsys/tracing/ctf/ctf_top.h
 +++ b/subsys/tracing/ctf/ctf_top.h
 @@ -63,6 +63,7 @@ static inline uint64_t soft_cycle_get_64() {
- 		uint8_t *epacket_cursor = &epacket[0];                          \
- 										\
- 		MAP(CTF_INTERNAL_FIELD_APPEND, ##__VA_ARGS__)                   \
-+		*(((uint16_t*)epacket) + 1) = sizeof(epacket) * 8;              \
- 		tracing_format_raw_data(epacket, sizeof(epacket));              \
+ 		uint8_t *epacket_cursor = &epacket[0];                                             \
+                                                                                                    \
+ 		MAP(CTF_INTERNAL_FIELD_APPEND, ##__VA_ARGS__)                                      \
++		*(((uint16_t*)epacket) + 1) = sizeof(epacket) * 8;                                 \
+ 		tracing_format_raw_data(epacket, sizeof(epacket));                                 \
  	}
  
 @@ -70,9 +71,10 @@ static inline uint64_t soft_cycle_get_64() {
- #define CTF_EVENT(...)                                                         \
- 	{                                                                      \
- 		int key = irq_lock();                                          \
-+		const uint16_t stream_id = 0;                                  \
-+		const uint16_t packet_size = 0;                                \
- 		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64()); \
--									       \
--		CTF_GATHER_FIELDS(tstamp, __VA_ARGS__)                         \
-+		CTF_GATHER_FIELDS(stream_id, packet_size, tstamp, __VA_ARGS__) \
- 		irq_unlock(key);                                               \
+ #define CTF_EVENT(...)                                                                             \
+ 	{                                                                                          \
+ 		int key = irq_lock();                                                              \
++		const uint16_t stream_id = 0;                                                      \
++		const uint16_t packet_size = 0;                                                    \
+ 		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64());                  \
+-                                                                                                   \
+-		CTF_GATHER_FIELDS(tstamp, __VA_ARGS__)                                             \
++		CTF_GATHER_FIELDS(stream_id, packet_size, tstamp, __VA_ARGS__)                     \
+ 		irq_unlock(key);                                                                   \
  	}
  #else
 diff --git a/subsys/tracing/ctf/tsdl/metadata b/subsys/tracing/ctf/tsdl/metadata
@@ -933,6 +933,1012 @@ index 9cc7d56d107..44caede79df 100644
 +	stream_id = 0;
  	name =  gpio_fire_callback;
  	id = 0x7E;
+ 	fields := struct {
+@@ -1189,6 +1189,7 @@ event {
+ 
+ /* Memory Slabs */
+ event {
++	stream_id = 0;
+ 	name = mem_slab_init;
+ 	id = 0x81;
+ 	fields := struct {
+@@ -1198,6 +1199,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mem_slab_alloc_enter;
+ 	id = 0x82;
+ 	fields := struct {
+@@ -1207,6 +1209,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mem_slab_alloc_blocking;
+ 	id = 0x83;
+ 	fields := struct {
+@@ -1216,6 +1219,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mem_slab_alloc_exit;
+ 	id = 0x84;
+ 	fields := struct {
+@@ -1226,6 +1230,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mem_slab_free_enter;
+ 	id = 0x85;
+ 	fields := struct {
+@@ -1234,6 +1239,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mem_slab_free_exit;
+ 	id = 0x86;
+ 	fields := struct {
+@@ -1244,6 +1250,7 @@ event {
+ /* Message Queues */
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_init;
+ 	id = 0x87;
+ 	fields := struct {
+@@ -1252,6 +1259,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_alloc_init_enter;
+ 	id = 0x88;
+ 	fields := struct {
+@@ -1260,6 +1268,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_alloc_init_exit;
+ 	id = 0x89;
+ 	fields := struct {
+@@ -1269,6 +1278,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_put_enter;
+ 	id = 0x8A;
+ 	fields := struct {
+@@ -1278,6 +1288,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_put_blocking;
+ 	id = 0x8B;
+ 	fields := struct {
+@@ -1287,6 +1298,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_put_exit;
+ 	id = 0x8C;
+ 	fields := struct {
+@@ -1297,6 +1309,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_get_enter;
+ 	id = 0x8D;
+ 	fields := struct {
+@@ -1306,6 +1319,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_get_blocking;
+ 	id = 0x8E;
+ 	fields := struct {
+@@ -1315,6 +1329,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_get_exit;
+ 	id = 0x8F;
+ 	fields := struct {
+@@ -1325,6 +1340,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_peek;
+ 	id = 0x90;
+ 	fields := struct {
+@@ -1334,6 +1350,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_purge;
+ 	id = 0x91;
+ 	fields := struct {
+@@ -1342,6 +1359,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_put_front_enter;
+ 	id = 0x92;
+ 	fields := struct {
+@@ -1351,6 +1369,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_put_front_blocking;
+ 	id = 0x94;
+ 	fields := struct {
+@@ -1360,6 +1379,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_put_front_exit;
+ 	id = 0x93;
+ 	fields := struct {
+@@ -1370,6 +1390,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_cleanup_enter;
+ 	id = 0x95;
+ 	fields := struct {
+@@ -1378,6 +1399,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = msgq_cleanup_exit;
+ 	id = 0x96;
+ 	fields := struct {
+@@ -1388,6 +1410,7 @@ event {
+ 
+ /* Condition Variables */
+ event {
++	stream_id = 0;
+ 	name = condvar_init;
+ 	id = 0x97;
+ 	fields := struct {
+@@ -1397,6 +1420,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = condvar_signal_enter;
+ 	id = 0x98;
+ 	fields := struct {
+@@ -1405,6 +1429,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = condvar_signal_blocking;
+ 	id = 0x99;
+ 	fields := struct {
+@@ -1414,6 +1439,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = condvar_signal_exit;
+ 	id = 0x9A;
+ 	fields := struct {
+@@ -1423,6 +1449,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = condvar_broadcast_enter;
+ 	id = 0x9B;
+ 	fields := struct {
+@@ -1431,6 +1458,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = condvar_broadcast_exit;
+ 	id = 0x9C;
+ 	fields := struct {
+@@ -1440,6 +1468,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = condvar_wait_enter;
+ 	id = 0x9D;
+ 	fields := struct {
+@@ -1449,6 +1478,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = condvar_wait_exit;
+ 	id = 0x9E;
+ 	fields := struct {
+@@ -1460,6 +1490,7 @@ event {
+ 
+ /* Work Queue Events */
+ event {
++	stream_id = 0;
+ 	name = work_init;
+ 	id = 0x9F;
+ 	fields := struct {
+@@ -1468,6 +1499,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_submit_to_queue_enter;
+ 	id = 0xA0;
+ 	fields := struct {
+@@ -1477,6 +1509,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_submit_to_queue_exit;
+ 	id = 0xA1;
+ 	fields := struct {
+@@ -1487,6 +1520,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_submit_enter;
+ 	id = 0xA2;
+ 	fields := struct {
+@@ -1495,6 +1529,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_submit_exit;
+ 	id = 0xA3;
+ 	fields := struct {
+@@ -1504,6 +1539,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_flush_enter;
+ 	id = 0xA4;
+ 	fields := struct {
+@@ -1512,6 +1548,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_flush_blocking;
+ 	id = 0xA5;
+ 	fields := struct {
+@@ -1521,6 +1558,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_flush_exit;
+ 	id = 0xA6;
+ 	fields := struct {
+@@ -1530,6 +1568,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_enter;
+ 	id = 0xA7;
+ 	fields := struct {
+@@ -1538,6 +1577,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_exit;
+ 	id = 0xA8;
+ 	fields := struct {
+@@ -1547,6 +1587,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_sync_enter;
+ 	id = 0xA9;
+ 	fields := struct {
+@@ -1556,6 +1597,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_sync_blocking;
+ 	id = 0xAA;
+ 	fields := struct {
+@@ -1565,6 +1607,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_sync_exit;
+ 	id = 0xAB;
+ 	fields := struct {
+@@ -1576,6 +1619,7 @@ event {
+ 
+ /* Work Queue Management */
+ event {
++	stream_id = 0;
+ 	name = work_queue_init;
+ 	id = 0xAC;
+ 	fields := struct {
+@@ -1584,6 +1628,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_start_enter;
+ 	id = 0xAD;
+ 	fields := struct {
+@@ -1592,6 +1637,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_start_exit;
+ 	id = 0xAE;
+ 	fields := struct {
+@@ -1600,6 +1646,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_stop_enter;
+ 	id = 0xAF;
+ 	fields := struct {
+@@ -1609,6 +1656,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_stop_blocking;
+ 	id = 0xB0;
+ 	fields := struct {
+@@ -1618,6 +1666,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_stop_exit;
+ 	id = 0xB1;
+ 	fields := struct {
+@@ -1628,6 +1677,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_drain_enter;
+ 	id = 0xB2;
+ 	fields := struct {
+@@ -1636,6 +1686,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_drain_exit;
+ 	id = 0xB3;
+ 	fields := struct {
+@@ -1645,6 +1696,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_unplug_enter;
+ 	id = 0xB4;
+ 	fields := struct {
+@@ -1653,6 +1705,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_queue_unplug_exit;
+ 	id = 0xB5;
+ 	fields := struct {
+@@ -1663,6 +1716,7 @@ event {
+ 
+ /* Delayable Work */
+ event {
++	stream_id = 0;
+ 	name = work_delayable_init;
+ 	id = 0xB6;
+ 	fields := struct {
+@@ -1671,6 +1725,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_schedule_for_queue_enter;
+ 	id = 0xB7;
+ 	fields := struct {
+@@ -1681,6 +1736,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_schedule_for_queue_exit;
+ 	id = 0xB8;
+ 	fields := struct {
+@@ -1692,6 +1748,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_schedule_enter;
+ 	id = 0xB9;
+ 	fields := struct {
+@@ -1701,6 +1758,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_schedule_exit;
+ 	id = 0xBA;
+ 	fields := struct {
+@@ -1711,6 +1769,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_reschedule_for_queue_enter;
+ 	id = 0xBB;
+ 	fields := struct {
+@@ -1721,6 +1780,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_reschedule_for_queue_exit;
+ 	id = 0xBC;
+ 	fields := struct {
+@@ -1732,6 +1792,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_reschedule_enter;
+ 	id = 0xBD;
+ 	fields := struct {
+@@ -1741,6 +1802,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_reschedule_exit;
+ 	id = 0xBE;
+ 	fields := struct {
+@@ -1751,6 +1813,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_flush_delayable_enter;
+ 	id = 0xBF;
+ 	fields := struct {
+@@ -1760,6 +1823,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_flush_delayable_exit;
+ 	id = 0xC0;
+ 	fields := struct {
+@@ -1770,6 +1834,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_delayable_enter;
+ 	id = 0xC1;
+ 	fields := struct {
+@@ -1778,6 +1843,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_delayable_exit;
+ 	id = 0xC2;
+ 	fields := struct {
+@@ -1787,6 +1853,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_delayable_sync_enter;
+ 	id = 0xC3;
+ 	fields := struct {
+@@ -1796,6 +1863,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_cancel_delayable_sync_exit;
+ 	id = 0xC4;
+ 	fields := struct {
+@@ -1807,6 +1875,7 @@ event {
+ 
+ /* Poll Work */
+ event {
++	stream_id = 0;
+ 	name = work_poll_init_enter;
+ 	id = 0xC5;
+ 	fields := struct {
+@@ -1815,6 +1884,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_init_exit;
+ 	id = 0xC6;
+ 	fields := struct {
+@@ -1823,6 +1893,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_submit_to_queue_enter;
+ 	id = 0xC7;
+ 	fields := struct {
+@@ -1833,6 +1904,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_submit_to_queue_blocking;
+ 	id = 0xC8;
+ 	fields := struct {
+@@ -1843,6 +1915,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_submit_to_queue_exit;
+ 	id = 0xC9;
+ 	fields := struct {
+@@ -1854,6 +1927,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_submit_enter;
+ 	id = 0xCA;
+ 	fields := struct {
+@@ -1863,6 +1937,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_submit_exit;
+ 	id = 0xCB;
+ 	fields := struct {
+@@ -1873,6 +1948,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_cancel_enter;
+ 	id = 0xCC;
+ 	fields := struct {
+@@ -1881,6 +1957,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = work_poll_cancel_exit;
+ 	id = 0xCD;
+ 	fields := struct {
+@@ -1891,6 +1968,7 @@ event {
+ 
+ /* Poll API */
+ event {
++	stream_id = 0;
+ 	name = poll_event_init;
+ 	id = 0xCE;
+ 	fields := struct {
+@@ -1899,6 +1977,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = poll_enter;
+ 	id = 0xCF;
+ 	fields := struct {
+@@ -1907,6 +1986,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = poll_exit;
+ 	id = 0xD0;
+ 	fields := struct {
+@@ -1916,6 +1996,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = poll_signal_init;
+ 	id = 0xD1;
+ 	fields := struct {
+@@ -1924,6 +2005,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = poll_signal_reset;
+ 	id = 0xD2;
+ 	fields := struct {
+@@ -1932,6 +2014,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = poll_signal_check;
+ 	id = 0xD3;
+ 	fields := struct {
+@@ -1940,6 +2023,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = poll_signal_raise;
+ 	id = 0xD4;
+ 	fields := struct {
+@@ -1949,30 +2033,35 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_foreach_enter;
+ 	id = 0xD5;
+ 	fields := struct {};
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_foreach_exit;
+ 	id = 0xD6;
+ 	fields := struct {};
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_foreach_unlocked_enter;
+ 	id = 0xD7;
+ 	fields := struct {};
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_foreach_unlocked_exit;
+ 	id = 0xD8;
+ 	fields := struct {};
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_heap_assign;
+ 	id = 0xD9;
+ 	fields := struct {
+@@ -1982,6 +2071,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_join_enter;
+ 	id = 0xDA;
+ 	fields := struct {
+@@ -1991,6 +2081,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_join_blocking;
+ 	id = 0xDB;
+ 	fields := struct {
+@@ -2000,6 +2091,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_join_exit;
+ 	id = 0xDC;
+ 	fields := struct {
+@@ -2010,6 +2102,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_msleep_enter;
+ 	id = 0xDD;
+ 	fields := struct {
+@@ -2018,6 +2111,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_msleep_exit;
+ 	id = 0xDE;
+ 	fields := struct {
+@@ -2027,6 +2121,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_usleep_enter;
+ 	id = 0xDF;
+ 	fields := struct {
+@@ -2035,6 +2130,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_usleep_exit;
+ 	id = 0xE0;
+ 	fields := struct {
+@@ -2044,6 +2140,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_busy_wait_enter;
+ 	id = 0xE1;
+ 	fields := struct {
+@@ -2052,6 +2149,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_busy_wait_exit;
+ 	id = 0xE2;
+ 	fields := struct {
+@@ -2060,11 +2158,13 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_yield;
+ 	id = 0xE3;
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_suspend_exit;
+ 	id = 0xE4;
+ 	fields := struct {
+@@ -2074,16 +2174,19 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_lock;
+ 	id = 0xE5;
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_unlock;
+ 	id = 0xE6;
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_wakeup;
+ 	id = 0xE7;
+ 	fields := struct {
+@@ -2093,6 +2196,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_abort;
+ 	id = 0xE8;
+ 	fields := struct {
+@@ -2102,6 +2206,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_priority_set;
+ 	id = 0xE9;
+ 	fields := struct {
+@@ -2112,6 +2217,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_ready;
+ 	id = 0xEA;
+ 	fields := struct {
+@@ -2121,6 +2227,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_pend;
+ 	id = 0xEB;
+ 	fields := struct {
+@@ -2130,6 +2237,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_resume;
+ 	id = 0xEC;
+ 	fields := struct {
+@@ -2139,6 +2247,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = thread_sched_suspend;
+ 	id = 0xED;
+ 	fields := struct {
+@@ -2148,6 +2257,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_init;
+ 	id = 0xEE;
+ 	fields := struct {
+@@ -2156,6 +2266,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_message_put_enter;
+ 	id = 0xEF;
+ 	fields := struct {
+@@ -2165,6 +2276,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_message_put_blocking;
+ 	id = 0xF0;
+ 	fields := struct {
+@@ -2174,6 +2286,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_message_put_exit;
+ 	id = 0xF1;
+ 	fields := struct {
+@@ -2184,6 +2297,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_put_enter;
+ 	id = 0xF2;
+ 	fields := struct {
+@@ -2193,6 +2307,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_put_exit;
+ 	id = 0xF3;
+ 	fields := struct {
+@@ -2203,6 +2318,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_async_put_enter;
+ 	id = 0xF4;
+ 	fields := struct {
+@@ -2212,6 +2328,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_async_put_exit;
+ 	id = 0xF5;
+ 	fields := struct {
+@@ -2221,6 +2338,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_get_enter;
+ 	id = 0xF6;
+ 	fields := struct {
+@@ -2230,6 +2348,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_get_blocking;
+ 	id = 0xF7;
+ 	fields := struct {
+@@ -2239,6 +2358,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_get_exit;
+ 	id = 0xF8;
+ 	fields := struct {
+@@ -2249,6 +2369,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = mbox_data_get;
+ 	id = 0xF9;
+ 	fields := struct {
+@@ -2257,6 +2378,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = event_init;
+ 	id = 0xFA;
+ 	fields := struct {
+@@ -2265,6 +2387,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = event_post_enter;
+ 	id = 0xFB;
+ 	fields := struct {
+@@ -2275,6 +2398,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = event_post_exit;
+ 	id = 0xFC;
+ 	fields := struct {
+@@ -2285,6 +2409,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = event_wait_enter;
+ 	id = 0xFD;
+ 	fields := struct {
+@@ -2296,6 +2421,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = event_wait_blocking;
+ 	id = 0xFE;
+ 	fields := struct {
+@@ -2307,6 +2433,7 @@ event {
+ };
+ 
+ event {
++	stream_id = 0;
+ 	name = event_wait_exit;
+ 	id = 0xFF;
  	fields := struct {
 -- 
 2.47.1

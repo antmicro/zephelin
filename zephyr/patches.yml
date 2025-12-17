@@ -66,12 +66,6 @@ patches:
     author: Maciej Torhan
     email: mtorhan@antmicro.com
     date: 2025-08-28
-  - path: zephyr/twister/0001-twister-scripts-add-missing-failure-reason-in-Robot-.patch
-    sha256sum: aaa8938104682a9806d4d533ed351aeef41795a8d1a30e8edb53653ea8c7671e
-    module: zephyr
-    author: Maciej Torhan
-    email: mtorhan@antmicro.com
-    date: 2025-11-14
   - path: tvm/0001-add-zephyr-files.patch
     sha256sum: 80f8ab2d05ed6f3518104298afe7cf1208f556fdd1fbbe31524ba19f283b2315
     module: tvm
@@ -115,13 +109,13 @@ patches:
     email: mtorhan@antmicro.com
     date: 2025-06-09
   - path: zephyr/instrumentation-subsystem/fixes/0001-scripts-zaru.py-deduplicate-code-rename-perfetto-to-.patch
-    sha256sum: d66ac026456cd2133e5642a837019deea6a587d109afff395caa4b346a313268
+    sha256sum: ed1eacb2176e4747be152e181eacccc589af35cff89d77c28b40bb78e0a0c158
     module: zephyr
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
     date: 2025-06-09
   - path: zephyr/instrumentation-subsystem/fixes/0001-instrumentation-make-runtime-configuration-of-trigge.patch
-    sha256sum: ddfb2d0aaa7026eff9a0b3c5adbc2e0b6f62b16fe9c084bbbacdc0950f78c7fc
+    sha256sum: 6b52e2daaaf04d317c8ad38ddea410e8913d8646f22265d78349be300b77cb04
     module: zephyr
     author: Maciej Sobkowski
     email: msobkowski@antmicro.com
@@ -133,7 +127,7 @@ patches:
     email: eszpotanski@antmicro.com
     date: 2025-09-26
   - path: zephyr/instrumentation-subsystem/0008-use-objdump-from-sdk-for-elf32-little.patch
-    sha256sum: 29761717f763ae783f060726e30c02f8c007a75094444ecc1e41d5fe911bd7ba
+    sha256sum: 5da225e7a1d4eb3178bda057f612c2b28f942f0ed0203b502e2cdf2be1be2ede
     module: zephyr
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
@@ -145,19 +139,19 @@ patches:
     email: eszpotanski@antmicro.com
     date: 2025-10-02
   - path: zephyr/ctf/0001-subsys-tracing-ctf-use-64-bit-timestamps.patch
-    sha256sum: 0e7af244b7a1b3bf9d29696fa2cf7aba173fdc3a014f14f3e2cde3d44eb404d6
+    sha256sum: e9c3dc4477e34fb000a5f8788216cbf9f07b9ac3e9b0ecb467d622d43ed50c92
     module: zephyr
     author: Mikołaj Klikowicz
     email: mklikowicz@antmicro.com
     date: 2025-09-12
   - path: zephyr/ctf/0002-subsys-tracing-ctf-use-packets.patch
-    sha256sum: b47e2f6c5397fd476d230777526255c2ae99d69c993eda09361b6db97feefcbd
+    sha256sum: 13e0a9361aa95a79d94da9a1d18db31c38dcee53cc8bcdb74d6f4de80974b754
     module: zephyr
     author: Mikołaj Klikowicz
     email: mklikowicz@antmicro.com
     date: 2025-09-12
   - path: zephyr/ctf/0003-subsys-tracing-ctf-add-CPU-ID-to-CTF-events.patch
-    sha256sum: 1478037c388cb57b84f33b801dba49e8196dee4f95af42a36235f0b8fd574eb2
+    sha256sum: 85c00f95972d9e5b12388e2cc68afcaa369f59723d91f693ec33c81a11ba71c3
     module: zephyr
     author: Maciej Torhan
     email: mtorhan@antmicro.com
@@ -193,7 +187,7 @@ patches:
     email: eszpotanski@antmicro.com
     date: 2025-10-31
   - path: zephyr/instrumentation-subsystem/fixes/0003-use-full-thread-id.patch
-    sha256sum: b2283f0ff045c14581ba2e34f01f7ec6fe12f46fce7e5c0d7d0ae22424879a12
+    sha256sum: 6f2131780d0a045cca38ee542208f5c35e495b424658479a27e22e8b8a54ca2a
     module: zephyr
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
@@ -205,8 +199,14 @@ patches:
     email: eszpotanski@antmicro.com
     date: 2025-11-05
   - path: zephyr/instrumentation-subsystem/0010-add-option-to-dump-events-when-buffer-is-full.patch
-    sha256sum: af906f3e934b1c93f30b0e794d50297ca6f1cafb3ba08da02cf560ac7fcb0401
+    sha256sum: e5ce5527e67d85eb65f68416db79fe9a9ceb2bb7cf6f979bda2cd8f8bc5596e6
     module: zephyr
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-11-12
+  - path: zephyr/0007-tracing-move-event-ids-from-uint8_t-to-uint16_t.patch
+    sha256sum: 3e9c9675e44760ae76efe8c506e9628b39461ea51f959ddfbf99f93b99efbb2b
+    module: zephyr
+    author: Anas Nashif
+    email: anas.nashif@intel.com
+    date: 2025-12-17

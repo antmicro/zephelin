@@ -11,7 +11,7 @@ dt overlay. Trigger/stopper functions need to be configured at build time.
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
 ---
  .../zephyr/instrumentation/instrumentation.h  |  6 +++++
- scripts/zaru.py                               | 20 ++++++++++++--
+ scripts/instrumentation/zaru.py                               | 20 ++++++++++++--
  subsys/instrumentation/Kconfig                | 26 ++++++++++++-------
  subsys/instrumentation/common/instr_common.c  | 17 ++++++++++++
  subsys/instrumentation/transport/uart.c       |  2 +-
@@ -34,10 +34,10 @@ index f37d3d181b1..d4f21afc5c1 100644
  /**
   * @brief Checks if subsystem is ready to be initialized. Must called be before
   *        instr_init().
-diff --git a/scripts/zaru.py b/scripts/zaru.py
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
 index 0a76a886063..cea1d142856 100755
---- a/scripts/zaru.py
-+++ b/scripts/zaru.py
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
 @@ -31,7 +31,7 @@ from west.app.main import WestApp
  from west.configuration import Configuration, config
  from west.util import west_topdir

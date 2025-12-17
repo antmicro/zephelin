@@ -13,7 +13,7 @@ Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
  2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
-index 725602d41a9..ad17f575d9d 100644
+index 325bd711b01..fa49b0e32bb 100644
 --- a/subsys/tracing/ctf/ctf_top.h
 +++ b/subsys/tracing/ctf/ctf_top.h
 @@ -13,6 +13,23 @@
@@ -41,16 +41,16 @@ index 725602d41a9..ad17f575d9d 100644
  #define CTF_MAX_STRING_LEN 20
  
 @@ -53,7 +70,7 @@
- #define CTF_EVENT(...)                                                         \
- 	{                                                                      \
- 		int key = irq_lock();                                          \
--		const uint32_t tstamp = k_cyc_to_ns_floor64(k_cycle_get_32()); \
-+		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64()); \
- 									       \
- 		CTF_GATHER_FIELDS(tstamp, __VA_ARGS__)                         \
- 		irq_unlock(key);                                               \
+ #define CTF_EVENT(...)                                                                             \
+ 	{                                                                                          \
+ 		int key = irq_lock();                                                              \
+-		const uint32_t tstamp = k_cyc_to_ns_floor64(k_cycle_get_32());                     \
++		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64());                  \
+                                                                                                    \
+ 		CTF_GATHER_FIELDS(tstamp, __VA_ARGS__)                                             \
+ 		irq_unlock(key);                                                                   \
 diff --git a/subsys/tracing/ctf/tsdl/metadata b/subsys/tracing/ctf/tsdl/metadata
-index 4e1c0780533..9cc7d56d107 100644
+index ca55f1c30df..76ff39e4af4 100644
 --- a/subsys/tracing/ctf/tsdl/metadata
 +++ b/subsys/tracing/ctf/tsdl/metadata
 @@ -8,7 +8,7 @@ typealias integer { size = 64; align = 8; signed = false; } := uint64_t;
