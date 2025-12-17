@@ -18,14 +18,14 @@ extern "C" {
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* TVM events IDs */
-#define ZPL_TVM_BEGIN_EVENT 0xB0
-#define ZPL_TVM_END_EVENT 0xB1
+#define ZPL_TVM_BEGIN_EVENT 0x102
+#define ZPL_TVM_END_EVENT 0x103
 
 typedef struct __packed {
 	uint16_t stream_id;
 	uint16_t packet_size;
 	uint64_t timestamp;
-	uint8_t id;
+	uint16_t id;
 	uint8_t cpu_id;
 	uint32_t thread_id;
 	uint8_t op_idx;

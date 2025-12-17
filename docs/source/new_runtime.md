@@ -67,7 +67,7 @@ The same structure has to be mirrored in the code (full example can be found in 
 typedef struct __packed {
   // Event header defined by Zephyr
 	uint32_t timestamp;
-	uint8_t id;
+	uint16_t id;
 	// Event fields
 	uint32_t thread_id;
 	uint16_t subgraph_idx;

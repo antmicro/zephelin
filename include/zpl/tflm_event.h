@@ -18,14 +18,14 @@ extern "C" {
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* TFLite Micro events IDs */
-#define ZPL_TFLM_ENTER_EVENT 0xA0
-#define ZPL_TFLM_EXIT_EVENT 0xA1
+#define ZPL_TFLM_ENTER_EVENT 0x100
+#define ZPL_TFLM_EXIT_EVENT 0x101
 
 typedef struct __packed {
 	uint16_t stream_id;
 	uint16_t packet_size;
 	uint64_t timestamp;
-	uint8_t id;
+	uint16_t id;
 	uint8_t cpu_id;
 	uint32_t thread_id;
 	uint16_t subgraph_idx;

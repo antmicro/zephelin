@@ -16,7 +16,7 @@ stream {
 event {
 	stream_id = 1;
 	name = zpl_tflm_enter;
-	id = 0xA0;
+	id = 0x100;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;
@@ -32,7 +32,7 @@ event {
 event {
 	stream_id = 1;
 	name = zpl_tflm_exit;
-	id = 0xA1;
+	id = 0x101;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;
@@ -55,7 +55,7 @@ enum zpl_memory_region : uint8_t {
 event {
 	stream_id = 1;
 	name = zpl_tvm_enter;
-	id = 0xB0;
+	id = 0x102;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;
@@ -68,7 +68,7 @@ event {
 event {
 	stream_id = 1;
 	name = zpl_tvm_exit;
-	id = 0xB1;
+	id = 0x103;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;
@@ -81,7 +81,7 @@ event {
 event {
 	stream_id = 0;
 	name = zpl_inference_enter;
-	id = 0xD0;
+	id = 0x104;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;
@@ -92,7 +92,7 @@ event {
 event {
 	stream_id = 0;
 	name = zpl_inference_exit;
-	id = 0xD1;
+	id = 0x105;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;
@@ -103,7 +103,7 @@ event {
 event {
 	stream_id = 0;
 	name = zpl_memory;
-	id = 0xEE;
+	id = 0x106;
 	fields := struct {
 		enum zpl_memory_region memory_region;
 		uint32_t memory_addr;
@@ -116,7 +116,7 @@ event {
 event {
 	stream_id = 0;
 	name = zpl_cpu_load_event;
-	id = 0xC0;
+	id = 0x107;
 	fields := struct {
 		uint8_t cpu_id;
 		uint16_t cpu_load;
@@ -126,7 +126,7 @@ event {
 event {
 	stream_id = 0;
 	name = zpl_die_temp_event;
-	id = 0xC1;
+	id = 0x108;
 	fields := struct {
 		uint16_t sensor_count;
 		float32 die_temp[sensor_count];
@@ -136,7 +136,7 @@ event {
 event {
 	stream_id = 0;
 	name = zpl_scope_enter;
-	id = 0xEF;
+	id = 0x109;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;
@@ -149,7 +149,7 @@ event {
 event {
 	stream_id = 0;
 	name = zpl_scope_exit;
-	id = 0xF0;
+	id = 0x10A;
 	fields := struct {
 		uint8_t cpu_id;
 		uint32_t thread_id;

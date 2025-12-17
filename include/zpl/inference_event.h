@@ -22,8 +22,8 @@ extern "C" {
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* Inference events IDs */
-#define ZPL_INFERENCE_ENTER_EVENT 0xD0
-#define ZPL_INFERENCE_EXIT_EVENT 0xD1
+#define ZPL_INFERENCE_ENTER_EVENT 0x104
+#define ZPL_INFERENCE_EXIT_EVENT 0x105
 
 /**
  * Inference event structure.
@@ -32,7 +32,7 @@ typedef struct __packed {
 	uint16_t stream_id;
 	uint16_t packet_size;
 	uint64_t timestamp;
-	uint8_t id;
+	uint16_t id;
 	uint8_t cpu_id;
 	uint32_t thread_id;
 	uint32_t model_id;

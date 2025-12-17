@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#define ZPL_MEMORY_EVENT 0xEE
+#define ZPL_MEMORY_EVENT 0x106
 
 enum zpl_memory_region {
 	ZPL_STACK,
@@ -29,7 +29,7 @@ typedef struct __packed {
 	uint16_t stream_id;
 	uint16_t packet_size;
 	uint64_t timestamp;
-	uint8_t id;
+	uint16_t id;
 	uint8_t memory_region;
 	uint32_t memory_addr;
 	uint32_t used;

@@ -22,7 +22,7 @@ extern "C" {
 
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 /* Die temp event ID */
-#define ZPL_DIE_TEMP_EVENT 0xC1
+#define ZPL_DIE_TEMP_EVENT 0x108
 
 /**
  * Die temperature event structure.
@@ -31,7 +31,7 @@ typedef struct __packed {
 	uint16_t stream_id;
 	uint16_t packet_size;
 	uint64_t timestamp;
-	uint8_t id;
+	uint16_t id;
 	uint16_t sensor_count;
 	float die_temp[CONFIG_ZPL_DIE_TEMP_PROFILING_SENSORS_COUNT];
 } zpl_die_temp_event_t;

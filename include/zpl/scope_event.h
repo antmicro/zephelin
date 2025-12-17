@@ -16,15 +16,15 @@
 extern "C" {
 #endif
 
-#define ZPL_SCOPE_ENTER_EVENT 0xEF
-#define ZPL_SCOPE_EXIT_EVENT 0xF0
+#define ZPL_SCOPE_ENTER_EVENT 0x109
+#define ZPL_SCOPE_EXIT_EVENT 0x10A
 #define ZPL_MAX_SCOPE_NAME_LENGTH 30
 
 typedef struct __packed {
 	uint16_t stream_id;
 	uint16_t packet_size;
 	uint64_t timestamp;
-	uint8_t id;
+	uint16_t id;
 	uint8_t cpu_id;
 	uint32_t thread_id;
 	uint16_t scope_name_len;

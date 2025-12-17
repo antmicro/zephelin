@@ -32,7 +32,7 @@ It contains information about:
 ```c
 typedef struct __packed {
     uint32_t timestamp;
-    uint8_t id;
+    uint16_t id;
     enum zpl_memory_region memory_region;
     uintptr_t memory_addr;
     uint32_t used;
