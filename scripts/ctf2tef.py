@@ -379,7 +379,7 @@ def ctf_to_tef(
             )
             continue
         # Check whether thread has changed
-        if str(msg.event.name).startswith("thread_"):
+        if str(msg.event.name).startswith("thread_") and "thread_id" in fields:
             thread_name[str(fields["name"])] = int(fields["thread_id"])
         # Check whether thread has changed
         if msg.event.name == "thread_switched_in":
