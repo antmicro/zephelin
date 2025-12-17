@@ -274,7 +274,10 @@ def extract_memory_symbols(zephyr_elf_path: Path):
         )
         return
 
-    nm = subprocess.run(["nm", str(zephyr_elf_path.absolute())], stdout=subprocess.PIPE)
+    nm = subprocess.run(
+        ["nm", "--defined-only", str(zephyr_elf_path.absolute())],
+        stdout=subprocess.PIPE,
+    )
     if 0 != nm.returncode:
         print("Symbol extraction failed", file=sys.stderr)
         return
