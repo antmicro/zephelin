@@ -88,7 +88,7 @@ Using this, events can be emitted with [trace_format_raw_data](https://docs.zeph
 #include <zephyr/tracing/tracing_format.h>
 
 zpl_tflm_event_t zpl_tflm_exit_event = {
-	.timestamp = k_cyc_to_ns_floor64(cycles),
+	.timestamp = zpl_timestamp_get_from_cycles(cycles),
 	.id = is_exit ? ZPL_TFLM_EXIT_EVENT : ZPL_TFLM_ENTER_EVENT,
 	.thread_id = (uint32_t)k_current_get(),
 	.subgraph_idx = subgraph_idx,

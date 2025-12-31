@@ -325,6 +325,23 @@ On top of the above, Renode's simulated trivial UART can be used as well to coll
 Zephelin provides methods for introducing custom named events to traces from the source code level.
 To use named events, include the header `zpl/lib.h`, and use the function `sys_trace_named_event()` to generate named events.
 
+### Changing timestamp clock
+
+By default, Zephelin uses kernel cycles for event timestamps. This can be overridden by y-selecting `CONFIG_ZPL_CONFIGURABLE_TIMESTAMP_CLOCK` and passing a structure to `zpl_clock_set`, which has the following definition:
+
+```C
+// zpl/time.h
+
+typedef struct {
+    uint64_t (*cycles_get)(void);
+    uint64_t (*timestamp_get)(uint64_t cycles);
+} zpl_clock_t;
+```
+
+This might be useful when system clock is not synchronized between different Zephelin instances running at the same time.
+
+An example can be found in {zpl_repo}`samples/basic/custom_clock/src/main.c`.
+
 ### Memory profiler
 
 To use Zephelin memory profiler, y-select the `CONFIG_ZPL_MEMORY_PROFILING` in Kconfig.

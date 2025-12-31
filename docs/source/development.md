@@ -141,7 +141,7 @@ void zpl_emit_cpu_load_event(void)
 	int key = irq_lock();
 	// Define and fill the event
 	zpl_cpu_load_event_t zpl_cpu_load_event = {
-		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
+		.timestamp = zpl_timestamp_get(),
 		.id = ZPL_CPU_LOAD_EVENT,
 		.cpu_id = arch_curr_cpu()->id,
 		.cpu_load = cpu_load,
