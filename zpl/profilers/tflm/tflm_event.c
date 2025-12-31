@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "zpl/time.h"
 #include <zpl.h>
 #include <zpl/configuration.h>
 #include <zpl/tflm_event.h>
@@ -20,7 +21,7 @@ void __zpl_emit_tflm_event(
 	ZPL_DISABLE_INSTRUMENTATION {
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	zpl_tflm_event_t zpl_tflm_exit_event = {
-		.timestamp = k_cyc_to_ns_floor64(cycles),
+		.timestamp = zpl_timestamp_get_from_cycles(cycles),
 		.id = is_exit ? ZPL_TFLM_EXIT_EVENT : ZPL_TFLM_ENTER_EVENT,
 		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)k_current_get(),

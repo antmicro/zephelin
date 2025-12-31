@@ -57,7 +57,7 @@ void zpl_emit_die_temp_event(void)
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
 	zpl_die_temp_event_t zpl_die_temp_event = {
-		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
+		.timestamp = zpl_timestamp_get(),
 		.id = ZPL_DIE_TEMP_EVENT,
 		.sensor_count = SENSORS_COUNT,
 		.stream_id = 0,

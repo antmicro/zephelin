@@ -34,7 +34,7 @@ uint32_t TFLMProfiler::BeginEvent(uint16_t subgraph_idx, uint16_t op_idx, const 
 	int event_handle = num_events_;
 
 	ZPL_DISABLE_INSTRUMENTATION {
-		begin_cycles_[event_handle] = soft_cycle_get_64();
+		begin_cycles_[event_handle] = zpl_cycles_get();
 		subgraph_idx_[event_handle] = subgraph_idx;
 		op_idx_[event_handle] = op_idx;
 		tags_[event_handle] = tag;
@@ -58,7 +58,7 @@ void TFLMProfiler::EndEvent(uint32_t event_handle) {
 	}
 
 	ZPL_DISABLE_INSTRUMENTATION {
-		end_cycles_[event_handle] = soft_cycle_get_64();
+		end_cycles_[event_handle] = zpl_cycles_get();
 		end_arena_used_bytes_[event_handle] = -1;
 		end_arena_tail_usage_[event_handle] = -1;
 		if (nullptr != allocator_) {

@@ -26,10 +26,10 @@ void zpl_emit_scope_event(char *scope_name, uint8_t is_exit)
 	}
 
 	int key = irq_lock();
-	uint64_t cycles = soft_cycle_get_64();
+	uint64_t cycles = zpl_cycles_get();
 
 	zpl_scope_event_t scope_event = {
-		.timestamp = k_cyc_to_ns_floor64(cycles),
+		.timestamp = zpl_timestamp_get_from_cycles(cycles),
 		.id = (is_exit) ? ZPL_SCOPE_EXIT_EVENT : ZPL_SCOPE_ENTER_EVENT,
 		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)k_current_get(),
@@ -43,7 +43,7 @@ void zpl_emit_scope_event(char *scope_name, uint8_t is_exit)
 	irq_unlock(key);
 #elif defined(CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT)
 	TRACING_STRING("zpl_scope_%s %lld %s %#x\n", is_exit ? "exit" : "enter",
-			k_cyc_to_ns_floor64(soft_cycle_get_64()), scope_name,
+			zpl_timestamp_get(), scope_name,
 			(uint32_t)k_current_get());
 #endif
 }

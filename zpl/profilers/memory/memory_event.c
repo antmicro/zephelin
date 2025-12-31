@@ -20,9 +20,8 @@ void zpl_emit_memory_for_thread_event(enum zpl_memory_region memory_region,
 	ZPL_CONF_RETURN_IF_DISABLED(memory);
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
-	uint64_t cycles = soft_cycle_get_64();
 	zpl_memory_event_t memory_event = {
-		.timestamp = k_cyc_to_ns_floor64(cycles),
+		.timestamp = zpl_timestamp_get(),
 		.id = ZPL_MEMORY_EVENT,
 		.memory_region = memory_region,
 		.memory_addr = memory_addr,

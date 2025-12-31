@@ -77,7 +77,7 @@ int zpl_tvm_profiler_begin_event(void *state, int op_idx, const char *tag)
 	int event_handle = zpl_state->num_events_;
 
 	ZPL_DISABLE_INSTRUMENTATION {
-		zpl_state->begin_cycles_[event_handle] = soft_cycle_get_64();
+		zpl_state->begin_cycles_[event_handle] = zpl_cycles_get();
 		zpl_state->op_idx_[event_handle] = op_idx;
 		zpl_state->tags_[event_handle] = tag;
 
@@ -96,7 +96,7 @@ void zpl_tvm_profiler_end_event(void *state, int event_handle)
 	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
 
 	ZPL_DISABLE_INSTRUMENTATION {
-		zpl_state->end_cycles_[event_handle] = soft_cycle_get_64();
+		zpl_state->end_cycles_[event_handle] = zpl_cycles_get();
 	}
 }
 

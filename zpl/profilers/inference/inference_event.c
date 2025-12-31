@@ -21,7 +21,7 @@ void zpl_inference_enter(uint32_t model_id)
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
 	zpl_inference_event_t zpl_inference_enter_event = {
-		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
+		.timestamp = zpl_timestamp_get(),
 		.id = ZPL_INFERENCE_ENTER_EVENT,
 		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)(uintptr_t)k_current_get(),
@@ -47,7 +47,7 @@ void zpl_inference_exit(uint32_t model_id)
 #if defined(CONFIG_ZPL_TRACE_FORMAT_CTF)
 	int key = irq_lock();
 	zpl_inference_event_t zpl_inference_exit_event = {
-		.timestamp = k_cyc_to_ns_floor64(soft_cycle_get_64()),
+		.timestamp = zpl_timestamp_get(),
 		.id = ZPL_INFERENCE_EXIT_EVENT,
 		.cpu_id = arch_curr_cpu()->id,
 		.thread_id = (uint32_t)(uintptr_t)k_current_get(),
