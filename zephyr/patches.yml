@@ -162,6 +162,12 @@ patches:
     author: Anas Nashif
     email: anas.nashif@intel.com
     date: 2025-12-17
+  - path: zephyr/ctf/0005-tracing-make-CTF-timestamp-function-configurable.patch
+    sha256sum: ed5a7114fd61b0b97527b1359cdb0a4036b3fdee9b5f05c5f1325b4961c3328a
+    module: zephyr
+    author: Andrii Chmutov
+    email: achmutov@antmicro.com
+    date: 2025-12-31
   - path: tflite-micro/0003-report-model-address-in-zpl_inference-events.patch
     sha256sum: b8c520f58505ee9aa87955a5012d34e4ebe776d1253e68f8953564dcb1a2502c
     module: tflite-micro
@@ -199,7 +205,7 @@ patches:
     email: eszpotanski@antmicro.com
     date: 2025-10-31
   - path: zephyr/instrumentation-subsystem/0009-add-config-to-use-the-same-timer-as-ctf.patch
-    sha256sum: c5a81e81e4bb75835bd17323d631dcaf8ee10a3856e4687621157cca8534d0bc
+    sha256sum: 1992549880830c19b4ede26e8fca161b468c818db7c468657c9005ce65143346
     module: zephyr
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com

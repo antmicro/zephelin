@@ -74,7 +74,7 @@ index 0ac5a81af6a..2ea1a756097 100644
  
  	return timing_cycles_to_ns(now_cycles);
 +#else
-+	return k_cyc_to_ns_floor64(soft_cycle_get_64());
++	return ctf_timestamp_get();
 +#endif /* CONFIG_INSTRUMENTATION_CTF_TIMER */
  }
 -- 
