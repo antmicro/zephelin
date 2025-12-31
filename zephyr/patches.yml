@@ -156,6 +156,12 @@ patches:
     author: Maciej Torhan
     email: mtorhan@antmicro.com
     date: 2025-10-23
+  - path: zephyr/ctf/0004-tracing-move-event-ids-from-uint8_t-to-uint16_t.patch
+    sha256sum: 3e9c9675e44760ae76efe8c506e9628b39461ea51f959ddfbf99f93b99efbb2b
+    module: zephyr
+    author: Anas Nashif
+    email: anas.nashif@intel.com
+    date: 2025-12-17
   - path: tflite-micro/0003-report-model-address-in-zpl_inference-events.patch
     sha256sum: b8c520f58505ee9aa87955a5012d34e4ebe776d1253e68f8953564dcb1a2502c
     module: tflite-micro
@@ -204,9 +210,3 @@ patches:
     author: Eryk Szpotanski
     email: eszpotanski@antmicro.com
     date: 2025-11-12
-  - path: zephyr/0007-tracing-move-event-ids-from-uint8_t-to-uint16_t.patch
-    sha256sum: 3e9c9675e44760ae76efe8c506e9628b39461ea51f959ddfbf99f93b99efbb2b
-    module: zephyr
-    author: Anas Nashif
-    email: anas.nashif@intel.com
-    date: 2025-12-17
