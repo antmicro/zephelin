@@ -50,7 +50,11 @@ static zpl_clock_t zpl_clock = {
 int zpl_clock_set(zpl_clock_t clock)
 {
 	zpl_clock = clock;
-	return tracing_set_ctf_timestamp_func(zpl_timestamp_get);
+	int status = 0;
+#ifdef CONFIG_TRACING_CTF_CONFIGURABLE_TIMER
+	status = tracing_set_ctf_timestamp_func(zpl_timestamp_get);
+#endif /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
+	return status;
 }
 
 uint64_t zpl_cycles_get(void)

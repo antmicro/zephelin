@@ -184,8 +184,11 @@ class TraceTester:
                     if trace.event.name != trace_name:
                         continue
 
-                    # check whether trace event fields match
-                    if self.__event_fields_is_subset(trace_fields, trace.event.payload_field):
+                    payload = dict(
+                        trace.event.payload_field,
+                        timestamp=trace.default_clock_snapshot.ns_from_origin,
+                    )
+                    if self.__event_fields_is_subset(trace_fields, payload):
                         trace_found = True
                         break
 

@@ -1,0 +1,50 @@
+# Copyright (c) 2025 Analog Devices, Inc.
+# Copyright (c) 2025 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: custom_clock
+common:
+  tags: basic
+  platform_exclude:
+    - mpfs_icicle/polarfire/u54/smp
+tests:
+  sample.trace.custom_clock.timings.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: custom_clock_simple.robot
+    extra_configs:
+      - CONFIG_ZPL_SCOPE_MARKING=y
+      - CONFIG_PRINTK=n
+      - CONFIG_TIMING_FUNCTIONS=y
+  sample.trace.custom_clock.sensor_clock.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: custom_clock_simple.robot
+    extra_configs:
+      - CONFIG_ZPL_SCOPE_MARKING=y
+      - CONFIG_PRINTK=n
+      - CONFIG_SENSOR=y
+      - CONFIG_SENSOR_ASYNC_API=y
+      - CONFIG_SENSOR_CLOCK_SYSTEM=y
+  sample.trace.custom_clock.zephyr_events.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: custom_clock_zephyr_events.robot
+    extra_configs:
+      - CONFIG_ZPL_SCOPE_MARKING=y
+      - CONFIG_ZPL_MEMORY_PROFILING=y
+      - CONFIG_ZPL_MEMORY_PROFILING_INTERVAL=10
+      - CONFIG_ZPL_MEMORY_PROFILING_THREAD_PRIORITY=-1
+      - CONFIG_PRINTK=n
+  sample.trace.custom_clock.instrumentation.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: custom_clock_instrumentation.robot
+    extra_configs:
+      - CONFIG_ZPL_INSTRUMENTATION=y
+      - CONFIG_PRINTK=y
+      - CONFIG_INSTRUMENTATION_DYNAMIC_TRIGGER=n
+      - CONFIG_INSTRUMENTATION_TRIGGER_FUNCTION="nested1"
+      - CONFIG_INSTRUMENTATION_STOPPER_FUNCTION="nested1"

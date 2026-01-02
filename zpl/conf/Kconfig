@@ -56,4 +56,4 @@ endchoice
 
 config ZPL_CONFIGURABLE_TIMESTAMP_CLOCK
 	bool "Configurable timestamp clock"
-	select TRACING_CTF_CONFIGURABLE_TIMER
+	imply TRACING_CTF_CONFIGURABLE_TIMER
