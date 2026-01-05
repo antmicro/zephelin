@@ -9,11 +9,11 @@ Resource          common.resource
 Should Display Traces With Correct Timestamps
   Prepare Machine
 
-  FOR  ${i}   IN RANGE  1   11
+  FOR  ${i}   IN RANGE  2   12
     Wait For Line On Uart  tick ${i}
   END
-  Wait For Line On Uart  nested2_enter 13
-  Wait For Line On Uart  nested2_enter 16
-  Wait For Line On Uart  top 17
-  Wait For Line On Uart  nested2_exit 18
-  Wait For Line On Uart  nested2_exit 21
+  Wait For Line On Uart  nested2_enter 14
+  Wait For Line On Uart  nested2_enter 17
+  Wait For Line On Uart  top 18
+  Wait For Line On Uart  nested2_exit 19
+  Wait For Line On Uart  nested2_exit 22

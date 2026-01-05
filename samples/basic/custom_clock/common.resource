@@ -34,7 +34,6 @@ Wait For Memory Traces On Uart
   ${ts}=  Wait For Memory Trace On Uart   ${ts}
   ${ts}=  Wait For Memory Trace On Uart   ${ts}
   ${ts}=  Wait For Memory Trace On Uart   ${ts}
-  ${ts}=  Wait For Memory Trace On Uart   ${ts}
 
   [Return]  ${ts}
 

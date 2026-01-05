@@ -47,8 +47,8 @@ int timing_init_sys(void)
 	return 0;
 }
 SYS_INIT(timing_init_sys, APPLICATION, 0);
-#else
-static uint64_t counter;
+#else  /* CONFIG_SENSOR_CLOCK */
+static uint64_t counter = 1;
 static uint64_t cycles_get(void)
 {
 	return counter++;
@@ -58,7 +58,7 @@ static uint64_t timestamp_get(uint64_t cycles)
 {
 	return cycles;
 }
-#endif
+#endif /* CONFIG_SENSOR_CLOCK */
 
 #ifdef CONFIG_INSTRUMENTATION
 #define sys_trace_named_event(fmt, ...)            \

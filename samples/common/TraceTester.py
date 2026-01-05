@@ -30,6 +30,12 @@ class UnexpectedTraceFoundError(Exception):
     """
 
 
+class InvalidTrace(Exception):
+    """
+    Raised when provided trace is invalid.
+    """
+
+
 class TraceTester:
     """
     Provides methods for testing whether trace events are present in CTF stream.
@@ -184,10 +190,11 @@ class TraceTester:
                     if trace.event.name != trace_name:
                         continue
 
-                    payload = dict(
-                        trace.event.payload_field,
-                        timestamp=trace.default_clock_snapshot.ns_from_origin,
-                    )
+                    timestamp = trace.default_clock_snapshot.ns_from_origin
+                    if timestamp <= 0:
+                        raise InvalidTrace("Timestamp must be positive")
+                    payload = dict(trace.event.payload_field, timestamp=timestamp)
+
                     if self.__event_fields_is_subset(trace_fields, payload):
                         trace_found = True
                         break

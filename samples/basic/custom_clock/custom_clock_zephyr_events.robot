@@ -14,9 +14,9 @@ Should Display Traces With Correct Timestamps
   Trace Tester Open Socket  ${SOCKET_PORT}
   Start Emulation
 
-  Wait For Trace On Uart  thread_info     timestamp=${0}
+  Wait For Trace On Uart  thread_info     timestamp=${1}
 
-  ${ts}=  Wait For Memory Traces On Uart  ${1}
+  ${ts}=  Wait For Memory Traces On Uart  ${2}
   ${ts}=  Wait For Tick Traces On Uart    ${ts}
   ${ts}=  Wait For Memory Traces On Uart  ${ts}
 
