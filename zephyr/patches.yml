@@ -216,3 +216,9 @@ patches:
   module: tflite-micro
   path: tflite-micro/0005-disable-instrumentation-of-custom-methods-based-on-c.patch
   sha256sum: db20756891afe7c5492bc8367284f961dad34a9f5809ec03640d53f0c6429db7
+- author: Andrii Chmutov
+  date: 2026-01-05
+  email: achmutov@antmicro.com
+  module: zephyr
+  path: zephyr/0023-add-timers-to-stm32f4_disc1-board.patch
+  sha256sum: e65ae352131de0c6b47446df661403a93f7cdc89f24448e6b40c270316883751

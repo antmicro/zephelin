@@ -1,0 +1,21 @@
+diff --git a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
+index 78e2cf1b5be..83959055025 100644
+--- a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
++++ b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
+@@ -49,6 +49,16 @@ sysbus:
+         Tag <0x40012200 0x50> "adc3"
+         Tag <0xe000e010 0x10> "systick"
+ 
++pwr: Python.PythonPeripheral @ sysbus 0x40007000
++    size: 0x400
++    initable: true
++    filename: "scripts/pydev/flipflop.py"
++
++timers2: Timers.STM32_Timer @ sysbus 0x40000000
++    frequency: 10000000
++    initialLimit: 0xffffffff
++    ->nvic0@28
++
+ usart1: UART.STM32_UART @ sysbus <0x40011000, +0x400>
+     ->nvic0@37
+ 

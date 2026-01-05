@@ -18,7 +18,7 @@ tests:
       - CONFIG_ZPL_SCOPE_MARKING=y
       - CONFIG_PRINTK=n
       - CONFIG_TIMING_FUNCTIONS=y
-  sample.trace.custom_clock.sensor_clock.robot:
+  sample.trace.custom_clock.sensor_clock_system.robot:
     harness: robot
     harness_config:
       robot_testsuite: custom_clock_simple.robot
@@ -28,6 +28,19 @@ tests:
       - CONFIG_SENSOR=y
       - CONFIG_SENSOR_ASYNC_API=y
       - CONFIG_SENSOR_CLOCK_SYSTEM=y
+  sample.trace.custom_clock.sensor_clock_counter.robot:
+    harness: robot
+    harness_config:
+      robot_testsuite: custom_clock_simple.robot
+    platform_allow:
+      - stm32f429i_disc1/stm32f429xx
+    extra_configs:
+      - CONFIG_ZPL_SCOPE_MARKING=y
+      - CONFIG_PRINTK=n
+      - CONFIG_SENSOR=y
+      - CONFIG_COUNTER=y
+      - CONFIG_SENSOR_ASYNC_API=y
+      - CONFIG_SENSOR_CLOCK_COUNTER=y
   sample.trace.custom_clock.zephyr_events.robot:
     harness: robot
     harness_config:

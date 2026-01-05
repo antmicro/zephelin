@@ -53,7 +53,10 @@ REPLS = {
     "max32690fthr": f"{ZEPHYR_DASHBOARD_URL}/max32690fthr_max32690_m4/hello_world/hello_world.repl",
     "max78002evkit": f"{ZEPHYR_DASHBOARD_URL}/max78002evkit_max78002_m4/hello_world/hello_world.repl",  # noqa: E501
     "qemu_cortex_m3": f"{ZEPHYR_DASHBOARD_URL}/qemu_cortex_m3/hello_world/hello_world.repl",
-    "stm32f429i_disc1": f"{ZEPHYR_DASHBOARD_URL}/stm32f429i_disc1/hello_world/hello_world.repl",
+    "stm32f429i_disc1": (
+        f"{ZEPHYR_DASHBOARD_URL}/stm32f429i_disc1/hello_world/hello_world.repl",
+        f"{REPO_ROOT}/samples/common/boards/stm32f429i_disc1_timer.repl",
+    ),
     "mpfs_icicle": f"{REPO_ROOT}/samples/profiling/smp_tvm/boards/mpfs_icicle_polarfire_u54_smp.repl",  # noqa: E501
 }
 
@@ -91,7 +94,14 @@ if __name__ == "__main__":
 
     platform = emulation.add_mach(board)
     if args.repl is None:
-        platform.load_repl(REPLS[board])
+        repl = REPLS.get(board, None)
+        if repl is None:
+            print(f"No default platform description is provided: ${board}")
+            exit(1)
+
+        for r in repl if isinstance(repl, (list, tuple)) else [repl]:
+            print(f"Loading REPL: {r}")
+            platform.load_repl(r)
     else:
         platform.load_repl(str(args.repl.resolve()))
 
