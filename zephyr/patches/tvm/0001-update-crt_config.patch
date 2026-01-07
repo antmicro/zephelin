@@ -26,10 +26,10 @@ index 000000000..d5731d811
 +#define TVM_CRT_DEBUG 0
 +
 +/* Maximum supported dimension in NDArray */
-+#define TVM_CRT_MAX_NDIM 4
++#define TVM_CRT_MAX_NDIM 6
 +
 +/* Maximum supported arguments in generated functions */
-+#define TVM_CRT_MAX_ARGS 7
++#define TVM_CRT_MAX_ARGS 10
 +
 +/* Size of the global function registry, in bytes. */
 +#define TVM_CRT_GLOBAL_FUNC_REGISTRY_SIZE_BYTES 256

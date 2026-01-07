@@ -11,7 +11,7 @@ patches:
   email: mtorhan@antmicro.com
   module: tvm
   path: tvm/0001-update-crt_config.patch
-  sha256sum: 03bc4ad0c7917db9dbb0a4222d63c0f30f2198fbefe9c473e433bef8c8c96e13
+  sha256sum: ffea5ba915f57ce303b500f87701394530aceac84ee757365cbe69065b2dfb6b
 - author: Maciej Torhan
   date: '2025-06-13'
   email: mtorhan@antmicro.com
