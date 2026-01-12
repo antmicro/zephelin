@@ -1,8 +1,8 @@
 # Zephelin - Zephyr AI Profiling Library
 
-Copyright (c) 2025 [Analog Devices, Inc.](https://www.analog.com/en/index.html)
+Copyright (c) 2025-2026 [Analog Devices, Inc.](https://www.analog.com/en/index.html)
 
-Copyright (c) 2025 [Antmicro](https://www.antmicro.com)
+Copyright (c) 2025-2026 [Antmicro](https://www.antmicro.com)
 
 <picture>
   <source srcset="docs/source/imgs/zephelin-logo-light.png" media="(prefers-color-scheme: light)"/>
