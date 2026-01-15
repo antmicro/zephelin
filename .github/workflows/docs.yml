@@ -17,6 +17,11 @@ jobs:
   Run-GatherTrace:
     runs-on: ubuntu-22.04
     steps:
+      - name: Free space on runner
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ggc
+          sudo rm -rf /usr/local/.ghcup
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
@@ -37,6 +42,11 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [Run-GatherTrace]
     steps:
+      - name: Free space on runner
+        run: |
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ggc
+          sudo rm -rf /usr/local/.ghcup
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
