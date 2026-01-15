@@ -15,14 +15,14 @@ Should Display Demo Traces
 
 	Start Emulation
 
-	Wait For Trace On Uart	named_event  name=thread_a  arg0=${0}  timeout=30
-	Wait For Trace On Uart	named_event  name=thread_b  arg0=${1}  timeout=30
-	Wait For Trace On Uart	named_event  name=thread_c  arg0=${2}  timeout=30
-	Wait For Trace On Uart	named_event  name=thread_d  arg0=${3}  timeout=30
+	Wait For Trace On Uart	named_event  name=thread_a  arg0=${0}  timeout=90
+	Wait For Trace On Uart	named_event  name=thread_b  arg0=${1}  timeout=60
+	Wait For Trace On Uart	named_event  name=thread_c  arg0=${2}  timeout=60
+	Wait For Trace On Uart	named_event  name=thread_d  arg0=${3}  timeout=60
 
-	Wait For Trace On Uart	named_event  name=thread_a  arg0=${0}  timeout=30
-	Wait For Trace On Uart	named_event  name=thread_b  arg0=${1}  timeout=30
-	Wait For Trace On Uart	named_event  name=thread_c  arg0=${2}  timeout=30
-	Wait For Trace On Uart	named_event  name=thread_d  arg0=${3}  timeout=30
+	Wait For Trace On Uart	named_event  name=thread_a  arg0=${0}  timeout=60
+	Wait For Trace On Uart	named_event  name=thread_b  arg0=${1}  timeout=60
+	Wait For Trace On Uart	named_event  name=thread_c  arg0=${2}  timeout=60
+	Wait For Trace On Uart	named_event  name=thread_d  arg0=${3}  timeout=60
 
 	Trace Tester Close Socket

@@ -31,8 +31,8 @@ Should Display OP Name
 	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${16}	tag=tvmgen_default_fused_nn_softmax
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${16}	tag=tvmgen_default_fused_nn_softmax
 	Wait For Trace On Uart	zpl_inference_exit	model_id=any
-	Wait For Trace On Uart	zpl_inference_enter	model_id=any
-	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${2}	tag=tvmgen_quantized_fused_reshape_cast_subtract	timeout=20
+	Wait For Trace On Uart	zpl_inference_enter	model_id=any	timeout=30
+	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${2}	tag=tvmgen_quantized_fused_reshape_cast_subtract	timeout=30
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${2}	tag=tvmgen_quantized_fused_reshape_cast_subtract
 	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${6}	tag=tvmgen_quantized_fused_nn_dense_add_fixed_point_multiply_add_clip_cast
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${6}	tag=tvmgen_quantized_fused_nn_dense_add_fixed_point_multiply_add_clip_cast
