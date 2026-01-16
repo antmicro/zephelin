@@ -1,0 +1,3 @@
+timer0: Timers.MAX32650_Timer @ sysbus 0x40010000
+    gcr: gcr
+    -> nvic0@5

@@ -1,0 +1,13 @@
+/ {
+	chosen {
+		zephyr,tracing-uart = &uart0;
+		zephyr,sensor-clock = &counter0;
+	};
+};
+
+&timer0 {
+	status = "okay";
+	counter0: counter {
+		status = "okay";
+	};
+};

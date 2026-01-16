@@ -51,6 +51,10 @@ ZEPHYR_DASHBOARD_URL = "https://zephyr-dashboard.renode.io/zephyr_sim/d90d71c42c
 REPO_ROOT = str(Path(__file__).parent.parent.resolve())
 REPLS = {
     "max32690fthr": f"{ZEPHYR_DASHBOARD_URL}/max32690fthr_max32690_m4/hello_world/hello_world.repl",
+    "max32650fthr": (
+        f"{ZEPHYR_DASHBOARD_URL}/max32650fthr/hello_world/hello_world.repl",
+        f"{REPO_ROOT}/samples/common/boards/max32650fthr_timer.repl",
+    ),
     "max78002evkit": f"{ZEPHYR_DASHBOARD_URL}/max78002evkit_max78002_m4/hello_world/hello_world.repl",  # noqa: E501
     "qemu_cortex_m3": f"{ZEPHYR_DASHBOARD_URL}/qemu_cortex_m3/hello_world/hello_world.repl",
     "stm32f429i_disc1": (
