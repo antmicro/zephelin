@@ -34,6 +34,7 @@ tests:
       robot_testsuite: custom_clock_simple.robot
     platform_allow:
       - stm32f429i_disc1/stm32f429xx
+      - max32650fthr
     extra_configs:
       - CONFIG_ZPL_SCOPE_MARKING=y
       - CONFIG_PRINTK=n
