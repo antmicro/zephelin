@@ -1,13 +1,13 @@
-From 3a9d55e7d7d5c4f62bd050f8a9a7902751ba55f9 Mon Sep 17 00:00:00 2001
+From d3b437990bf407d9f6f2badb9e4572f12461bd70 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Wed, 8 Oct 2025 11:15:53 +0200
-Subject: [PATCH] Report model address in zpl_inference events
+Subject: [PATCH 3/5] report model address in zpl_inference events
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---
- tensorflow/lite/micro/micro_interpreter.cc |  8 +++++++-
- tensorflow/lite/micro/micro_interpreter.h  | 10 +++++++---
- 2 files changed, 14 insertions(+), 4 deletions(-)
+ tensorflow/lite/micro/micro_interpreter.cc | 8 +++++++-
+ tensorflow/lite/micro/micro_interpreter.h  | 9 ++++++---
+ 2 files changed, 13 insertions(+), 4 deletions(-)
 
 diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
 index bfd54ba7..42762cc8 100644
@@ -43,7 +43,9 @@ index bfd54ba7..42762cc8 100644
    if (initialization_status_ != kTfLiteOk) {
      MicroPrintf("Invoke() called after initialization failed\n");
 diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
-index e9a3de04..fa25b0d8 100644
+index e9a3de04..a1f6657b 100644
+--- a/tensorflow/lite/micro/micro_interpreter.h
++++ b/tensorflow/lite/micro/micro_interpreter.h
 @@ -215,11 +215,14 @@ class MicroInterpreter {
  
  #ifdef CONFIG_ZPL_INFERENCE_PROFILING
@@ -63,5 +65,5 @@ index e9a3de04..fa25b0d8 100644
  };
  #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
 -- 
-2.50.1
+2.47.1
 

@@ -1,0 +1,63 @@
+From 77e0585d29e36d48e3984c0b9cadeb03cd62579b Mon Sep 17 00:00:00 2001
+From: Maciej Sobkowski <msobkowski@antmicro.com>
+Date: Mon, 30 Jun 2025 13:16:51 +0200
+Subject: [PATCH 07/22] modules: enable tvm
+
+---
+ modules/tvm/CMakeLists.txt | 33 +++++++++++++++++++++++++++++++++
+ modules/tvm/Kconfig        |  3 +++
+ 2 files changed, 36 insertions(+)
+ create mode 100644 modules/tvm/CMakeLists.txt
+ create mode 100644 modules/tvm/Kconfig
+
+diff --git a/modules/tvm/CMakeLists.txt b/modules/tvm/CMakeLists.txt
+new file mode 100644
+index 00000000000..f383b6a02ed
+--- /dev/null
++++ b/modules/tvm/CMakeLists.txt
+@@ -0,0 +1,33 @@
++macro(apply_patch source target patch)
++  add_custom_command(
++    OUTPUT
++      ${target}
++    DEPENDS
++      ${source}
++      ${patch}
++    COMMAND patch -o ${target} ${source} ${patch}
++  )
++endmacro()
++
++if(CONFIG_ZEPHYR_TVM_MODULE)
++  set(TVM_DIR ${ZEPHYR_CURRENT_MODULE_DIR})
++
++  zephyr_library()
++
++  zephyr_include_directories(
++    ${TVM_DIR}/include/
++    ${TVM_DIR}/src/runtime/crt/include/
++  )
++
++  zephyr_library_sources(
++    ${TVM_DIR}/src/runtime/crt/common/crt_backend_api.c
++    ${TVM_DIR}/src/runtime/crt/common/crt_runtime_api.c
++    ${TVM_DIR}/src/runtime/crt/common/func_registry.c
++    ${TVM_DIR}/src/runtime/crt/common/ndarray.c
++    ${TVM_DIR}/src/runtime/crt/common/packed_func.c
++    ${TVM_DIR}/src/runtime/crt/graph_executor/graph_executor.c
++    ${TVM_DIR}/src/runtime/crt/graph_executor/load_json.c
++    ${TVM_DIR}/src/runtime/crt/memory/page_allocator.c
++    ${TVM_DIR}/src/runtime/crt/memory/stack_allocator.c
++  )
++endif(CONFIG_ZEPHYR_TVM_MODULE)
+diff --git a/modules/tvm/Kconfig b/modules/tvm/Kconfig
+new file mode 100644
+index 00000000000..fc269136946
+--- /dev/null
++++ b/modules/tvm/Kconfig
+@@ -0,0 +1,3 @@
++config ZEPHYR_TVM_MODULE
++        bool "Support for microTVM runtime"
++        default 0
+-- 
+2.47.1
+

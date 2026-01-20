@@ -1,0 +1,4 @@
+dlpack: dlpack
+tvm: tvm
+zephyr: zephyr
+tflite-micro: optional/modules/lib/tflite-micro

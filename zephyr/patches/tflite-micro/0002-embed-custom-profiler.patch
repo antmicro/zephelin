@@ -1,3 +1,14 @@
+From de948711a091cf098f630f0dc810098b170dcca8 Mon Sep 17 00:00:00 2001
+From: Andrii Chmutov <achmutov@antmicro.com>
+Date: Wed, 10 Sep 2025 10:32:02 +0200
+Subject: [PATCH 2/5] embed custom profiler
+
+---
+ tensorflow/lite/micro/micro_interpreter.cc    | 48 +++++++++++++------
+ tensorflow/lite/micro/micro_interpreter.h     | 23 +++++++++
+ .../lite/micro/micro_profiler_interface.h     |  4 ++
+ 3 files changed, 61 insertions(+), 14 deletions(-)
+
 diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
 index 666516c6..bfd54ba7 100644
 --- a/tensorflow/lite/micro/micro_interpreter.cc
@@ -132,7 +143,7 @@ index 4a03c3fe..e9a3de04 100644
  }  // namespace tflite
  
 diff --git a/tensorflow/lite/micro/micro_profiler_interface.h b/tensorflow/lite/micro/micro_profiler_interface.h
-index f839a74a..e58dd6b9 100644
+index 594f0c00..cb168c44 100644
 --- a/tensorflow/lite/micro/micro_profiler_interface.h
 +++ b/tensorflow/lite/micro/micro_profiler_interface.h
 @@ -31,6 +31,10 @@ class MicroProfilerInterface {
@@ -146,3 +157,6 @@ index f839a74a..e58dd6b9 100644
  };
  
  }  // namespace tflite
+-- 
+2.47.1
+

@@ -1,0 +1,67 @@
+From 9fa51f5878eba41793e24f6978f37f4f70f01c0a Mon Sep 17 00:00:00 2001
+From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+Date: Fri, 12 Sep 2025 15:23:46 +0200
+Subject: [PATCH 15/22] subsys: tracing: ctf: use 64-bit timestamps
+
+Changes CTF events to use 64bit timestamp. This enables tracing of longer
+execution as 32bit timestamps overflows after ~4s.
+
+Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+---
+ subsys/tracing/ctf/ctf_top.h     | 19 ++++++++++++++++++-
+ subsys/tracing/ctf/tsdl/metadata |  2 +-
+ 2 files changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
+index 325bd711b01..e1f8faa2b25 100644
+--- a/subsys/tracing/ctf/ctf_top.h
++++ b/subsys/tracing/ctf/ctf_top.h
+@@ -13,6 +13,23 @@
+ #include <zephyr/tracing/tracing_format.h>
+ #include <zephyr/net/net_ip.h>
+ 
++#ifdef CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER
++static inline uint64_t soft_cycle_get_64() {
++	return sys_clock_cycle_get_64();
++}
++#else /* CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER */
++static inline uint64_t soft_cycle_get_64() {
++	static uint32_t overflows = 0;
++	static uint32_t prev_clk = 0;
++
++	uint32_t clk = k_cycle_get_32();
++
++	overflows += prev_clk > clk;
++	prev_clk = clk;
++	return (uint64_t)overflows << 32 | clk;
++}
++#endif /* CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER */
++
+ /* Limit strings to 20 bytes to optimize bandwidth */
+ #define CTF_MAX_STRING_LEN 20
+ 
+@@ -53,7 +70,7 @@
+ #define CTF_EVENT(...)                                                                             \
+ 	{                                                                                          \
+ 		int key = irq_lock();                                                              \
+-		const uint32_t tstamp = k_cyc_to_ns_floor64(k_cycle_get_32());                     \
++		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64());                  \
+                                                                                                    \
+ 		CTF_GATHER_FIELDS(tstamp, __VA_ARGS__)                                             \
+ 		irq_unlock(key);                                                                   \
+diff --git a/subsys/tracing/ctf/tsdl/metadata b/subsys/tracing/ctf/tsdl/metadata
+index ca55f1c30df..76ff39e4af4 100644
+--- a/subsys/tracing/ctf/tsdl/metadata
++++ b/subsys/tracing/ctf/tsdl/metadata
+@@ -8,7 +8,7 @@ typealias integer { size = 64; align = 8; signed = false; } := uint64_t;
+ typealias integer { size = 8; align = 8; signed = false; encoding = ASCII; } := ctf_bounded_string_t;
+ 
+ struct event_header {
+-	uint32_t timestamp;
++	uint64_t timestamp;
+ 	uint8_t id;
+ };
+ 
+-- 
+2.47.1
+

@@ -1,0 +1,37 @@
+From 3ed3bd88c16679c04106710c9f279f4f9cf49423 Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Thu, 26 Jun 2025 12:59:07 +0200
+Subject: [PATCH 6/8] graph_executor: fix nop duplicating operations
+
+---
+ src/runtime/crt/graph_executor/graph_executor.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/runtime/crt/graph_executor/graph_executor.c b/src/runtime/crt/graph_executor/graph_executor.c
+index 69926b918..a633ed630 100644
+--- a/src/runtime/crt/graph_executor/graph_executor.c
++++ b/src/runtime/crt/graph_executor/graph_executor.c
+@@ -1146,7 +1146,7 @@ int TVMGraphExecutor_SetupOpExecs(TVMGraphExecutor* executor) {
+   }
+   for (nid = 0; nid < executor->nodes_count; nid++) {
+     const TVMGraphExecutorNode* inode = executor->nodes + nid;
+-    if (strcmp(inode->op_type, "null")) {
++    if (strcmp(inode->op_type, "null") && strcmp(inode->param.func_name, "__nop")) {
+       DLTensorPtr args[TVM_CRT_MAX_ARGS];
+       uint32_t args_count = 0;
+       for (idx = 0; idx < inode->inputs_count; idx++) {
+@@ -1175,7 +1175,10 @@ int TVMGraphExecutor_SetupOpExecs(TVMGraphExecutor* executor) {
+       printf("tvm_op: creating %s with node_id=%d\n", inode->param.func_name, nid);
+ #endif  // TVM_CRT_DEBUG
+       TVMPackedFunc pf;
+-      TVMGraphExecutor_CreateTVMOp(executor, &(inode->param), args, args_count, &pf);
++      status = TVMGraphExecutor_CreateTVMOp(executor, &(inode->param), args, args_count, &pf);
++      if (status) {
++        break;
++      }
+       executor->op_execs[nid] = pf;
+     } else {
+       memset(&executor->op_execs[nid], 0, sizeof(TVMPackedFunc));
+-- 
+2.47.1
+

@@ -1,0 +1,81 @@
+From 09f52ab97a48156cccfd2355b2359fbf804f2ac9 Mon Sep 17 00:00:00 2001
+From: Maciej Sobkowski <msobkowski@antmicro.com>
+Date: Fri, 6 Jun 2025 14:40:39 +0200
+Subject: [PATCH 03/22] boards: st: stm32f429i_disc1: renode/renode-robot
+ support
+
+Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
+---
+ boards/st/stm32f429i_disc1/board.cmake        |  9 +++++++
+ .../st/stm32f429i_disc1/stm32f429i_disc1.yaml |  7 ++++++
+ .../support/stm32f4_discovery.resc            | 24 +++++++++++++++++++
+ 3 files changed, 40 insertions(+)
+ create mode 100644 boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
+
+diff --git a/boards/st/stm32f429i_disc1/board.cmake b/boards/st/stm32f429i_disc1/board.cmake
+index 836afa988e3..81888bfa5ed 100644
+--- a/boards/st/stm32f429i_disc1/board.cmake
++++ b/boards/st/stm32f429i_disc1/board.cmake
+@@ -1,5 +1,14 @@
+ # SPDX-License-Identifier: Apache-2.0
+ 
++set(SUPPORTED_EMU_PLATFORMS renode)
++set(RENODE_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/support/stm32f4_discovery.resc)
++set(RENODE_UART sysbus.usart1)
++
++set_ifndef(BOARD_SIM_RUNNER renode)
++set_ifndef(BOARD_ROBOT_RUNNER renode-robot)
++include(${ZEPHYR_BASE}/boards/common/renode.board.cmake)
++include(${ZEPHYR_BASE}/boards/common/renode_robot.board.cmake)
++
+ # keep first
+ board_runner_args(stm32cubeprogrammer "--port=swd" "--reset-mode=hw")
+ board_runner_args(jlink "--device=STM32F429ZI" "--speed=4000")
+diff --git a/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml b/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml
+index 10fbd8485d4..f160f837986 100644
+--- a/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml
++++ b/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml
+@@ -13,3 +13,10 @@ supported:
+   - spi
+   - display
+ vendor: st
++simulation:
++  - name: renode
++    exec: renode
++testing:
++  renode:
++    uart: sysbus.usart1
++    resc: boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
+diff --git a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
+new file mode 100644
+index 00000000000..e7dc1e0c9ac
+--- /dev/null
++++ b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
+@@ -0,0 +1,24 @@
++$name?="STM32F4_Discovery"
++
++using sysbus
++mach create $name
++machine LoadPlatformDescription @https://zephyr-dashboard.renode.io/zephyr_sim/54b826336bae437f851fcba332481e24a7e1532d/0e512aebf21a8c51bda51fa67354277811f10a40/stm32f429i_disc1/hello_world/hello_world.repl
++
++showAnalyzer sysbus.usart1
++
++python "import _random"
++python "rand = _random.Random()"
++
++$id1 = `python "print rand.getrandbits(32)"`
++$id2 = `python "print rand.getrandbits(32)"`
++$id3 = `python "print rand.getrandbits(32)"`
++macro reset
++"""
++    sysbus LoadELF $elf
++
++    sysbus WriteDoubleWord 0x1FFF7A10 $id1
++    sysbus WriteDoubleWord 0x1FFF7A14 $id2
++    sysbus WriteDoubleWord 0x1FFF7A18 $id3
++"""
++
++runMacro $reset
+-- 
+2.47.1
+

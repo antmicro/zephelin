@@ -1,0 +1,78 @@
+From 4085ccca99239b81faa8e37c47fbfbe7596e9170 Mon Sep 17 00:00:00 2001
+From: Maciej Sobkowski <msobkowski@antmicro.com>
+Date: Fri, 1 Aug 2025 13:06:32 +0200
+Subject: [PATCH 02/22] boards: adi: max32690fthr: add renode/renode-robot
+ support
+
+Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
+Signed-off-by: Krzysztof Sychla <ksychla@antmicro.com>
+---
+ boards/adi/max32690fthr/board.cmake           |  9 +++++++++
+ .../max32690fthr_max32690_m4.yaml             |  7 +++++++
+ boards/adi/max32690fthr/support/max32690.resc | 19 +++++++++++++++++++
+ 3 files changed, 35 insertions(+)
+ create mode 100644 boards/adi/max32690fthr/support/max32690.resc
+
+diff --git a/boards/adi/max32690fthr/board.cmake b/boards/adi/max32690fthr/board.cmake
+index 43b3efb7b59..edd5214d31f 100644
+--- a/boards/adi/max32690fthr/board.cmake
++++ b/boards/adi/max32690fthr/board.cmake
+@@ -1,6 +1,15 @@
+ # Copyright (c) 2023-2024 Analog Devices, Inc.
+ # SPDX-License-Identifier: Apache-2.0
+ 
++set(SUPPORTED_EMU_PLATFORMS renode)
++set(RENODE_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/support/max32690.resc)
++set(RENODE_UART sysbus.uart0)
++
++set_ifndef(BOARD_SIM_RUNNER renode)
++set_ifndef(BOARD_ROBOT_RUNNER renode-robot)
++include(${ZEPHYR_BASE}/boards/common/renode.board.cmake)
++include(${ZEPHYR_BASE}/boards/common/renode_robot.board.cmake)
++
+ board_runner_args(jlink "--device=MAX32690" "--reset-after-load")
+ 
+ include(${ZEPHYR_BASE}/boards/common/openocd-adi-max32.boards.cmake)
+diff --git a/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml b/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
+index d779aa2140b..2fc03352b59 100644
+--- a/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
++++ b/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
+@@ -18,3 +18,10 @@ supported:
+   - usbd
+ ram: 128
+ flash: 3072
++simulation:
++  - name: renode
++    exec: renode
++testing:
++  renode:
++    uart: sysbus.uart0
++    resc: boards/adi/max32690fthr/support/max32690.resc
+diff --git a/boards/adi/max32690fthr/support/max32690.resc b/boards/adi/max32690fthr/support/max32690.resc
+new file mode 100644
+index 00000000000..3a412cb3274
+--- /dev/null
++++ b/boards/adi/max32690fthr/support/max32690.resc
+@@ -0,0 +1,19 @@
++$name?="max32690"
++
++using sysbus
++mach create $name
++machine LoadPlatformDescription @https://zephyr-dashboard.renode.io/zephyr_sim/54b826336bae437f851fcba332481e24a7e1532d/0e512aebf21a8c51bda51fa67354277811f10a40/max32690fthr_max32690_m4/hello_world/hello_world.repl
++machine LoadPlatformDescriptionFromString
++"""
++cpu0:
++    PerformanceInMips: 30
++"""
++
++showAnalyzer uart0
++
++macro reset
++"""
++    sysbus LoadELF $elf
++    cpu0 VectorTableOffset `sysbus GetSymbolAddress "_vector_table"`
++"""
++runMacro $reset
+-- 
+2.47.1
+

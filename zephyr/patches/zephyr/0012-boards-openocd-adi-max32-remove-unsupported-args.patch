@@ -1,0 +1,23 @@
+From 59ce76175f04353a7ac61f4267219304045a545f Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Fri, 26 Sep 2025 14:58:27 +0200
+Subject: [PATCH 12/22] boards: openocd-adi-max32: remove unsupported args
+
+---
+ boards/common/openocd-adi-max32.boards.cmake | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/boards/common/openocd-adi-max32.boards.cmake b/boards/common/openocd-adi-max32.boards.cmake
+index c815a0db64f..40140c89808 100644
+--- a/boards/common/openocd-adi-max32.boards.cmake
++++ b/boards/common/openocd-adi-max32.boards.cmake
+@@ -23,6 +23,5 @@ board_runner_args(openocd --cmd-pre-init "source [find target/${MAX32_TARGET_CFG
+ board_runner_args(openocd "--target-handle=_CHIPNAME.cpu")
+ 
+ if(CONFIG_SOC_FAMILY_MAX32_M4 OR CONFIG_SOC_FAMILY_MAX32_M33)
+-  board_runner_args(openocd --cmd-pre-init "allow_low_pwr_dbg")
+   board_runner_args(openocd "--cmd-erase=max32xxx mass_erase 0")
+ endif()
+-- 
+2.47.1
+

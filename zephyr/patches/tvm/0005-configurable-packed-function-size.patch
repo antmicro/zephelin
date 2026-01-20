@@ -1,0 +1,25 @@
+From 5882269014f179df618cf81c0f509ce56ba85c81 Mon Sep 17 00:00:00 2001
+From: Maciej Torhan <mtorhan@antmicro.com>
+Date: Fri, 13 Jun 2025 11:53:05 +0200
+Subject: [PATCH 5/8] configurable packed function size
+
+---
+ include/tvm/runtime/crt/packed_func.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/tvm/runtime/crt/packed_func.h b/include/tvm/runtime/crt/packed_func.h
+index 83d961baf..c5cd25e00 100644
+--- a/include/tvm/runtime/crt/packed_func.h
++++ b/include/tvm/runtime/crt/packed_func.h
+@@ -44,7 +44,7 @@ typedef struct TVMArgs {
+ TVMArgs TVMArgs_Create(TVMValue* values, uint32_t* tcodes, uint32_t values_count);
+ 
+ typedef struct TVMPackedFunc {
+-  char name[200];
++  char name[TVM_CRT_MAX_STRLEN_FUNCTION_NAME];
+   TVMFunctionHandle fexec;
+   TVMArgs args;
+   TVMArgs ret_value;
+-- 
+2.47.1
+

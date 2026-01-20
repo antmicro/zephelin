@@ -1,0 +1,34 @@
+From 2c93053f8652898aea4977083ae9a646c5718255 Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Mon, 13 Oct 2025 12:29:45 +0200
+Subject: [PATCH 7/8] graph_executor: specify model id for zpl_inference
+
+---
+ src/runtime/crt/graph_executor/graph_executor.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/runtime/crt/graph_executor/graph_executor.c b/src/runtime/crt/graph_executor/graph_executor.c
+index a633ed630..a31087893 100644
+--- a/src/runtime/crt/graph_executor/graph_executor.c
++++ b/src/runtime/crt/graph_executor/graph_executor.c
+@@ -937,7 +937,7 @@ int TVMGraphExecutor_LoadParams(TVMGraphExecutor* executor, const char* param_bl
+  */
+ void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
+ #ifdef CONFIG_ZPL_INFERENCE_PROFILING
+-  zpl_inference_enter();
++  zpl_inference_enter(0);
+ #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+ 
+   void* profiler_state;
+@@ -967,7 +967,7 @@ void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
+     profiler->dump_events_cb(profiler_state);
+   }
+ #ifdef CONFIG_ZPL_INFERENCE_PROFILING
+-  zpl_inference_exit();
++  zpl_inference_exit(0);
+ #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+ }
+ 
+-- 
+2.47.1
+
