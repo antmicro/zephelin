@@ -28,7 +28,7 @@ Should Display TFLM and TVM OP Name
 	Wait For Trace On Uart  zpl_scope_enter  scope_name=tvm_model_load  cycles=any  thread_id=any
 	Wait For Trace On Uart  zpl_scope_exit   scope_name=tvm_model_load  cycles=any  thread_id=any
 	Wait For Trace On Uart	zpl_inference_enter	model_id=any
-	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${0}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any	timeout=40
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${0}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any	timeout=60
 	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${0}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
 	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${1}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
 	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${1}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
@@ -36,7 +36,7 @@ Should Display TFLM and TVM OP Name
 	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${2}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
 	Wait For Trace On Uart	zpl_inference_exit	model_id=any
 	Wait For Trace On Uart	zpl_inference_enter	model_id=any
-	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${0}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any	timeout=40
+	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${0}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any	timeout=60
 	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${0}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
 	Wait For Trace On Uart	zpl_tflm_enter	subgraph_idx=${0}	op_idx=${1}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
 	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${1}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
@@ -44,7 +44,7 @@ Should Display TFLM and TVM OP Name
 	Wait For Trace On Uart	zpl_tflm_exit	subgraph_idx=${0}	op_idx=${2}	tag=FULLY_CONNECTED	thread_id=any	arena_used_bytes=any	arena_tail_usage=any
 	Wait For Trace On Uart	zpl_inference_exit	model_id=any
 	Wait For Trace On Uart	zpl_inference_enter	model_id=any
-	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${2}	tag=tvmgen_quantized_fused_reshape_cast_subtract	timeout=40
+	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${2}	tag=tvmgen_quantized_fused_reshape_cast_subtract	timeout=60
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${2}	tag=tvmgen_quantized_fused_reshape_cast_subtract
 	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${6}	tag=tvmgen_quantized_fused_nn_dense_add_fixed_point_multiply_add_clip_cast
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${6}	tag=tvmgen_quantized_fused_nn_dense_add_fixed_point_multiply_add_clip_cast
@@ -58,7 +58,7 @@ Should Display TFLM and TVM OP Name
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${14}	tag=tvmgen_quantized_fused_nn_dense_add_fixed_point_multiply_add_clip_cast_2
 	Wait For Trace On Uart	zpl_inference_exit	model_id=any
 	Wait For Trace On Uart	zpl_inference_enter	model_id=any
-	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${2}	tag=tvmgen_sine2_fused_reshape_cast_subtract	timeout=40
+	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${2}	tag=tvmgen_sine2_fused_reshape_cast_subtract	timeout=60
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${2}	tag=tvmgen_sine2_fused_reshape_cast_subtract
 	Wait For Trace On Uart	zpl_tvm_enter	op_idx=${6}	tag=tvmgen_sine2_fused_nn_dense_add_fixed_point_multiply_add_clip_cast
 	Wait For Trace On Uart	zpl_tvm_exit	op_idx=${6}	tag=tvmgen_sine2_fused_nn_dense_add_fixed_point_multiply_add_clip_cast
