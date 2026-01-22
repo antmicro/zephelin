@@ -184,3 +184,24 @@ K_THREAD_DEFINE(zpl_cpu_load_profiling,
 
 This will emit events either in text or CTF format.
 The CTF traces later will be parsed by {zpl_repo}`scripts/ctf2tef.py` script to generate TEF traces for Trace Viewer to obtain - check {doc}`ctf_to_tef` for more details.
+
+## Adding Zephyr patches
+
+To simplify development of Zephyr patches, you can use `apply_patches.py` and `update_patches.py` scripts for applying patches and converting commits to patches.
+
+Before using those scripts, ensure that the repositories are updated:
+```shell
+west update
+```
+
+To apply Zephyr patches run:
+
+```shell
+python scripts/apply_patches.py
+```
+
+In case new commits are introduced or existing commits are modified, the changes can be saved as patches with:
+
+```shell
+python scripts/update_patches.py
+```
