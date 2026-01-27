@@ -244,9 +244,9 @@ def ctf_to_tef(
         Path to the file with trace in CTF.
     skip_args : bool
         Whether the arguments of events should be ignored.
-    custom_metadata : list[CustomMetadataDefinition] | None
+    custom_metadata : dict[str, CustomMetadataDefinition] | None
         Dictionary mapping CTF event to the TEF metadata.
-    custom_events : dict[str, CustomEventDefinition] | None
+    custom_events : list[CustomEventDefinition] | None
         List with mapping of the beginning and the end represented by CTF events
         to a new TEF event.
 
