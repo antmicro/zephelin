@@ -1,7 +1,7 @@
-From 992bcefb413772702fcc13dd7ee1fd1f85ad8f10 Mon Sep 17 00:00:00 2001
+From fd4f6da083dda5e740ad591505ef20d867004911 Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Wed, 31 Dec 2025 14:02:33 +0100
-Subject: [PATCH 19/22] tracing: make CTF timestamp function configurable
+Subject: [PATCH 16/31] tracing: make CTF timestamp function configurable
 
 Signed-off-by: Andrii Chmutov <achmutov@antmicro.com>
 ---
@@ -127,5 +127,5 @@ index 90051505512..beb5d2e1e33 100644
 +}
 +#endif /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
 -- 
-2.47.1
+2.47.3
 

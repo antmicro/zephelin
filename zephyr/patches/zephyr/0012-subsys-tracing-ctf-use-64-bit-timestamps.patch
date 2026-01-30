@@ -1,7 +1,7 @@
-From 9fa51f5878eba41793e24f6978f37f4f70f01c0a Mon Sep 17 00:00:00 2001
+From 8059b3a9be68e75ef248904208ca145ff7329215 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 12 Sep 2025 15:23:46 +0200
-Subject: [PATCH 15/22] subsys: tracing: ctf: use 64-bit timestamps
+Subject: [PATCH 12/31] subsys: tracing: ctf: use 64-bit timestamps
 
 Changes CTF events to use 64bit timestamp. This enables tracing of longer
 execution as 32bit timestamps overflows after ~4s.
@@ -63,5 +63,5 @@ index ca55f1c30df..76ff39e4af4 100644
  };
  
 -- 
-2.47.1
+2.47.3
 

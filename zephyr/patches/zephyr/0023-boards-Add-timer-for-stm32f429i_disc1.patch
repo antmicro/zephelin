@@ -1,3 +1,13 @@
+From a7ede47f88073826fab9f19a9859976fdda2d343 Mon Sep 17 00:00:00 2001
+From: Jedrzej Czykier <jczykier@antmicro.com>
+Date: Tue, 3 Mar 2026 16:31:53 +0100
+Subject: [PATCH 23/31] boards: Add timer for stm32f429i_disc1
+
+Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
+---
+ .../st/stm32f429i_disc1/support/stm32f4_discovery.repl | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
 diff --git a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
 index 78e2cf1b5be..83959055025 100644
 --- a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
@@ -19,3 +29,6 @@ index 78e2cf1b5be..83959055025 100644
  usart1: UART.STM32_UART @ sysbus <0x40011000, +0x400>
      ->nvic0@37
  
+-- 
+2.47.3
+

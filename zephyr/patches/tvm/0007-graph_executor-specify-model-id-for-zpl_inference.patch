@@ -1,4 +1,4 @@
-From 2c93053f8652898aea4977083ae9a646c5718255 Mon Sep 17 00:00:00 2001
+From 2523396238b8c2f2a5e08cff42f97f065fe55268 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Mon, 13 Oct 2025 12:29:45 +0200
 Subject: [PATCH 7/8] graph_executor: specify model id for zpl_inference
@@ -30,5 +30,5 @@ index a633ed630..a31087893 100644
  }
  
 -- 
-2.47.1
+2.47.3
 

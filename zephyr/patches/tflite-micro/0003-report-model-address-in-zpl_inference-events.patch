@@ -1,4 +1,4 @@
-From d3b437990bf407d9f6f2badb9e4572f12461bd70 Mon Sep 17 00:00:00 2001
+From c6acc34fccfb128e8a8f5520ac736a7ffb0128c7 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Wed, 8 Oct 2025 11:15:53 +0200
 Subject: [PATCH 3/5] report model address in zpl_inference events
@@ -65,5 +65,5 @@ index e9a3de04..a1f6657b 100644
  };
  #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
 -- 
-2.47.1
+2.47.3
 

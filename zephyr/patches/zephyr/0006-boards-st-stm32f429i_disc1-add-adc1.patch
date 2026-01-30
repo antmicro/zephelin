@@ -1,7 +1,7 @@
 From 2481967f31fe28e12fb5459a52bf5e5ff3f49e4c Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Fri, 27 Jun 2025 14:38:43 +0200
-Subject: [PATCH 06/22] boards: st: stm32f429i_disc1: add adc1
+Subject: [PATCH 06/31] boards: st: stm32f429i_disc1: add adc1
 
 ---
  .../support/stm32f4_discovery.repl            | 144 ++++++++++++++++++
@@ -173,5 +173,5 @@ index e7dc1e0c9ac..56e425a6e47 100644
  showAnalyzer sysbus.usart1
  
 -- 
-2.47.1
+2.47.3
 

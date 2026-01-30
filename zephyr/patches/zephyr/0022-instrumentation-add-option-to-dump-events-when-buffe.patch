@@ -1,7 +1,8 @@
-From 5911e0647ba0975e3041a813c3a891520ab4bb64 Mon Sep 17 00:00:00 2001
+From 52bd8da1efd5b5657c11ac5881d5088718870488 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Wed, 12 Nov 2025 19:50:49 +0100
-Subject: [PATCH 22/22] add option to dump events when buffer is full
+Subject: [PATCH 22/31] instrumentation: add option to dump events when buffer
+ is full
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---
@@ -154,19 +155,7 @@ index 248aa2ecf43..7424ee7f12b 100755
              + " ns |"
          )
          line_buffer_first_half.append(line)
-@@ -775,69 +779,17 @@ def get_traces_in_trace_event_format(tmpdir, elf, demangle, verbose=False):
-     named_thread_list = []
-     for trace in ge:
-         event_type, func, tid, cpu, _, ts, tn = trace.values()
--        tid = int(tid, 0)
-+
-+        if tid == "none-thread":
-+            tid = -1
-+        else:
-+            tid = int(tid, 0)
-
-         # Set phase type according with the Event
-         if event_type == "entry":
+@@ -775,62 +786,6 @@ def get_traces_in_trace_event_format(tmpdir, elf, demangle, verbose=False):
              ph = "B"  # Event Begin
          elif event_type == "exit":
              ph = "E"  # Event End
@@ -398,5 +387,5 @@ index afac0c6eed6..e36a6d6a8ec 100644
  {
  	return ring_buf_is_empty(&instr_ring_buf);
 -- 
-2.47.1
+2.47.3
 

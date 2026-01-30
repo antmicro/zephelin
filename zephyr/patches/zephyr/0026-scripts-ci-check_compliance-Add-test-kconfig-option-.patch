@@ -1,17 +1,19 @@
-From c3e6a95fc8a6908dfae5206558df3bda36859a47 Mon Sep 17 00:00:00 2001
+From f3f47880313f47f752e5723a64a5b0e6ee307c27 Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
-Date: Thu, 26 Feb 2026 15:50:30 +0100
-Subject: [PATCH] [#91648] scripts: ci: check_compliance: Add test kconfig option to ignored keywords
+Date: Tue, 17 Mar 2026 10:10:57 +0100
+Subject: [PATCH 26/31] scripts: ci: check_compliance: Add test kconfig option
+ to igonred keywords
 
+Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
 ---
  scripts/ci/check_compliance.py | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/scripts/ci/check_compliance.py b/scripts/ci/check_compliance.py
-index e2a66589204..a09fb029307 100755
+index c745cd00290..23d49ca6c44 100755
 --- a/scripts/ci/check_compliance.py
 +++ b/scripts/ci/check_compliance.py
-@@ -1498,6 +1498,7 @@ flagged.
+@@ -1503,6 +1503,7 @@ flagged.
          "ZPL_SAMPLE_TFLM_BUFFER_SIZE",
          "ZPL_SAMPLE_TVM_QUANTIZED_MODEL",
          "ZPL_SAMPLE_TVM_HEAP_SIZE",
@@ -19,6 +21,6 @@ index e2a66589204..a09fb029307 100755
          "ZTEST_FAIL_TEST_",  # regex in tests/ztest/fail/CMakeLists.txt
          "ZVFS_OPEN_ADD_SIZE_", # Used as an option matching prefix
          # zephyr-keep-sorted-stop
---
+-- 
 2.47.3
 

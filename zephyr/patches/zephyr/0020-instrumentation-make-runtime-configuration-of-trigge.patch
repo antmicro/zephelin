@@ -1,7 +1,7 @@
-From ae6e171c32aceb6dd9222e88b090623fe39f828f Mon Sep 17 00:00:00 2001
+From 4ff5f3432c8b9f1e7896869b765d1e830f7a0804 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Tue, 8 Jul 2025 16:36:13 +0200
-Subject: [PATCH 11/22] instrumentation: make runtime configuration of
+Subject: [PATCH 20/31] instrumentation: make runtime configuration of
  trigger/stopper functions optional
 
 This makes using instrumentation much easier with any sample/board
@@ -35,10 +35,10 @@ index 41810a04581..639e4f83f5a 100644
   * @brief Checks if subsystem is ready to be initialized. Must called be before
   *        instr_init().
 diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
-index 2d38c1fcc75..bc04a9355d3 100755
+index b28fa3419c6..248aa2ecf43 100755
 --- a/scripts/instrumentation/zaru.py
 +++ b/scripts/instrumentation/zaru.py
-@@ -34,7 +34,7 @@ from west.app.main import WestApp
+@@ -36,7 +36,7 @@ from west.app.main import WestApp
  from west.configuration import Configuration, config
  from west.util import west_topdir
  
@@ -47,7 +47,7 @@ index 2d38c1fcc75..bc04a9355d3 100755
  
  
  LISTSETS_REPLY_PATTERN = r"(trigger|stopper): (0x[0-9A-Fa-f]+)"
-@@ -320,8 +320,13 @@ def get_target_status(port, verbose=False):
+@@ -371,8 +371,13 @@ def get_target_status(port, verbose=False):
  
      trace_enabled = r.group(1) == "1"
      profile_enabled = r.group(2) == "1"
@@ -62,7 +62,7 @@ index 2d38c1fcc75..bc04a9355d3 100755
  
  
  def get_trigger_stopper_addr(port):
-@@ -376,6 +381,11 @@ def set_trigger_addr(port, addr, verbose=False):
+@@ -427,6 +432,11 @@ def set_trigger_addr(port, addr, verbose=False):
      is returned. If address '0' is given it disables the trigger.
      """
  
@@ -74,7 +74,7 @@ index 2d38c1fcc75..bc04a9355d3 100755
      port.write(b'trigger ' + b'0x' + bytes(addr, "ascii") + b'\r')
  
      # Check if trigger was set correctly.
-@@ -956,9 +966,11 @@ def status(args):
+@@ -1003,9 +1013,11 @@ def status(args):
  
      trace_status = "supported" if status["trace"] else "not supported"
      profile_status = "supported" if status["profile"] else "not supported"
@@ -86,7 +86,7 @@ index 2d38c1fcc75..bc04a9355d3 100755
  
  
  def trace(args):
-@@ -1005,6 +1017,10 @@ def trace(args):
+@@ -1052,6 +1064,10 @@ def trace(args):
          args.stopper = args.couple
  
      if args.trigger or args.stopper:
@@ -237,5 +237,5 @@ index 3af7236557c..b1f5bd37c51 100644
  		printk("pong\n");
  	} else if (strncmp("dump_trace", cmd, length) == 0) {
 -- 
-2.47.1
+2.47.3
 

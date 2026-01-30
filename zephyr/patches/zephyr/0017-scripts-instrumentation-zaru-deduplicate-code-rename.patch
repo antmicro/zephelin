@@ -1,7 +1,7 @@
-From b1470af2fcce5447675e6d78200e51c42428c567 Mon Sep 17 00:00:00 2001
+From 7c30c4eae6025f1968e172a2a2c7e8b26a0b5aca Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Tue, 22 Jul 2025 17:35:46 +0200
-Subject: [PATCH 10/22] scripts/instrumentation/zaru.py: deduplicate code,
+Subject: [PATCH 17/31] scripts: instrumentation: zaru: deduplicate code,
  rename perfetto to trace event
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
@@ -980,5 +980,5 @@ index 9fc6557f053..2d38c1fcc75 100755
      trace_parser.add_argument('--demangle', '-d', action='store_true', help="demangle C++ symbols.")
      trace_parser.add_argument(
 -- 
-2.47.1
+2.47.3
 

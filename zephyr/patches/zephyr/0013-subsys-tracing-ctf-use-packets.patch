@@ -1,7 +1,7 @@
-From c69c465f1a0e78daddc7a4b7b6653e5c851e423b Mon Sep 17 00:00:00 2001
+From a78a2855f55d0fb3284ab771a3c5351e248b1bd7 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 12 Sep 2025 15:29:42 +0200
-Subject: [PATCH 16/22] subsys: tracing: ctf: use packets
+Subject: [PATCH 13/31] subsys: tracing: ctf: use packets
 
 Enables usage of multiple CTF streams.
 
@@ -1941,5 +1941,5 @@ index 76ff39e4af4..c716a3bb70c 100644
  	id = 0xFF;
  	fields := struct {
 -- 
-2.47.1
+2.47.3
 

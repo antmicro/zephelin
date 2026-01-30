@@ -1,7 +1,7 @@
-From 7ed4b902b92deb384815a935b5ad0653b71e9c27 Mon Sep 17 00:00:00 2001
+From c1fa7f3531f430016e67f11059b8f1126731f41a Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Wed, 17 Dec 2025 12:50:17 +0100
-Subject: [PATCH 13/22] scripts: instrumentation: zaru: use objdump from sdk
+Subject: [PATCH 18/31] scripts: instrumentation: zaru: use objdump from sdk
  for elf32-little
 
 ---
@@ -9,7 +9,7 @@ Subject: [PATCH 13/22] scripts: instrumentation: zaru: use objdump from sdk
  1 file changed, 54 insertions(+), 3 deletions(-)
 
 diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
-index bc04a9355d3..2251dd4840d 100755
+index 2d38c1fcc75..7cb74deed13 100755
 --- a/scripts/instrumentation/zaru.py
 +++ b/scripts/instrumentation/zaru.py
 @@ -27,6 +27,8 @@ import re
@@ -106,5 +106,5 @@ index bc04a9355d3..2251dd4840d 100755
  
      if verbose:
 -- 
-2.47.1
+2.47.3
 

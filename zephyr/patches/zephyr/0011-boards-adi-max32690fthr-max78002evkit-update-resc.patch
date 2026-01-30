@@ -1,7 +1,7 @@
-From 842ea216879f5933826c315175f2fd39f8e5e4ad Mon Sep 17 00:00:00 2001
+From e3944b6b00cadba1542f21cbd260fd82be71f26e Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Thu, 2 Oct 2025 14:26:21 +0200
-Subject: [PATCH 14/22] boards: adi: max32690fthr, max78002evkit: update resc
+Subject: [PATCH 11/31] boards: adi: max32690fthr, max78002evkit: update resc
 
 ---
  boards/adi/max32690fthr/support/max32690.resc  | 2 +-
@@ -35,5 +35,5 @@ index 33a6aa79f28..aca205d292d 100644
  machine LoadPlatformDescriptionFromString
  """
 -- 
-2.47.1
+2.47.3
 

@@ -1,4 +1,4 @@
-From 423beb0139b52744b4d43b95c0ab7e02a7f4981a Mon Sep 17 00:00:00 2001
+From b0c82c700615cee46da6f162c29c7446c748da02 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 24 Oct 2025 12:01:48 +0200
 Subject: [PATCH 8/8] graph_executor: emit zpl_inference_exit before dumping
@@ -30,5 +30,5 @@ index a31087893..c518ff12d 100644
  
  /*!
 -- 
-2.47.1
+2.47.3
 
