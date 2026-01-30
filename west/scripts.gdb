@@ -1,5 +1,5 @@
-# Copyright (c) 2025 Analog Devices, Inc.
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -24,4 +24,22 @@ end
 define calculate_start_end
 	set $start = &ram_tracing
 	set $end = (char*)&ram_tracing + pos
+end
+
+# $arg0 : Path to the file
+# $arg1 : The size of buffer
+define dump_data_to_file
+	break tracing_backend_ram_output if (pos + length) > $arg1
+	set $append = 0
+	while (1)
+		continue
+		calculate_start_end
+		if $append
+			append binary memory $arg0 $start $end
+		else
+			dump binary memory $arg0 $start $end
+		end
+		call tracing_backend_ram_init()
+		set $append = 1
+	end
 end
