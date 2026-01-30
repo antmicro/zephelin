@@ -1,5 +1,5 @@
-# Copyright (c) 2025 Analog Devices, Inc.
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -314,6 +314,7 @@ class ZplInstrumentationUartGdbCapture(ZplInstrumentationUartCapture):
             self.inf(f"GDB return code {proc_gdb.poll()}")
 
             args_gdb_capture = copy(args)
+            args_gdb_capture.capture_once = True
             args_gdb_capture.no_debug_server = True
             args_gdb_capture.output_path = str(original_output)
 

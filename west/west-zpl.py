@@ -1,5 +1,5 @@
-# Copyright (c) 2025 Analog Devices, Inc.
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -16,7 +16,7 @@ import serial
 import usb.core
 import usb.util
 from tqdm import tqdm
-from utils import add_gdb_common_args, get_zephyr_elf, start_debugserver
+from utils import add_gdb_common_args, get_kconfigs, get_zephyr_elf, start_debugserver
 from west.commands import WestCommand
 
 CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
@@ -51,15 +51,19 @@ class ZplGdbCapture(WestCommand):
             "--no-debug-server", help="Don't set up the debug server", action="store_true"
         )
         parser.add_argument("--openocd", help="Path to custom OpenOCD", type=Path, default=None)
+        parser.add_argument(
+            "--capture-once", help="Dump data from buffer only once and exit", action="store_true"
+        )
         stop_condition_group = parser.add_mutually_exclusive_group()
         stop_condition_group.add_argument(
             "--buffer-full",
-            help="Run application until trace buffer is full",
+            help="Run application until trace buffer is full; works only with --capture-once",
             action="store_true",
         )
         stop_condition_group.add_argument(
             "--n-bytes",
-            help="Run application until there is at least n in trace buffer",
+            help="Run application until there is at least n in trace buffer;"
+            " works only with --capture-once",
             type=int,
         )
 
@@ -84,7 +88,8 @@ class ZplGdbCapture(WestCommand):
             if (ret_code := proc_debugserver.poll()) is not None:
                 self.die(f"The debug server exited with code: {ret_code}")
 
-        cmd_gdb = [
+        # Prepare GDB command
+        cmd_prefix = [
             args.gdb,
             "-batch",
             "-ex",
@@ -92,29 +97,90 @@ class ZplGdbCapture(WestCommand):
             "-ex",
             f"target remote :{args.gdb_port}",
         ]
+        cmd_gdb = cmd_prefix[:]
 
-        if args.buffer_full:
-            cmd_gdb += ["-ex", "wait_buffer_full"]
-        elif args.n_bytes:
-            cmd_gdb += ["-ex", f"wait_n_bytes {args.n_bytes}"]
+        if args.capture_once:
+            if args.buffer_full:
+                cmd_gdb += ["-ex", "wait_buffer_full"]
+            elif args.n_bytes:
+                cmd_gdb += ["-ex", f"wait_n_bytes {args.n_bytes}"]
 
+            cmd_gdb += [
+                "-ex",
+                "calculate_start_end",
+                "-ex",
+                f"dump binary memory {args.output_path} $start $end",
+            ]
+        else:
+            kconfigs = get_kconfigs()
+            buffer_size = kconfigs.get("CONFIG_RAM_TRACING_BUFFER_SIZE", None)
+            if buffer_size is None:
+                self.wrn("CONFIG_RAM_TRACING_BUFFER_SIZE not found, using 1024 as the buffer size")
+                buffer_size = "1024"
+            cmd_gdb += [
+                "-ex",
+                f"dump_data_to_file {args.output_path} {buffer_size}",
+            ]
         cmd_gdb += [
-            "-ex",
-            "calculate_start_end",
-            "-ex",
-            f"dump binary memory {args.output_path} $start $end",
             "-ex",
             "quit",
             args.elf_path,
         ]
 
+        # Gather info about output file
+        output_file = Path(args.output_path)
+        original_mtime = 0
+        output_last_size = 0
+        if output_file.exists():
+            stats = output_file.stat()
+            original_mtime = stats.st_mtime
+
         self.inf("Saving traces...")
-        proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE)
-        (output, _) = proc_gdb.communicate()
-        exit_code = proc_gdb.wait()
+        proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if args.capture_once:
+            # Capture data and wait for GDB to exit
+            (output, _) = proc_gdb.communicate()
+            exit_code = proc_gdb.wait()
+        else:
+            # Monitor the output file and report its size
+            output, stats = None, None
+            progress_bar = tqdm(unit="B", unit_scale=True)
+            try:
+                tqdm.write("Press C-c to stop.")
+                while True:
+                    if output_file.exists():
+                        stats = output_file.stat()
+                        size_diff = stats.st_size - output_last_size
+                        if stats.st_mtime > original_mtime and size_diff > 0:
+                            progress_bar.update(size_diff)
+                            output_last_size = stats.st_size
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                # Stop running GDB
+                proc_gdb.send_signal(signal.SIGINT)
+                try:
+                    proc_gdb.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc_gdb.kill()
+                # Capture data that remains in the RAM buffer
+                cmd_gdb = cmd_prefix + [
+                    "-ex",
+                    "calculate_start_end",
+                    "-ex",
+                    f"append binary memory {args.output_path} $start $end",
+                ]
+                tqdm.write("Saving remaining traces...")
+                proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                proc_gdb.communicate()
+                proc_gdb.wait()
+                # If mtime is newer, then part of a trace was captured
+                exit_code = int(not (stats and stats.st_mtime > original_mtime))
+            finally:
+                progress_bar.close()
 
         if exit_code != 0:
-            self.err(output)
+            if output:
+                self.err(output)
             self.die("Failed to capture tracing data!")
 
         if not args.no_debug_server:
