@@ -1,0 +1,12 @@
+/ {
+	chosen {
+		zephyr,tracing-uart = &uart2;
+	};
+};
+
+&uart2 {
+	status = "okay";
+	pinctrl-0 = < &uart2_tx_p1_1 &uart2_rx_p1_0 >;
+	pinctrl-names = "default";
+	current-speed = < 0x1c200 >;
+};
