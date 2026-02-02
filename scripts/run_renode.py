@@ -155,7 +155,7 @@ if __name__ == "__main__":
         trace_f = None
 
     if args.debug:
-        platform.StartGdbServer(3333)
+        platform.StartGdbServer(3333, True, "all")
         print("gdb server started at :3333")
         if not args.debug_start_immediately:
             print("Press ENTER to start simulation")
