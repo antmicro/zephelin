@@ -110,3 +110,20 @@ west zpl-prepare-trace -o tef_tvm_instrumentation.json -i renode_tvm.instr.ctf r
   --tvm-model-metadata ./samples/common/tvm/model/sine-metadata.json \
   --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]*_fused_' \
   --trim-metadata
+
+# SMP TVM sample with GDB capture
+west build -p -b  mpfs_icicle/polarfire/u54/smp samples/profiling/smp_tvm -- \
+  -DCONFIG_ZPL_TRACE_BACKEND_DEBUGGER=y -DCONFIG_ZPL_TRACE_FORMAT_CTF=y
+python3 ./scripts/run_renode.py --simulation-only \
+  --debug &> run_renode_tflm_gdb.log &
+RENODE_SIM=$!
+sleep 5
+timeout --preserve-status -s INT 1m west zpl-gdb-capture --no-debug-server ./smp_tvm_gdb.ctf
+kill $RENODE_SIM && rm /tmp/uart-log
+west zpl-prepare-trace ./smp_tvm_gdb.ctf -o ./tef_smp_tvm_gdb.json \
+  --tvm-model-paths ./samples/common/tvm/model/sine-graph.json \
+    ./samples/common/tvm/model/magic-wand-graph.json \
+  --tvm-model-metadata-paths ./samples/common/tvm/model/sine-metadata.json \
+    ./samples/common/tvm/model/magic-wand-metadata.json \
+  --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
+  --trim-metadata
