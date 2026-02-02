@@ -1,5 +1,5 @@
-# Copyright (c) 2025 Analog Devices, Inc.
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import tflite
+    from tflite.Model import Model
     from tvm.relay.backend.executor_factory import GraphExecutorFactoryModule
 
 
@@ -44,7 +44,7 @@ def sample_tflite_model() -> bytes:
 
 
 def sample_tvm_compile(
-    tflite_model: tflite.Model, module_name: str | None = None
+    tflite_model: Model, module_name: str | None = None
 ) -> GraphExecutorFactoryModule:
     """
     Compiles TFLite model with default parameters.
@@ -80,8 +80,8 @@ def sample_tvm_metadata_export(
     module_name : str | None
         The name of the generated module, changes the prefix of received functions
     """
-    import tflite
     import tvm.ir
+    from tflite.Model import Model
 
     # Read or generate TFLite model
     if tflite_model_path:
@@ -90,7 +90,7 @@ def sample_tvm_metadata_export(
     else:
         print("Using sample model")
         buf = sample_tflite_model()
-    tflite_model = tflite.Model.GetRootAsModel(buf)
+    tflite_model = Model.GetRootAsModel(buf)
 
     # Compile and extract metadata
     module = sample_tvm_compile(tflite_model, module_name)
