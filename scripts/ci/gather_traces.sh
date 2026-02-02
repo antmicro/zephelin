@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Copyright (c) 2025 Analog Devices, Inc.
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -14,45 +14,45 @@ CTF_CONFS=${CTF_CONFS:-"-DCONFIG_ZPL_TRACE_FORMAT_CTF=y
 
 ### TFLM profiler
 west build -p -b $BOARD samples/profiling/tflm_profiler -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 \
+python3 ./scripts/run_renode.py --trace-output ./tflm_profiler.ctf --timeout 45
+west zpl-prepare-trace ./tflm_profiler.ctf \
   --tflm-model-path ./samples/common/tflm/model/magic-wand.tflite \
   -o ./tef_tflm_profiler.json
 
 ### Memory profiling
 west build -p -b $BOARD samples/profiling/memory_profiling -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 -o ./tef_memory_profiling.json
+python3 ./scripts/run_renode.py --trace-output ./memory_profiling.ctf --timeout 45
+west zpl-prepare-trace ./memory_profiling.ctf -o ./tef_memory_profiling.json
 
 ### TVM profiler
 west build -p -b $BOARD samples/profiling/tvm_profiler -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 \
+python3 ./scripts/run_renode.py --trace-output ./tvm_profiler.ctf --timeout 45
+west zpl-prepare-trace ./tvm_profiler.ctf \
   --tvm-model-path ./samples/common/tvm/model/magic-wand-graph.json \
   --tvm-model-metadata-path ./samples/common/tvm/model/magic-wand-metadata.json \
   -o ./tef_tvm_profiler.json
 
 ### Marking code scopes
 west build -p -b $BOARD samples/basic/marking_code_scopes -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 -o ./tef_marking_code_scopes.json
+python3 ./scripts/run_renode.py --trace-output ./marking_code_scopes.ctf --timeout 45
+west zpl-prepare-trace ./marking_code_scopes.ctf -o ./tef_marking_code_scopes.json
 
 ### CPU load
 west build -p -b $BOARD samples/profiling/cpu_load -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 -o ./tef_cpu_load.json
+python3 ./scripts/run_renode.py --trace-output ./cpu_load.ctf --timeout 45
+west zpl-prepare-trace ./cpu_load.ctf -o ./tef_cpu_load.json
 
 ### TFLM multi model
 west build -p -b $BOARD samples/profiling/tflm_multi_model -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_multi_model.json \
+python3 ./scripts/run_renode.py --trace-output ./tflm_multi_model.ctf --timeout 45
+west zpl-prepare-trace ./tflm_multi_model.ctf -o ./tef_tflm_multi_model.json \
   --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite \
     ./samples/common/tflm/model/sine.tflite
 
 ### TVM multi model
 west build -p -b $BOARD samples/profiling/tvm_multi_model -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 -o ./tef_tvm_multi_model.json \
+python3 ./scripts/run_renode.py --trace-output ./tvm_multi_model.ctf --timeout 45
+west zpl-prepare-trace ./tvm_multi_model.ctf -o ./tef_tvm_multi_model.json \
   --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
   --tvm-model-paths ./samples/common/tvm/model/magic-wand-graph.json \
     ./samples/common/tvm/model/sine-graph.json \
@@ -61,8 +61,8 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_tvm_multi_model.json \
 
 ### TFLM and TVM models
 west build -p -b $BOARD samples/profiling/tflm_tvm_models -- ${CTF_CONFS}
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_tvm_models.json \
+python3 ./scripts/run_renode.py --trace-output ./tflm_tvm_models.ctf --timeout 45
+west zpl-prepare-trace ./tflm_tvm_models.ctf -o ./tef_tflm_tvm_models.json \
   --tflm-model-paths ./samples/common/tflm/model/sine.tflite \
   --tvm-model-paths ./samples/common/tvm/model/sine-graph.json \
     ./samples/common/tvm/model/sine2-graph.json \
@@ -73,8 +73,8 @@ west zpl-prepare-trace ./channel0_0 -o ./tef_tflm_tvm_models.json \
 
 ### SMP TVM sample
 west build -p -b  mpfs_icicle/polarfire/u54/smp samples/profiling/smp_tvm
-python3 ./scripts/run_renode.py --trace-output ./channel0_0 --timeout 45
-west zpl-prepare-trace ./channel0_0 -o ./tef_smp_tvm_models.json \
+python3 ./scripts/run_renode.py --trace-output ./smp_tvm.ctf --timeout 45
+west zpl-prepare-trace ./smp_tvm.ctf -o ./tef_smp_tvm_models.json \
   --tvm-model-paths ./samples/common/tvm/model/sine-graph.json \
     ./samples/common/tvm/model/magic-wand-graph.json \
   --tvm-model-metadata-paths ./samples/common/tvm/model/sine-metadata.json \
@@ -127,3 +127,10 @@ west zpl-prepare-trace ./smp_tvm_gdb.ctf -o ./tef_smp_tvm_gdb.json \
     ./samples/common/tvm/model/magic-wand-metadata.json \
   --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
   --trim-metadata
+
+
+# Validate generated CTFs
+if [[ $(ls -l -s *.ctf | awk '($6 > 0)' | wc -l) -lt 14 ]]; then
+  echo "Wrong number of non-zero CTF files" 1>&2
+  exit 1
+fi
