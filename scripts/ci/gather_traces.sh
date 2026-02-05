@@ -128,9 +128,25 @@ west zpl-prepare-trace ./smp_tvm_gdb.ctf -o ./tef_smp_tvm_gdb.json \
   --tvm-model-op-remove-prefix 'tvmgen_[a-zA-Z0-9]+_fused_' \
   --trim-metadata
 
+# Two TFLM models with external clock
+west build -p -b max32650fthr samples/multi_machine/two_models -- ${CTF_CONFS}
+python3 ./scripts/run_renode_multimachine.py \
+	--boards max32650fthr max32650fthr \
+	--elfs build/zephyr/zephyr.elf build/zephyr/zephyr.elf \
+	--trace_uarts uart0 uart0 \
+	--shared_clock_address 0x400FFFF0 \
+	--offset 2000 \
+	--trace-output ./trace.ctf \
+	--timeout 20
+west zpl-prepare-trace ./trace.ctf \
+  --tflm-model-path ./samples/common/tflm/model/magic-wand.tflite \
+  -o ./tef_tflm_profiler_0.json
+west zpl-prepare-trace ./trace_1.ctf \
+  --tflm-model-path ./samples/common/tflm/model/magic-wand.tflite \
+  -o ./tef_tflm_profiler_1.json
 
 # Validate generated CTFs
-if [[ $(ls -l -s *.ctf | awk '($6 > 0)' | wc -l) -lt 14 ]]; then
+if [[ $(ls -l -s *.ctf | awk '($6 > 0)' | wc -l) -lt 16 ]]; then
   echo "Wrong number of non-zero CTF files" 1>&2
   exit 1
 fi

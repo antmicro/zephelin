@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2025 Analog Devices, Inc.
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 """
-Python script for running Kenning Zephyr Runtime in Renode.
+Python script for running Zephelin profiling.
 """
 
 import argparse
+import os
 import re
+import sys
 import time
 from pathlib import Path
 
@@ -65,6 +67,205 @@ REPLS = {
 }
 
 
+class RenodeMachine:
+    """
+    Representation of a simulated machine.
+    """
+
+    def __init__(
+        self,
+        index: int,
+        elf: Path,
+        emulation: Emulation,
+        board: str,
+        args: argparse.Namespace,
+        console_uart: str | None = None,
+        trace_uart: str | None = None,
+        repl: Path | None = None,
+    ):
+        """
+        Initialize the machine.
+        """
+        self.index = index
+        self.board = board
+        self.name = f"mach_{index}_{board}"
+        self.elfs = args.elfs
+
+        self.mach = emulation.add_mach(self.name)
+
+        if not self.mach:
+            print("Machine could not be added to the emulation")
+            exit(1)
+
+        if repl:
+            repl_path = str(repl.resolve())
+        elif board in REPLS:
+            repl_path = REPLS[board]
+        else:
+            repl_path = f"{board}.repl"
+            print(f"[{board}] Could not determine REPL. Trying {board}.repl")
+
+        if not isinstance(repl_path, (list, tuple)):
+            paths_to_load = [repl_path]
+        else:
+            paths_to_load = repl_path
+
+        for r in paths_to_load:
+            if not r.startswith("http") and not Path(r).exists():
+                print(f"Error: REPL file not found at {r}")
+                exit(1)
+            self.mach.load_repl(r)
+
+        self.mach.load_elf(str(elf.resolve()))
+
+        self.trace_buffer = b""
+        self.trace_index = 0
+
+        self.simulation_only = args.simulation_only
+
+        self.shared_uart = (console_uart == trace_uart) and (console_uart is not None)
+
+        self.trace_serial = self._setup_uart(emulation, trace_uart, "trace")
+        self.console_serial = None
+
+        self.trace_file = None
+        self.filename = None
+
+        if not self.shared_uart:
+            self.console_serial = self._setup_uart(emulation, console_uart, "console")
+
+        if self.simulation_only:
+            if self.console_serial:
+                self.console_serial.close()
+            if self.trace_serial:
+                self.trace_serial.close()
+            self.console_serial = self.trace_serial = None
+            self.trace_file = None
+        else:
+            base = Path(args.trace_output)
+            if self.index == 0:
+                self.filename = base
+            else:
+                self.filename = f"{base.stem}_{self.index}{base.suffix}"
+
+            self.trace_file = open(self.filename, "wb")
+            print(f"[{self.board}] Started initial trace: {self.filename}")
+
+        if args.debug:
+            port = 3333 + index
+            try:
+                self.mach.StartGdbServer(port, True, "all")
+            except Exception as e:
+                print(e)
+                print(f"Problems with starting the GDB Server on port {port}.")
+                sys.exit(1)
+
+        if args.sensor and args.sensor_samples:
+            self._setup_sensor(args.sensor, args.sensor_samples)
+
+    def _setup_uart(self, emulation, uart_name, type_label):
+        """
+        Set up UART connection.
+        """
+        if not uart_name:
+            return None
+        pty = "/tmp/uart-log" if type_label == "console" else f"/tmp/uart-trace-{self.index}"
+        terminal_name = f"{type_label}_term_{self.index}"
+        if os.path.exists(pty):
+            os.remove(pty)
+        emulation.CreateUartPtyTerminal(terminal_name, pty, True)
+
+        timeout = 5
+        while not os.path.exists(pty) and timeout > 0:
+            time.sleep(0.1)
+            timeout -= 0.1
+
+        if not os.path.exists(pty):
+            print(f"Error: PTY {pty} was not created by Renode in time.")
+            exit(1)
+
+        uart = getattr(self.mach.sysbus, uart_name, None)
+        if uart:
+            emulation.Connector.Connect(
+                uart.internal,
+                getattr(emulation.externals, terminal_name),
+            )
+        else:
+            print(f"Error: UART {uart_name} could not be found")
+            exit(1)
+        return serial.Serial(pty, baudrate=115200)
+
+    def _setup_sensor(self, sensor_path, samples_path):
+        """
+        Set up Sensor node.
+        """
+        sensor_node = self.mach.sysbus
+        for node in sensor_path.split("."):
+            sensor_node = getattr(sensor_node, node, None)
+            if not sensor_node:
+                break
+
+        if hasattr(sensor_node, "FeedSample") and Path(samples_path).exists():
+            sensor_node.FeedSample(str(Path(samples_path).resolve()), -1)
+            print(f"[{self.board}] Feeding samples to {sensor_path}")
+
+    def process_data(self):
+        """
+        Handle console print and trace gathering from simulation run.
+        """
+        if self.simulation_only:
+            return
+
+        if self.console_serial and self.console_serial.in_waiting:
+            try:
+                logs = self.console_serial.read_all()
+                print(f"[{self.board}-{self.index}] {logs.decode(errors='ignore')}")
+            except Exception as e:
+                print(f"[{self.board}-{self.index}] Error reading console {e}", file=sys.stderr)
+
+        if self.trace_serial:
+            try:
+                new_traces = self.trace_serial.read_all()
+                if self.trace_file:
+                    self.trace_buffer += new_traces
+                    self._handle_trace_rotation()
+            except Exception as e:
+                print(f"[{self.board}-{self.index}] Error reading trace Uart: {e}")
+
+    def _handle_trace_rotation(self):
+        if CTF_TRACE_START_TAG in self.trace_buffer:
+            tag_idx = self.trace_buffer.index(CTF_TRACE_START_TAG)
+            self.trace_file.write(self.trace_buffer[:tag_idx])
+
+            if tag_idx > 0:
+                self.trace_file.close()
+                self.trace_index += 1
+
+                if self.filename:
+                    new_path = f"{self.filename}_{self.trace_index}"
+                else:
+                    new_path = f"trace_{self.board}.bin_{self.trace_index}"
+
+                self.trace_file = open(new_path, "wb")
+
+            self.trace_buffer = self.trace_buffer[tag_idx + len(CTF_TRACE_START_TAG) :]
+
+        elif len(self.trace_buffer) > len(CTF_TRACE_START_TAG):
+            safe_to_write = len(self.trace_buffer) - len(CTF_TRACE_START_TAG)
+            self.trace_file.write(self.trace_buffer[:safe_to_write])
+            self.trace_buffer = self.trace_buffer[safe_to_write:]
+
+    def cleanup(self):
+        if self.trace_file:
+            if self.trace_buffer:
+                self.trace_file.write(self.trace_buffer)
+            self.trace_file.close()
+        if self.console_serial:
+            self.console_serial.close()
+        if self.trace_serial:
+            self.trace_serial.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(__doc__, allow_abbrev=False)
     parser.add_argument("--debug", action="store_true", help="Enable GDB server")
@@ -88,163 +289,66 @@ if __name__ == "__main__":
     parser.add_argument(
         "--timeout", type=int, help="Defines for how long the simulation should run in seconds."
     )
+
     args = parser.parse_args()
 
     board = get_cmake_var("BOARD:STRING").split("/")[0]
-    build_path = get_cmake_var("APPLICATION_BINARY_DIR:PATH")
+    build_path = Path(get_cmake_var("APPLICATION_BINARY_DIR:PATH"))
     project_name = get_cmake_var("CMAKE_PROJECT_NAME:STATIC")
+    elf_path = build_path / "zephyr" / "zephyr.elf"
+    args.elfs = [elf_path]
+
+    c_uart = get_zephyr_chosen("console")
+    try:
+        t_uart = get_zephyr_chosen("tracing-uart")
+    except Exception:
+        t_uart = None if args.simulation_only else sys.exit("Tracing UART missing")
 
     emulation = Emulation()
 
-    platform = emulation.add_mach(board)
-    if args.repl is None:
-        repl = REPLS.get(board, None)
-        if repl is None:
-            print(f"No default platform description is provided: ${board}")
-            exit(1)
-
-        for r in repl if isinstance(repl, (list, tuple)) else [repl]:
-            print(f"Loading REPL: {r}")
-            platform.load_repl(r)
-    else:
-        platform.load_repl(str(args.repl.resolve()))
-
-    platform.load_elf(f"{build_path}/zephyr/zephyr.elf")
-
-    # create pty terminal for UART with traces
-    trace_uart = None
-    try:
-        trace_uart = get_zephyr_chosen("tracing-uart")
-        emulation.CreateUartPtyTerminal("trace_uart_term", "/tmp/uart-trace")
-        emulation.Connector.Connect(
-            getattr(platform.sysbus, trace_uart).internal,
-            emulation.externals.trace_uart_term,
-        )
-    except Exception:
-        if not args.simulation_only:
-            # Tracing UART is not required for a simulation only run
-            raise
-
-    trace_serial = None
-    if not args.simulation_only:
-        trace_serial = serial.Serial("/tmp/uart-trace", baudrate=115200)
-
-    # create pty terminal for UART with logs
-    console_uart = get_zephyr_chosen("console")
-    console_serial = None
-    if console_uart != trace_uart:
-        emulation.CreateUartPtyTerminal("console_uart_term", "/tmp/uart-log")
-        emulation.Connector.Connect(
-            getattr(platform.sysbus, console_uart).internal,
-            emulation.externals.console_uart_term,
-        )
-        if not args.simulation_only:
-            console_serial = serial.Serial("/tmp/uart-log", baudrate=115200)
-        else:
-            print(f"Writing console ({console_uart}) output to stdout")
-
-    if args.sensor is not None:
-        if args.sensor_samples is None:
-            print("Missing sensor samples file")
-            exit(1)
-
-        sensor = platform.sysbus
-        for node in args.sensor.split("."):
-            sensor = getattr(sensor, node)
-
-        if not hasattr(sensor, "FeedSample"):
-            print(f"Sensor {args.sensor} is not supported")
-            exit(1)
-
-        if not args.sensor_samples.exists():
-            print(f"File {args.sensor_samples} does not exist")
-            exit(1)
-
-        sensor.FeedSample(str(args.sensor_samples.resolve()), -1)
-
-    if args.trace_output:
-        trace_f = open(args.trace_output, "wb")
-        print(f"Writing tracing-uart ({trace_uart}) output to {args.trace_output} file")
-    else:
-        trace_f = None
+    machine = RenodeMachine(
+        index=0,
+        elf=elf_path,
+        emulation=emulation,
+        board=board,
+        args=args,
+        console_uart=c_uart,
+        trace_uart=t_uart,
+        repl=args.repl,
+    )
 
     if args.debug:
-        platform.StartGdbServer(3333, True, "all")
-        print("gdb server started at :3333")
         if not args.debug_start_immediately:
             print("Press ENTER to start simulation")
             inp = None
-            try:
-                inp = input()
-            except EOFError:
-                # Assuming the run_renode.py was used inside the script, waiting for 20s
-                time.sleep(20)
+        try:
+            inp = input()
+        except EOFError:
+            # Assuming the run_renode.py was used inside the script, waiting for 20s
+            time.sleep(20)
 
-    trace_idx = 0
-    trace_buff = b""
-    trace_written = False
-
-    print("Starting Renode simulation. Press CTRL+C to exit.")
     emulation.StartAll()
+    start_time = time.time()
 
-    simulation_start = time.time()
     try:
         while True:
             if args.simulation_only:
-                time.sleep(args.timeout if args.timeout else 30)
-                if args.timeout:
+                time.sleep(args.timeout if args.timeout else 1)
+                if args.timeout and (time.time() - start_time) > args.timeout:
                     break
                 continue
 
-            traces = trace_serial.read_all()
-            if trace_f is not None:
-                trace_buff += traces
-
-                if CTF_TRACE_START_TAG in trace_buff:
-                    tag_idx = trace_buff.index(CTF_TRACE_START_TAG)
-                    trace_f.write(trace_buff[:tag_idx])
-                    trace_written = tag_idx > 0
-                    if trace_written:
-                        # open new file only if there were any traces written to previous
-                        trace_f.close()
-                        output_path = args.trace_output.with_stem(
-                            args.trace_output.stem + f"_{trace_idx}"
-                        )
-                        trace_f = open(output_path, "wb")
-                        trace_idx += 1
-                        trace_written = False
-
-                    trace_buff = trace_buff[tag_idx + len(CTF_TRACE_START_TAG) :]
-
-                elif len(trace_buff) > len(CTF_TRACE_START_TAG):
-                    trace_f.write(trace_buff[: -len(CTF_TRACE_START_TAG)])
-                    trace_buff = trace_buff[-len(CTF_TRACE_START_TAG) :]
-                    trace_written = True
-
-            if args.trace_output_stdout:
-                print(traces.decode(errors="ignore"), end="", flush=True)
-
-            if console_serial is not None:
-                logs = console_serial.read_all()
-                print(logs.decode(errors="ignore"), end="", flush=True)
-
-            if args.timeout:
-                if time.time() - simulation_start >= args.timeout:
-                    raise KeyboardInterrupt
+            machine.process_data()
+            if args.timeout and (time.time() - start_time) > args.timeout:
+                break
+            time.sleep(0.01)
 
     except KeyboardInterrupt:
-        if trace_f is not None:
-            trace_f.write(trace_buff)
-    except Exception:
-        print("Program failed, saving traces...")
+        print("\nSimulation stopped by user.")
+    except Exception as e:
+        print(f"Program failed with error: {e}")
+        print("Saving traces and exiting...")
     finally:
-        if trace_f is not None:
-            trace_f.close()
-
-        if console_serial is not None:
-            console_serial.close()
-        if trace_serial is not None:
-            trace_serial.close()
+        machine.cleanup()
         emulation.clear()
-
-    print("\nExiting...")
+        print("Exiting...")
