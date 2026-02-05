@@ -185,7 +185,7 @@ patches:
   email: eszpotanski@antmicro.com
   module: zephyr
   path: zephyr/0022-add-option-to-dump-events-when-buffer-is-full.patch
-  sha256sum: c3aea08128c920b5b2a5a52a4dd32b97712d98a36ff6cf0d9fd669b0a76cb098
+  sha256sum: 68706df2434dc35cbd4b528608d93e7e1e87f54a37124850751152f2ece86c46
 - author: Maciej Torhan
   date: '2025-06-04'
   email: mtorhan@antmicro.com

@@ -154,7 +154,19 @@ index 248aa2ecf43..7424ee7f12b 100755
              + " ns |"
          )
          line_buffer_first_half.append(line)
-@@ -775,62 +786,6 @@ def get_traces_in_trace_event_format(tmpdir, elf, demangle, verbose=False):
+@@ -775,69 +779,17 @@ def get_traces_in_trace_event_format(tmpdir, elf, demangle, verbose=False):
+     named_thread_list = []
+     for trace in ge:
+         event_type, func, tid, cpu, _, ts, tn = trace.values()
+-        tid = int(tid, 0)
++
++        if tid == "none-thread":
++            tid = -1
++        else:
++            tid = int(tid, 0)
+
+         # Set phase type according with the Event
+         if event_type == "entry":
              ph = "B"  # Event Begin
          elif event_type == "exit":
              ph = "E"  # Event End
