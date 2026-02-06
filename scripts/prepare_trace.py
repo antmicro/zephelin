@@ -24,9 +24,7 @@ from ctf2tef import (
     CustomMetadataDefinition,
     EventPhase,
     ctf_to_tef,
-    instrumentation_ctf_to_tef,
     prepare_dir,
-    prepare_dir_for_instrumentation,
 )
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
@@ -364,30 +362,67 @@ def extract_memory_symbols(addr_to_symbol: dict[int, list[str]]) -> dict[int, li
     return mem_symbols
 
 
-def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict]) -> list[dict]:
+def zaru_format(instr_trace: list[dict]) -> list[dict]:
     """
-    Adjusts instrumentation traces to make sure they do not collide with ZPL traces.
+    Adjusts format of trace in a similar manner as in zaru.py script.
+    """
+    trace_events = []
+    named_thread_list = []
 
-    It is achieved with:
-    * converting timestamp to microseconds,
-    * removing events without beginnings,
-    * closing unfinished events,
-    * making events longer to make sure they are not shorter than their children.
-    """
-    # Convert timestamps to us
     for event in instr_trace:
-        event["ts"] = float(event["ts"]) * 1e-3
+        ph = event.get("ph", "")
+
+        if ph not in ["B", "E"]:
+            continue
+
+        name = event.get("name", "")
+
+        # When tracing non-application code usually there isn't a thread ID
+        # associated to the context, so in this case change thread ID to 0.
+        tid = event.get("args", {}).get("thread_id", 0)
+
+        ts = float(event.get("ts", 0.0))
+        tn = event.get("args", {}).get("thread_name", "none-thread")
+
+        if tn == "none-thread":
+            tid = -1
+
+        if not name:
+            print(f"Skipped event at ts = {ts}, with tid = {tid}, tn = {tn} due to empty name")
+            continue
+
+        # Check if it's necessary to name a thread/process in the Event
+        # Trace Format. Once a new thread is found it's named and included
+        # to the list of named threads, threads need to be named only once.
         # Set all process IDs to 0 to match with Zephelin events
         # By default instrumentation subsystem uses thread ID
         # for "tid" (thread ID) and "pid" (process ID)
-        event["pid"] = 0
+        if tn not in named_thread_list:
+            named_thread_list.append(tn)
 
+            trace_event = {
+                "args": {"name": tn},
+                "cat": "__metadata",
+                "name": "thread_name",
+                "ph": "M",
+                "pid": 0,
+                "tid": tid,
+                "ts": 0.0,
+            }
+            trace_events.append(trace_event)
+
+        trace_event = {"ts": ts, "pid": 0, "tid": tid, "ph": ph, "name": name}
+        trace_events.append(trace_event)
+
+    return trace_events
+
+
+def remove_events_without_beginning(instr_trace: list[dict]) -> list[dict]:
+    """
+    Remove events' ends that do not have beginnings.
+    """
     EventHash = namedtuple("EventHash", ["name", "tid"])
 
-    def matching_events(a, b):
-        return a["name"] == b["name"] and a["tid"] == b["tid"]
-
-    # Remove events' ends that do not have beginnings
     begins = []
     to_remove = []
     for i, e in enumerate(instr_trace):
@@ -432,8 +467,20 @@ def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict])
             "name": be.name,
         })
 
-    # Scan instrumentation events and fix timestamps
-    # making sure parents do not end before children
+    return instr_trace
+
+
+def fix_timestamps(
+    instr_trace: list[dict], zpl_trace: list[dict], verbose: bool = False
+) -> list[dict]:
+    """
+    Scan instrumentation events and fix timestamps
+    making sure parents do not end before children.
+    """
+
+    def matching_events(a, b):
+        return a["name"] == b["name"] and a["tid"] == b["tid"]
+
     adjusted = []
     to_remove = []
     for instr_id, instr_beg_ev in enumerate(instr_trace[:]):
@@ -448,7 +495,7 @@ def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict])
             (None, None),
         )
         if instr_end_ev is None:
-            print(f"Cannot find end of {e['name']} event")
+            print(f"Cannot find end of {instr_beg_ev['name']} event")
             continue
         instr_end_id += instr_id + 1
         # Remove events with invalid timestamp
@@ -491,16 +538,46 @@ def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict])
                 adjusted.append(instr_end_ev)
                 break
             ts = zpl_end_ev["ts"]
+
     if to_remove:
         removed = set([instr_trace.pop(i)["name"] for i in sorted(to_remove, reverse=True)])
-        print("Removed events whose ends are before beginnings:\n\t" + "\n\t".join(removed))
-    if adjusted:
+        if verbose:
+            print("Removed events whose ends are before beginnings:\n\t" + "\n\t".join(removed))
+    if adjusted and verbose:
         print(
             "Adjusted ends for following instrumentation events, "
             "to avoid collisions with Zephelin events:\n\t"
             + "\n\t".join(f"{e['name']} ({e['ts']}us)" for e in adjusted)
         )
+
     return instr_trace
+
+
+def adjust_instrumentation_trace(tef_trace: list[dict]) -> list[dict]:
+    """
+    Adjusts instrumentation traces to make sure they do not collide with ZPL traces.
+
+    It is achieved with:
+    * filtering out scheduling events,
+    * splitting traces into instrumentation and ZPL parts,
+    * processing trace events in similar manner as `zaru.py` script,
+    * removing events without beginnings,
+    * closing unfinished events,
+    * making events longer to make sure they are not shorter than their children.
+    """
+    # Filter out scheduling events, as they are dropped in one of zephyr patches
+    tef_trace = [ev for ev in tef_trace if not ev.get("name", "").startswith(INSTR_SCHED_PREFIX)]
+
+    # Split the trace into instrumentation and ZPL parts
+    instr_trace, zpl_trace = split_instr_zpl(tef_trace)
+
+    instr_trace = zaru_format(instr_trace)
+
+    instr_trace = remove_events_without_beginning(instr_trace)
+
+    instr_trace = fix_timestamps(instr_trace, zpl_trace, verbose=True)
+
+    return zpl_trace + instr_trace
 
 
 def trim_metadata(tef_trace: list[dict]) -> list[dict]:
@@ -644,6 +721,21 @@ def process_ram_report(ram: dict) -> float:
     return s
 
 
+def split_instr_zpl(tef_trace: list[dict]) -> tuple[list[dict], list[dict]]:
+    """
+    Split TEF trace into instrumentation and ZPL parts.
+    """
+    instr_trace = []
+    zpl_trace = []
+    for ev in tef_trace:
+        if ev.get("name", "").startswith(INSTR_EVENT_PREFIX):
+            instr_trace.append(ev)
+        else:
+            zpl_trace.append(ev)
+
+    return instr_trace, zpl_trace
+
+
 def prepare(args: argparse.Namespace):
     """
     Prepares CTF trace to be visualized.
@@ -697,15 +789,8 @@ def prepare(args: argparse.Namespace):
                 ),
             )
             tef_trace, thread_name = results.tef, results.thread_names
-    if args.instrumentation:
-        with prepare_dir_for_instrumentation(
-            args.instrumentation, args.build_dir / "ctf_metadata"
-        ) as tmp_dir:
-            instr_trace = instrumentation_ctf_to_tef(
-                str(tmp_dir), args.zephyr_elf_path, args.zephyr_base
-            ).tef["traceEvents"]
 
-        tef_trace += adjust_instrumentation_trace(instr_trace, tef_trace)
+            tef_trace = adjust_instrumentation_trace(tef_trace)
 
     # If TVM inference was detected, scan through trace and recalculate model numbers
     # based on common prefix of used TVM functions
