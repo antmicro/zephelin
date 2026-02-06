@@ -8,9 +8,11 @@ Script preparing trace (in TEF) based on the CTF trace and metadata, e.g. TFLM m
 """
 
 import argparse
+import functools
 import json
 import os
 import re
+import subprocess
 import sys
 from collections import defaultdict, namedtuple
 from pathlib import Path
@@ -44,6 +46,12 @@ TVMGEN_PREFIX_ARG = "_tvmgen_prefix"
 TVM_EVENTS = False
 # Mapping of models IDs to consecustive numbers
 MODEL_IDS_MAPPING = {}
+# Prefix for instrumentation events
+INSTR_EVENT_PREFIX = "instr::"
+# Prefix for scheduling events
+INSTR_SCHED_PREFIX = "instr_sched_switch"
+
+CPPFILT_CMD = [os.environ.get("ZPL_DEMANGLE_CMD", "c++filt")]
 
 
 # The list of custom events definitions
@@ -51,6 +59,7 @@ def create_custom_events(
     tvm_op_remove_prefix: re.Pattern = DEFAULT_OP_PREFIX_RE,
     tvm_op_remove_suffix: re.Pattern = DEFAULT_OP_SUFFIX_RE,
     multi_model_trace: bool = False,
+    symbol_map: dict[int, list[str]] | None = None,
 ) -> list[CustomEventDefinition]:
     """
     Creates custom events.
@@ -63,12 +72,16 @@ def create_custom_events(
         Pattern removing TVM operator type suffix.
     multi_model_trace : bool
         Whether the trace contains more than one model.
+    symbol_map : dict[int, list[str]] | None
+        Dict mapping addresses to mangled symbols.
 
     Returns
     -------
     list[CustomEventDefinition]
         Created events.
     """
+    if symbol_map is None:
+        symbol_map = {}
     # The mapping of thread ID to model ID
     ACTIVE_INFERENCES = {}
     # The mapping of currently processed TVM events, grouped by thread ID
@@ -168,6 +181,32 @@ def create_custom_events(
                 return {TVMGEN_PREFIX_ARG: common_prefix}
         return {}
 
+    @functools.lru_cache(maxsize=1024)
+    def demangle(func: str):
+        cmd = CPPFILT_CMD + [func]
+        try:
+            func_demangled = subprocess.check_output(cmd, text=True).strip()
+        except subprocess.CalledProcessError as e:
+            print(f"Error message: {e}")
+            func_demangled = func
+        return func_demangled
+
+    def instr_event_suffix(msg: bt2._EventMessageConst) -> str:
+        callee = str(msg.event.payload_field.get("callee", ""))
+
+        if callee.strip().lstrip("+-").isdigit():
+            symbol_map_key = int(callee)
+        else:
+            symbol_map_key = 0
+
+        symbol_list = symbol_map.get(symbol_map_key)
+
+        if symbol_list:
+            return demangle(symbol_list[0])
+        else:
+            print(f"No symbols found - using callee address {hex(symbol_map_key)}")
+            return hex(symbol_map_key)
+
     return [
         CustomEventDefinition(
             MODEL_EVENT_NAME,
@@ -200,6 +239,20 @@ def create_custom_events(
             "zpl_inference_exit",
             inference_model_number if multi_model_trace else lambda _: "",
             inference_additional_args,
+        ),
+        CustomEventDefinition(
+            INSTR_EVENT_PREFIX,
+            "func_with_context_enter",
+            "func_with_context_exit",
+            instr_event_suffix,
+            None,
+        ),
+        CustomEventDefinition(
+            INSTR_SCHED_PREFIX,
+            "sched_switched_in",
+            "sched_switched_out",
+            lambda msg: msg.event.payload_field.get("thread_name", ""),
+            None,
         ),
     ]
 
@@ -255,7 +308,7 @@ def add_model_metadata(trace: list, data: dict):
     )
 
 
-def extract_memory_symbols(zephyr_elf_path: Path):
+def extract_symbol_map(zephyr_elf_path: Path) -> dict[int, list[str]]:
     """
     Extracts memory symbols from the provided Zephyr ELF.
 
@@ -290,14 +343,23 @@ def extract_memory_symbols(zephyr_elf_path: Path):
         print(f"Symbol extraction failed: {e}", file=sys.stderr)
         return
 
+    return addr_to_symbol
+
+
+def extract_memory_symbols(addr_to_symbol: dict[int, list[str]]) -> dict[int, list[str]]:
+    """
+    Extracts memory symbols from the provided Zephyr ELF.
+
+    It uses `nm` from GNU binutils to get all available symbols
+    and filters out ones that have not appeared in trace.
+    """
     mem_symbols = {}
     for addr in REGION_SIZES:
-        addr_hex = f"{addr:x}"
-        if addr_hex not in addr_to_symbol or not addr_to_symbol[addr_hex]:
-            print(f"Cannot find symbol for address 0x{addr_hex}", file=sys.stderr)
+        if addr not in addr_to_symbol or not addr_to_symbol[addr]:
+            print(f"Cannot find symbol for address 0x{addr:x}", file=sys.stderr)
             continue
         # Choose last found symbol
-        mem_symbols[addr] = addr_to_symbol[addr_hex][-1]
+        mem_symbols[addr] = addr_to_symbol[addr][-1]
 
     return mem_symbols
 
@@ -441,7 +503,7 @@ def adjust_instrumentation_trace(instr_trace: list[dict], zpl_trace: list[dict])
     return instr_trace
 
 
-def trim_metadata(tef_trace: list[dict]):
+def trim_metadata(tef_trace: list[dict]) -> list[dict]:
     """
     Creates trace with removed metadata events
     that were emitted after the last beginning or end event.
@@ -601,6 +663,8 @@ def prepare(args: argparse.Namespace):
     if args.ctf_trace is None and args.instrumentation is None:
         raise argparse.ArgumentError(None, "Please provide at least one trace file")
 
+    symbol_map = extract_symbol_map(args.zephyr_elf_path)
+
     # Convert CTF
     if args.ctf_trace:
         with prepare_dir(args.ctf_trace, args.zephyr_base) as tmp_dir:
@@ -629,6 +693,7 @@ def prepare(args: argparse.Namespace):
                     tvm_op_remove_prefix=args.tvm_model_op_remove_prefix,
                     tvm_op_remove_suffix=args.tvm_model_op_remove_suffix,
                     multi_model_trace=multiple_models,
+                    symbol_map=symbol_map,
                 ),
             )
             tef_trace, thread_name = results.tef, results.thread_names
@@ -721,7 +786,7 @@ def prepare(args: argparse.Namespace):
 
     # Metadata with memory symbols
     if REGION_SIZES:
-        mem_symbols = extract_memory_symbols(args.zephyr_elf_path)
+        mem_symbols = extract_memory_symbols(symbol_map)
         tef_trace.append(
             {
                 "name": "MEMORY::SYMBOLS",
