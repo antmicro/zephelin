@@ -5,8 +5,10 @@
 
 """Zephelin West extension for tracing data capture."""
 
+import os
 import signal
 import subprocess
+import threading
 import time
 from argparse import ArgumentParser
 from pathlib import Path
@@ -19,7 +21,7 @@ from tqdm import tqdm
 from utils import add_gdb_common_args, get_kconfigs, get_zephyr_elf, start_debugserver
 from west.commands import WestCommand
 
-CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
+_CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
 
 class ZplGdbCapture(WestCommand):
@@ -190,6 +192,58 @@ class ZplGdbCapture(WestCommand):
         self.inf("Done.")
 
 
+class SerialWrapper:
+    """Wrapper for serial port used for PTY passthrough."""
+
+    def __init__(self, ser, target=None, pty_forward=False):
+        """Init SerialWrapper for a provided serial port."""
+        self._ser = ser
+        self._target = target if target is not None else "zpl_pty"
+        self._pty_forward = pty_forward
+
+        master, slave = os.openpty()
+        self._master = master
+        self._slave = slave
+        self._pty_name = os.ttyname(slave)
+
+        if self._target is not None:
+            try:
+                os.unlink(self._target)
+            except FileNotFoundError:
+                ...
+            os.symlink(self._pty_name, self._target)
+
+        self._ser_lock = threading.Lock()
+        self._write_thread = threading.Thread(target=self._write_loop, daemon=True)
+        self._write_thread.start()
+
+    def _write_loop(self):
+        while True:
+            data = os.read(self._master, 1)
+            with self._ser_lock:
+                self._ser.write(data)
+
+    def write(self, data):
+        with self._ser_lock:
+            self._ser.write(data)
+
+    def read(self, size):
+        with self._ser_lock:
+            data = self._ser.read(size)
+        if self._pty_forward and data:
+            os.write(self._master, data)
+
+        return data
+
+    def read_all(self):
+        with self._ser_lock:
+            data = self._ser.read_all()
+        if self._pty_forward and data:
+            os.write(self._master, data)
+
+        return data
+
+
 class ZplUartCapture(WestCommand):
     """Main class for the zpl-uart-capture command."""
 
@@ -218,6 +272,13 @@ class ZplUartCapture(WestCommand):
                 "CONFIG_TRACING_HANDLE_HOST_CMD to be enabled in the app"
             ),
         )
+        parser.add_argument(
+            "--pty-forward",
+            action="store_true",
+        )
+        parser.add_argument(
+            "--pty-path",
+        )
 
         return parser
 
@@ -228,6 +289,12 @@ class ZplUartCapture(WestCommand):
             self.inf("Press C-c to stop.")
         else:
             self.die(f"Couldn't open port {ser.port}!")
+
+        serw = SerialWrapper(
+            ser=ser,
+            target=args.pty_path,
+            pty_forward=args.pty_forward,
+        )
 
         trace_idx = 0
         buff = b""
@@ -242,7 +309,7 @@ class ZplUartCapture(WestCommand):
 
         try:
             while True:
-                data = ser.read_all()
+                data = serw.read_all()
                 progress_bar.update(len(data))
 
                 if args.send_enable:
@@ -251,8 +318,8 @@ class ZplUartCapture(WestCommand):
 
                 buff += data
 
-                if CTF_TRACE_START_TAG in buff:
-                    tag_idx = buff.index(CTF_TRACE_START_TAG)
+                if _CTF_TRACE_START_TAG in buff:
+                    tag_idx = buff.index(_CTF_TRACE_START_TAG)
                     f.write(buff[:tag_idx])
                     f.close()
                     output_path = args.output_path.with_stem(
@@ -260,14 +327,14 @@ class ZplUartCapture(WestCommand):
                     )
                     tqdm.write(f"Found CTF trace start, writing trace to new file {output_path}")
                     f = open(output_path, "wb")
-                    buff = buff[tag_idx + len(CTF_TRACE_START_TAG) :]
+                    buff = buff[tag_idx + len(_CTF_TRACE_START_TAG) :]
                     progress_bar.reset()
                     progress_bar.update(len(buff))
                     trace_idx += 1
 
-                elif len(buff) > len(CTF_TRACE_START_TAG):
-                    f.write(buff[: -len(CTF_TRACE_START_TAG)])
-                    buff = buff[-len(CTF_TRACE_START_TAG) :]
+                elif len(buff) > len(_CTF_TRACE_START_TAG):
+                    f.write(buff[: -len(_CTF_TRACE_START_TAG)])
+                    buff = buff[-len(_CTF_TRACE_START_TAG) :]
 
         except KeyboardInterrupt:
             f.write(buff)
