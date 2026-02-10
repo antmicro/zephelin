@@ -266,3 +266,50 @@ west zpl-prepare-trace ./smp.ctf -o ./tef_smp_tvm_models.json \
 
 In the Trace Viewer there should be separate thread for each model and each of those threads should contain events produced by that model.
 :::::
+
+## Simple tracing of two applications running on different SoCs with common external clock
+
+* **Source**: {zpl_repo}`samples/multi_machine/two_models`
+* **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler_0.json&profileURL=./tef_tflm_profiler_1.json){.external}
+
+This sample demonstrates tracing of two Zephyr applications running on separate boards.
+
+Those boards share a common clock provider, allowing for traces to be synchronized.
+An artificial time offset is introduced for the demonstration purposes.
+
+:::::{example} Tracing same solution on two machines
+:collapsible:
+
+To build a sample run:
+```bash
+west build -p -b max32650fthr samples/multi_machine/two_models -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n
+```
+
+Demos uses same application for both boards.
+
+The above sample can be simulated in Renode with:
+
+```bash
+python3 ./scripts/run_renode_multimachine.py \
+	--boards max32650fthr max32650fthr \
+	--elfs build/zephyr/zephyr.elf build/zephyr/zephyr.elf \
+	--trace_uarts uart0 uart0 \
+	--shared_clock_address 0x400FFFF0 \
+	--offset 2000 \
+	--trace-output ./trace.ctf \
+	--timeout 20
+```
+
+Finally, to parse produced `./trace.ctf` and `./trace_1.ctf` run:
+
+```bash
+west zpl-prepare-trace ./trace.ctf \
+  --tflm-model-path ./samples/common/tflm/model/magic-wand.tflite \
+  -o ./tef_tflm_profiler_0.json
+west zpl-prepare-trace ./trace_1.ctf \
+  --tflm-model-path ./samples/common/tflm/model/magic-wand.tflite \
+  -o ./tef_tflm_profiler_1.json
+```
+
+In the Trace Viewer, traces from the same model run should be available but with 2s offset between them.
+:::::
