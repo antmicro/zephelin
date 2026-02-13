@@ -15,7 +15,7 @@ from itertools import zip_longest
 from pathlib import Path
 
 from pyrenode3.wrappers import Emulation
-from run_renode import RenodeMachine
+from run_renode import RenodeMachine, get_renode_logger, get_renode_logs
 
 RENODE_CLOCK_LOGIC = """
 from Antmicro.Renode.Core import EmulationManager
@@ -62,12 +62,15 @@ if __name__ == "__main__":
         help="Hex address of shared clock, if provided all boards will \
             have access to peripheral with consistent time",
     )
+    parser.add_argument("--renode-logs", action="store_true", help="Print Renode logs to stdout")
 
     args = parser.parse_args()
 
     emulation = Emulation()
     emulation.SyncStepping = True
     machines = []
+
+    logger = get_renode_logger() if args.renode_logs else None
 
     for i, (b, e, t, c, r) in enumerate(
         zip_longest(
@@ -159,11 +162,12 @@ if __name__ == "__main__":
     finally:
         for m in machines:
             m.cleanup()
-
         try:
             emulation.clear()
         except Exception as e:
             # Renode might try to delete /tmp/uart-log twice and thorw an exception
             print(e)
-            ...
+        if logger:
+            get_renode_logs(logger, 1000)
+
     print("\nExiting...")
