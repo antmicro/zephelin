@@ -48,6 +48,27 @@ def get_zephyr_chosen(chosen: str) -> str:
     raise Exception("Zephyr tracing UART not found")
 
 
+def get_renode_logger():
+    """
+    Creates Renode logging backend.
+    """
+    from Antmicro.Renode.Logging import Logger
+    from Antmicro.Renode.Logging.Backends import MemoryBackend
+
+    logger = MemoryBackend()
+    Logger.AddBackend(logger, "pyrenode3-logger", True)
+    return logger
+
+
+def get_renode_logs(logger, log_ammount: int):
+    """
+    Prints logs gathered by logging backed.
+    """
+    print("Renode logs:")
+    for entry in logger.GetMemoryLogEntries(log_ammount):
+        print(entry.Message)
+
+
 CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 ZEPHYR_DASHBOARD_URL = "https://zephyr-dashboard.renode.io/zephyr_sim/d90d71c42c6d3a81b10b17b5eb5ab3d686b7512f/58aef12522b98e26da67642f9935efa38b6369df"
 REPO_ROOT = str(Path(__file__).parent.parent.resolve())
@@ -289,6 +310,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--timeout", type=int, help="Defines for how long the simulation should run in seconds."
     )
+    parser.add_argument("--renode-logs", action="store_true", help="Print Renode logs to stdout")
 
     args = parser.parse_args()
 
@@ -305,6 +327,8 @@ if __name__ == "__main__":
         t_uart = None if args.simulation_only else sys.exit("Tracing UART missing")
 
     emulation = Emulation()
+
+    logger = get_renode_logger() if args.renode_logs else None
 
     machine = RenodeMachine(
         index=0,
@@ -351,4 +375,6 @@ if __name__ == "__main__":
     finally:
         machine.cleanup()
         emulation.clear()
+        if logger:
+            get_renode_logs(logger, 1000)
         print("Exiting...")
