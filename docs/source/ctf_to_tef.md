@@ -39,6 +39,9 @@ There are several optional arguments available:
 * `-o` - the file path which points to the file where the converted trace should be saved.
   If not provided, the JSON will be printed to STDOUT.
 
+The extension uses by default `c++filt` utility to demangle function names.
+A custom tool can be specified by setting `ZPL_DEMANGLE_CMD` environment variable.
+
 Apart from changing the format, this involves a custom logic which can group elements into {{TEF_Duration}} events, and extend their arguments (see [](converted-events)).
 Completely new events can be added to the trace, extending the context, and improving the trace visualization capabilities (see [](optional-events)).
 Furthermore, the command also converts timestamps from nanoseconds (used in CTF) to microseconds, which are valid for Zephelin Trace Viewer and Speedscope (it assumes that the timestamps are provided in such unit).
