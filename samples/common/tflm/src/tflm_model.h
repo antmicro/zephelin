@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2025 Analog Devices, Inc.
- * Copyright (c) 2025 Antmicro <www.antmicro.com>
+ * Copyright (c) 2025-2026 Analog Devices, Inc.
+ * Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,7 +12,21 @@
 #include <stdint.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
 
-#define TFLITE_RESOLVER_SIZE 5
+#define BASE_OPS_COUNT 5
+
+#ifdef IS_PREPROCESSOR
+	#define PREPROCESSOR_OPS_COUNT 17
+#else
+	#define PREPROCESSOR_OPS_COUNT 0
+#endif
+
+#ifdef IS_MICROSPEECH
+	#define MICROSPEECH_OPS_COUNT 1
+#else
+	#define MICROSPEECH_OPS_COUNT 0
+#endif
+
+#define TFLITE_RESOLVER_SIZE (BASE_OPS_COUNT + PREPROCESSOR_OPS_COUNT + MICROSPEECH_OPS_COUNT)
 
 namespace tflm {
 void model_init(void);

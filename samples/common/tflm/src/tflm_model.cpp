@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2025 Analog Devices, Inc.
- * Copyright (c) 2025 Antmicro <www.antmicro.com>
+ * Copyright (c) 2025-2026 Analog Devices, Inc.
+ * Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -29,6 +29,31 @@ void tflm::model_init(void)
 	g_tflite_resolver.AddMaxPool2D();
 	g_tflite_resolver.AddReshape();
 	g_tflite_resolver.AddSoftmax();
+
+	#ifdef IS_PREPROCESSOR
+	g_tflite_resolver.AddWindow();
+	g_tflite_resolver.AddFftAutoScale();
+	g_tflite_resolver.AddRfft();
+	g_tflite_resolver.AddEnergy();
+	g_tflite_resolver.AddCast();
+	g_tflite_resolver.AddStridedSlice();
+	g_tflite_resolver.AddConcatenation();
+	g_tflite_resolver.AddFilterBank();
+	g_tflite_resolver.AddFilterBankSquareRoot();
+	g_tflite_resolver.AddFilterBankSpectralSubtraction();
+	g_tflite_resolver.AddPCAN();
+	g_tflite_resolver.AddFilterBankLog();
+	g_tflite_resolver.AddMul();
+	g_tflite_resolver.AddAdd();
+	g_tflite_resolver.AddDiv();
+	g_tflite_resolver.AddMinimum();
+	g_tflite_resolver.AddMaximum();
+	#endif
+
+	#ifdef IS_MICROSPEECH
+	g_tflite_resolver.AddDepthwiseConv2D();
+	#endif
+
 }
 
 int tflm::model_load(const uint8_t *model, tflite::MicroInterpreter*& gp_interpreter = gp_interpreter_, size_t tensor_arena_size = 0)
