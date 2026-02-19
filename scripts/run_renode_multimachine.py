@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument("--repls", type=Path, nargs="+", help="List of paths to REPL files")
     parser.add_argument("--offset", type=int, help="Offset between running application (ms)")
     parser.add_argument(
-        "--shared_clock_address",
+        "--shared-clock-address",
         type=lambda x: int(x, 0),
         help="Hex address of shared clock, if provided all boards will \
             have access to peripheral with consistent time",

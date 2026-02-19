@@ -137,7 +137,7 @@ python3 ./scripts/run_renode_multimachine.py \
 	--boards max32650fthr max32650fthr \
 	--elfs build/node_0/zephyr/zephyr.elf build/node_1/zephyr/zephyr.elf \
 	--trace_uarts uart0 uart0 \
-	--shared_clock_address 0x400FFFF0 \
+	--shared-clock-address 0x400FFFF0 \
 	--offset 2000 \
 	--trace-output ./trace.ctf \
 	--timeout 20
