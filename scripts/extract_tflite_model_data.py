@@ -363,14 +363,23 @@ def extract_model_data(
     model_data = dict()
 
     # extract input/output data
+    signatures = interpreter.get_signature_list()
+    has_serving_default = signatures is not None and "serving_default" in signatures
+
     for io_type, io_details in (
         ("input", interpreter.get_input_details()),
         ("output", interpreter.get_output_details()),
     ):
         model_data[f"{io_type}s"] = []
+
+        if has_serving_default:
+            io_names = signatures["serving_default"][f"{io_type}s"]
+        else:
+            io_names = [io["name"] for io in io_details]
+
         for io, io_name in zip(
             io_details,
-            interpreter.get_signature_list()["serving_default"][f"{io_type}s"],
+            io_names,
             strict=False,
         ):
             io_data = dict()
