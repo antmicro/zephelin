@@ -152,8 +152,34 @@ west zpl-prepare-trace ./trace_1.ctf \
   --zephyr-elf-path build/node_1/zephyr/zephyr.elf \
   -o ./tef_tflm_profiler_1.json
 
+# Two TFLM models comunicating
+west build -p -b max32650evkit -d build_preprocessor samples/multi_machine/micro_speech/preprocessor -- ${CTF_CONFS}
+west build -p -b max32650evkit -d build_micro_speech samples/multi_machine/micro_speech/micro_speech -- ${CTF_CONFS}
+
+python3 ./scripts/run_renode_multimachine.py \
+--boards max32650evkit max32650evkit \
+--elfs build_preprocessor/zephyr/zephyr.elf build_micro_speech/zephyr/zephyr.elf \
+--repls samples/multi_machine/micro_speech/boards/max32650evkit.repl samples/multi_machine/micro_speech/boards/max32650evkit.repl \
+--trace_uarts uart0 uart0 \
+--uart-connect uart1 \
+--shared-clock-address 0x400FFFF0 \
+--trace-output micro_speech.ctf \
+--timeout 45
+
+west zpl-prepare-trace ./micro_speech.ctf \
+  --build-dir build/micro_speech \
+  --tflm-model-path ./samples/common/tflm/model/micro_speech_quantized.tflite \
+  -o ./tef_micro_speech.json \
+  --zephyr-elf-path build/micro_speech/zephyr/zephyr.elf
+
+west zpl-prepare-trace ./micro_speech_1.ctf \
+  --build-dir build/preprocessor \
+  --tflm-model-path ./samples/common/tflm/model/audio_preprocessor_int8.tflite \
+  -o ./tef_preprocessor.json \
+  --zephyr-elf-path build/preprocessor/zephyr/zephyr.elf
+
 # Validate generated CTFs
-if [[ $(ls -l -s *.ctf | awk '($6 > 0)' | wc -l) -lt 16 ]]; then
+if [[ $(ls -l -s *.ctf | awk '($6 > 0)' | wc -l) -lt 18 ]]; then
   echo "Wrong number of non-zero CTF files" 1>&2
   exit 1
 fi
