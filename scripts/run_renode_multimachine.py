@@ -63,6 +63,7 @@ if __name__ == "__main__":
             have access to peripheral with consistent time",
     )
     parser.add_argument("--renode-logs", action="store_true", help="Print Renode logs to stdout")
+    parser.add_argument("--uart-connect", type=str, help="UART name to connect thorugh")
 
     args = parser.parse_args()
 
@@ -101,6 +102,19 @@ if __name__ == "__main__":
 
     if args.debug and not args.debug_start_immediately:
         input("Press Enter to start simulation...")
+    if args.uart_connect and len(machines) == 2:
+        src_mach = machines[0].mach
+        dst_mach = machines[1].mach
+
+        uart_name = args.uart_connect
+
+        src_uart = getattr(src_mach.sysbus, uart_name)
+        dst_uart = getattr(dst_mach.sysbus, uart_name)
+
+        emulation.CreateUARTHub("hub")
+
+        emulation.externals.hub.AttachTo(src_uart.internal)
+        emulation.externals.hub.AttachTo(dst_uart.internal)
 
     if args.shared_clock_address:
 
