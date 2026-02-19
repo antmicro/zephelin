@@ -5,9 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zpl.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/uart.h>
+#include <zpl.h>
+#include <zpl/time.h>
 #include <tflm_model.h>
 
 extern "C" {
@@ -24,7 +25,24 @@ static int8_t model_output[OUTPUT_SHAPE];
 
 const struct device *uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart1));
 
+#define EXTERNAL_CLOCK_ADDR 0x400FFFF0
+
 using namespace tflm;
+
+static uint64_t cycles_get(void)
+{
+	return (uint64_t)*(volatile uint32_t *)EXTERNAL_CLOCK_ADDR;
+}
+
+static uint64_t timestamp_get(uint64_t cycles)
+{
+    return cycles * 1000ULL;
+}
+
+static zpl_clock_t custom_clock = {
+	.cycles_get = cycles_get,
+	.timestamp_get = timestamp_get,
+};
 
 void generate_input();
 void send_data_via_uart(int8_t data[]);
@@ -34,10 +52,12 @@ int main(void)
   int status = 0;
   printk("PREPROCESSOR STATRING...\n");
 
+  zpl_clock_set(custom_clock);
+  zpl_init();
+
   // Give micro-speech time to initialize
   k_msleep(1000);
 
-  zpl_init();
 	model_init();
 
 	status = model_load(model0_data);

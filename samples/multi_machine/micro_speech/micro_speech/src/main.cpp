@@ -10,6 +10,8 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/ring_buffer.h>
+#include <zpl.h>
+#include <zpl/time.h>
 #include <tflm_model.h>
 
 extern "C" {
@@ -31,7 +33,24 @@ RING_BUF_DECLARE(uart_ringbuf, RING_BUF_SIZE);
 
 const struct device *uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart1));
 
+#define EXTERNAL_CLOCK_ADDR 0x400FFFF0
+
 using namespace tflm;
+
+static uint64_t cycles_get(void)
+{
+	return (uint64_t)*(volatile uint32_t *)EXTERNAL_CLOCK_ADDR;
+}
+
+static uint64_t timestamp_get(uint64_t cycles)
+{
+	return cycles * 1000ULL;
+}
+
+static zpl_clock_t custom_clock = {
+	.cycles_get = cycles_get,
+	.timestamp_get = timestamp_get,
+};
 
 void handle_inference_cycle();
 void uart_interrupt_handler(const struct device *dev, void *user_data);
@@ -39,35 +58,37 @@ void process_uart_byte(uint8_t recv_byte);
 
 int main(void)
 {
-    uint8_t recv_byte;
-    int status = 0;
+	uint8_t recv_byte;
+	int status = 0;
 
-    model_init();
+	zpl_clock_set(custom_clock);
+	zpl_init();
 
-    status = model_load(model0_data);
-    if (status) {
-        printk("Model load failed %d\n", status);
-        return 1;
-    }
+	model_init();
 
-    if (!device_is_ready(uart_dev)) {
-        printk("RECEIVER ERROR: UART1 device not ready\n");
-        return 0;
-    }
+	status = model_load(model0_data);
+	if (status) {
+		printk("Model load failed %d\n", status);
+		return 1;
+	}
 
-    uart_irq_callback_set(uart_dev, uart_interrupt_handler);
-    uart_irq_rx_enable(uart_dev);
+	if (!device_is_ready(uart_dev)) {
+		printk("RECEIVER ERROR: UART1 device not ready\n");
+		return 0;
+	}
 
-    for (;;) {
-        if (ring_buf_get(&uart_ringbuf, &recv_byte, 1) > 0) {
-            process_uart_byte(recv_byte);
-        } else {
-            k_msleep(1);
-        }
-    }
-    return 0;
+	uart_irq_callback_set(uart_dev, uart_interrupt_handler);
+	uart_irq_rx_enable(uart_dev);
+
+	for (;;) {
+		if (ring_buf_get(&uart_ringbuf, &recv_byte, 1) > 0) {
+			process_uart_byte(recv_byte);
+		} else {
+			k_msleep(1);
+		}
+	}
+	return 0;
 }
-
 
 void handle_inference_cycle() {
     printk("Buffer full. Running inference...\n");
