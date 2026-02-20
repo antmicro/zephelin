@@ -28,7 +28,7 @@ static int input_index = 0;
 #define PAYLOAD_SIZE 40
 static int8_t current_payload[PAYLOAD_SIZE];
 
-#define RING_BUF_SIZE 1024
+#define RING_BUF_SIZE 4096
 RING_BUF_DECLARE(uart_ringbuf, RING_BUF_SIZE);
 
 const struct device *uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart1));
@@ -92,7 +92,6 @@ int main(void)
 
 void handle_inference_cycle() {
     printk("Buffer full. Running inference...\n");
-
     int status = 0;
     status = model_load_input((uint8_t *) input_buffer, sizeof(uint8_t) * INPUT_SHAPE);
 
