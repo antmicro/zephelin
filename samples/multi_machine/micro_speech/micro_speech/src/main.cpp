@@ -127,48 +127,48 @@ void handle_inference_cycle() {
 
 
 void process_uart_byte(uint8 recv_byte) {
-    static int bytes_read = 0;
-    enum state State {
-        WAIT_HEADER,
-        WAIT_SYNC,
-        PAYLOAD,
-        FOOTER
-    } state = WAIT_HEADER;
+	static int bytes_read = 0;
+	static enum State {
+		WAIT_HEADER,
+		WAIT_SYNC,
+		PAYLOAD,
+		FOOTER
+	} state = WAIT_HEADER;
 
-    switch (state) {
-        case WAIT_HEADER:
-            if (recv_byte == 0xAA) state = WAIT_SYNC;
-            break;
+	switch (state) {
+		case WAIT_HEADER:
+			if (recv_byte == 0xAA) state = WAIT_SYNC;
+			break;
 
-        case WAIT_SYNC:
-            if (recv_byte == 0xBB) {
-                state = PAYLOAD;
-                bytes_read = 0;
-            } else if (recv_byte != 0xAA) {
-                state = WAIT_HEADER;
-            }
-            break;
+		case WAIT_SYNC:
+			if (recv_byte == 0xBB) {
+				state = PAYLOAD;
+				bytes_read = 0;
+			} else if (recv_byte != 0xAA) {
+				state = WAIT_HEADER;
+			}
+			break;
 
-        case PAYLOAD:
-            current_payload[bytes_read++] = (int8_t)recv_byte;
-            if (bytes_read >= PAYLOAD_SIZE) state = FOOTER;
-            break;
+		case PAYLOAD:
+			current_payload[bytes_read++] = (int8_t)recv_byte;
+			if (bytes_read >= PAYLOAD_SIZE) state = FOOTER;
+			break;
 
-        case FOOTER:
-            if (recv_byte == '\n') {
-                for (int i = 0; i < PAYLOAD_SIZE && input_index < INPUT_SHAPE; i++) {
-                    input_buffer[input_index++] = current_payload[i];
-                }
+		case FOOTER:
+			if (recv_byte == '\n') {
+				for (int i = 0; i < PAYLOAD_SIZE && input_index < INPUT_SHAPE; i++) {
+					input_buffer[input_index++] = current_payload[i];
+				}
 
-                if (input_index >= INPUT_SHAPE) {
-                    handle_inference_cycle();
-                }
-            } else {
-                printk("Invalid frame footer: 0x%02X\n", recv_byte);
-            }
-            state = WAIT_HEADER;
-            break;
-    }
+				if (input_index >= INPUT_SHAPE) {
+					handle_inference_cycle();
+				}
+			} else {
+				printk("Invalid frame footer: 0x%02X\n", recv_byte);
+			}
+			state = WAIT_HEADER;
+			break;
+	}
 }
 
 void uart_interrupt_handler(const struct device *dev, void *user_data) {

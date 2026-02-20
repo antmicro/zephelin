@@ -16,7 +16,7 @@
 const int g_audio_sample_size = sizeof(g_audio_sample) / sizeof(g_audio_sample[0]);
 
 extern "C" {
-  #include <generated/model0_data.h>
+	#include <generated/model0_data.h>
 }
 
 #define SAMPLE_RATE_HZ 16000
@@ -33,6 +33,8 @@ static int8_t model_output[OUTPUT_SHAPE];
 
 const struct device *uart_dev = DEVICE_DT_GET(DT_NODELABEL(uart1));
 
+#define MS_TO_NS_SCALER 1000ULL
+
 #define EXTERNAL_CLOCK_ADDR 0x400FFFF0
 
 using namespace tflm;
@@ -44,7 +46,7 @@ static uint64_t cycles_get(void)
 
 static uint64_t timestamp_get(uint64_t cycles)
 {
-    return cycles * 1000ULL;
+	return cycles * MS_TO_NS_SCALER;
 }
 
 static zpl_clock_t custom_clock = {
@@ -57,14 +59,14 @@ void send_data_via_uart(int8_t data[]);
 
 int main(void)
 {
-  int status = 0;
-  printk("PREPROCESSOR STATRING...\n");
+	int status = 0;
+	printk("PREPROCESSOR STATRING...\n");
 
-  zpl_clock_set(custom_clock);
-  zpl_init();
+	zpl_clock_set(custom_clock);
+	zpl_init();
 
-  // Give micro-speech time to initialize
-  k_msleep(1000);
+	// Give micro-speech time to initialize
+	k_msleep(1000);
 
 	model_init();
 
@@ -74,69 +76,89 @@ int main(void)
 		return 1;
 	}
 
-  for(;;) {
+	for(;;) {
+		generate_input();
 
-    generate_input();
+		status = model_load_input((uint8_t *)input_buffer, sizeof(int16_t) * INPUT_SHAPE);
 
-    status = model_load_input((uint8_t *)input_buffer, sizeof(int16_t) * INPUT_SHAPE);
+		if (status) {
+			printk("Model load input failed %d\n", status);
+			return 1;
+		}
 
-    if (status) {
-      printk("Model load input failed %d\n", status);
-      return 1;
-    }
+		status = model_run();
+		if (status) {
+			printk("Model invocation failed\n");
+			return 1;
+		}
 
-    status = model_run();
-    if (status) {
-        printk("Model invocation failed\n");
-        return 1;
-    }
+		status = model_get_output((uint8_t *)model_output, sizeof(model_output));
+		if (status) {
+			printk("Model get output failed %d\n", status);
+			return 1;
+		}
 
-    status = model_get_output((uint8_t *)model_output, sizeof(model_output));
-    if (status) {
-        printk("Model get output failed %d\n", status);
-        return 1;
+		ZPL_MARK_CODE_SCOPE(uart_send) {
+			send_data_via_uart(model_output);
+		}
+		k_msleep(10);
+	}
+
+      send_data_via_uart(model_output);
       k_msleep(10);
     }
 
-    send_data_via_uart(model_output);
+    return 0;
   }
 
-  return 0;
-}
+  void generate_input() {
+    static int current_index = 0;
 
-void generate_input() {
-  static int current_index = 0;
+    int remaining_samples = g_audio_sample_size - current_index;
+    int copy_size = (remaining_samples < INPUT_SHAPE) ? remaining_samples : INPUT_SHAPE;
 
-  int remaining_samples = g_audio_sample_size - current_index;
-  int copy_size = (remaining_samples < INPUT_SHAPE) ? remaining_samples : INPUT_SHAPE;
+    memcpy(input_buffer, &g_audio_sample[current_index], copy_size * sizeof(int16_t));
 
-  memcpy(input_buffer, &g_audio_sample[current_index], copy_size * sizeof(int16_t));
+    if (copy_size < INPUT_SHAPE) {
+      memset(input_buffer + copy_size, 0, (INPUT_SHAPE - copy_size) * sizeof(int16_t));
+    }
 
-  if (copy_size < INPUT_SHAPE) {
-    memset(input_buffer + copy_size, 0, (INPUT_SHAPE - copy_size) * sizeof(int16_t));
-  }
+    current_index += STRIDE_SAMPLES;
 
-  current_index += STRIDE_SAMPLES;
-
-  if (current_index >= g_audio_sample_size) {
-    current_index = 0;
-  }
-}
-
-void send_data_via_uart(int8_t data[]) {
-  // Send sync header
-  uart_poll_out(uart_dev, 0xAA);
-  uart_poll_out(uart_dev, 0xBB);
-
-  // Send model output
-  ZPL_MARK_CODE_SCOPE(send_frame) {
-    for (int i = 0; i < OUTPUT_SHAPE; ++i) {
-      uart_poll_out(uart_dev, (uint8_t)data[i]);
-      k_usleep(100);
+    if (current_index >= g_audio_sample_size) {
+      current_index = 0;
     }
   }
 
-  // Send footer
-  uart_poll_out(uart_dev, '\n');
+void generate_input() {
+	static int current_index = 0;
+	int remaining_samples = g_audio_sample_size - current_index;
+	int copy_size = (remaining_samples < INPUT_SHAPE) ? remaining_samples : INPUT_SHAPE;
 
+	memcpy(input_buffer, &g_audio_sample[current_index], copy_size * sizeof(int16_t));
+	if (copy_size < INPUT_SHAPE) {
+		memset(input_buffer + copy_size, 0, (INPUT_SHAPE - copy_size) * sizeof(int16_t));
+	}
+
+	current_index += STRIDE_SAMPLES;
+	if (current_index >= g_audio_sample_size) {
+		current_index = 0;
+	}
+}
+
+void send_data_via_uart(int8_t data[]) {
+	// Send sync header
+	uart_poll_out(uart_dev, 0xAA);
+	uart_poll_out(uart_dev, 0xBB);
+
+	// Send model output
+	ZPL_MARK_CODE_SCOPE(send_frame) {
+		for (int i = 0; i < OUTPUT_SHAPE; ++i) {
+			uart_poll_out(uart_dev, (uint8_t)data[i]);
+			k_usleep(100);
+		}
+	}
+
+	// Send footer
+	uart_poll_out(uart_dev, '\n');
 }
