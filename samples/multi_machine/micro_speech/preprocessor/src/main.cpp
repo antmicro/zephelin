@@ -10,10 +10,18 @@
 #include <zpl.h>
 #include <zpl/time.h>
 #include <tflm_model.h>
+#include <string.h>
+
+#include "no_1000ms.h"
+const int g_audio_sample_size = sizeof(g_audio_sample) / sizeof(g_audio_sample[0]);
 
 extern "C" {
   #include <generated/model0_data.h>
 }
+
+#define SAMPLE_RATE_HZ 16000
+#define WINDOW_STRIDE_MS 20
+#define STRIDE_SAMPLES ((SAMPLE_RATE_HZ * WINDOW_STRIDE_MS) / 1000)
 
 ZPL_CODE_SCOPE_DEFINE(send_frame, true);
 
@@ -96,9 +104,21 @@ int main(void)
 }
 
 void generate_input() {
-  // Put fake data into buffer
-  for (int i = 0; i < INPUT_SHAPE; i++) {
-    input_buffer[i] = (i % 100) * 50;
+  static int current_index = 0;
+
+  int remaining_samples = g_audio_sample_size - current_index;
+  int copy_size = (remaining_samples < INPUT_SHAPE) ? remaining_samples : INPUT_SHAPE;
+
+  memcpy(input_buffer, &g_audio_sample[current_index], copy_size * sizeof(int16_t));
+
+  if (copy_size < INPUT_SHAPE) {
+    memset(input_buffer + copy_size, 0, (INPUT_SHAPE - copy_size) * sizeof(int16_t));
+  }
+
+  current_index += STRIDE_SAMPLES;
+
+  if (current_index >= g_audio_sample_size) {
+    current_index = 0;
   }
 }
 
