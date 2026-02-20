@@ -95,6 +95,7 @@ int main(void)
     if (status) {
         printk("Model get output failed %d\n", status);
         return 1;
+      k_msleep(10);
     }
 
     send_data_via_uart(model_output);
