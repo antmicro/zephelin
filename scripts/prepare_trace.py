@@ -11,7 +11,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 from collections import defaultdict, namedtuple
 from pathlib import Path
@@ -27,6 +26,8 @@ from ctf2tef import (
     prepare_dir,
     prepare_dir_for_instrumentation,
 )
+from elftools.elf.elffile import ELFFile
+from elftools.elf.sections import SymbolTableSection
 from extract_tvm_model_data import (
     DEFAULT_OP_PREFIX_RE,
     DEFAULT_OP_SUFFIX_RE,
@@ -258,8 +259,8 @@ def extract_memory_symbols(zephyr_elf_path: Path):
     """
     Extracts memory symbols from the provided Zephyr ELF.
 
-    It uses `nm` from GNU binutils to get all available symbols
-    and filteres out ones that have not appeared in trace.
+    It parses the ELF file to get all available symbols
+    and filters out ones that have not appeared in trace.
     """
     if not zephyr_elf_path.exists():
         print(
@@ -267,26 +268,27 @@ def extract_memory_symbols(zephyr_elf_path: Path):
             file=sys.stderr,
         )
         return
-    if 0 != subprocess.call(["which", "nm"], stdout=subprocess.DEVNULL):
-        print(
-            "`nm` is not available, please install binutils to extract symbols of memory regions",
-            file=sys.stderr,
-        )
-        return
 
-    nm = subprocess.run(
-        ["nm", "--defined-only", str(zephyr_elf_path.absolute())],
-        stdout=subprocess.PIPE,
-    )
-    if 0 != nm.returncode:
-        print("Symbol extraction failed", file=sys.stderr)
-        return
-
-    nm_output = nm.stdout.decode()
     addr_to_symbol = defaultdict(list)
-    for line in nm_output.splitlines():
-        addr, _, name = line.split(" ")
-        addr_to_symbol[addr.lower()].append(name)
+
+    try:
+        with open(zephyr_elf_path, "rb") as f:
+            elffile = ELFFile(f)
+
+            for section in elffile.iter_sections():
+                if isinstance(section, SymbolTableSection):
+                    for symbol in section.iter_symbols():
+                        if (
+                            symbol["st_shndx"] != "SHN_UNDEF"
+                            and symbol.name
+                            and not symbol.name.startswith("$")
+                        ):
+                            addr_hex = f"{symbol['st_value']:08x}"
+                            addr_to_symbol[addr_hex].append(symbol.name)
+
+    except Exception as e:
+        print(f"Symbol extraction failed: {e}", file=sys.stderr)
+        return
 
     mem_symbols = {}
     for addr in REGION_SIZES:
