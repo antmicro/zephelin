@@ -85,7 +85,7 @@ west zpl-prepare-trace ./smp_tvm.ctf -o ./tef_smp_tvm_models.json \
 # TFLM instrumentation with ZPL events
 west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="dump_on_full.conf;zpl.conf"
 python3 ./scripts/run_renode.py --simulation-only \
-  --debug &> run_renode_tflm_instrumentation.log &
+  --debug --renode-logs &> run_renode_tflm_instrumentation.log &
 RENODE_SIM=$!
 sleep 5
 west zpl-instrumentation-uart-gdb-capture \
@@ -98,7 +98,7 @@ west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr_0.c
 # TVM instrumentation with ZPL events
 west build -p -b $BOARD samples/profiling/tvm_instrumentation -- -DEXTRA_CONF_FILE=zpl.conf
 python3 ./scripts/run_renode.py --simulation-only \
-  --debug --debug-start-immediately &> run_renode_tvm_instrumentation.log &
+  --debug --debug-start-immediately --renode-logs &> run_renode_tvm_instrumentation.log &
 RENODE_SIM=$!
 sleep 5
 west zpl-instrumentation-uart-gdb-capture \
@@ -115,7 +115,7 @@ west zpl-prepare-trace -o tef_tvm_instrumentation.json -i renode_tvm.instr.ctf r
 west build -p -b  mpfs_icicle/polarfire/u54/smp samples/profiling/smp_tvm -- \
   -DCONFIG_ZPL_TRACE_BACKEND_DEBUGGER=y -DCONFIG_ZPL_TRACE_FORMAT_CTF=y
 python3 ./scripts/run_renode.py --simulation-only \
-  --debug &> run_renode_tflm_gdb.log &
+  --debug --renode-logs &> run_renode_tflm_gdb.log &
 RENODE_SIM=$!
 sleep 5
 timeout --preserve-status -s INT 1m west zpl-gdb-capture --no-debug-server ./smp_tvm_gdb.ctf
