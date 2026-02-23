@@ -321,3 +321,56 @@ west zpl-prepare-trace ./trace_1.ctf \
 
 In the Trace Viewer, traces from the same model run should be available but with 2s offset between them.
 :::::
+
+## Preprocessing to micro-speech pipeline
+
+* **Source**: {zpl_repo}`samples/multi_machine/micro_speech`
+* **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_preprocessor.json&profileURL=./tef_micro_speech.json){.external}
+
+This sample demonstrates deployment of Micro-speech model on two SoCs connected via UART.
+The preprocessor running on 1st SoC converts raw audio sample into a spectrographic feature.
+Processed data is passed via UART to the second SoC that runs Micro-speech model once sufficient data has been accumulated.
+Model responses can be `yes`, `no`, `silence` and `undefined`.
+
+:::::{example} Micro-speech pipeline
+:collapsible:
+
+To build a sample run:
+```bash
+
+west build -p -b max32650fthr --sysbuild samples/multi_machine/micro_speech/micro_speech -- \
+   -Dmicro_speech_CONFIG_ZPL_TRACE_FORMAT_CTF=y \
+   -Dmicro_speech_CONFIG_TRACING_BUFFER_SIZE=10000 \
+   -Dpreprocessor_CONFIG_ZPL_TRACE_FORMAT_CTF=y \
+   -Dpreprocessor_CONFIG_TRACING_BUFFER_SIZE=10000
+```
+
+The above sample can be executed on hardware or simulated in Renode with:
+
+```bash
+python3 ./scripts/run_renode_multimachine.py \
+--boards max32650fthr max32650fthr \
+--elfs build/micro_speech/zephyr/zephyr.elf build/preprocessor/zephyr/zephyr.elf \
+--repls samples/multi_machine/boards/max32650fthr.repl samples/multi_machine/boards/max32650fthr.repl \
+--trace_uarts uart0 uart0 \
+--uart-connect uart1 \
+--shared-clock-address 0x400FFFF0 \
+--trace-output micro_speech.ctf \
+--timeout 45
+```
+
+Finally, to parse produced `./microspeech.ctf` and `./microspeech_1.ctf` run:
+
+```bash
+west zpl-prepare-trace ./micro_speech.ctf \
+  --build-dir build/micro_speech \
+  --tflm-model-path ./samples/common/tflm/model/micro_speech_quantized.tflite \
+  -o ./tef_micro_speech.json \
+  --zephyr-elf-path build/micro_speech/zephyr/zephyr.elf
+
+west zpl-prepare-trace ./micro_speech_1.ctf \
+  --build-dir build/micro_speech \
+  --tflm-model-path ./samples/common/tflm/model/audio_preprocessor_int8.tflite \
+  -o ./tef_preprocessor.json \
+  --zephyr-elf-path build/preprocessor/zephyr/zephyr.elf
+```
