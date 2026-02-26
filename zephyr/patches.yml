@@ -228,3 +228,9 @@ patches:
   module: zephyr
   path: zephyr/0024-boards-adi-max32650fthr-add-renode-renode-robot-supp.patch
   sha256sum: e0f5eea45ca28b518a2fa7bba5c1f9ca5ee3365e355b458dceff0aca45a72b94
+- author: Jedrzej Czykier
+  date: 2026-02-24
+  email: jczykier@antmicro.com
+  module: zephyr
+  path: zephyr/0025-boards-common-add-sysbuild-domain-export.patch
+  sha256sum: bbc91945d7104f5f01f3b4a6cdd105a152a6ccc83de8dcc278de55597645365b
