@@ -1,0 +1,9 @@
+shared_clock: Python.PythonPeripheral @ sysbus 0x400FFFF0
+    size: 0x4
+    initable: false
+    script: '''
+from Antmicro.Renode.Core import EmulationManager
+if request.IsRead:
+    emulation_time = EmulationManager.Instance.CurrentEmulation.MasterTimeSource.ElapsedVirtualTime
+    request.Value = int(emulation_time.TotalMicroseconds) & 0xFFFFFFFF
+    '''
