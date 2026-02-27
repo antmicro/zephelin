@@ -26,12 +26,12 @@ using namespace tflm;
 
 static uint64_t cycles_get(void)
 {
-    return (uint64_t)*(volatile uint32_t *)EXTERNAL_CLOCK_ADDR;
+	return (uint64_t)*(volatile uint32_t *)EXTERNAL_CLOCK_ADDR;
 }
 
 static uint64_t timestamp_get(uint64_t cycles)
 {
-    return cycles * 1000ULL;
+	return cycles * 1000ULL;
 }
 
 static zpl_clock_t sensor_clock = {
@@ -48,10 +48,10 @@ int main(void)
 
 	zpl_clock_set(sensor_clock);
 
-	int delay_ms = CONFIG_ZPL_APP_STARTUP_DELAY_MS;
+	int delay_ms = CONFIG_ZPL_SAMPLE_APP_STARTUP_DELAY_MS;
 	if (delay_ms > 0) {
-    k_msleep(delay_ms);
-  }
+		k_msleep(delay_ms);
+	}
 
 	#ifdef CONFIG_ZPL_TRACE_BACKEND_USB
 	k_sleep(K_MSEC(500));

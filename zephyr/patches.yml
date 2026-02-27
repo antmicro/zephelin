@@ -234,3 +234,9 @@ patches:
   module: zephyr
   path: zephyr/0025-boards-common-add-sysbuild-domain-export.patch
   sha256sum: bbc91945d7104f5f01f3b4a6cdd105a152a6ccc83de8dcc278de55597645365b
+- author: Jedrzej Czykier
+  date: 2026-02-25
+  email: jczykier@antmicro.com
+  module: zephyr
+  path: zephyr/0026-check_compliance-exclude-kconfig-symbol.patch
+  sha256sum: 1531f3589acc6f324eb677b2cf16769c31b7d1b09eaca0012bfacc51645391bb

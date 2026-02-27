@@ -23,4 +23,4 @@ tests:
       robot_option:
         - --variable=SYSBUILD_DIR:${APPLICATION_BINARY_DIR}/..
     extra_args:
-      - node_1_CONFIG_ZPL_APP_STARTUP_DELAY_MS:STRING=2000
+      - node_1_CONFIG_ZPL_SAMPLE_APP_STARTUP_DELAY_MS:STRING=2000

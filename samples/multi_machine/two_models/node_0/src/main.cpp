@@ -26,12 +26,12 @@ using namespace tflm;
 
 static uint64_t cycles_get(void)
 {
-    return (uint64_t)*(volatile uint32_t *)EXTERNAL_CLOCK_ADDR;
+	return (uint64_t)*(volatile uint32_t *)EXTERNAL_CLOCK_ADDR;
 }
 
 static uint64_t timestamp_get(uint64_t cycles)
 {
-    return cycles * 1000ULL;
+	return cycles * 1000ULL;
 }
 
 static zpl_clock_t sensor_clock = {
