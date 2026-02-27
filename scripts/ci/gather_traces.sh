@@ -153,13 +153,16 @@ west zpl-prepare-trace ./trace_1.ctf \
   -o ./tef_tflm_profiler_1.json
 
 # Two TFLM models comunicating
-west build -p -b max32650evkit -d build_preprocessor samples/multi_machine/micro_speech/preprocessor -- ${CTF_CONFS}
-west build -p -b max32650evkit -d build_micro_speech samples/multi_machine/micro_speech/micro_speech -- ${CTF_CONFS}
+west build -p -b max32650fthr --sysbuild samples/multi_machine/micro_speech/micro_speech -- \
+   -Dmicro_speech_CONFIG_ZPL_TRACE_FORMAT_CTF=y \
+   -Dmicro_speech_CONFIG_TRACING_BUFFER_SIZE=10000 \
+   -Dpreprocessor_CONFIG_ZPL_TRACE_FORMAT_CTF=y \
+   -Dpreprocessor_CONFIG_TRACING_BUFFER_SIZE=10000
 
 python3 ./scripts/run_renode_multimachine.py \
---boards max32650evkit max32650evkit \
---elfs build_preprocessor/zephyr/zephyr.elf build_micro_speech/zephyr/zephyr.elf \
---repls samples/multi_machine/micro_speech/boards/max32650evkit.repl samples/multi_machine/micro_speech/boards/max32650evkit.repl \
+--boards max32650fthr max32650fthr \
+--elfs build/micro_speech/zephyr/zephyr.elf build/preprocessor/zephyr/zephyr.elf \
+--repls samples/multi_machine/boards/max32650fthr.repl samples/multi_machine/boards/max32650fthr.repl \
 --trace_uarts uart0 uart0 \
 --uart-connect uart1 \
 --shared-clock-address 0x400FFFF0 \
