@@ -55,16 +55,9 @@ class ZplPrepareTrace(WestCommand):
         return parser
 
     def do_run(self, args, unknown_args):
-        self.inf("Running ram_report")
-        # Run ram_report, capture all output
-        # as results are also saved to ram.json in build dir
-        ret = run(["west", "build", "-t", "ram_report"], capture_output=True)
-        if ret.returncode != 0:
-            self.err("Building ram_report failed")
-            self.dbg("with errors:", ret.stderr)
-
         invalid_build_dir = not args.build_dir or not args.build_dir.exists()
         invalid_zephyr_base = not args.zephyr_base or not args.zephyr_base.exists()
+
         if invalid_build_dir or invalid_zephyr_base:
             self.dbg("Trying to find build dir")
 
@@ -75,7 +68,16 @@ class ZplPrepareTrace(WestCommand):
 
             if invalid_zephyr_base:
                 args.zephyr_base = Path(west_topdir()) / "zephyr"
-                self.dbg(f"Found ZEPHYR_BASE: {args.zephyr_base}")
+        self.inf("Running ram_report")
+        cmd = ["west", "build", "-t", "ram_report"]
+
+        if args.build_dir and args.build_dir.exists():
+            cmd.extend(["-d", str(args.build_dir)])
+
+        ret = run(cmd, capture_output=True)
+        if ret.returncode != 0:
+            self.err("Building ram_report failed")
+            self.dbg("with errors:\n", ret.stderr.decode("utf-8", errors="ignore"))
 
         self.inf("Preparing trace")
         prepare(args)
