@@ -1,0 +1,20 @@
+# Copyright (c) 2026 Analog Devices, Inc.
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  name: micro-speech
+common:
+  harness: robot
+  sysbuild: true
+  tags: multi_machine
+  platform_allow:
+    - max32650fthr
+
+tests:
+  sample.trace.micro_speech.communication_is_happening:
+    harness_config:
+      robot_testsuite: tflm_nodes_communicating.robot
+      robot_option:
+        - --variable=SYSBUILD_DIR:${APPLICATION_BINARY_DIR}/..
