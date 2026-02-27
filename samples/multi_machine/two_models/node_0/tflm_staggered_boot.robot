@@ -13,7 +13,7 @@ Resource        ../../multiple_machines.resource
 Node 0 Should Finish Before Node 1 Starts
     ${node_0_elf}=    Join Path    ${EXECDIR}    ${SYSBUILD_DIR}    node_0    zephyr    zephyr.elf
     ${node_1_elf}=    Join Path    ${EXECDIR}    ${SYSBUILD_DIR}    node_1    zephyr    zephyr.elf
-    ${board_repl}=    Join Path    ${CURDIR}    ..    ..    ..    common    boards    max32650evkit.repl
+    ${board_repl}=    Join Path    ${CURDIR}    ..    ..    boards    max32650fthr.repl
     ${shared_clock_repl}=    Join Path    ${CURDIR}    ..    ..    shared_clock.repl
 
     Setup Multi Machine

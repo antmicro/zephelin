@@ -9,6 +9,8 @@ common:
   harness: robot
   sysbuild: true
   tags: multi_machine
+  platform_allow:
+    - max32650fthr
 
 tests:
   sample.trace.two_models.boot:
