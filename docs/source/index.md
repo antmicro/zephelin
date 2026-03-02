@@ -8,6 +8,7 @@ library
 configuration
 memory_profiling
 code_scopes
+usb_requirements
 debug_capture
 instrumentation
 ctf_to_tef
