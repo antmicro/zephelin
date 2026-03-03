@@ -282,7 +282,11 @@ An artificial time offset is introduced for the demonstration purposes.
 
 To build a sample run:
 ```bash
-west build -p -b max32650fthr samples/multi_machine/two_models -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n
+west build -p -b max32650fthr --sysbuild samples/multi_machine/two_models/node_0 -- \
+   -Dnode_0_CONFIG_ZPL_TRACE_FORMAT_CTF=y \
+   -Dnode_0_CONFIG_TRACING_BUFFER_SIZE=10000 \
+   -Dnode_1_CONFIG_ZPL_TRACE_FORMAT_CTF=y \
+   -Dnode_1_CONFIG_TRACING_BUFFER_SIZE=10000
 ```
 
 Demos uses same application for both boards.
@@ -292,7 +296,7 @@ The above sample can be simulated in Renode with:
 ```bash
 python3 ./scripts/run_renode_multimachine.py \
 	--boards max32650fthr max32650fthr \
-	--elfs build/zephyr/zephyr.elf build/zephyr/zephyr.elf \
+	--elfs build/node_0/zephyr/zephyr.elf build/node_1/zephyr/zephyr.elf \
 	--trace_uarts uart0 uart0 \
 	--shared_clock_address 0x400FFFF0 \
 	--offset 2000 \
@@ -304,10 +308,14 @@ Finally, to parse produced `./trace.ctf` and `./trace_1.ctf` run:
 
 ```bash
 west zpl-prepare-trace ./trace.ctf \
+  --build-dir build/node_0 \
   --tflm-model-path ./samples/common/tflm/model/magic-wand.tflite \
+  --zephyr-elf-path build/node_0/zephyr/zephyr.elf \
   -o ./tef_tflm_profiler_0.json
 west zpl-prepare-trace ./trace_1.ctf \
+  --build-dir build/node_1 \
   --tflm-model-path ./samples/common/tflm/model/magic-wand.tflite \
+  --zephyr-elf-path build/node_1/zephyr/zephyr.elf \
   -o ./tef_tflm_profiler_1.json
 ```
 
