@@ -68,11 +68,12 @@ jobs:
           ./scripts/ci/setup_zephyr.sh
       - name: Run Twister
         run: |
-          export ZPL_BASE="$(pwd)"
-          west twister -v -p ${{ matrix.platform }} -T samples -T tests -j 1 --timeout-multiplier 3
           normalized_name=$(echo ${{ matrix.platform}} | tr '/' '_')
           echo "TWISTER_SUFFIX=$normalized_name" >> $GITHUB_ENV
+          export ZPL_BASE="$(pwd)"
+          west twister -v -p ${{ matrix.platform }} -T samples -T tests -j 1 --timeout-multiplier 3
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: "twister-out-${{ env.TWISTER_SUFFIX }}"
           path: |
