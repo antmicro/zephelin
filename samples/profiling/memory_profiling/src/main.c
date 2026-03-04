@@ -51,7 +51,6 @@ int main(void)
 #ifdef CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING
 	ZPL_CONF_SET(memory_profiler, false);
 #endif /* CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING */
-	zpl_init();
 	recursive_function(5);
 	k_msleep(5000);
 #ifdef CONFIG_ZPL_SAMPLE_RUNTIME_CONF_PROFILING

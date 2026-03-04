@@ -29,8 +29,6 @@ int main(void)
 	float __attribute((aligned(32))) model_input[INPUT_SHAPE_0][INPUT_SHAPE_1];
 	int status = 0;
 
-	zpl_init();
-
 	#ifdef CONFIG_ZPL_TRACE_BACKEND_USB
 	k_sleep(K_MSEC(500));
 	#endif

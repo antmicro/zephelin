@@ -46,8 +46,6 @@ int main(void)
 	float __attribute((aligned(32))) model_input[INPUT_SHAPE_0][INPUT_SHAPE_1];
 	float __attribute((aligned(32))) model_output[OUTPUT_SHAPE_0][OUTPUT_SHAPE_1];
 
-	zpl_init();
-
 	status = model_init();
 	if (status) {
 		printk("Model init failed %d\n", status);

@@ -36,10 +36,6 @@ int main(void)
 	TVMGraphExecutor *executor_quantized = malloc(sizeof(TVMGraphExecutor));
 	TVMModuleHandle handle_quantized = NULL;
 
-#ifdef CONFIG_ZPL
-	zpl_init();
-#endif
-
 	ZPL_MARK_CODE_SCOPE(prepare_model) {
 		status = model_init();
 		if (status) {

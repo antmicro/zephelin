@@ -9,7 +9,5 @@
 
 int main(void)
 {
-	zpl_init();
-
 	return 0;
 }

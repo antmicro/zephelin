@@ -44,8 +44,6 @@ void thread_loop(void *my_sem_, void *other_sem_, void *arg3)
 
 int main(void)
 {
-	zpl_init();
-
 	/* initialize semaphores */
 	for (int i = 0; i < THREADS_NUM; ++i) {
 		k_sem_init(&tsem[i], i == 0 ? 1 : 0, 1);

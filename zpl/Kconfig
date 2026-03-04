@@ -64,6 +64,41 @@ config ZPL_INTERNALS_INSTRUMENTATION
 	  otherwise all Zephelin files will be excluded from instrumentation.
 	depends on INSTRUMENTATION
 
+config ZPL_AUTORUN_INIT
+	bool "Runs zpl_init automatically within SYS_INIT"
+	default y
+	depends on ZPL
+
+choice
+	prompt "Sets SYS_INIT initialization level for call of zpl_init"
+	default ZPL_INIT_LVL_APPLICATION
+	depends on ZPL_AUTORUN_INIT
+
+config ZPL_INIT_LVL_EARLY
+	bool "Sets level to EARLY"
+
+config ZPL_INIT_LVL_PRE_KERNEL_1
+	bool "Sets level to PRE_KERNEL_1"
+
+config ZPL_INIT_LVL_PRE_KERNEL_2
+	bool "Sets level to PRE_KERNEL_2"
+
+config ZPL_INIT_LVL_POST_KERNEL
+	bool "Sets level to POST_KERNEL"
+
+config ZPL_INIT_LVL_APPLICATION
+	bool "Sets level to APPLICATION"
+
+config ZPL_INIT_LVL_SMP
+	bool "Sets level to SMP"
+
+endchoice
+
+config ZPL_INIT_PRIO
+	int "Sets SYS_INIT priority for call of zpl_init"
+	default 1
+	depends on ZPL_AUTORUN_INIT
+
 module = ZPL
 module-str = Zephelin
 source "subsys/logging/Kconfig.template.log_config"

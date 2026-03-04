@@ -60,6 +60,31 @@ SYS_INIT(zpl_ctf_start_tag_emit, APPLICATION, 0);
 	* !defined(CONFIG_TRACING_HANDLE_HOST_CMD)
 	*/
 
+#if defined(CONFIG_ZPL) && defined(CONFIG_ZPL_AUTORUN_INIT) && defined(CONFIG_ZPL_INIT_PRIO)
+
+#if defined(CONFIG_ZPL_INIT_LVL_EARLY)
+SYS_INIT(zpl_init, EARLY, CONFIG_ZPL_INIT_PRIO);
+
+#elif defined(CONFIG_ZPL_INIT_LVL_PRE_KERNEL_1)
+SYS_INIT(zpl_init, PRE_KERNEL_1, CONFIG_ZPL_INIT_PRIO);
+
+#elif defined(CONFIG_ZPL_INIT_LVL_PRE_KERNEL_2)
+SYS_INIT(zpl_init, PRE_KERNEL_2, CONFIG_ZPL_INIT_PRIO);
+
+#elif defined(CONFIG_ZPL_INIT_LVL_POST_KERNEL)
+SYS_INIT(zpl_init, POST_KERNEL, CONFIG_ZPL_INIT_PRIO);
+
+#elif defined(CONFIG_ZPL_INIT_LVL_APPLICATION)
+SYS_INIT(zpl_init, APPLICATION, CONFIG_ZPL_INIT_PRIO);
+
+#elif defined(CONFIG_ZPL_INIT_LVL_SMP)
+SYS_INIT(zpl_init, SMP, CONFIG_ZPL_INIT_PRIO);
+#endif
+
+#endif /* defined(CONFIG_ZPL) && defined(CONFIG_ZPL_AUTORUN_INIT) &&
+	* defined(CONFIG_ZPL_INIT_PRIO)
+	*/
+
 #ifdef CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT
 void sys_trace_k_heap_sys_k_aligned_alloc_enter(struct k_heap *h, size_t align,
 		size_t size)

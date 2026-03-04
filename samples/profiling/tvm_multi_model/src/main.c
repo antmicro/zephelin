@@ -38,8 +38,6 @@ int main(void)
 	float __attribute((aligned(32))) model_input[INPUT_SHAPE_0][INPUT_SHAPE_1];
 	int8_t model_int8_input;
 
-	zpl_init();
-
 	status = model_init();
 	if (status) {
 		printk("Model init failed %d\n", status);

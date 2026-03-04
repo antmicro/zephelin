@@ -46,7 +46,6 @@ void test_recurrent(int counter)
 
 int main(void)
 {
-	zpl_init();
 	k_sleep(K_MSEC(1000));
 	for (int i = 0; i < 10; i++) {
 		ZPL_MARK_CODE_SCOPE(code_scope3) {

@@ -60,8 +60,6 @@ int main(void)
 
 	int status = 0;
 
-	zpl_init();
-
 	#ifdef CONFIG_ZPL_TRACE_BACKEND_USB
 	k_sleep(K_MSEC(500));
 	#endif
