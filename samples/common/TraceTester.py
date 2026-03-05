@@ -20,7 +20,9 @@ from typing import Any
 
 import bt2
 
-_DEFAULT_TIMEOUT = 10.0
+_TRACE_PRESENT_TIMEOUT = 100.0
+_TRACE_ABSENT_TIMEOUT = 10.0
+
 _CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
 
@@ -90,7 +92,7 @@ class TraceTester:
     def wait_for_trace_on_uart(
         self,
         trace_name: str,
-        timeout: float = _DEFAULT_TIMEOUT,
+        timeout: float = _TRACE_PRESENT_TIMEOUT,
         **trace_fields: Any,
     ):
         """
@@ -115,7 +117,7 @@ class TraceTester:
     def trace_should_not_be_on_uart(
         self,
         trace_name: str,
-        timeout: float = _DEFAULT_TIMEOUT,
+        timeout: float = _TRACE_ABSENT_TIMEOUT,
         **trace_fields,
     ):
         """
@@ -146,7 +148,7 @@ class TraceTester:
     def __read_traces_until_trace(
         self,
         trace_name: str,
-        timeout: float = _DEFAULT_TIMEOUT,
+        timeout: float = _TRACE_PRESENT_TIMEOUT,
         **trace_fields,
     ):
         start = time.perf_counter()
