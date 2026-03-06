@@ -70,18 +70,18 @@ def get_renode_logs(logger, log_ammount: int):
 
 
 CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
-ZEPHYR_DASHBOARD_URL = "https://zephyr-dashboard.renode.io/zephyr_sim/d90d71c42c6d3a81b10b17b5eb5ab3d686b7512f/58aef12522b98e26da67642f9935efa38b6369df"
 REPO_ROOT = str(Path(__file__).parent.parent.resolve())
+ZEPHYR_DASHBOARD_PATH = os.path.join(REPO_ROOT, "repls")
 REPLS = {
-    "max32690fthr": f"{ZEPHYR_DASHBOARD_URL}/max32690fthr_max32690_m4/hello_world/hello_world.repl",
+    "max32690fthr": f"{ZEPHYR_DASHBOARD_PATH}/max32690fthr_max32690_m4/hello_world/hello_world.repl",  # noqa: E501
     "max32650fthr": (
-        f"{ZEPHYR_DASHBOARD_URL}/max32650fthr/hello_world/hello_world.repl",
+        f"{ZEPHYR_DASHBOARD_PATH}/max32650fthr/hello_world/hello_world.repl",
         f"{REPO_ROOT}/samples/common/boards/max32650fthr_timer.repl",
     ),
-    "max78002evkit": f"{ZEPHYR_DASHBOARD_URL}/max78002evkit_max78002_m4/hello_world/hello_world.repl",  # noqa: E501
-    "qemu_cortex_m3": f"{ZEPHYR_DASHBOARD_URL}/qemu_cortex_m3/hello_world/hello_world.repl",
+    "max78002evkit": f"{ZEPHYR_DASHBOARD_PATH}/max78002evkit_max78002_m4/hello_world/hello_world.repl",  # noqa: E501
+    "qemu_cortex_m3": f"{ZEPHYR_DASHBOARD_PATH}/qemu_cortex_m3/hello_world/hello_world.repl",
     "stm32f429i_disc1": (
-        f"{ZEPHYR_DASHBOARD_URL}/stm32f429i_disc1/hello_world/hello_world.repl",
+        f"{ZEPHYR_DASHBOARD_PATH}/stm32f429i_disc1/hello_world/hello_world.repl",
         f"{REPO_ROOT}/samples/common/boards/stm32f429i_disc1_timer.repl",
     ),
     "mpfs_icicle": f"{REPO_ROOT}/samples/profiling/smp_tvm/boards/mpfs_icicle_polarfire_u54_smp.repl",  # noqa: E501
