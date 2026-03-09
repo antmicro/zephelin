@@ -193,7 +193,7 @@ def create_custom_events(
         callee = str(msg.event.payload_field.get("callee", ""))
 
         if callee.strip().lstrip("+-").isdigit():
-            symbol_map_key = int(callee)
+            symbol_map_key = f"{int(callee):08x}"
         else:
             symbol_map_key = 0
 
