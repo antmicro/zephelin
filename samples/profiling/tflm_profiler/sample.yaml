@@ -1,5 +1,5 @@
-# Copyright (c) 2025 Analog Devices, Inc.
-# Copyright (c) 2025 Antmicro <www.antmicro.com>
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -27,6 +27,7 @@ tests:
       - CONFIG_ZPL_TRACE_FORMAT_CTF=y
       - CONFIG_BOOT_BANNER=n
       - CONFIG_PRINTK=n
+      - CONFIG_LOG=n
     harness: robot
     harness_config:
       robot_testsuite: tflm_ctf.robot
