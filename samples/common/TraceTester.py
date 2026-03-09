@@ -22,6 +22,7 @@ import bt2
 
 _TRACE_PRESENT_TIMEOUT = 100.0
 _TRACE_ABSENT_TIMEOUT = 10.0
+_PARSING_THROTTLE_TIME = 0.5
 
 _CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
@@ -49,6 +50,11 @@ class TraceTester:
         """
         self.sock = None
         self.ctf_dir = Path(tempfile.mkdtemp())
+
+        self._ctf_stream = bytearray()
+
+        self._parsed_traces = []
+        self._processed_trace_count = 0
 
         # prepare directory with traces and metadata for babeltrace
         metadata_zephyr_path = Path(os.environ["ZEPHYR_BASE"]) / "subsys/tracing/ctf/tsdl/metadata"
@@ -152,71 +158,97 @@ class TraceTester:
         **trace_fields,
     ):
         start = time.perf_counter()
-        ctf_stream = b""
-        traces_str = ""
+        last_parse_time = 0.0
         trace_found = False
 
-        while True:
-            if time.perf_counter() - start > timeout:
-                raise TimeoutError(
-                    f"Trace {trace_name} {trace_fields} not found.\nParsed traces:\n{traces_str}"
-                )
-
-            try:
-                # read stream byte by byte so that no extra bytes are read
-                ctf_stream += self.sock.recv(1)
-            except TimeoutError:
-                # no new data
-                continue
-
-            if ctf_stream == _CTF_TRACE_START_TAG:
-                ctf_stream = b""
-
-            self.ctf_path.write_bytes(ctf_stream)
-
-            try:
-                # parse traces
-                traces = list(bt2.TraceCollectionMessageIterator(str(self.ctf_dir)))
-
-                for trace in traces:
-                    # check if trace type is proper
-                    if not isinstance(trace, bt2._EventMessageConst):
-                        continue
-
-                    traces_str += (
-                        f"\t{trace.default_clock_snapshot.ns_from_origin / 1e9} s"
-                        f" {trace.event.name} {trace.event.payload_field}\n"
+        with open(self.ctf_path, "wb") as ctf_file:
+            while True:
+                # global timeout
+                if time.perf_counter() - start > timeout:
+                    error_log = "\n".join(
+                        f"\t{t['timestamp'] / 1e9} s {t['name']} {t['payload']}"
+                        for t in self._parsed_traces
+                    )
+                    raise TimeoutError(
+                        f"Trace {trace_name} {trace_fields} not found.\nParsed traces:\n{error_log}"
                     )
 
-                    # check trace event name
-                    if trace.event.name != trace_name:
+                # drain socket 4096 bytes at a time
+                try:
+                    chunk = self.sock.recv(4096)
+                    if chunk:
+                        self._ctf_stream.extend(chunk)
+                    else:
+                        raise ConnectionError(
+                            f"Emulator closed the socked before {trace_name} could be found."
+                        )
+                except TimeoutError:
+                    pass
+
+                if self._ctf_stream:
+                    tag_idx = self._ctf_stream.rfind(_CTF_TRACE_START_TAG)
+                    # start recording a trace
+                    if tag_idx != -1:
+                        self._ctf_stream = self._ctf_stream[tag_idx + len(_CTF_TRACE_START_TAG) :]
+                        self._parsed_traces.clear()
+                        self._processed_trace_count = 0
+
+                # call bt2 periodically to prevent it from choking on short byte sequences
+                if self._ctf_stream:
+                    current_time = time.perf_counter()
+                    if current_time - last_parse_time >= _PARSING_THROTTLE_TIME:
+                        last_parse_time = current_time
+
+                        # write bytes to the file
+                        ctf_file.seek(0)
+                        ctf_file.truncate()
+                        ctf_file.write(self._ctf_stream)
+                        ctf_file.flush()
+
+                        extracted_traces = []
+                        try:
+                            for msg in bt2.TraceCollectionMessageIterator(str(self.ctf_dir)):
+                                if isinstance(msg, bt2._EventMessageConst):
+                                    timestamp = msg.default_clock_snapshot.ns_from_origin
+                                    payload = dict(msg.event.payload_field)
+                                    payload["timestamp"] = timestamp
+
+                                    # convert C-pointer from bt2 into native Python dicts
+                                    extracted_traces.append({
+                                        "name": msg.event.name,
+                                        "timestamp": timestamp,
+                                        "payload": payload,
+                                    })
+                        except bt2._Error:
+                            # if file contains partial traces, ignore and try to parse
+                            # them on the next iteration
+                            pass
+                        else:
+                            self._parsed_traces = extracted_traces
+
+                # only check traces that arrived after current bookmark
+                new_traces = self._parsed_traces[self._processed_trace_count :]
+
+                for i, trace in enumerate(new_traces):
+                    if trace["name"] != trace_name:
                         continue
 
-                    timestamp = trace.default_clock_snapshot.ns_from_origin
-                    if timestamp <= 0:
+                    if trace["timestamp"] <= 0:
                         raise InvalidTrace("Timestamp must be positive")
-                    payload = dict(trace.event.payload_field, timestamp=timestamp)
 
-                    if self.__event_fields_is_subset(trace_fields, payload):
+                    if self.__event_fields_is_subset(trace_fields, trace["payload"]):
                         trace_found = True
+                        self._processed_trace_count += i + 1
                         break
 
                 if trace_found:
                     # break main loop
                     break
 
-            except bt2._Error:
-                # traces could not be parsed
-                pass
-
-            else:
-                # clear CTF stream so that it does not parse the same traces multiple times
-                ctf_stream = b""
-
     @staticmethod
     def __event_fields_is_subset(
         fields_a: dict,
-        fields_b: bt2._StructureFieldConst,
+        fields_b: dict,
     ) -> bool:
         for field_name, field_value in fields_a.items():
             if field_name not in fields_b:
