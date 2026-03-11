@@ -74,8 +74,6 @@ ZPL_CODE_SCOPE_DEFINE(code_scope2, true);
 
 int main(void)
 {
-    zpl_init();
-
     ZPL_MARK_CODE_SCOPE(code_scope1) {
         // ... Code inside code_scope1
     }

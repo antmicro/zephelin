@@ -223,7 +223,7 @@ Then, the traces collected via UART can be analyzed the same way as in [Running 
 ## Customizing and using Zephelin
 
 Zephelin can be enabled by y-selecting the `CONFIG_ZPL` symbol in the project configuration file.
-To initialize Zephelin in a runtime, use the `zpl_init()` function defined by the `zpl/lib.h` header.
+By default, Zephelin is automatically initialized during Zephyr initialization, but it can also be initialized in a runtime, by setting Kconfig symbol `CONFIG_ZPL_AUTORUN_INIT` to `n` and using the `zpl_init()` function defined by the `zpl/lib.h` header.
 You can enable various Zephelin components by using Kconfig and runtime configuration, as described in following sections.
 
 ### Configuration
