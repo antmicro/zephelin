@@ -18,6 +18,9 @@ extern "C" {
 	#include <generated/model0_data.h>
 }
 
+ZPL_CODE_SCOPE_DEFINE(uart_read, true);
+ZPL_CODE_SCOPE_DEFINE(sample_process, true);
+
 #define INPUT_SHAPE 1960
 #define OUTPUT_SHAPE 4
 
@@ -91,37 +94,39 @@ int main(void)
 }
 
 void handle_inference_cycle() {
-    printk("Buffer full. Running inference...\n");
-    int status = 0;
-    status = model_load_input((uint8_t *) input_buffer, sizeof(uint8_t) * INPUT_SHAPE);
+	ZPL_MARK_CODE_SCOPE(sample_process) {
+		printk("Buffer full. Running inference...\n");
+		int status = 0;
+		status = model_load_input((uint8_t *) input_buffer, sizeof(uint8_t) * INPUT_SHAPE);
 
-    if (status) {
-        printk("Model load input failed %d\n", status);
-        return;
-    }
+		if (status) {
+			printk("Model load input failed %d\n", status);
+			return;
+		}
 
-    status = model_run();
+		status = model_run();
 
-    if (status) {
-        printk("Model invocation failed %d\n", status);
-        return;
-    }
+		if (status) {
+			printk("Model invocation failed %d\n", status);
+			return;
+		}
 
-    status = model_get_output((uint8_t *)model_output, sizeof(model_output));
-    if (status) {
-        printk("Model get output failed %d\n", status);
-        return;
-    }
+		status = model_get_output((uint8_t *)model_output, sizeof(model_output));
+		if (status) {
+			printk("Model get output failed %d\n", status);
+			return;
+		}
 
-    printk("Inference complete. Results: \n");
-    printk("silence: %d\n unknown: %d\n yes: %d\n no: %d\n",
-           model_output[0],
-           model_output[1],
-           model_output[2],
-           model_output[3]
-    );
+		printk("Inference complete. Results: \n");
+		printk("silence: %d\n unknown: %d\n yes: %d\n no: %d\n",
+			model_output[0],
+			model_output[1],
+			model_output[2],
+			model_output[3]
+		);
 
-    input_index = 0;
+		input_index = 0;
+	}
 }
 
 
@@ -181,7 +186,9 @@ void uart_interrupt_handler(const struct device *dev, void *user_data) {
 		return;
 	}
 
-    while (uart_fifo_read(dev, &c, 1) == 1) {
-        ring_buf_put(&uart_ringbuf, &c, 1);
-    }
+	ZPL_MARK_CODE_SCOPE(uart_read) {
+		while (uart_fifo_read(dev, &c, 1) == 1) {
+			ring_buf_put(&uart_ringbuf, &c, 1);
+		}
+	}
 }

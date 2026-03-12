@@ -19,6 +19,8 @@ extern "C" {
 	#include <generated/model0_data.h>
 }
 
+ZPL_CODE_SCOPE_DEFINE(uart_send, true);
+
 #define SAMPLE_RATE_HZ 16000
 #define WINDOW_STRIDE_MS 20
 #define STRIDE_SAMPLES ((SAMPLE_RATE_HZ * WINDOW_STRIDE_MS) / 1000)
@@ -104,31 +106,8 @@ int main(void)
 		k_msleep(10);
 	}
 
-      send_data_via_uart(model_output);
-      k_msleep(10);
-    }
-
-    return 0;
-  }
-
-  void generate_input() {
-    static int current_index = 0;
-
-    int remaining_samples = g_audio_sample_size - current_index;
-    int copy_size = (remaining_samples < INPUT_SHAPE) ? remaining_samples : INPUT_SHAPE;
-
-    memcpy(input_buffer, &g_audio_sample[current_index], copy_size * sizeof(int16_t));
-
-    if (copy_size < INPUT_SHAPE) {
-      memset(input_buffer + copy_size, 0, (INPUT_SHAPE - copy_size) * sizeof(int16_t));
-    }
-
-    current_index += STRIDE_SAMPLES;
-
-    if (current_index >= g_audio_sample_size) {
-      current_index = 0;
-    }
-  }
+	return 0;
+}
 
 void generate_input() {
 	static int current_index = 0;
