@@ -331,6 +331,11 @@ This sample demonstrates deployment of Micro-speech model on two SoCs connected 
 The preprocessor running on 1st SoC converts raw audio sample into a spectrographic feature.
 Processed data is passed via UART to the second SoC that runs Micro-speech model once sufficient data has been accumulated.
 Model responses can be `yes`, `no`, `silence` and `undefined`.
+Sample expects `.h` files as input, to prepare `.wav`  file you can use following [script]({zpl_repo}`samples/multi_machine/micro_speech/scripts/wav_to_h.py`).
+Example usage:
+```bash
+python3 wav_to_h.py input.wav output.h
+```
 
 :::::{example} Micro-speech pipeline
 :collapsible:
