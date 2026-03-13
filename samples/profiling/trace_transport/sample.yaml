@@ -1,0 +1,22 @@
+# Copyright (c) 2026 Analog Devices, Inc.
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  description: Hello World TensorFlow instrumentation sample
+  name: hello world tensorflow instrumentation
+common:
+  tags: tensorflow profiling
+  platform_allow:
+    - max78002evkit/max78002/m4
+  modules:
+    - tflite-micro
+tests:
+  sample.tensorflow.trace.transport.instrumentation.robot:
+    extra_configs:
+    - CONFIG_INSTRUMENTATION_RECURSIVE_EXCLUDE=y
+    - CONFIG_INSTRUMENTATION_RECURSIVE_EXCLUDE_LIST="sys_clock_isr"
+    harness: robot
+    harness_config:
+      robot_testsuite: instrumentation.robot
