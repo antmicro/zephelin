@@ -53,7 +53,7 @@ def get_stream(port):
 class ZplInstrumentationUartCapture(WestCommand):
     """Main class for the zpl-instrumentation-uart-capture command."""
 
-    DUMP_TRACE_CMD = "dump_trace\r".encode()
+    DUMP_TRACE_CMD = b"instr_dump_trace\r"
     DUMP_ON_FULL_CONF = "CONFIG_INSTRUMENTATION_MODE_CALLGRAPH_DUMP_ON_FULL"
 
     def __init__(self, *args):
@@ -124,7 +124,7 @@ class ZplInstrumentationUartCapture(WestCommand):
         should_end = False
 
         timeout = args.timeout
-        last_instr_msg = None
+        last_instr_msg = time.time()
 
         def _handler(sig, frame):
             nonlocal should_end
