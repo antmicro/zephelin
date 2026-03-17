@@ -597,6 +597,36 @@ def trim_metadata(tef_trace: list[dict]) -> list[dict]:
     ]
 
 
+def merge_renode_split_files(base_path: Path):
+    """
+    Renode creates suffix files (e.g., .ctf_1, .ctf_2) if the emulator resets.
+    This safely concatenates them back into the base file so Babeltrace
+    can read the entire stream seamlessly.
+    """
+    if not base_path or not base_path.exists():
+        return
+
+    base_name = base_path.name
+    parent_dir = base_path.parent
+
+    fragments = []
+    for p in parent_dir.glob(f"{base_name}_*"):
+        suffix = p.name.replace(f"{base_name}_", "")
+        if suffix.isdigit():
+            fragments.append((int(suffix), p))
+
+    if not fragments:
+        return
+
+    fragments.sort(key=lambda x: x[0])
+
+    with base_path.open("ab") as out_f:
+        for _, frag_path in fragments:
+            with frag_path.open("rb") as in_f:
+                out_f.write(in_f.read())
+            frag_path.unlink()
+
+
 def setup_parser(parser: argparse.ArgumentParser):
     """
     Sets up parser for prepare trace script.
@@ -756,6 +786,8 @@ def prepare(args: argparse.Namespace):
         raise argparse.ArgumentError(None, "Please provide at least one trace file")
 
     symbol_map = extract_symbol_map(args.zephyr_elf_path)
+
+    merge_renode_split_files(args.ctf_trace)
 
     # Convert CTF
     if args.ctf_trace:
