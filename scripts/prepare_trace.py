@@ -240,8 +240,8 @@ def create_custom_events(
         ),
         CustomEventDefinition(
             INSTR_EVENT_PREFIX,
-            "func_with_context_enter",
-            "func_with_context_exit",
+            "func_entry_with_context",
+            "func_exit_with_context",
             instr_event_suffix,
             None,
         ),
