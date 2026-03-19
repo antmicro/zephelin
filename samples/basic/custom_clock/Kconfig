@@ -1,0 +1,11 @@
+# Copyright (c) 2025-2026 Analog Devices, Inc.
+# Copyright (c) 2025-2026 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config ZPL_SAMPLE_SIMPLE_COUNTER_CLOCK
+	bool "Use simple counter instead as a custom clock"
+	help
+	  Say 'Y' if you want to enable runtime configuration threading features.
+
+source "Kconfig.zephyr"

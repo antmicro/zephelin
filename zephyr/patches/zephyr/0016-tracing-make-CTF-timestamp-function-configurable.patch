@@ -1,22 +1,22 @@
-From fd4f6da083dda5e740ad591505ef20d867004911 Mon Sep 17 00:00:00 2001
+From 123fcae7e0b8e25cb3ebbd946d8c6ef524b694c3 Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Wed, 31 Dec 2025 14:02:33 +0100
-Subject: [PATCH 16/31] tracing: make CTF timestamp function configurable
+Subject: [PATCH 16/37] tracing: make CTF timestamp function configurable
 
 Signed-off-by: Andrii Chmutov <achmutov@antmicro.com>
 ---
  subsys/tracing/Kconfig                |  7 +++++++
- subsys/tracing/ctf/ctf_top.c          | 23 +++++++++++++++++++++++
- subsys/tracing/ctf/ctf_top.h          | 13 ++++++++++++-
+ subsys/tracing/ctf/ctf_top.c          | 18 ++++++++++++++++++
+ subsys/tracing/ctf/ctf_top.h          | 14 +++++++++++++-
  subsys/tracing/include/tracing_core.h |  4 ++++
  subsys/tracing/tracing_core.c         |  8 ++++++++
- 5 files changed, 54 insertions(+), 1 deletion(-)
+ 5 files changed, 50 insertions(+), 1 deletion(-)
 
 diff --git a/subsys/tracing/Kconfig b/subsys/tracing/Kconfig
-index 298ab8a71a1..5b8af3964b1 100644
+index 6bbcad077ba..fb51c559d8f 100644
 --- a/subsys/tracing/Kconfig
 +++ b/subsys/tracing/Kconfig
-@@ -74,6 +74,13 @@ config TRACING_CTF_TIMESTAMP
+@@ -75,6 +75,13 @@ config TRACING_CTF_TIMESTAMP
  	  Timestamp prefix will be added to the beginning of CTF
  	  event internally.
  
@@ -31,20 +31,15 @@ index 298ab8a71a1..5b8af3964b1 100644
  	prompt "Tracing Method"
  	default TRACING_ASYNC
 diff --git a/subsys/tracing/ctf/ctf_top.c b/subsys/tracing/ctf/ctf_top.c
-index 65c41062cfe..6d2d3ae9fcc 100644
+index 65c41062cfe..0b160f8c5d1 100644
 --- a/subsys/tracing/ctf/ctf_top.c
 +++ b/subsys/tracing/ctf/ctf_top.c
-@@ -15,6 +15,29 @@
+@@ -15,6 +15,24 @@
  #include <zephyr/net/net_pkt.h>
  #include <zephyr/debug/cpu_load.h>
  
-+#ifdef CONFIG_TRACING_CTF_CONFIGURABLE_TIMER
-+static inline uint64_t default_ctf_timestamp_get(void)
-+{
-+	return k_cyc_to_ns_floor64(soft_cycle_get_64());
-+}
-+
-+static ctf_timestamp_get_t ctf_timestamp_func = default_ctf_timestamp_get;
++#if defined(CONFIG_TRACING_CTF_TIMESTAMP) && defined(CONFIG_TRACING_CTF_CONFIGURABLE_TIMER)
++static ctf_timestamp_get_t ctf_timestamp_func = ctf_top_timestamp_get;
 +
 +int ctf_set_timestamp_func(ctf_timestamp_get_t timestamp_getter)
 +{
@@ -59,18 +54,18 @@ index 65c41062cfe..6d2d3ae9fcc 100644
 +{
 +	return ctf_timestamp_func();
 +}
-+#endif /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
++#endif /* CONFIG_TRACING_CTF_TIMESTAMP && CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
 +
  static void _get_thread_name(struct k_thread *thread, ctf_bounded_string_t *name)
  {
  	const char *tname = k_thread_name_get(thread);
 diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
-index dbd325e057c..a38e1b5d0b9 100644
+index 9e5fa6fa4e9..9909e623ee1 100644
 --- a/subsys/tracing/ctf/ctf_top.h
 +++ b/subsys/tracing/ctf/ctf_top.h
-@@ -30,6 +30,17 @@ static inline uint64_t soft_cycle_get_64() {
+@@ -66,6 +66,18 @@ static inline uint64_t ctf_top_timestamp_get(void)
+ 	return timing_cycles_to_ns(now_cycles);
  }
- #endif /* CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER */
  
 +#ifdef CONFIG_TRACING_CTF_CONFIGURABLE_TIMER
 +typedef uint64_t (*ctf_timestamp_get_t)(void);
@@ -79,18 +74,19 @@ index dbd325e057c..a38e1b5d0b9 100644
 +#else /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
 +static inline uint64_t ctf_timestamp_get(void)
 +{
-+	return k_cyc_to_ns_floor64(soft_cycle_get_64());
++	return ctf_top_timestamp_get();
 +}
 +#endif /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
 +
- /* Limit strings to 20 bytes to optimize bandwidth */
- #define CTF_MAX_STRING_LEN 20
- 
-@@ -73,7 +84,7 @@ static inline uint64_t soft_cycle_get_64() {
++
+ #define CTF_EVENT(event_id, ...)                                                                   \
+ 	{                                                                                          \
+ 		if (!is_tracing_enabled()) {                                                       \
+@@ -74,7 +86,7 @@ static inline uint64_t ctf_top_timestamp_get(void)
  		int key = irq_lock();                                                              \
  		const uint16_t stream_id = 0;                                                      \
  		const uint16_t packet_size = 0;                                                    \
--		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64());                  \
+-		const uint64_t tstamp = ctf_top_timestamp_get();                                   \
 +		const uint64_t tstamp = ctf_timestamp_get();                                       \
  		const uint8_t cpu_id = arch_curr_cpu()->id;                                        \
  		CTF_GATHER_FIELDS(stream_id, packet_size, tstamp, event_id, cpu_id, ##__VA_ARGS__) \
@@ -111,10 +107,10 @@ index 84eab0eb8e6..bc6687246b4 100644
  }
  #endif
 diff --git a/subsys/tracing/tracing_core.c b/subsys/tracing/tracing_core.c
-index 90051505512..beb5d2e1e33 100644
+index 6bb9acbf23e..61e05bee593 100644
 --- a/subsys/tracing/tracing_core.c
 +++ b/subsys/tracing/tracing_core.c
-@@ -146,3 +146,11 @@ void tracing_packet_drop_handle(void)
+@@ -154,3 +154,11 @@ void tracing_packet_drop_handle(void)
  {
  	atomic_inc(&tracing_packet_drop_num);
  }

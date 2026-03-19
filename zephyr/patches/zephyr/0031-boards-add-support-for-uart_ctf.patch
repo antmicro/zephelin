@@ -1,7 +1,7 @@
-From b3497eae1d7effc63914f447ad96e00755dc6d38 Mon Sep 17 00:00:00 2001
+From 42588c4b5dc4e0238859e53f82bda4f30a8b433d Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Thu, 5 Mar 2026 12:27:50 +0100
-Subject: [PATCH 31/31] boards: add support for uart_ctf
+Subject: [PATCH 31/37] boards: add support for uart_ctf
 
 Added support for dedicated CTF UART
 

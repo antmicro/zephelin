@@ -1,7 +1,7 @@
-From c1fa7f3531f430016e67f11059b8f1126731f41a Mon Sep 17 00:00:00 2001
+From 812896b27e7cad860c2a00d688eaa0398e7d4537 Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Wed, 17 Dec 2025 12:50:17 +0100
-Subject: [PATCH 18/31] scripts: instrumentation: zaru: use objdump from sdk
+Subject: [PATCH 18/37] scripts: instrumentation: zaru: use objdump from sdk
  for elf32-little
 
 ---

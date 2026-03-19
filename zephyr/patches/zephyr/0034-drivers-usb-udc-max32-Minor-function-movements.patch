@@ -1,7 +1,7 @@
-From d66cb34d82ee655e27065dc487cc72c3445a82e2 Mon Sep 17 00:00:00 2001
+From 2e9480a1710b31182b210252ea558efb374aca97 Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:56:36 -0800
-Subject: [PATCH] drivers: usb: udc: max32: Minor function movements
+Subject: [PATCH 34/37] drivers: usb: udc: max32: Minor function movements
 
 Move xfer_in_done and xfer_out_done to after xfer_in
 and xfer_out. This is because they will need to call
@@ -14,7 +14,7 @@ Signed-off-by: Brandon Hurst <brandon.hurst@analog.com>
  1 file changed, 58 insertions(+), 55 deletions(-)
 
 diff --git a/drivers/usb/udc/udc_max32.c b/drivers/usb/udc/udc_max32.c
-index b083f53314f92..9897cc179a911 100644
+index b083f53314f..9897cc179a9 100644
 --- a/drivers/usb/udc/udc_max32.c
 +++ b/drivers/usb/udc/udc_max32.c
 @@ -115,62 +115,8 @@ static void udc_event_xfer_out_callback(void *cbdata)
@@ -145,3 +145,6 @@ index b083f53314f92..9897cc179a911 100644
  static int udc_ctrl_feed_dout(const struct device *dev, const size_t length)
  {
  	struct udc_max32_data *priv = udc_get_private(dev);
+-- 
+2.47.3
+

@@ -18,6 +18,7 @@ config ZPL
 config ZPL_TRACE
 	bool "Support for integration with Zephyr tracing subsystem"
 	select TRACING
+	select TIMING_FUNCTIONS
 
 config ZPL_INSTRUMENTATION
 	bool "Enables instrumentation subsystem"

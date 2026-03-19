@@ -1,7 +1,7 @@
-From b8a2558fad930bf84db18805b4989a905d4dd8dc Mon Sep 17 00:00:00 2001
+From be1faf4f9a74f0fbcac7e33e22987ec13b275ffd Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Thu, 23 Oct 2025 15:00:24 +0200
-Subject: [PATCH 14/31] subsys: tracing: ctf: add CPU ID to CTF events
+Subject: [PATCH 14/37] subsys: tracing: ctf: add CPU ID to CTF events
 
 Signed-off-by: Maciej Torhan <mtorhan@antmicro.com>
 ---
@@ -10,20 +10,22 @@ Signed-off-by: Maciej Torhan <mtorhan@antmicro.com>
  2 files changed, 266 insertions(+), 12 deletions(-)
 
 diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
-index b79ceb5fbf8..cb38c48f30a 100644
+index 74f4e3755e8..c07a0287394 100644
 --- a/subsys/tracing/ctf/ctf_top.h
 +++ b/subsys/tracing/ctf/ctf_top.h
-@@ -68,13 +68,14 @@ static inline uint64_t soft_cycle_get_64() {
- 	}
+@@ -66,7 +66,7 @@ static inline uint64_t ctf_top_timestamp_get(void)
+ 	return timing_cycles_to_ns(now_cycles);
+ }
  
- #ifdef CONFIG_TRACING_CTF_TIMESTAMP
 -#define CTF_EVENT(...)                                                                             \
 +#define CTF_EVENT(event_id, ...)                                                                   \
  	{                                                                                          \
- 		int key = irq_lock();                                                              \
+ 		if (!is_tracing_enabled()) {                                                       \
+ 			return;                                                                    \
+@@ -75,7 +75,8 @@ static inline uint64_t ctf_top_timestamp_get(void)
  		const uint16_t stream_id = 0;                                                      \
  		const uint16_t packet_size = 0;                                                    \
- 		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64());                  \
+ 		const uint64_t tstamp = ctf_top_timestamp_get();                                   \
 -		CTF_GATHER_FIELDS(stream_id, packet_size, tstamp, __VA_ARGS__)                     \
 +		const uint8_t cpu_id = arch_curr_cpu()->id;                                        \
 +		CTF_GATHER_FIELDS(stream_id, packet_size, tstamp, event_id, cpu_id, ##__VA_ARGS__) \

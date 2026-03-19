@@ -1,7 +1,7 @@
-From a5516ce3c60b3bff5fe004d0b3b9bd3d1af425e3 Mon Sep 17 00:00:00 2001
+From 0c117d4a8e737ba03f68db8ed626e17991244adb Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:56:21 -0800
-Subject: [PATCH] drivers: usb: udc: max32: Reduce spurious resume events
+Subject: [PATCH 33/37] drivers: usb: udc: max32: Reduce spurious resume events
 
 UDC driver was submitting spurious resume events
 when receiving DPACT events while the device was not
@@ -16,7 +16,7 @@ Signed-off-by: Brandon Hurst <brandon.hurst@analog.com>
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/usb/udc/udc_max32.c b/drivers/usb/udc/udc_max32.c
-index 5c561540a7997..b083f53314f92 100644
+index 5c561540a79..b083f53314f 100644
 --- a/drivers/usb/udc/udc_max32.c
 +++ b/drivers/usb/udc/udc_max32.c
 @@ -566,8 +566,11 @@ static int udc_max32_event_callback(maxusb_event_t event, void *cbdata)
@@ -33,3 +33,6 @@ index 5c561540a7997..b083f53314f92 100644
  		break;
  	case MAXUSB_EVENT_BRST:
  		LOG_DBG("BRST event occurred");
+-- 
+2.47.3
+

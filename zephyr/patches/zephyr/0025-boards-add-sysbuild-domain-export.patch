@@ -1,7 +1,7 @@
-From ea481f15b19506d019cd8ef2f1c413878e60dcd7 Mon Sep 17 00:00:00 2001
+From 103f109194f5f588754216d6ae2403328b97bce3 Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
 Date: Tue, 17 Mar 2026 14:48:41 +0100
-Subject: [PATCH 25/31] boards: add sysbuild domain export
+Subject: [PATCH 25/37] boards: add sysbuild domain export
 
 Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
 ---

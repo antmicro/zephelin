@@ -1,7 +1,7 @@
-From c3b835ad459eeedd66e8cb59000128baf70ebbbc Mon Sep 17 00:00:00 2001
+From d176882e59fcbaaab008d73b42d515bf1bb65141 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Thu, 23 Oct 2025 14:54:44 +0200
-Subject: [PATCH 05/31] boards: microchip: mpfs_icicle: add renode/renode-robot
+Subject: [PATCH 05/37] boards: microchip: mpfs_icicle: add renode/renode-robot
  support
 
 Signed-off-by: Maciej Torhan <mtorhan@antmicro.com>

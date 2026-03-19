@@ -9,6 +9,8 @@
 #define ZPL_TIME_H_
 
 #include <zephyr/init.h>
+#include <zephyr/kernel.h>
+#include <zephyr/timing/timing.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -34,7 +36,7 @@ uint64_t zpl_cycles_get(void);
  */
 static inline uint64_t zpl_timestamp_get_from_cycles(uint64_t cycles)
 {
-	return k_cyc_to_ns_floor64(cycles);
+	return timing_cycles_to_ns(cycles);
 }
 
 /**

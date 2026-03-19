@@ -1,7 +1,8 @@
-From 15b94c3ac660fe292c8d6b128c5b247c046b4fdc Mon Sep 17 00:00:00 2001
+From aa769c6c56bff7d1945882afb63881ddc972a3c3 Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:56:47 -0800
-Subject: [PATCH] drivers: usb: udc: max32: Handle deferred endpoint transfers
+Subject: [PATCH 35/37] drivers: usb: udc: max32: Handle deferred endpoint
+ transfers
 
 Issue was corrected where transfers waiting on a busy
 endpoint were not being serviced. This was causing some transfers
@@ -13,7 +14,7 @@ Signed-off-by: Brandon Hurst <brandon.hurst@analog.com>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/usb/udc/udc_max32.c b/drivers/usb/udc/udc_max32.c
-index 9897cc179a911..e2bb673c2e860 100644
+index 9897cc179a9..e2bb673c2e8 100644
 --- a/drivers/usb/udc/udc_max32.c
 +++ b/drivers/usb/udc/udc_max32.c
 @@ -233,6 +233,11 @@ static void udc_event_xfer_in_done(const struct device *dev, struct udc_ep_confi
@@ -40,3 +41,6 @@ index 9897cc179a911..e2bb673c2e860 100644
  }
  
  static int udc_ctrl_feed_dout(const struct device *dev, const size_t length)
+-- 
+2.47.3
+

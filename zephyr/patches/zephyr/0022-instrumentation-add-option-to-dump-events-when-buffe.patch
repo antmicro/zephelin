@@ -1,7 +1,7 @@
-From 52bd8da1efd5b5657c11ac5881d5088718870488 Mon Sep 17 00:00:00 2001
+From 2339fb0b45a9c91bbb9c28794edf64347063e39f Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Wed, 12 Nov 2025 19:50:49 +0100
-Subject: [PATCH 22/31] instrumentation: add option to dump events when buffer
+Subject: [PATCH 22/37] instrumentation: add option to dump events when buffer
  is full
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>

@@ -1,7 +1,7 @@
-From a78a2855f55d0fb3284ab771a3c5351e248b1bd7 Mon Sep 17 00:00:00 2001
+From 34694e5b805d336d57d78df9ab55c310458aaec2 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 12 Sep 2025 15:29:42 +0200
-Subject: [PATCH 13/31] subsys: tracing: ctf: use packets
+Subject: [PATCH 13/37] subsys: tracing: ctf: use packets
 
 Enables usage of multiple CTF streams.
 
@@ -12,10 +12,10 @@ Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
  2 files changed, 249 insertions(+), 2 deletions(-)
 
 diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
-index e1f8faa2b25..b79ceb5fbf8 100644
+index 6260c1f97b4..74f4e3755e8 100644
 --- a/subsys/tracing/ctf/ctf_top.h
 +++ b/subsys/tracing/ctf/ctf_top.h
-@@ -63,6 +63,7 @@ static inline uint64_t soft_cycle_get_64() {
+@@ -47,6 +47,7 @@
  		uint8_t *epacket_cursor = &epacket[0];                                             \
                                                                                                     \
  		MAP(CTF_INTERNAL_FIELD_APPEND, ##__VA_ARGS__)                                      \
@@ -23,13 +23,13 @@ index e1f8faa2b25..b79ceb5fbf8 100644
  		tracing_format_raw_data(epacket, sizeof(epacket));                                 \
  	}
  
-@@ -70,9 +71,10 @@ static inline uint64_t soft_cycle_get_64() {
- #define CTF_EVENT(...)                                                                             \
- 	{                                                                                          \
+@@ -71,9 +72,10 @@ static inline uint64_t ctf_top_timestamp_get(void)
+ 			return;                                                                    \
+ 		}                                                                                  \
  		int key = irq_lock();                                                              \
 +		const uint16_t stream_id = 0;                                                      \
 +		const uint16_t packet_size = 0;                                                    \
- 		const uint64_t tstamp = k_cyc_to_ns_floor64(soft_cycle_get_64());                  \
+ 		const uint64_t tstamp = ctf_top_timestamp_get();                                   \
 -                                                                                                   \
 -		CTF_GATHER_FIELDS(tstamp, __VA_ARGS__)                                             \
 +		CTF_GATHER_FIELDS(stream_id, packet_size, tstamp, __VA_ARGS__)                     \

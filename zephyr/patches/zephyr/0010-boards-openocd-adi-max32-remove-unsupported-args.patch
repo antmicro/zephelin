@@ -1,7 +1,7 @@
-From 875e40227cb9a0b5c1cbf1e23cc756a780917e71 Mon Sep 17 00:00:00 2001
+From d9e9e5b4f23f5f7e164b0375dad6c823f47fdf25 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 26 Sep 2025 14:58:27 +0200
-Subject: [PATCH 10/31] boards: openocd-adi-max32: remove unsupported args
+Subject: [PATCH 10/37] boards: openocd-adi-max32: remove unsupported args
 
 ---
  boards/common/openocd-adi-max32.boards.cmake | 1 -

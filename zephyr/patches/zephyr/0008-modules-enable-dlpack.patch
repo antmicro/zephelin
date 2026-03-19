@@ -1,7 +1,7 @@
-From f4afe23e3e5de647ff44bd3ccfbc25171b3dcea5 Mon Sep 17 00:00:00 2001
+From 441b549ea6a96f129e8e3bf53384e6cda1447e79 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Mon, 30 Jun 2025 13:16:51 +0200
-Subject: [PATCH 08/31] modules: enable dlpack
+Subject: [PATCH 08/37] modules: enable dlpack
 
 ---
  modules/dlpack/CMakeLists.txt | 13 +++++++++++++

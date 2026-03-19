@@ -24,7 +24,9 @@ static uint64_t timestamp_get(uint64_t cycles)
 {
 	return sensor_clock_cycles_to_ns(cycles);
 }
-#elif defined(CONFIG_TIMING_FUNCTIONS) && !defined(CONFIG_INSTRUMENTATION)
+#elif !defined(CONFIG_ZPL_SAMPLE_SIMPLE_COUNTER_CLOCK) && \
+  defined(CONFIG_TIMING_FUNCTIONS) && \
+  !defined(CONFIG_INSTRUMENTATION)
 #include <zephyr/timing/timing.h>
 #include <zephyr/timing/types.h>
 

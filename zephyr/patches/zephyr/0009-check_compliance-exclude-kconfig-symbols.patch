@@ -1,7 +1,7 @@
-From 7a6dbe38365aa38a69db274e2379ecf54c35df61 Mon Sep 17 00:00:00 2001
+From 9cc0f59b233e06a5b52172c7ea58e6a11fb4fd04 Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Fri, 17 Oct 2025 15:00:19 +0200
-Subject: [PATCH 09/31] check_compliance: exclude kconfig symbols
+Subject: [PATCH 09/37] check_compliance: exclude kconfig symbols
 
 ---
  scripts/ci/check_compliance.py | 5 +++++

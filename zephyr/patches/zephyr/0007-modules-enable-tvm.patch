@@ -1,7 +1,7 @@
-From 77e0585d29e36d48e3984c0b9cadeb03cd62579b Mon Sep 17 00:00:00 2001
+From 44c9293099575106fd7992e2672e1382c7ee12c7 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Mon, 30 Jun 2025 13:16:51 +0200
-Subject: [PATCH 07/31] modules: enable tvm
+Subject: [PATCH 07/37] modules: enable tvm
 
 ---
  modules/tvm/CMakeLists.txt | 33 +++++++++++++++++++++++++++++++++

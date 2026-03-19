@@ -1,7 +1,7 @@
-From a6275d42e89da876bcc06ad9224ed3f6fb1565e4 Mon Sep 17 00:00:00 2001
+From f5d2413283496ebfd103b7f1ae7b20c9cbb4931f Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 16 Jan 2026 17:11:26 +0100
-Subject: [PATCH 27/31] instrumentation: Add tracing subsystem transport
+Subject: [PATCH 27/37] instrumentation: Add tracing subsystem transport
  backend
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1619,7 +1619,7 @@ index 97df19a7afa..48c5f318c1d 100644
 +	};
 +};
 diff --git a/subsys/tracing/tracing_core.c b/subsys/tracing/tracing_core.c
-index beb5d2e1e33..efb61e7fe8f 100644
+index 61e05bee593..d84a04f25a7 100644
 --- a/subsys/tracing/tracing_core.c
 +++ b/subsys/tracing/tracing_core.c
 @@ -1,5 +1,7 @@
@@ -1630,9 +1630,9 @@ index beb5d2e1e33..efb61e7fe8f 100644
   *
   * SPDX-License-Identifier: Apache-2.0
   */
-@@ -18,6 +20,12 @@
- #include <tracing_buffer.h>
- #include <tracing_backend.h>
+@@ -21,6 +23,12 @@
+ #include <zephyr/timing/timing.h>
+ #endif
  
 +#ifdef CONFIG_INSTRUMENTATION
 +#include <zephyr/instrumentation/instrumentation.h>
@@ -1643,7 +1643,7 @@ index beb5d2e1e33..efb61e7fe8f 100644
  #define TRACING_CMD_ENABLE  "enable"
  #define TRACING_CMD_DISABLE "disable"
  
-@@ -37,8 +45,7 @@ static k_tid_t tracing_thread_tid;
+@@ -40,8 +48,7 @@ static k_tid_t tracing_thread_tid;
  static struct k_thread tracing_thread;
  static struct k_timer tracing_thread_timer;
  static K_SEM_DEFINE(tracing_thread_sem, 0, 1);
@@ -1653,7 +1653,7 @@ index beb5d2e1e33..efb61e7fe8f 100644
  
  static void tracing_thread_func(void *dummy1, void *dummy2, void *dummy3)
  {
-@@ -53,12 +60,9 @@ static void tracing_thread_func(void *dummy1, void *dummy2, void *dummy3)
+@@ -56,12 +63,9 @@ static void tracing_thread_func(void *dummy1, void *dummy2, void *dummy3)
  		if (tracing_buffer_is_empty()) {
  			k_sem_take(&tracing_thread_sem, K_FOREVER);
  		} else {
@@ -1669,7 +1669,7 @@ index beb5d2e1e33..efb61e7fe8f 100644
  			tracing_buffer_get_finish(transferring_length);
  		}
  	}
-@@ -92,13 +96,11 @@ static int tracing_init(void)
+@@ -100,13 +104,11 @@ static int tracing_init(void)
  	}
  
  #ifdef CONFIG_TRACING_ASYNC
@@ -1686,7 +1686,7 @@ index beb5d2e1e33..efb61e7fe8f 100644
  	k_thread_name_set(&tracing_thread, TRACING_THREAD_NAME);
  #endif
  
-@@ -111,8 +113,7 @@ SYS_INIT(tracing_init, APPLICATION, 0);
+@@ -119,8 +121,7 @@ SYS_INIT(tracing_init, APPLICATION, 0);
  void tracing_trigger_output(bool before_put_is_empty)
  {
  	if (before_put_is_empty) {
@@ -1696,7 +1696,7 @@ index beb5d2e1e33..efb61e7fe8f 100644
  			      K_NO_WAIT);
  	}
  }
-@@ -130,6 +131,15 @@ bool is_tracing_enabled(void)
+@@ -138,6 +139,15 @@ bool is_tracing_enabled(void)
  
  void tracing_cmd_handle(uint8_t *buf, uint32_t length)
  {
@@ -1712,7 +1712,7 @@ index beb5d2e1e33..efb61e7fe8f 100644
  	if (strncmp(buf, TRACING_CMD_ENABLE, length) == 0) {
  		tracing_set_state(TRACING_ENABLE);
  	} else if (strncmp(buf, TRACING_CMD_DISABLE, length) == 0) {
-@@ -139,7 +149,19 @@ void tracing_cmd_handle(uint8_t *buf, uint32_t length)
+@@ -147,7 +157,19 @@ void tracing_cmd_handle(uint8_t *buf, uint32_t length)
  
  void tracing_buffer_handle(uint8_t *data, uint32_t length)
  {

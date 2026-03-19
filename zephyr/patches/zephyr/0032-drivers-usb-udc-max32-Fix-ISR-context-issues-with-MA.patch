@@ -1,8 +1,8 @@
-From 1880f0938ba8898d2b09b215ca2e5f28e214ba49 Mon Sep 17 00:00:00 2001
+From 1899817b6b3dbb0f83b4dc696317acfcde330bd1 Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:54:46 -0800
-Subject: [PATCH] drivers: usb: udc: max32: Fix ISR context issues with MAX32
- USB
+Subject: [PATCH 32/37] drivers: usb: udc: max32: Fix ISR context issues with
+ MAX32 USB
 
 MAX32 USB had some functions in ISR context allocating memory &
 acquiring mutexes. This commit fixes this by separating the
@@ -27,7 +27,7 @@ Signed-off-by: Brandon Hurst <brandon.hurst@analog.com>
  1 file changed, 71 insertions(+), 37 deletions(-)
 
 diff --git a/drivers/usb/udc/udc_max32.c b/drivers/usb/udc/udc_max32.c
-index 526a49b8ba917..5c561540a7997 100644
+index 526a49b8ba9..5c561540a79 100644
 --- a/drivers/usb/udc/udc_max32.c
 +++ b/drivers/usb/udc/udc_max32.c
 @@ -23,9 +23,13 @@ LOG_MODULE_REGISTER(udc_max32, CONFIG_UDC_DRIVER_LOG_LEVEL);
@@ -226,3 +226,6 @@ index 526a49b8ba917..5c561540a7997 100644
  		.make_thread = udc_max32_make_thread_##n,                                          \
  		.speed_idx = DT_ENUM_IDX(DT_DRV_INST(n), maximum_speed),                           \
  		.clock = DEVICE_DT_GET(DT_INST_CLOCKS_CTLR(n)),                                    \
+-- 
+2.47.3
+

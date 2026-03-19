@@ -47,6 +47,7 @@ tests:
     harness_config:
       robot_testsuite: custom_clock_zephyr_events.robot
     extra_configs:
+      - CONFIG_ZPL_SAMPLE_SIMPLE_COUNTER_CLOCK=y
       - CONFIG_ZPL_SCOPE_MARKING=y
       - CONFIG_ZPL_MEMORY_PROFILING=y
       - CONFIG_ZPL_MEMORY_PROFILING_INTERVAL=10

@@ -1,7 +1,7 @@
-From d95401e686d6d423c524b6753e56524336de4717 Mon Sep 17 00:00:00 2001
+From 78026101e5771ef931aedef342ef81ddbba2e0b5 Mon Sep 17 00:00:00 2001
 From: Anas Nashif <anas.nashif@intel.com>
 Date: Tue, 2 Dec 2025 09:53:51 -0500
-Subject: [PATCH 15/31] tracing: move event ids from uint8_t to uint16_t
+Subject: [PATCH 15/37] tracing: move event ids from uint8_t to uint16_t
 
 We are hitting the limit of 256 events possible with event id right now
 defined as uint8_t.
@@ -18,10 +18,10 @@ Signed-off-by: Anas Nashif <anas.nashif@intel.com>
  2 files changed, 245 insertions(+), 243 deletions(-)
 
 diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
-index cb38c48f30a..dbd325e057c 100644
+index c07a0287394..9e5fa6fa4e9 100644
 --- a/subsys/tracing/ctf/ctf_top.h
 +++ b/subsys/tracing/ctf/ctf_top.h
-@@ -364,775 +364,776 @@ typedef struct {
+@@ -365,775 +365,776 @@ typedef struct {
  
  static inline void ctf_top_thread_switched_out(uint32_t thread_id, ctf_bounded_string_t name)
  {
@@ -948,7 +948,7 @@ index cb38c48f30a..dbd325e057c 100644
  }
  
  /* Network socket */
-@@ -1142,505 +1143,506 @@ typedef struct {
+@@ -1143,505 +1144,506 @@ typedef struct {
  
  static inline void ctf_top_socket_init(int32_t sock, uint32_t family, uint32_t type, uint32_t proto)
  {

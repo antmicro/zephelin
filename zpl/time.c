@@ -10,6 +10,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/sys/time_units.h>
+#include <zephyr/timing/timing.h>
 
 #ifdef CONFIG_ZPL_CONFIGURABLE_TIMESTAMP_CLOCK
 #define _CYCLE_GET
@@ -19,18 +20,11 @@
 
 _CYCLE_GET uint64_t soft_cycle_get_64(void)
 {
-#ifdef CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER
-	return sys_clock_cycle_get_64();
-#else /* CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER */
-	static uint32_t overflows;
-	static uint32_t prev_clk;
+	static timing_t bigbang;
+	timing_t now;
 
-	uint32_t clk = k_cycle_get_32();
-
-	overflows += prev_clk > clk;
-	prev_clk = clk;
-	return (uint64_t)overflows << 32 | clk;
-#endif /* CONFIG_TIMER_HAS_64BIT_CYCLE_COUNTER */
+	now = timing_counter_get();
+	return timing_cycles_get(&bigbang, &now);
 }
 
 #undef _CYCLE_GET
@@ -39,7 +33,7 @@ _CYCLE_GET uint64_t soft_cycle_get_64(void)
 #include <tracing_core.h>
 static uint64_t cyc_to_ns_floor64(uint64_t cycles)
 {
-	return k_cyc_to_ns_floor64(cycles);
+	return timing_cycles_to_ns(cycles);
 }
 
 static zpl_clock_t zpl_clock = {
