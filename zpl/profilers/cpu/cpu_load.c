@@ -13,6 +13,7 @@
 #include <zephyr/tracing/tracing_format.h>
 
 #include <zpl/time.h>
+#include <zpl.h>
 
 void zpl_emit_cpu_load_event(void)
 {
@@ -43,9 +44,11 @@ void zpl_emit_cpu_load_event(void)
 static void zpl_profile_cpu_load(void)
 {
 	while (true) {
-		ZPL_CONF_WAIT(cpu_load_profiler);
-		zpl_emit_cpu_load_event();
-		k_msleep(CONFIG_ZPL_CPU_LOAD_PROFILING_INTERVAL);
+		ZPL_DISABLE_INSTRUMENTATION {
+			ZPL_CONF_WAIT(cpu_load_profiler);
+			zpl_emit_cpu_load_event();
+			k_msleep(CONFIG_ZPL_CPU_LOAD_PROFILING_INTERVAL);
+		}
 	}
 }
 

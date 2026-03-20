@@ -92,8 +92,8 @@ void zpl_profile_memory(void)
 			zpl_profile_heap();
 			zpl_profile_k_heaps();
 			zpl_profile_memory_slabs();
+			k_msleep(CONFIG_ZPL_MEMORY_PROFILING_INTERVAL);
 		}
-		k_msleep(CONFIG_ZPL_MEMORY_PROFILING_INTERVAL);
 	}
 }
 
