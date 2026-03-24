@@ -82,7 +82,7 @@ west zpl-prepare-trace ./smp_tvm.ctf -o ./tef_smp_tvm_models.json \
   --trim-metadata
 
 # TFLM instrumentation with ZPL events
-west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="dump_on_full.conf;zpl.conf"
+west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="instrumentation_uart.conf;zpl.conf"
 python3 ./scripts/run_renode.py --simulation-only \
   --debug --renode-logs &> run_renode_tflm_instrumentation.log &
 RENODE_SIM=$!
@@ -91,7 +91,7 @@ west zpl-instrumentation-uart-gdb-capture \
   /tmp/uart-log 115200 ./renode_tflm.instr.ctf ./renode_tflm.gdb.ctf \
   --no-debug-server --timeout 20
 kill $RENODE_SIM && rm /tmp/uart-log
-west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr_0.ctf renode_tflm.gdb.ctf \
+west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr.ctf renode_tflm.gdb.ctf \
   --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
 
 # TVM instrumentation with ZPL events
@@ -181,8 +181,25 @@ west zpl-prepare-trace ./micro_speech_1.ctf \
   -o ./tef_preprocessor.json \
   --zephyr-elf-path build/preprocessor/zephyr/zephyr.elf
 
+# Instrumentation via tracing backend
+west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="zpl.conf;instrumentation_tracing.conf"
+python3 ./scripts/run_renode.py --trace-output ./tracing_backend.ctf --timeout 10
+west zpl-prepare-trace ./tracing_backend.ctf -o ./tef_tflm_instrumentation_tracing.json \
+  --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite \
+    ./samples/common/tflm/model/sine.tflite
+
+#Instumentation via tracing backend with uart-capture
+west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="zpl.conf;instrumentation_tracing.conf" -DCONFIG_BOOT_DELAY=1000
+python3 ./scripts/run_renode.py --simulation-only --renode-logs &> run_renode_tflm_instrumentation_tracing.log &
+RENODE_SIM=$!
+while [ ! -e /tmp/uart-trace-0 ]; do sleep 0.05; done
+timeout --preserve-status -s INT 20 west zpl-uart-capture /tmp/uart-trace-0 115200 ./renode_tflm_instrumentation.ctf
+kill -9 $RENODE_SIM && rm -f /tmp/uart-log
+west zpl-prepare-trace -o tef_tflm_instrumentation_capture.json renode_tflm_instrumentation_0.ctf \
+  --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
+
 # Validate generated CTFs
-if [[ $(ls -l -s *.ctf | awk '($6 > 0)' | wc -l) -lt 18 ]]; then
+if [[ $(ls -l -s *.ctf | awk '($6 > 0)' | wc -l) -lt 20 ]]; then
   echo "Wrong number of non-zero CTF files" 1>&2
   exit 1
 fi
