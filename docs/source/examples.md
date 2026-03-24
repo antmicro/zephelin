@@ -158,7 +158,7 @@ west zpl-prepare-trace ./trace.ctf \
 In the end, generated `tef_tvm_profiler.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 :::::
 
-## Full TFLite Micro traces with instrumentation
+## Full TFLite Micro traces with instrumentation using separate UART connection for instrumentation traces
 
 * **Source**: {zpl_repo}`samples/profiling/tflm_instrumentation`
 * **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json){.external}
@@ -180,7 +180,7 @@ Check {doc}`ctf_to_tef` for more details.
 To build a sample run:
 
 ```bash
-west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="dump_on_full.conf;zpl.conf"
+west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="instrumentation_uart.conf;zpl.conf"
 ```
 
 Secondly, flash the device or run a simulation and collect traces:
@@ -217,10 +217,64 @@ Remember that `/dev/ttyUSB0` may need to be replaced with a different device.
 Then, the TEF traces can be created with `west zpl-prepare-trace` like so:
 
 ```bash
-west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr_0.ctf renode_tflm.gdb.ctf --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
+west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr.ctf renode_tflm.gdb.ctf --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
 ```
 
 In the end, generated `tef_tflm_instrumentation.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
+
+:::{note}
+The `renode_tflm.instr.ctf` can be saved under a different path (e.g. `renode_tflm.instr.ctf`) due to resets - check paths reported by `west zpl-instrumentation-uart-gdb-capture` and update command accordingly.
+:::
+:::::
+
+## Full TFLite Micro traces with instrumentation sent through tracing subsystem
+
+* **Source**: {zpl_repo}`samples/profiling/tflm_instrumentation`
+* **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json){.external}
+
+This sample demonstrates how to collect regular traces, custom traces, execution metrics, model-specific metrics and instrumentation traces using only tracing subsystem transport, without delivering instrumentation traces separately.
+
+In this scenario instead of `west zpl-instrumentation-uart-gdb-capture` you can use regular Zephelin capture commands, such as `west zpl-uart-capture`.
+
+:::::{example} Collecting regular and instrumentation traces using `zpl-uart-capture`
+:collapsible:
+
+To build a sample run:
+
+```bash
+west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="instrumentation_tracing.conf;zpl.conf"
+```
+
+Secondly, flash the device or run a simulation and collect traces:
+
+::::{tabs}
+
+:::{group-tab} Renode
+For Renode, simulation and collection of traces can be done with:
+
+```bash
+python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
+```
+:::
+
+:::{group-tab} Hardware
+For hardware, once the device is flashed the traces can be collected with:
+
+```bash
+west zpl-uart-capture /dev/ttyUSB0 115200 ./trace.ctf
+```
+:::
+::::
+
+Then, the TEF traces can be created with `west zpl-prepare-trace` like so:
+
+```bash
+west zpl-prepare-trace ./trace.ctf \
+  --tflm-model-path ./samples/common/tflm/model/sine.tflite \
+  -o ./tef_tflm_instrumentation_via_tracing.json
+```
+
+In the end, generated `tef_tflm_instrumentation_via_tracing.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 :::::
 
 ## Multithreaded application running multiple models
