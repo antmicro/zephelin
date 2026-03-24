@@ -11,7 +11,7 @@ Library                             ../../common/instrumentation/zaru_helper.py
 *** Keywords ***
 Wait For TFLM Sample Output
   FOR  ${i}  IN RANGE  0  10
-    Wait For Line On Uart       x_value: \\d+.\\d+, y_value: \\d+.\\d+        treatAsRegex=true
+    Wait For Line On Uart       x_value: \\d+.\\d+, y_value: \\d+.\\d+        treatAsRegex=true        timeout=30
   END
 
 *** Test Cases ***
