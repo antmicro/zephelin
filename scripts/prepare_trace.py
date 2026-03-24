@@ -24,7 +24,9 @@ from ctf2tef import (
     CustomMetadataDefinition,
     EventPhase,
     ctf_to_tef,
+    instrumentation_ctf_to_tef,
     prepare_dir,
+    prepare_dir_for_instrumentation,
 )
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
@@ -417,6 +419,20 @@ def zaru_format(instr_trace: list[dict]) -> list[dict]:
     return trace_events
 
 
+def split_instr_zpl(tef_trace: list[dict]) -> tuple[list[dict], list[dict]]:
+    """
+    Split instrumentation events from trace events.
+    """
+    instr_trace = []
+    zpl_trace = []
+    for ev in tef_trace:
+        if ev.get("name", "").startswith(INSTR_EVENT_PREFIX):
+            instr_trace.append(ev)
+        else:
+            zpl_trace.append(ev)
+    return instr_trace, zpl_trace
+
+
 def remove_events_without_beginning(instr_trace: list[dict]) -> list[dict]:
     """
     Remove events' ends that do not have beginnings.
@@ -553,7 +569,9 @@ def fix_timestamps(
     return instr_trace
 
 
-def adjust_instrumentation_trace(tef_trace: list[dict]) -> list[dict]:
+def adjust_instrumentation_trace(
+    tef_trace: list[dict], external_instr_trace: list[dict] | None = None
+) -> list[dict]:
     """
     Adjusts instrumentation traces to make sure they do not collide with ZPL traces.
 
@@ -565,16 +583,20 @@ def adjust_instrumentation_trace(tef_trace: list[dict]) -> list[dict]:
     * closing unfinished events,
     * making events longer to make sure they are not shorter than their children.
     """
-    # Filter out scheduling events, as they are dropped in one of zephyr patches
-    tef_trace = [ev for ev in tef_trace if not ev.get("name", "").startswith(INSTR_SCHED_PREFIX)]
-
-    # Split the trace into instrumentation and ZPL parts
-    instr_trace, zpl_trace = split_instr_zpl(tef_trace)
-
-    instr_trace = zaru_format(instr_trace)
+    if external_instr_trace is not None:
+        zpl_trace = tef_trace
+        instr_trace = external_instr_trace
+        for event in instr_trace:
+            event["ts"] = float(event["ts"]) * 1e-3
+            event["pid"] = 0
+    else:
+        tef_trace = [
+            ev for ev in tef_trace if not ev.get("name", "").startswith(INSTR_SCHED_PREFIX)
+        ]
+        instr_trace, zpl_trace = split_instr_zpl(tef_trace)
+        instr_trace = zaru_format(instr_trace)
 
     instr_trace = remove_events_without_beginning(instr_trace)
-
     instr_trace = fix_timestamps(instr_trace, zpl_trace, verbose=True)
 
     return zpl_trace + instr_trace
@@ -751,21 +773,6 @@ def process_ram_report(ram: dict) -> float:
     return s
 
 
-def split_instr_zpl(tef_trace: list[dict]) -> tuple[list[dict], list[dict]]:
-    """
-    Split TEF trace into instrumentation and ZPL parts.
-    """
-    instr_trace = []
-    zpl_trace = []
-    for ev in tef_trace:
-        if ev.get("name", "").startswith(INSTR_EVENT_PREFIX):
-            instr_trace.append(ev)
-        else:
-            zpl_trace.append(ev)
-
-    return instr_trace, zpl_trace
-
-
 def prepare(args: argparse.Namespace):
     """
     Prepares CTF trace to be visualized.
@@ -786,7 +793,6 @@ def prepare(args: argparse.Namespace):
         raise argparse.ArgumentError(None, "Please provide at least one trace file")
 
     symbol_map = extract_symbol_map(args.zephyr_elf_path)
-
     merge_renode_split_files(args.ctf_trace)
 
     # Convert CTF
@@ -822,7 +828,16 @@ def prepare(args: argparse.Namespace):
             )
             tef_trace, thread_name = results.tef, results.thread_names
 
-            tef_trace = adjust_instrumentation_trace(tef_trace)
+    instr_trace = None
+    if args.instrumentation:
+        with prepare_dir_for_instrumentation(
+            args.instrumentation, args.build_dir / "ctf_metadata"
+        ) as tmp_dir:
+            instr_trace = instrumentation_ctf_to_tef(
+                str(tmp_dir), args.zephyr_elf_path, args.zephyr_base
+            ).tef["traceEvents"]
+
+    tef_trace = adjust_instrumentation_trace(tef_trace, instr_trace)
 
     # If TVM inference was detected, scan through trace and recalculate model numbers
     # based on common prefix of used TVM functions
