@@ -7,3 +7,7 @@
 &uart2 {
 	status = "okay";
 };
+
+&usbhs {
+	maximum-speed = "high-speed";
+};
