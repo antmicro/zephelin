@@ -270,3 +270,27 @@ patches:
   module: tflite-micro
   path: tflite-micro/0005-disable-instrumentation-of-custom-methods-based-on-c.patch
   sha256sum: bed21d187b34b5a4158a10ca434c2b1a49d91b88d6fba226e6eb2d5a95d13b0b
+- author: Brandon Hurst
+  date: '2026-02-17'
+  email: brandon.hurst@analog.com
+  module: zephyr
+  path: zephyr/0032-drivers-usb-udc-max32-Fix-ISR-context-issues-with-MA.patch
+  sha256sum: fcb4b005bc3acff295b0d83de31fa18b3e047f2934df9b04c167e1b6d5f2dbfd
+- author: Brandon Hurst
+  date: '2026-02-17'
+  email: brandon.hurst@analog.com
+  module: zephyr
+  path: zephyr/0033-drivers-usb-udc-max32-Reduce-spurious-resume-events.patch
+  sha256sum: 7270909820493e6bd4be77133048c7a609570747cbdd218f78f3a8cb1ccbb44b
+- author: Brandon Hurst
+  date: '2026-02-17'
+  email: brandon.hurst@analog.com
+  module: zephyr
+  path: zephyr/0034-drivers-usb-udc-max32-Minor-function-movements.patch
+  sha256sum: e2da7b99041079c5aeb1f1b3511d4851bcbe30eb8899fab5236814e6a382d82e
+- author: Brandon Hurst
+  date: '2026-02-17'
+  email: brandon.hurst@analog.com
+  module: zephyr
+  path: zephyr/0035-drivers-usb-udc-max32-Handle-deferred-endpoint-trans.patch
+  sha256sum: bfeec9b38b04e72b129eb3cbaa58b4860997d28c073da25886c91bac5d677295
