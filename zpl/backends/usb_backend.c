@@ -25,12 +25,14 @@ USBD_DEVICE_DEFINE(zpl_usbd,
 USBD_DESC_MANUFACTURER_DEFINE(zpl_mfr, ZPL_PRODUCT_MANUFACTURER);
 USBD_DESC_PRODUCT_DEFINE(zpl_product, ZPL_PRODUCT_STRING);
 USBD_DESC_CONFIG_DEFINE(fs_cfg_desc, "Zephelin Full-Speed Configuration");
+USBD_DESC_CONFIG_DEFINE(hs_cfg_desc, "Zephelin High-Speed Configuration");
 
 static const uint8_t attributes = 0;
 static const char *blocklist[] = { NULL };
 
 /* USB Configurations */
 USBD_CONFIGURATION_DEFINE(zpl_fs_config, attributes, ZPL_USBD_MAX_POWER, &fs_cfg_desc);
+USBD_CONFIGURATION_DEFINE(zpl_hs_config, attributes, ZPL_USBD_MAX_POWER, &hs_cfg_desc);
 
 static struct usbd_context *zpl_usbd_setup_device(void)
 {
@@ -46,6 +48,22 @@ static struct usbd_context *zpl_usbd_setup_device(void)
 	if (ret) {
 		LOG_ERR("Descriptors: failed to initialize product descriptor (%d)!", ret);
 		return NULL;
+	}
+
+	if (USBD_SUPPORTS_HIGH_SPEED && usbd_caps_speed(&zpl_usbd) == USBD_SPEED_HS) {
+		ret = usbd_add_configuration(&zpl_usbd, USBD_SPEED_HS,
+					     &zpl_hs_config);
+		if (ret) {
+			LOG_ERR("Configuration: Failed to add high-speed configuration");
+			return NULL;
+		}
+
+		ret = usbd_register_all_classes(&zpl_usbd, USBD_SPEED_HS, 1,
+						blocklist);
+		if (ret) {
+			LOG_ERR("Classes: failed to register classes (%d)!", ret);
+			return NULL;
+		}
 	}
 
 	ret = usbd_add_configuration(&zpl_usbd, USBD_SPEED_FS, &zpl_fs_config);
