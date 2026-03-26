@@ -36,6 +36,12 @@ int main(void)
 {
 	int status = 0;
 
+#if defined(CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE) && defined(CONFIG_TRACING_BACKEND_USB)
+	// Give some time to allow the host PC to detect and configure the USB
+	// device before proceeding with the demo.
+	k_msleep(5000);
+#endif
+
 	ZPL_MARK_CODE_SCOPE(prepare_model) {
 		model_init();
 		status = model_load(model0_data);
