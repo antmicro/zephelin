@@ -230,7 +230,7 @@ The `renode_tflm.instr.ctf` can be saved under a different path (e.g. `renode_tf
 ## Full TFLite Micro traces with instrumentation sent through tracing subsystem
 
 * **Source**: {zpl_repo}`samples/profiling/tflm_instrumentation`
-* **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation.json){.external}
+* **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation_tracing.json){.external}
 
 This sample demonstrates how to collect regular traces, custom traces, execution metrics, model-specific metrics and instrumentation traces using only tracing subsystem transport, without delivering instrumentation traces separately.
 
@@ -271,10 +271,10 @@ Then, the TEF traces can be created with `west zpl-prepare-trace` like so:
 ```bash
 west zpl-prepare-trace ./trace.ctf \
   --tflm-model-path ./samples/common/tflm/model/sine.tflite \
-  -o ./tef_tflm_instrumentation_via_tracing.json
+  -o ./tef_tflm_instrumentation_tracing.json
 ```
 
-In the end, generated `tef_tflm_instrumentation_via_tracing.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
+In the end, generated `./tef_tflm_instrumentation_tracing.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 :::::
 
 ## Multithreaded application running multiple models

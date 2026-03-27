@@ -48,6 +48,15 @@ Interactive version of instrumentation examples:
 
 ## Additional options
 
+### Picking communication backend for instrumentation traces
+
+To collect instrumentation traces from the device, following backends can be used:
+
+* Dedicated UART backend that can be enabled with `CONFIG_INSTRUMENTATION_BACKEND_UART=y`.
+  In case regular Zephelin traces are collected as well, it requires handling both channels of traces separately.
+* Tracing subsystem backend, allowing to send instrumentation traces together with regular traces in a separate CTF stream, allowing communication to be sent over single channel, either UART, USB or GDB.
+  It can be enabled with `CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE=y`.
+
 ### Running without retained memory
 
 By default, the instrumentation subsystem uses [retained memory](https://docs.zephyrproject.org/latest/hardware/peripherals/retained_mem.html) in order to configure trigger and stopper functions via UART, and persistently store them as long as the device is powered.
