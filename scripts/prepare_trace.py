@@ -437,17 +437,17 @@ def remove_events_without_beginning(instr_trace: list[dict]) -> list[dict]:
     """
     Remove events' ends that do not have beginnings.
     """
-    EventHash = namedtuple("EventHash", ["name", "tid"])
+    EventHash = namedtuple("EventHash", ["name", "tid", "pid"])
 
     begins = []
     to_remove = []
     for i, e in enumerate(instr_trace):
         if e["ph"] == "B":
-            begins.insert(0, EventHash(e["name"], e["tid"]))
+            begins.insert(0, EventHash(e["name"], e["tid"], e["pid"]))
             continue
         if e["ph"] != "E":
             continue
-        h = EventHash(e["name"], e["tid"])
+        h = EventHash(e["name"], e["tid"], e["pid"])
         if h not in begins:
             to_remove.append(i)
         else:
@@ -477,7 +477,7 @@ def remove_events_without_beginning(instr_trace: list[dict]) -> list[dict]:
         instr_trace.append({
             # Add small value to make sure the event do not end in the same timestamp
             "ts": last_ts_per_thread[be.tid] + 0.1,
-            "pid": 0,
+            "pid": be.pid,
             "tid": be.tid,
             "ph": "E",
             "name": be.name,
@@ -495,7 +495,7 @@ def fix_timestamps(
     """
 
     def matching_events(a, b):
-        return a["name"] == b["name"] and a["tid"] == b["tid"]
+        return a["name"] == b["name"] and a["tid"] == b["tid"] and a["pid"] == b["pid"]
 
     adjusted = []
     to_remove = []
@@ -526,6 +526,7 @@ def fix_timestamps(
             zpl_beg_ev = next(
                 filter(
                     lambda e: e["tid"] == instr_beg_ev["tid"]
+                    and e["pid"] == instr_beg_ev["pid"]
                     and e["ph"] == "B"
                     and ts <= e["ts"] < instr_end_ev["ts"],
                     zpl_trace,
@@ -570,7 +571,9 @@ def fix_timestamps(
 
 
 def adjust_instrumentation_trace(
-    tef_trace: list[dict], external_instr_trace: list[dict] | None = None
+    tef_trace: list[dict],
+    external_instr_trace: list[dict] | None = None,
+    separate_instr_pid: bool = False,
 ) -> list[dict]:
     """
     Adjusts instrumentation traces to make sure they do not collide with ZPL traces.
@@ -588,13 +591,20 @@ def adjust_instrumentation_trace(
         instr_trace = external_instr_trace
         for event in instr_trace:
             event["ts"] = float(event["ts"]) * 1e-3
-            event["pid"] = 0
     else:
         tef_trace = [
             ev for ev in tef_trace if not ev.get("name", "").startswith(INSTR_SCHED_PREFIX)
         ]
         instr_trace, zpl_trace = split_instr_zpl(tef_trace)
         instr_trace = zaru_format(instr_trace)
+
+    if separate_instr_pid:
+        for event in instr_trace:
+            event["pid"] = 1
+
+            if event.get("ph") == "M" and event.get("name") == "thread_name":
+                current_name = event.get("args", {}).get("name", "")
+                event["args"]["name"] = f"{current_name} (instrumentation)"
 
     instr_trace = remove_events_without_beginning(instr_trace)
     instr_trace = fix_timestamps(instr_trace, zpl_trace, verbose=True)
@@ -736,6 +746,11 @@ def setup_parser(parser: argparse.ArgumentParser):
         action="store_true",
         help="Discards all metadata that were emitted after the last trace event",
     )
+    parser.add_argument(
+        "--separate-instr-pid",
+        action="store_true",
+        help="Move all instrumentation events to a separate process (pid = 1)",
+    )
     return parser
 
 
@@ -837,7 +852,7 @@ def prepare(args: argparse.Namespace):
                 str(tmp_dir), args.zephyr_elf_path, args.zephyr_base
             ).tef["traceEvents"]
 
-    tef_trace = adjust_instrumentation_trace(tef_trace, instr_trace)
+    tef_trace = adjust_instrumentation_trace(tef_trace, instr_trace, args.separate_instr_pid)
 
     # If TVM inference was detected, scan through trace and recalculate model numbers
     # based on common prefix of used TVM functions
