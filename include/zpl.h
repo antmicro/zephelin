@@ -21,6 +21,12 @@ struct zpl_code_scope_conf {
 	bool is_enabled;
 };
 
+/*
+ * Initialize Zephelin.
+ *
+ * Enabling `CONFIG_ZPL_AUTORUN_INIT` prevents calling this function
+ * manually.
+ */
 int zpl_init(void);
 void zpl_code_scope_enter(struct zpl_code_scope_conf scope_conf);
 void zpl_code_scope_exit(struct zpl_code_scope_conf scope_conf);

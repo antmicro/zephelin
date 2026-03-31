@@ -21,6 +21,12 @@ void zpl_named_event(const char *name, uint32_t arg0, uint32_t arg1)
 }
 #endif /* CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT */
 
+/* Make `zpl_init` local when `CONFIG_ZPL_AUTORUN_INIT` is enabled
+ * to prevent double initialization.
+ */
+#if IS_ENABLED(CONFIG_ZPL_AUTORUN_INIT)
+static
+#endif /* CONFIG_ZPL_AUTORUN_INIT */
 int zpl_init(void)
 {
 #if defined(CONFIG_ZPL_TRACE_BACKEND_USB)

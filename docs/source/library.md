@@ -226,6 +226,11 @@ Zephelin can be enabled by y-selecting the `CONFIG_ZPL` symbol in the project co
 By default, Zephelin is automatically initialized during Zephyr initialization, but it can also be initialized in a runtime, by setting Kconfig symbol `CONFIG_ZPL_AUTORUN_INIT` to `n` and using the `zpl_init()` function defined by the `zpl/lib.h` header.
 You can enable various Zephelin components by using Kconfig and runtime configuration, as described in following sections.
 
+:::{warning}
+Manual and automatic initializations are mutually exclusive. Enabling `CONFIG_ZPL_AUTORUN_INIT` makes `zpl_init` local as a protection
+against using both methods at the same time. Improper use will result in a compile-time error.
+:::
+
 ### Configuration
 
 The library can be configured both during building and during a run on a device.
