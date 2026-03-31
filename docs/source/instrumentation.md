@@ -4,8 +4,16 @@ The [instrumentation subsystem](https://docs.zephyrproject.org/latest/samples/su
 
 ## Capturing trace
 
-Currently instrumentation subsystem supports one tracing backend - UART.
-Zephelin provides a `zpl-instrumentation-uart-capture` West subcommand to collect instrumentation traces:
+Currently, the instrumentation subsystem supports two tracing backends:
+
+* UART
+* Tracing subsystem
+
+### UART
+
+It can be enabled with `CONFIG_INSTRUMENTATION_BACKEND_UART=y`.
+
+When using standalone UART backend, Zephelin provides the `west zpl-instrumentation-uart-capture` command to collect instrumentation traces:
 
 ```bash
 west zpl-instrumentation-uart-capture [-h] \
@@ -15,6 +23,20 @@ west zpl-instrumentation-uart-capture [-h] \
 It requests the trace by sending `dump_trace` message and waits for a response.
 To make sure the received data is not contaminated by e.g. log messages, it is sent wrapped with `-*-#...-*-!`.
 Base on that, the command finds the beginning and the end of message and saves trace in CTF format.
+
+In case regular Zephelin traces are collected as well, it requires handling both channels of traces separately.
+
+### Tracing subsystem
+
+This backend can be enabled with `CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE=y`.
+
+Instrumentation traces are packed together with regular traces in a separate CTF stream, allowing communication to be sent over single channel, either UART, USB or GDB.
+
+When using tracing subsystem backend, instrumentation traces can be collected with the same `west` subcommand as regular traces, `zpl-uart-capture`:
+```bash
+  west zpl-uart-capture [-h] \
+    serial_port serial_baudrate output_path
+```
 
 In order to visualize the trace with [Zephelin Trace Viewer](visual_interface), it has to be converted using `west zpl-prepare-trace -i {INSTRUMENTATION_CTF_TRACE} {CONVERTED_TRACE}`.
 For more details, check out [CTF to TEF conversion](ctf_to_tef).
@@ -29,7 +51,7 @@ The requirements for collecting all data are following:
 * A different backend or connection type for instrumentation subsystem and the rest of traces - can be e.g. UART backend for instrumentation and RAM backend for other traces.
 * A CTF format for the remaining traces (configurable with `CONFIG_ZPL_TRACE_FORMAT_CTF=y`)
 
-With this, a following West subcommand can be used to capture both instrumentation and Zephelin traces at the same time:
+With this, a following `west` subcommand can be used to capture both instrumentation and Zephelin traces at the same time:
 
 ```bash
 west zpl-instrumentation-uart-gdb-capture [-h] \
@@ -47,15 +69,6 @@ Interactive version of instrumentation examples:
 :::
 
 ## Additional options
-
-### Picking communication backend for instrumentation traces
-
-To collect instrumentation traces from the device, following backends can be used:
-
-* Dedicated UART backend that can be enabled with `CONFIG_INSTRUMENTATION_BACKEND_UART=y`.
-  In case regular Zephelin traces are collected as well, it requires handling both channels of traces separately.
-* Tracing subsystem backend, allowing to send instrumentation traces together with regular traces in a separate CTF stream, allowing communication to be sent over single channel, either UART, USB or GDB.
-  It can be enabled with `CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE=y`.
 
 ### Running without retained memory
 
@@ -86,8 +99,14 @@ This option can be enabled with `CONFIG_INSTRUMENTATION_MODE_CALLGRAPH_DUMP_ON_F
 
 The `zpl-instrumentation-uart-capture` and `zpl-instrumentation-uart-gdb-capture` commands can automatically detect whether `DUMP_ON_FULL` was used and adjust capturing mechanism accordingly.
 Similarly to Zephelin, instrumentation subsystem sends init tag at the start of the application.
-It is detected by the West commands, to save traces into separate file, therefore it is advised to start `zpl-instrumentation-uart-capture` command before flashing or restarting the board.
+It is detected by the `west` commands, to save traces into separate file, therefore it is advised to start `zpl-instrumentation-uart-capture` command before flashing or restarting the board.
 Next, the commands wait for binary messages until user stops it or there is no new message received in specified timeout.
 Also, to make sure all events are captured, after the timeout, the commands send `dump_trace` and gather remaining data from the buffer.
 
 The example of this mechanism can be found in {zpl_repo}`samples/profiling/tflm_instrumentation`.
+
+### Separating instrumentation traces from regular traces
+
+To visually separate instrumentation traces from regular traces in [Zephelin Trace Viewer](visual_interface), the `--separate-instr-pid` option can be passed to `west zpl-prepare-trace`.
+Instrumentation traces will be placed on a separate profile with its name matching the original thread name but with `(instrumentation)` suffix added.
+Using this option avoids the need to tamper with event timestamps to align both types of traces.
