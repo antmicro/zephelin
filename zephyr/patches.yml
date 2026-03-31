@@ -300,3 +300,9 @@ patches:
   module: tflite-micro
   path: tflite-micro/0005-disable-instrumentation-of-custom-methods-based-on-c.patch
   sha256sum: bed21d187b34b5a4158a10ca434c2b1a49d91b88d6fba226e6eb2d5a95d13b0b
+- author: Lukasz Kedziora
+  date: '2026-03-31'
+  email: lkedziora@antmicro.com
+  module: zephyr
+  path: zephyr/0037-subsys-instrumentation-Exclude-irq-lock-unlock-and-t.patch
+  sha256sum: 2032aeb393e51cf758364c4c2430ca49662adc35db181b1e97fd4a79fa324fd4
