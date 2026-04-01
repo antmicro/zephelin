@@ -92,6 +92,13 @@ It is achieved by adding source files to the exclude file list and using:
 In order to enable instrumentation for Zephelin's internal functions the `CONFIG_ZPL_INTERNALS_INSTRUMENTATION` can be used.
 It prevents source file from being added in the exclude list and disables both `__no_zpl_instrumentation__` and `ZPL_DISABLE_INSTRUMENTATION`.
 
+Disabling instrumentation using the aforementioned options does not affect functions called from within excluded functions.
+To disable instrumentation of functions called within excluded function, enable `CONFIG_INSTRUMENTATION_RECURSIVE_EXCLUDE` and list function names in `CONFIG_INSTRUMENTATION_RECURSIVE_EXCLUDE_LIST`.
+Ensure that functions listed in `CONFIG_INSTRUMENTATION_RECURSIVE_EXCLUDE_LIST` are not excluded using the non-recursive methods (e.g. `__no_instrumentation__`), because this will prevent the recursive exclusion flags from being set.
+
+Instrumentation subsystem provides a list of default excludes designed to prevent instrumentation of the instrumentation and tracing subsystems.
+Before configuring custom excludes, consider appending them to the defaults.
+
 ### Dumping events when instrumentation buffer is full
 
 Instead of disabling instrumentation subsystem when buffer is filled or overwriting the existing data, the subsystem can also dump all events to make space in the buffer.
