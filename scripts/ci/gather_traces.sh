@@ -183,7 +183,7 @@ west zpl-prepare-trace ./micro_speech_1.ctf \
 
 # Instrumentation via tracing backend
 west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="zpl.conf;instrumentation_tracing.conf"
-python3 ./scripts/run_renode.py --trace-output ./tracing_backend.ctf --timeout 10
+python3 ./scripts/run_renode.py --trace-output ./tracing_backend.ctf --timeout 50
 west zpl-prepare-trace ./tracing_backend.ctf -o ./tef_tflm_instrumentation_tracing.json \
   --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite \
     ./samples/common/tflm/model/sine.tflite
@@ -193,7 +193,7 @@ west build -p -b $BOARD samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_F
 python3 ./scripts/run_renode.py --simulation-only --renode-logs &> run_renode_tflm_instrumentation_tracing.log &
 RENODE_SIM=$!
 while [ ! -e /tmp/uart-trace-0 ]; do sleep 0.05; done
-timeout --preserve-status -s INT 20 west zpl-uart-capture /tmp/uart-trace-0 115200 ./renode_tflm_instrumentation.ctf
+timeout --preserve-status -s INT 50 west zpl-uart-capture /tmp/uart-trace-0 115200 ./renode_tflm_instrumentation.ctf
 kill -9 $RENODE_SIM && rm -f /tmp/uart-log
 west zpl-prepare-trace -o tef_tflm_instrumentation_capture.json renode_tflm_instrumentation_0.ctf \
   --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
