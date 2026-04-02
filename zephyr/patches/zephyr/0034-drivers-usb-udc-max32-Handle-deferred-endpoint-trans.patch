@@ -1,7 +1,7 @@
-From aa769c6c56bff7d1945882afb63881ddc972a3c3 Mon Sep 17 00:00:00 2001
+From f8e91a533342fcf82a54e9ef376b1161f8740768 Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:56:47 -0800
-Subject: [PATCH 35/37] drivers: usb: udc: max32: Handle deferred endpoint
+Subject: [PATCH 34/36] drivers: usb: udc: max32: Handle deferred endpoint
  transfers
 
 Issue was corrected where transfers waiting on a busy

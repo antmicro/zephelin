@@ -1,7 +1,7 @@
-From f5d2413283496ebfd103b7f1ae7b20c9cbb4931f Mon Sep 17 00:00:00 2001
+From 23ac6e441fd0cc761f05e30b619b8633fc657d84 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 16 Jan 2026 17:11:26 +0100
-Subject: [PATCH 27/37] instrumentation: Add tracing subsystem transport
+Subject: [PATCH 26/36] instrumentation: Add tracing subsystem transport
  backend
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8

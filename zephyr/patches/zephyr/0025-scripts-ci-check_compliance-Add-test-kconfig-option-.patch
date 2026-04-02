@@ -1,7 +1,7 @@
-From eff9b6bfcee028b05c966bf958940bf6a0a5d839 Mon Sep 17 00:00:00 2001
+From 4913a7ac6ef43a16142caa70cd79080956594b72 Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
 Date: Tue, 17 Mar 2026 10:10:57 +0100
-Subject: [PATCH 26/37] scripts: ci: check_compliance: Add test kconfig option
+Subject: [PATCH 25/36] scripts: ci: check_compliance: Add test kconfig option
  to igonred keywords
 
 Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>

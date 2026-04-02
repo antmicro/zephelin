@@ -1,7 +1,7 @@
-From 5fde378e8bf69123bbd6bae9a29b7d81b1598dbe Mon Sep 17 00:00:00 2001
+From 4d1de84cea890e6c0c6eb363b28a34a7f241bb09 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Tue, 22 Jul 2025 17:35:46 +0200
-Subject: [PATCH 17/37] scripts: instrumentation: zaru: deduplicate code,
+Subject: [PATCH 16/36] scripts: instrumentation: zaru: deduplicate code,
  rename perfetto to trace event
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>

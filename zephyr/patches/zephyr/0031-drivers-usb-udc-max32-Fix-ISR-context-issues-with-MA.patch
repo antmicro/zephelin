@@ -1,7 +1,7 @@
-From 1899817b6b3dbb0f83b4dc696317acfcde330bd1 Mon Sep 17 00:00:00 2001
+From 97da820573f6f81426a8d5169989b3c88fafbe85 Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:54:46 -0800
-Subject: [PATCH 32/37] drivers: usb: udc: max32: Fix ISR context issues with
+Subject: [PATCH 31/36] drivers: usb: udc: max32: Fix ISR context issues with
  MAX32 USB
 
 MAX32 USB had some functions in ISR context allocating memory &

@@ -1,7 +1,7 @@
-From cc8be622245178fb39ab6017f97cabd8cd95be9f Mon Sep 17 00:00:00 2001
+From 129185b39232c62cd7c4bef61abcf2e9f5944881 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Tue, 10 Feb 2026 15:09:40 +0100
-Subject: [PATCH 28/37] scripts: instrumentation: Support
+Subject: [PATCH 27/36] scripts: instrumentation: Support
  instrumentation-via-tracing in zaru
 
 Update zaru to support receiving instrumentation events when using the

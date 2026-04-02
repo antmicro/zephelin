@@ -1,14 +1,72 @@
-From b327c16ecd54fd3cd91742c490fdac7dc881709f Mon Sep 17 00:00:00 2001
+From 8baa309685a7cb9b1e3152e00dd1b24078576138 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Fri, 27 Jun 2025 14:38:43 +0200
-Subject: [PATCH 06/37] boards: st: stm32f429i_disc1: add adc1
+Subject: [PATCH 06/36] boards: st: stm32f429i_disc1: add adc1
 
 ---
+ .../stm32f429i_disc1/support/hello_world.repl |  20 ++-
  .../support/stm32f4_discovery.repl            | 144 ++++++++++++++++++
- .../support/stm32f4_discovery.resc            |   2 +-
- 2 files changed, 145 insertions(+), 1 deletion(-)
+ 2 files changed, 159 insertions(+), 5 deletions(-)
  create mode 100644 boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
 
+diff --git a/boards/st/stm32f429i_disc1/support/hello_world.repl b/boards/st/stm32f429i_disc1/support/hello_world.repl
+index ae5c1bf3f73..f350465d15b 100644
+--- a/boards/st/stm32f429i_disc1/support/hello_world.repl
++++ b/boards/st/stm32f429i_disc1/support/hello_world.repl
+@@ -31,7 +31,6 @@ sysbus:
+         Tag <0x40010000 0x400> "timers1"
+         Tag <0x40010400 0x400> "timers8"
+         Tag <0x40011400 0x400> "usart6"
+-        Tag <0x40012000 0x400> "adc1 / adc2 / adc3"
+         Tag <0x40012c00 0x400> "sdmmc1"
+         Tag <0x40013000 0x400> "spi1"
+         Tag <0x40013400 0x400> "spi4"
+@@ -46,8 +45,8 @@ sysbus:
+         Tag <0x50060800 0x400> "rng"
+         Tag <0xa0000000 0x400> "fmc"
+         Tag <0x40016800 0x200> "ltdc"
+-        Tag <0x40015804 0x20> "sai1_a"
+-        Tag <0x40015824 0x20> "sai1_b"
++        Tag <0x40012100 0x50> "adc2"
++        Tag <0x40012200 0x50> "adc3"
+         Tag <0xe000e010 0x10> "systick"
+ 
+ pwr: Python.PythonPeripheral @ sysbus 0x40007000
+@@ -55,9 +54,17 @@ pwr: Python.PythonPeripheral @ sysbus 0x40007000
+     initable: true
+     filename: "scripts/pydev/flipflop.py"
+ 
++timers2: Timers.STM32_Timer @ sysbus 0x40000000
++    frequency: 10000000
++    initialLimit: 0xffffffff
++    ->nvic0@28
++
+ usart1: UART.STM32_UART @ sysbus <0x40011000, +0x400>
+     ->nvic0@37
+ 
++usart2: UART.STM32_UART @ sysbus <0x40004400, +0x400>
++    ->nvic0@38
++
+ gpioa: GPIOPort.STM32_GPIOPort @ sysbus <0x40020000, +0x400>
+ 
+ gpiob: GPIOPort.STM32_GPIOPort @ sysbus <0x40020400, +0x400>
+@@ -129,11 +136,14 @@ i2c3: I2C.STM32F4_I2C @ sysbus 0x40005c00
+ rtc: Timers.STM32F4_RTC @ sysbus 0x40002800
+     AlarmIRQ->nvic0@41
+ 
++rcc: Miscellaneous.STM32F4_RCC @ sysbus 0x40023800
++    rtcPeripheral: rtc
++
+ spi5: SPI.STM32SPI @ sysbus 0x40015000
+     IRQ->nvic0@85
+ 
+-rcc: Miscellaneous.STM32F4_RCC @ sysbus 0x40023800
+-    rtcPeripheral: rtc
++adc1: Analog.STM32_ADC @ sysbus 0x40012000
++    IRQ->nvic0@18
+ 
+ // cortex-m overlay
+ 
 diff --git a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
 new file mode 100644
 index 00000000000..78e2cf1b5be
@@ -159,19 +217,6 @@ index 00000000000..78e2cf1b5be
 +sysbus:
 +    init add:
 +        ApplySVD @https://dl.antmicro.com/projects/renode/svd/STM32F40x.svd.gz
-diff --git a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
-index e7dc1e0c9ac..56e425a6e47 100644
---- a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
-+++ b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
-@@ -2,7 +2,7 @@ $name?="STM32F4_Discovery"
- 
- using sysbus
- mach create $name
--machine LoadPlatformDescription @https://zephyr-dashboard.renode.io/zephyr_sim/54b826336bae437f851fcba332481e24a7e1532d/0e512aebf21a8c51bda51fa67354277811f10a40/stm32f429i_disc1/hello_world/hello_world.repl
-+machine LoadPlatformDescription $ORIGIN/stm32f4_discovery.repl
- 
- showAnalyzer sysbus.usart1
- 
 -- 
 2.47.3
 

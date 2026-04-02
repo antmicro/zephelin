@@ -1,7 +1,7 @@
-From 78026101e5771ef931aedef342ef81ddbba2e0b5 Mon Sep 17 00:00:00 2001
+From c95583a3e3192f0e9b582545aafa29b4289ca889 Mon Sep 17 00:00:00 2001
 From: Anas Nashif <anas.nashif@intel.com>
 Date: Tue, 2 Dec 2025 09:53:51 -0500
-Subject: [PATCH 15/37] tracing: move event ids from uint8_t to uint16_t
+Subject: [PATCH 14/36] tracing: move event ids from uint8_t to uint16_t
 
 We are hitting the limit of 256 events possible with event id right now
 defined as uint8_t.

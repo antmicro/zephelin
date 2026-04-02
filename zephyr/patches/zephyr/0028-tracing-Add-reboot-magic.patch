@@ -1,7 +1,7 @@
-From d7cba81ffaf383bfffa755351f24e068470c2681 Mon Sep 17 00:00:00 2001
+From a8957404027c9bfbafe7cab81266a390b4fe3a36 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Tue, 10 Feb 2026 17:02:38 +0100
-Subject: [PATCH 29/37] tracing: Add reboot magic
+Subject: [PATCH 28/36] tracing: Add reboot magic
 
 This commit adds an event triggered immediately after initialization of
 tracing subsystem to detect when Zephyr is reinitialized after reboot.

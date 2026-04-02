@@ -1,7 +1,7 @@
-From 34694e5b805d336d57d78df9ab55c310458aaec2 Mon Sep 17 00:00:00 2001
+From 4c67b170e15b0cbebcd8aba016c06c52c24d415b Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 12 Sep 2025 15:29:42 +0200
-Subject: [PATCH 13/37] subsys: tracing: ctf: use packets
+Subject: [PATCH 12/36] subsys: tracing: ctf: use packets
 
 Enables usage of multiple CTF streams.
 

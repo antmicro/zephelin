@@ -1,7 +1,7 @@
-From 12268575f419b97bdd8bb3c4ce856e2e9e608e6e Mon Sep 17 00:00:00 2001
+From 629a892da8f090962d9b9163f170a42a03982b9b Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 31 Oct 2025 19:02:27 +0100
-Subject: [PATCH 19/37] scripts: instrumentation: zaru: use full thread ID
+Subject: [PATCH 18/36] scripts: instrumentation: zaru: use full thread ID
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---

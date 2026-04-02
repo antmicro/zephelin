@@ -1,7 +1,7 @@
-From 0e3c538e89f8ec9aee42136345c49e9949723646 Mon Sep 17 00:00:00 2001
+From 8a9c8882c6125ad0db51b3d49e2cbe4f3551746e Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
 Date: Tue, 3 Mar 2026 16:31:53 +0100
-Subject: [PATCH 23/37] boards: Add timer for stm32f429i_disc1
+Subject: [PATCH 22/36] boards: Add timer for stm32f429i_disc1
 
 Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
 ---

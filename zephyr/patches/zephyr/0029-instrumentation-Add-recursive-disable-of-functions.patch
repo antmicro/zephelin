@@ -1,7 +1,7 @@
-From 9ea7557a2fd1cfcd7239b792841329856e0d74a2 Mon Sep 17 00:00:00 2001
+From 086966ad8e3384e44f261ba2afa06d00b4f1ad9c Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 13 Feb 2026 16:47:24 +0100
-Subject: [PATCH 30/37] instrumentation: Add recursive disable of functions
+Subject: [PATCH 29/36] instrumentation: Add recursive disable of functions
 
 Added support for recursively disabling certain functions from emitting
 instrumentation events.

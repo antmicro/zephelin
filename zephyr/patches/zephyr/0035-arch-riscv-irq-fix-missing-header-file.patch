@@ -1,7 +1,7 @@
-From 404494f3e05dc7be0575f65ce64ac4e8aeaea29e Mon Sep 17 00:00:00 2001
+From c9adbd7089baa25c4b3d3dfe182c4de61c8188be Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Thu, 19 Mar 2026 19:27:55 +0100
-Subject: [PATCH 36/37] arch: riscv: irq: fix missing header file
+Subject: [PATCH 35/36] arch: riscv: irq: fix missing header file
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---

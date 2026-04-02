@@ -1,7 +1,7 @@
-From 42588c4b5dc4e0238859e53f82bda4f30a8b433d Mon Sep 17 00:00:00 2001
+From 2fa499701443ff454927333d466a1363d7a89b31 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Thu, 5 Mar 2026 12:27:50 +0100
-Subject: [PATCH 31/37] boards: add support for uart_ctf
+Subject: [PATCH 30/36] boards: add support for uart_ctf
 
 Added support for dedicated CTF UART
 
@@ -39,7 +39,7 @@ index 9825469be14..cd9eff70208 100644
 +    uart_ctf: sysbus.uart2
      resc: boards/adi/max78002evkit/support/max78002.resc
 diff --git a/boards/adi/max78002evkit/support/max78002.resc b/boards/adi/max78002evkit/support/max78002.resc
-index aca205d292d..8e28242ea2a 100644
+index afd9237687d..6454f32da3f 100644
 --- a/boards/adi/max78002evkit/support/max78002.resc
 +++ b/boards/adi/max78002evkit/support/max78002.resc
 @@ -8,6 +8,8 @@ machine LoadPlatformDescriptionFromString

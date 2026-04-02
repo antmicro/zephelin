@@ -1,7 +1,7 @@
-From 7b894b660ab6b46e132d557c481eaba928665bfe Mon Sep 17 00:00:00 2001
+From 83e4b52d022d564fa7a7e7b5b493e824b5121824 Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
 Date: Tue, 31 Mar 2026 09:54:08 +0200
-Subject: [PATCH 37/37] scripts: ci: Add sample specific kconfig option to
+Subject: [PATCH 36/36] scripts: ci: Add sample specific kconfig option to
  ignore list
 
 ---
