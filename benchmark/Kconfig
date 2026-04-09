@@ -1,0 +1,30 @@
+# Copyright (c) 2026 Analog Devices, Inc.
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config ZPL_BENCHMARK_ITERS
+	int "Benchmark iterations"
+	default 10
+
+config ZPL_BENCHMARK_MAGIC
+	string "Benchmark magic sent before every result"
+	default "BENCHMARK RESULT"
+
+choice
+	prompt "Zephelin benchmark to run"
+	default ZPL_BENCHMARK_RUN_DHRYSTONE
+
+config ZPL_BENCHMARK_RUN_DHRYSTONE
+	bool "Dhrystone Zephelin benchmark"
+
+config ZPL_BENCHMARK_RUN_BASIC
+	bool "Basic Zephelin benchmark (a very inefficient dot product implementaton)"
+
+config ZPL_BENCHMARK_RUN_THREADS
+	bool "Threads-based Zephelin benchmark"
+
+
+endchoice
+
+source "Kconfig.zephyr"

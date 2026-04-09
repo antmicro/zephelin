@@ -1,0 +1,10 @@
+/ {
+	chosen {
+		zephyr,tracing-uart = &usart6;
+	};
+};
+
+&usart6 {
+	status = "okay";
+	current-speed = <115200>;
+};

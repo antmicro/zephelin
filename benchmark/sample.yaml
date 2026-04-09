@@ -1,0 +1,46 @@
+# Copyright (c) 2026 Analog Devices, Inc.
+# Copyright (c) 2026 Antmicro <www.antmicro.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+sample:
+  description: Benchmark sample
+  name: benchmark sample
+common:
+  tags: benchmark
+tests:
+  bench.dhry:
+    harness: robot
+    harness_config:
+      robot_testsuite: bench.robot
+  bench.dhry.instr:
+    harness: robot
+    harness_config:
+      robot_testsuite: bench.robot
+    extra_args: EXTRA_CONF_FILE=instr_tracing.conf
+  bench.basic:
+    harness: robot
+    harness_config:
+      robot_testsuite: bench.robot
+    extra_configs:
+      - CONFIG_ZPL_BENCHMARK_RUN_BASIC=y
+  bench.basic.instr:
+    harness: robot
+    harness_config:
+      robot_testsuite: bench.robot
+    extra_args: EXTRA_CONF_FILE=instr_tracing.conf
+    extra_configs:
+      - CONFIG_ZPL_BENCHMARK_RUN_BASIC=y
+  bench.threads:
+    harness: robot
+    harness_config:
+      robot_testsuite: bench.robot
+    extra_configs:
+      - CONFIG_ZPL_BENCHMARK_RUN_THREADS=y
+  bench.threads.tracing:
+    harness: robot
+    harness_config:
+      robot_testsuite: bench.robot
+    extra_args: EXTRA_CONF_FILE=tracing.conf
+    extra_configs:
+      - CONFIG_ZPL_BENCHMARK_RUN_THREADS=y
