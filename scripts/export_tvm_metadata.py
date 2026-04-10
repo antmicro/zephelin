@@ -40,7 +40,14 @@ def sample_tflite_model() -> bytes:
     outputs = keras.layers.Dense(4, activation="softmax")(x)
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile()
-    return tf.lite.TFLiteConverter.from_keras_model(model).convert()
+
+    @tf.function
+    def serving_fn(x):
+        return model(x, training=False)
+
+    concrete_fn = serving_fn.get_concrete_function(tf.TensorSpec((1, 128, 3, 1), tf.float32))
+
+    return tf.lite.TFLiteConverter.from_concrete_functions([concrete_fn], model).convert()
 
 
 def sample_tvm_compile(
