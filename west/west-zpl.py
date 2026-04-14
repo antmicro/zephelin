@@ -13,6 +13,7 @@ import time
 from argparse import ArgumentParser
 from pathlib import Path
 from textwrap import dedent
+from typing import Optional
 
 import serial
 import usb.core
@@ -305,6 +306,9 @@ class ZplUartCapture(WestCommand):
         parser.add_argument("serial_baudrate", help="Seral baudrate")
         parser.add_argument("output_path", help="Capture output path", type=Path)
         parser.add_argument(
+            "--send-to-remote", help="Stream captured data to a remote socket", default=None
+        )
+        parser.add_argument(
             "--send-enable",
             action="store_true",
             help=(
@@ -336,6 +340,10 @@ class ZplUartCapture(WestCommand):
             socket_port=args.socket_port,
         )
 
+        remote_socket = None
+        if args.send_to_remote:
+            remote_socket = _open_socket(self, args.send_to_remote)
+
         trace_idx = 0
         buff = b""
         progress_bar = tqdm(unit="B", unit_scale=True)
@@ -351,6 +359,14 @@ class ZplUartCapture(WestCommand):
             while True:
                 data = serw.read_all()
                 progress_bar.update(len(data))
+
+                if remote_socket:
+                    try:
+                        remote_socket.sendall(data)
+                    except Exception as e:
+                        self.wrn(f"Failed to send data: {e}")
+                        remote_socket.close()
+                        remote_socket = None
 
                 if args.send_enable:
                     f.write(data)
@@ -518,3 +534,22 @@ class ZplDebugConfig(WestCommand):
 
         if exit_code != 0:
             self.err(output)
+
+
+def _open_socket(command: WestCommand, remote_target: str) -> Optional[socket.socket]:
+    """
+    Attempts to connect to a socket.
+    """
+    try:
+        host, port = remote_target.split(":")
+        command.inf(f"Connecting to remote socket {host}:{port}...")
+
+        port = int(port)
+        remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        remote_socket.connect((host, port))
+
+        command.inf("Connected to remote socket successfully.")
+        return remote_socket
+    except Exception as e:
+        command.wrn(f"Failed to connect to remote socket {e}")
+        return None
