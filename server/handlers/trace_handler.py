@@ -11,10 +11,11 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 from config import TraceConfig
 from ctf2tef import ctf_to_tef, prepare_dir
+from endpoints import Endpoints
 from extract_tvm_model_data import tvm_recalculate_model_numbers
 from handlers.base import BaseHandler
 from prepare_trace import (
@@ -40,6 +41,8 @@ class TraceHandler(BaseHandler):
     """
     Handler responsible for managing the lifecycle of trace data collection.
     """
+
+    endpoints = Endpoints()
 
     def __init__(
         self,
@@ -93,13 +96,14 @@ class TraceHandler(BaseHandler):
 
         self.continuous_streaming = False
 
-    async def connect(self) -> dict[str, str]:
+    @endpoints.register_method("trace.connnect")
+    async def connect(self) -> dict[Literal["status", "message"], str]:
         """
         Starts the TCP server to listen for incoming trace streams from capture scripts.
 
         Returns
         -------
-        dict[str, str]
+        dict[Literal["status", "message"], str]
             Status message.
 
         Raises
@@ -122,13 +126,14 @@ class TraceHandler(BaseHandler):
             "message": f"Listening for traces on {self.tcp_host}:{self.tcp_port}",
         }
 
-    async def disconnect(self) -> dict[str, str]:
+    @endpoints.register_method("trace.disconnect")
+    async def disconnect(self) -> dict[Literal["status", "message"], str]:
         """
         Terminates the background read task and tears down transportation backend.
 
         Returns
         -------
-        dict[str, str]
+        dict[Literal["status", "message"], str]
             Status message.
         """
         logger.info("Disconnecting")
@@ -155,39 +160,42 @@ class TraceHandler(BaseHandler):
 
         return {"status": "success", "message": "Trace stopping initiated."}
 
-    async def stream_start(self) -> dict[str, str]:
+    @endpoints.register_method("trace.stream_start")
+    async def stream_start(self) -> dict[Literal["status"], str]:
         """
         Enables continuous trace streaming to the frontend.
 
         Returns
         -------
-        dict[str, str]
+        dict[Literal["status"], str]
             Status message.
         """
         self.continuous_streaming = True
         logger.debug("Continous streaming enabled.")
         return {"status": "success"}
 
-    async def stream_stop(self) -> dict[str, str]:
+    @endpoints.register_method("trace.stream_stop")
+    async def stream_stop(self) -> dict[Literal["status"], str]:
         """
         Disables continuous trace streaming to the frontend.
 
         Returns
         -------
-        dict[str, str]
+        dict[Literal["status"], str]
             Status message.
         """
         self.continuous_streaming = False
         logger.debug("Continous streaming disabled.")
         return {"status": "success"}
 
-    async def metadata(self) -> dict[str, Union[str, dict]]:
+    @endpoints.register_method("trace.metadata")
+    async def metadata(self) -> dict[Literal["status", "message", "data"], Union[str, dict]]:
         """
         Provides model metadata and memory symbols for the trace.
 
         Returns
         -------
-        dict[str, Union[str, dict]]
+        dict[Literal["status", "message", "data"], Union[str, dict]]
             Message with metadata events or error.
         """
         logger.info("Collecting trace metadata")
@@ -264,17 +272,19 @@ class TraceHandler(BaseHandler):
             logger.error(f"Metadata collection error: {e}")
             return {"status": "error", "message": f"Failed to collect metadata: {e}"}
 
+    @endpoints.register_method("trace.reset")
     async def reset(self):
         """Resets the trace buffer."""
         raise NotImplementedError
 
-    async def collect(self) -> dict[str, Union[str, dict]]:
+    @endpoints.register_method("trace.collect")
+    async def collect(self) -> dict[Literal["status", "message", "data"], Union[str, dict]]:
         """
         Provides the increment of the trace buffer not yet sent.
 
         Returns
         -------
-        dict[str, Union[str, dict]]
+        dict[Literal["status", "message", "data"], Union[str, dict]]
             Message with all events present in the buffer or error.
         """
         logger.info("Collecting trace increment")

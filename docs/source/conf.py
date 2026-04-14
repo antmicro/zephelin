@@ -17,8 +17,9 @@ Updated documentation of the configuration options is available at
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
 
+import os
+import sys
 from datetime import datetime
-from os import environ
 from pathlib import Path
 
 from antmicro_sphinx_utils.defaults import antmicro_html, antmicro_latex
@@ -28,10 +29,24 @@ from antmicro_sphinx_utils.defaults import (
     myst_fence_as_directive as default_myst_fence_as_directive,
 )
 
+sys.path.insert(0, os.path.abspath("../../server"))
+sys.path.insert(0, os.path.abspath("../../scripts"))
+
+from handlers.trace_handler import TraceHandler
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
+
+endpoints = "\n* " + "\n* ".join([
+    f"`{endpoint}`\n"
+    "  ```{eval-rst}\n"
+    "  .. autofunction:: "
+    f"handlers.trace_handler.TraceHandler.{func.__name__}\n"
+    "  ```"
+    for endpoint, func in TraceHandler.endpoints.items()
+])
 
 # -- General configuration -----------------------------------------------------
 
@@ -56,12 +71,14 @@ extensions = default_extensions + [
     "sphinx.ext.extlinks",
     "sphinx_tabs.tabs",
     "pipeline_manager.sphinxext.draw_graph",
+    "sphinx.ext.autosummary",
 ]
 myst_enable_extensions = default_myst_enable_extensions + ["attrs_inline"]
 myst_fence_as_directive = default_myst_fence_as_directive
 
 myst_substitutions = {
     "project": project,
+    "endpoints": endpoints,
     # Links to TEF documentation
     "TEF_Metadata": "[Metadata](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?tab=t.0#heading=h.xqopa5m0e28f)",
     "TEF_Duration": "[Duration](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit?tab=t.0#heading=h.nso4gcezn7n1)",
@@ -90,7 +107,7 @@ html_show_sphinx = False
 
 (html_logo, html_theme_options, html_context) = antmicro_html(
     pdf_url=f"{basic_filename}.pdf",
-    gh_slug=environ.get("GITHUB_REPOSITORY", None),
+    gh_slug=os.environ.get("GITHUB_REPOSITORY", None),
 )
 
 html_title = project

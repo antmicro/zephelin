@@ -4,3 +4,4 @@ tqdm
 requests
 pipeline_manager[to-image] @ https://github.com/antmicro/kenning-pipeline-manager/archive/main.zip
 Sphinx<9
+-r ../requirements.txt

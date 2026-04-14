@@ -13,5 +13,6 @@ This documentation describes the following aspects of Zephelin and the associate
 * {doc}`ctf_to_tef` - describes how traces are converted and processed
 * {doc}`new_runtime` - depicts how to track a new runtime
 * {doc}`visual_interface` - describes the tool for trace visualization and provides sample applications for various tracing features
+* {doc}`server_endpoints` - lists the API endpoints supported by the real-time tracing server.
 * {doc}`examples` - aggregates and describes various example applications present in the project
 * {doc}`development` - summarizes and links resources regarding development of Zephelin
