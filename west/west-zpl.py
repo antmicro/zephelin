@@ -421,6 +421,9 @@ class ZplUsbCapture(WestCommand):
         parser.add_argument("product_id", help="Product ID")
         parser.add_argument("output_path", help="Capture output path")
         parser.add_argument(
+            "--send-to-remote", help="Stream captured data to a remote socket", default=None
+        )
+        parser.add_argument(
             "-t", "--timeout", help="Timeout of the USB capture in seconds", type=int, default=2
         )
         parser.add_argument(
@@ -469,17 +472,32 @@ class ZplUsbCapture(WestCommand):
         write_ep.write("enable")
         progress_bar = tqdm(unit="B", unit_scale=True)
 
+        remote_socket = None
+        if args.send_to_remote:
+            remote_socket = _open_socket(self, args.send_to_remote)
+
         with open(args.output_path, "wb") as f:
             buf = usb.util.create_buffer(10 * 1024)
             while True:
                 try:
                     n_bytes = read_ep.read(buf, args.timeout * 1000)
-                    f.write(buf[:n_bytes])
+                    chunk = buf[:n_bytes]
+                    if remote_socket:
+                        try:
+                            remote_socket.sendall(n_bytes)
+                        except Exception as e:
+                            self.wrn(f"Failed to send data: {e}")
+                            remote_socket.close()
+                            remote_socket = None
+
+                    f.write(chunk)
                     progress_bar.update(n_bytes)
                 except usb.core.USBTimeoutError:
                     self.die("USB operation timeout!")
                 except KeyboardInterrupt:
                     break
+            if remote_socket:
+                remote_socket.close()
 
 
 class ZplDebugConfig(WestCommand):
