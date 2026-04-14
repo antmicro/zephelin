@@ -55,6 +55,9 @@ class ZplGdbCapture(WestCommand):
         )
         parser.add_argument("--openocd", help="Path to custom OpenOCD", type=Path, default=None)
         parser.add_argument(
+            "--send-to-remote", help="Stream captured data to a remote socket", default=None
+        )
+        parser.add_argument(
             "--capture-once", help="Dump data from buffer only once and exit", action="store_true"
         )
         stop_condition_group = parser.add_mutually_exclusive_group()
@@ -138,12 +141,25 @@ class ZplGdbCapture(WestCommand):
             stats = output_file.stat()
             original_mtime = stats.st_mtime
 
+        remote_socket = None
+        if args.send_to_remote:
+            remote_socket = _open_socket(self, args.send_to_remote)
+
         self.inf("Saving traces...")
         proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if args.capture_once:
             # Capture data and wait for GDB to exit
             (output, _) = proc_gdb.communicate()
             exit_code = proc_gdb.wait()
+
+            if exit_code == 0 and remote_socket and output_file.exists():
+                try:
+                    with open(output_file, "rb") as f:
+                        remote_socket.sendall(f.read())
+                except Exception as e:
+                    self.wrn(f"Failed to send data: {e}")
+                finally:
+                    remote_socket.close()
         else:
             # Monitor the output file and report its size
             output, stats = None, None
@@ -155,6 +171,17 @@ class ZplGdbCapture(WestCommand):
                         stats = output_file.stat()
                         size_diff = stats.st_size - output_last_size
                         if stats.st_mtime > original_mtime and size_diff > 0:
+                            if remote_socket:
+                                try:
+                                    with open(output_file, "rb") as f:
+                                        f.seek(output_last_size)
+                                        chunk = f.read(size_diff)
+                                        remote_socket.sendall(chunk)
+                                except Exception as e:
+                                    self.wrn(f"Failed to send data {e}")
+                                    remote_socket.close()
+                                    remote_socket = None
+
                             progress_bar.update(size_diff)
                             output_last_size = stats.st_size
                     time.sleep(1)
@@ -176,10 +203,23 @@ class ZplGdbCapture(WestCommand):
                 proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 proc_gdb.communicate()
                 proc_gdb.wait()
+
+                if remote_socket and output_file.exists():
+                    stats = output_file.stat()
+                    size_diff = stats.st_size - output_last_size
+                    if size_diff > 0:
+                        try:
+                            with open(output_file, "rb") as f:
+                                f.seek(output_last_size)
+                                remote_socket.sendall(f.read(size_diff))
+                        except Exception:
+                            pass
                 # If mtime is newer, then part of a trace was captured
                 exit_code = int(not (stats and stats.st_mtime > original_mtime))
             finally:
                 progress_bar.close()
+                if remote_socket:
+                    remote_socket.close()
 
         if exit_code != 0:
             if output:
@@ -568,6 +608,6 @@ def _open_socket(command: WestCommand, remote_target: str) -> Optional[socket.so
 
         command.inf("Connected to remote socket successfully.")
         return remote_socket
+
     except Exception as e:
-        command.wrn(f"Failed to connect to remote socket {e}")
-        return None
+        command.die(f"Failed to connect to remote socket {e}")
