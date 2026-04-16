@@ -1,4 +1,4 @@
-From a9e9cad29d9692b1af5775fe81c686db5391190b Mon Sep 17 00:00:00 2001
+From 240457fe082ae65750e6c75dc2c47f6b4c6b6960 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Wed, 4 Jun 2025 15:26:13 +0200
 Subject: [PATCH 1/5] pass subgraph and op idx to profiler
@@ -90,5 +90,5 @@ index f839a74a..594f0c00 100644
    // Marks the end of an event associated with event_handle.
    virtual void EndEvent(uint32_t event_handle) = 0;
 -- 
-2.47.3
+2.47.1
 

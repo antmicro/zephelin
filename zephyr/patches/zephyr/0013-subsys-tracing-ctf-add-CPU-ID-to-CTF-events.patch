@@ -1,7 +1,7 @@
-From 01ed908fa7dd58c8e28b2d8988a703105276b93c Mon Sep 17 00:00:00 2001
+From 41090c7864e99c0693b76c2d118663d346d6acd7 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Thu, 23 Oct 2025 15:00:24 +0200
-Subject: [PATCH 13/36] subsys: tracing: ctf: add CPU ID to CTF events
+Subject: [PATCH 13/38] subsys: tracing: ctf: add CPU ID to CTF events
 
 Signed-off-by: Maciej Torhan <mtorhan@antmicro.com>
 ---
@@ -1961,5 +1961,5 @@ index c716a3bb70c..4a88326da35 100644
  		uint32_t events;
  		int32_t ret;
 -- 
-2.47.3
+2.47.1
 

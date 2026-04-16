@@ -1,4 +1,4 @@
-From 5bf9eb4b15814b82d4e6995cb165ebc9255b63f7 Mon Sep 17 00:00:00 2001
+From f36a2dc61bb0f5d005ba3725422607a7a58e0d34 Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Thu, 11 Sep 2025 17:33:14 +0200
 Subject: [PATCH 4/8] graph_executor: add profiler
@@ -207,5 +207,5 @@ index d4429308b..cfcfb57a4 100644
  
  typedef DLTensor* DLTensorPtr;
 -- 
-2.47.3
+2.47.1
 

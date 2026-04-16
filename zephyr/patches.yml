@@ -5,304 +5,310 @@ patches:
   email: mtorhan@antmicro.com
   module: dlpack
   path: dlpack/0001-enable-dlpack.patch
-  sha256sum: 0d2d8b6f07aec3a64f3f0c15834e3a0c2035d69aee0c423bc9f724372891eda4
+  sha256sum: 8dd4a365c979f0f62209fb4ef6e405a9ad8556e6b07bd91118d4e4d10527f557
 - author: Maciej Torhan
   date: '2025-11-03'
   email: mtorhan@antmicro.com
   module: tvm
   path: tvm/0001-update-crt_config.patch
-  sha256sum: ba70eab3e39ffaa55a88b2c654ad4871e2c01b7b7833502e0e0b5ab9eb6db800
+  sha256sum: d643b445ad7b6a88249bec7c04fd0405c81c337b2e2da4ef6376983638984e4c
 - author: Maciej Torhan
   date: '2025-06-13'
   email: mtorhan@antmicro.com
   module: tvm
   path: tvm/0002-graph_executor-ignore-nop.patch
-  sha256sum: 7ff9ec5ede3b6d4e6a53b54219f6eac3598ce9c25dedfbbe64a8de25e57723b9
+  sha256sum: 23c5fc432cc115efe3ffd9ab741c53787da175aaca06525fb552797a97bc0554
 - author: Maciej Torhan
   date: '2025-06-13'
   email: mtorhan@antmicro.com
   module: tvm
   path: tvm/0003-graph_executor-fix-memory-leaks.patch
-  sha256sum: d8bd239233b89dd5ddbc6ff96eb0c1d6d5c1d8ce49e97c1f46c78db60d71a528
+  sha256sum: 06a6ad2ced81b96d4ac0404a74b56088f0d1962eda637beb2cf80af6786c5b0b
 - author: Andrii Chmutov
   date: '2025-09-11'
   email: achmutov@antmicro.com
   module: tvm
   path: tvm/0004-graph_executor-add-profiler.patch
-  sha256sum: 49cad0ab13334409b2e439d926fc71ece478d200fd6f56bb795a82f105f3bee0
+  sha256sum: 1c251232080e0b9ce56b13ae5578bfa8c2208f3ade34b8d2b8aabb2f66460fa8
 - author: Maciej Torhan
   date: '2025-06-13'
   email: mtorhan@antmicro.com
   module: tvm
   path: tvm/0005-configurable-packed-function-size.patch
-  sha256sum: d5c96f1f78ba837b0a31af15bd269113702bce88af758498bd86ca47a025efb7
+  sha256sum: 043578d1ff4acdec1f589d6255ff2e51b693b2f304c493589a8d532c3d5e4a5a
 - author: Eryk Szpotanski
   date: '2025-06-26'
   email: eszpotanski@antmicro.com
   module: tvm
   path: tvm/0006-graph_executor-fix-nop-duplicating-operations.patch
-  sha256sum: 87ee8a43912db1d8b7a5e8e7a9bdba2cf9bb2587e3ba8b7fc6acb188daab975d
+  sha256sum: b1fd788a02c30a4ddd809b4d8b4d3f732f1994a996b582f824d3cc8d42459bb8
 - author: Eryk Szpotanski
   date: '2025-10-13'
   email: eszpotanski@antmicro.com
   module: tvm
   path: tvm/0007-graph_executor-specify-model-id-for-zpl_inference.patch
-  sha256sum: 7b2b2e5fc88d4f073a7ed5c12c84614ace3399933595661165dbf6ae8f1eb799
+  sha256sum: 6cef862955ef1b7277238adbd163ff8018d097dbe1bd3a99ae32e3b89015d203
 - author: Eryk Szpotanski
   date: '2025-10-24'
   email: eszpotanski@antmicro.com
   module: tvm
   path: tvm/0008-graph_executor-emit-zpl_inference_exit-before-dumpin.patch
-  sha256sum: 5986ebb5618aa8f99e71ef3fae7da254138352093f192fef0ddbbcf1490dea96
+  sha256sum: 1c6712e430fcc4021e45ca107edb9f0567acc04f8d3ff6d7d417c225d1ef03b5
 - author: Maciej Sobkowski
   date: '2025-08-01'
   email: msobkowski@antmicro.com
   module: zephyr
   path: zephyr/0001-boards-adi-max78002evkit-add-renode-renode-robot-sup.patch
-  sha256sum: 80a630a92a25b4e84e298339205e1e051291fd8778fdef6b718d4c3fdc4b4e97
+  sha256sum: 304b43755b9cbbbc66df81bc3fd5bb34fd8029f12f9069ace283dd1f958a84a6
 - author: Maciej Sobkowski
   date: '2025-08-01'
   email: msobkowski@antmicro.com
   module: zephyr
   path: zephyr/0002-boards-adi-max32690fthr-add-renode-renode-robot-supp.patch
-  sha256sum: 6e45c6b924573d011223c6e48ad4dda7ab002374c8405f52d7a465b26438e3db
+  sha256sum: 7295b900528c426a8fd53f71046d1df72670f304674298ed35fa38e7013df049
 - author: Maciej Sobkowski
   date: '2025-06-06'
   email: msobkowski@antmicro.com
   module: zephyr
   path: zephyr/0003-boards-st-stm32f429i_disc1-renode-renode-robot-suppo.patch
-  sha256sum: 62a0fed614f7762b7224a2cccedd10bc48e87b4b3a4e154c3a93c3298623cde4
+  sha256sum: dc25933cc884374d71145391ce5b906c4ea4d48a09b906e816cbc776dda25e24
 - author: Filip Kokosinski
   date: '2025-10-06'
   email: fkokosinski@antmicro.com
   module: zephyr
   path: zephyr/0004-boards-st-stm32f746g_disco-renode-renode-robot-suppo.patch
-  sha256sum: 1a6c9c745db46db12c3b63c6f343136f7650120090ef0bffaa063e5ec20ed101
+  sha256sum: 292fe00105c2572c9cdfb51e4eeebd5456e72b8ff44660f367c079d2a30885f4
 - author: Maciej Torhan
   date: '2025-10-23'
   email: mtorhan@antmicro.com
   module: zephyr
   path: zephyr/0005-boards-microchip-mpfs_icicle-add-renode-renode-robot.patch
-  sha256sum: 5edeb877f9e00a063fd25563efbbaeebc9aa502a02bc3cc9207c4f62bcf25a0d
+  sha256sum: f14e7ac426204847fb077dc1954f3f5b21c2927ffd98c915d1630989cd21d258
 - author: Maciej Torhan
   date: '2025-06-27'
   email: mtorhan@antmicro.com
   module: zephyr
   path: zephyr/0006-boards-st-stm32f429i_disc1-add-adc1.patch
-  sha256sum: a868f470c771599d8570d4338189cc10d2072be56b77ca237477f8243d3544a1
+  sha256sum: b9f04e6ee6993a299992d02edfbb6bdac4b0a9221a0a98747e9e8f8641a402c7
 - author: Maciej Sobkowski
   date: '2025-06-30'
   email: msobkowski@antmicro.com
   module: zephyr
   path: zephyr/0007-modules-enable-tvm.patch
-  sha256sum: 1e16af3eecf3c666ffc9aebf9c5997fddb418dde1100a06f361039a0a49d4aba
+  sha256sum: 7cf18be145ef3c4ef04de6b9b9819f7e73fd6c21bc828d90d637fe69e19d957a
 - author: Maciej Sobkowski
   date: '2025-06-30'
   email: msobkowski@antmicro.com
   module: zephyr
   path: zephyr/0008-modules-enable-dlpack.patch
-  sha256sum: 9a6c6e0abc70f613f57b1b1b16e26dabf1b4cddd8fdd5fe6d70874d45e42ac94
+  sha256sum: fd586a6fa1bcf75d597d210301f2e1101f4310665bf2b21e6679a7118ec7a3c1
 - author: Andrii Chmutov
   date: '2025-10-17'
   email: achmutov@antmicro.com
   module: zephyr
   path: zephyr/0009-check_compliance-exclude-kconfig-symbols.patch
-  sha256sum: 3eb39976469e88f83a53bca0173048b0f4f9352266328c1757dee709dd0004e7
+  sha256sum: 4818ab60d97fc14bfa0c74496af6c1ef28db19f060f922864f9806e87b87575b
 - author: Eryk Szpotanski
   date: '2025-09-26'
   email: eszpotanski@antmicro.com
   module: zephyr
   path: zephyr/0010-boards-openocd-adi-max32-remove-unsupported-args.patch
-  sha256sum: 5c937af3d9e6b3bad4a69b49197d03842ef9c83afcbb1072027e6bc27fc3a3e3
+  sha256sum: 5d9453d58640163104396ab955df732905b21ffd48a0db239a52c72c8d64c1fd
 - author: Mikolaj Klikowicz
   date: '2025-09-12'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0011-tracing-ctf-use-64-bit-timestamps.patch
-  sha256sum: 2fd2009db1da90db2b75a15dbf1134af8f21939427f729ac1db30d26e38cad04
+  sha256sum: 0ea3a91d36cca6c4c1a82f44283538270438249e3de834ba921e52067e94a3af
 - author: Mikolaj Klikowicz
   date: '2025-09-12'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0012-subsys-tracing-ctf-use-packets.patch
-  sha256sum: f323a10b3811604e50a797d19b49eb32bae4d50ba27721443b39679846e5a6a0
+  sha256sum: de68a9d1b203cae5a58b1bc87c9ba76737c199c77b610f78d5b6de9f3000e40e
 - author: Maciej Torhan
   date: '2025-10-23'
   email: mtorhan@antmicro.com
   module: zephyr
   path: zephyr/0013-subsys-tracing-ctf-add-CPU-ID-to-CTF-events.patch
-  sha256sum: 65db428b17756035767c8254fecd528d697d68db7bcddcea4238e06708b85c6a
+  sha256sum: 70edbad60b3e707fb039a7e817e77a4d3efc042f6c1892b04f6e87edef7b34a9
 - author: Anas Nashif
   date: '2025-12-02'
   email: anas.nashif@intel.com
   module: zephyr
   path: zephyr/0014-tracing-move-event-ids-from-uint8_t-to-uint16_t.patch
-  sha256sum: b07a7f605db5267430bd3ffd925572d93650bde5e89dbd0059cd9f8e6077992d
+  sha256sum: b4499f0e685ba6dee1b559794665fe8ea849004cfab81ea7ffbe284a044bbf8b
 - author: Andrii Chmutov
   date: '2025-12-31'
   email: achmutov@antmicro.com
   module: zephyr
   path: zephyr/0015-tracing-make-CTF-timestamp-function-configurable.patch
-  sha256sum: 12e7d997a3936a17d31f102440c7c432a54a3c93e8e95997058ef53758f6ad39
+  sha256sum: b1f1bc4512d82596d3524e06968f3ad7c3a5094e70e479c73e6b3d294cc5f657
 - author: Maciej Sobkowski
   date: '2025-07-22'
   email: msobkowski@antmicro.com
   module: zephyr
   path: zephyr/0016-scripts-instrumentation-zaru-deduplicate-code-rename.patch
-  sha256sum: 5c895de0425d58eff5e1f877115362ce61821d8c1f771226902a7383e2a9e435
+  sha256sum: 426e5b62765c260e5b1efe2c2b3427a67c047c3c4847d861a514b442c2d2f71b
 - author: Andrii Chmutov
   date: '2025-12-17'
   email: achmutov@antmicro.com
   module: zephyr
   path: zephyr/0017-scripts-instrumentation-zaru-use-objdump-from-sdk-fo.patch
-  sha256sum: 840edd236463164fbf6fa91bfdec4f82d89ec5f467ad515ba329d4c9cebd5492
+  sha256sum: 82f5bb8ee4ba15919dedb92cd4ae1d6ef18d5f361cde097942d83095db964fda
 - author: Eryk Szpotanski
   date: '2025-10-31'
   email: eszpotanski@antmicro.com
   module: zephyr
   path: zephyr/0018-scripts-instrumentation-zaru-use-full-thread-ID.patch
-  sha256sum: 20264b7fe7ef357b34b72067f2eec2a51abd8fccb79b9c603203dde3db0560ae
+  sha256sum: 95368e5eaf93e94493996645e94fd3684710106fe81d0b21722391a45b519d5b
 - author: Maciej Sobkowski
   date: '2025-07-08'
   email: msobkowski@antmicro.com
   module: zephyr
   path: zephyr/0019-instrumentation-make-runtime-configuration-of-trigge.patch
-  sha256sum: 3111c2f645b83e07c8b50ec5dc75e63dce3b8a1c8366f761caf55dc643ceb253
+  sha256sum: de224b13f2650986432d274a0b7d39aca65604ca72e18f5df5f6b6a98c42a259
 - author: Eryk Szpotanski
   date: '2025-11-05'
   email: eszpotanski@antmicro.com
   module: zephyr
   path: zephyr/0020-instrumentation-Add-config-to-use-the-same-timer-as-.patch
-  sha256sum: 997d5bb8afc2f23cdfc5a01936465b7bc05c2c8d76816aece0403f5af4cac2be
+  sha256sum: f64b7949f512b4bf895049aaed9715b876e9e7569cfe785b8b4f065c693f0acd
 - author: Eryk Szpotanski
   date: '2025-11-12'
   email: eszpotanski@antmicro.com
   module: zephyr
   path: zephyr/0021-instrumentation-add-option-to-dump-events-when-buffe.patch
-  sha256sum: 961115fb2d9476ef5ab2cc516ca774269806cedf319f4dd2b2ce65a9eff6ffcc
+  sha256sum: f0c9c374500f94d4342dc61f89ff6cec1ad92812f6a7052a8ef82ac5c16256df
 - author: Jedrzej Czykier
   date: '2026-03-03'
   email: jczykier@antmicro.com
   module: zephyr
   path: zephyr/0022-boards-Add-timer-for-stm32f429i_disc1.patch
-  sha256sum: c0b26104ebe49f7eb318f4ccd62ba39e2a4424017c4cab4f1119def7cc710e43
+  sha256sum: ad27019be21c0a1d5dc8d866d6f36f4c9840b32311f249302924e0c938543b27
 - author: Jedrzej Czykier
   date: '2026-03-03'
   email: jczykier@antmicro.com
   module: zephyr
   path: zephyr/0023-boards-add-resc-for-max32650fthr.patch
-  sha256sum: 5685d9616bceda3cb327538904817e5e9d1594e1336e506d69c8b923b4830e6a
+  sha256sum: e16f17be6961fb6e0de349f30b822a906b5f3663d87c4cca8d47d3722728cd1c
 - author: Jedrzej Czykier
   date: '2026-03-17'
   email: jczykier@antmicro.com
   module: zephyr
   path: zephyr/0024-boards-add-sysbuild-domain-export.patch
-  sha256sum: 2d22e0cfab665e11a993fc008fb57209684fa52c2da72be3eb1816f19ad4fd07
+  sha256sum: 4354fdff6410e4072c4286160fe5166f40868a4d72a31f2029ff42af300534b3
 - author: Jedrzej Czykier
   date: '2026-03-17'
   email: jczykier@antmicro.com
   module: zephyr
   path: zephyr/0025-scripts-ci-check_compliance-Add-test-kconfig-option-.patch
-  sha256sum: f42df6b496fa1b3f0ef7f2b90771f17939e23c5266fa7eb1782092515af733ed
+  sha256sum: 418316b185b31a0812ea59bd4ecd43779377c3f411af74c662deb322e6455443
 - author: Mikolaj Klikowicz
   date: '2026-01-16'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0026-instrumentation-Add-tracing-subsystem-transport-back.patch
-  sha256sum: 54c8f4605aaf169bfab0723177f283450f40f48348dc880e94a970c2865d05b4
+  sha256sum: 7c8eb11b1aa68dae23e9cd197e093f887b63dfaf0d24dd0eda33d7390267a7b6
 - author: Mikolaj Klikowicz
   date: '2026-02-10'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0027-scripts-instrumentation-Support-instrumentation-via-.patch
-  sha256sum: 400f1afb5f429558f0201875425534b94951829034401940b0072f62490b1f13
+  sha256sum: b29bbc53f1cbc9832cdaf0045363c84918cd14d958a42b62d391b04a24e09495
 - author: Mikolaj Klikowicz
   date: '2026-02-10'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0028-tracing-Add-reboot-magic.patch
-  sha256sum: 0868c0d778563728f447cda314bed59eb9579cf62a79f4ffae5ab2c4a6146c09
+  sha256sum: 199f219df29b526caf44ac3c3f6cd3bab8d46dd0ad9a77a309b2036b67ac1428
 - author: Mikolaj Klikowicz
   date: '2026-02-13'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0029-instrumentation-Add-recursive-disable-of-functions.patch
-  sha256sum: 710634cf77ca71ebe0226b736ae812dc9c24f6885849756624d9306bb2d42740
+  sha256sum: ea8449df8dfc8e52ce87164ee8c2bcd2591ac83fe27ca98586228bd38991cce0
 - author: Mikolaj Klikowicz
   date: '2026-03-05'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0030-boards-add-support-for-uart_ctf.patch
-  sha256sum: 196cc2357b8626d7b5e0e584c0e2e5f9248a780ee1031d1b21713741c0312b86
+  sha256sum: 305958eeeb525a47124df9c753093b25a36a545117881bc9db8119e0d87c5a14
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
   path: zephyr/0031-drivers-usb-udc-max32-Fix-ISR-context-issues-with-MA.patch
-  sha256sum: 045618ae934586d19a474a3e3a3ccf3868639ee54a153f3061e9c55d87bb07db
+  sha256sum: 0d052f51a0aceb1afb18d92cee80e5a2f999f98b1a562c2e9969d38bd5b65f3d
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
   path: zephyr/0032-drivers-usb-udc-max32-Reduce-spurious-resume-events.patch
-  sha256sum: b7272128c4387d31c7bbe2bc4cbff1fcd860bdee78eebd96c89b491cfe314600
+  sha256sum: 0d504bea76b6bca048e715e1c5c47a5f436e5b99e0f8a23446bf300c24aaca81
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
   path: zephyr/0033-drivers-usb-udc-max32-Minor-function-movements.patch
-  sha256sum: 92f59893558e37a25f6d143de681b1cab4b72532233266f4b7a94d25f98af722
+  sha256sum: afd343817d7d22a739bedf4bfaea6cd8d977c43b5935d5b7ae4deca49cc2c14b
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
   path: zephyr/0034-drivers-usb-udc-max32-Handle-deferred-endpoint-trans.patch
-  sha256sum: d750c2509b1ebbd2a76fdc86e7ed1376389b2a59c67aa5d41d7f306a7f80c476
+  sha256sum: 68d826e82c4e83dda19efdcb66a018422552d3c3adbcb333fade614d5b2d9920
 - author: Eryk Szpotanski
   date: '2026-03-19'
   email: eszpotanski@antmicro.com
   module: zephyr
   path: zephyr/0035-arch-riscv-irq-fix-missing-header-file.patch
-  sha256sum: 3bc7a02c10d5e9d216e85cbe12a91b09128cc69a4760bc1178394ad8f9c2ca9f
+  sha256sum: 0b61ede4dd0f00a981bcfaf0d982851bb6e95aaf846a2d0eea0ca939de9cff98
 - author: Jedrzej Czykier
   date: '2026-03-31'
   email: jczykier@antmicro.com
   module: zephyr
   path: zephyr/0036-scripts-ci-Add-sample-specific-kconfig-option-to-ign.patch
-  sha256sum: 2946211455236859c1104e5bce20cc149853a0db7633789a71ee4cde222acc31
+  sha256sum: 3c1872aa2c3fd352dc86fe84d8ca9428471cd061b769d42e3afa8a04495bd858
+- author: =?UTF-8?q?=C5=81ukasz=20K=C4=99dziora?=
+  date: '2026-03-31'
+  email: lkedziora@antmicro.com
+  module: zephyr
+  path: zephyr/0037-subsys-instrumentation-Exclude-irq-lock-unlock-and-t.patch
+  sha256sum: e8ada2af698d43ddb99e52e0bd6e63f26d2a532d7616c16bb6a6c9327812d866
+- author: Mikolaj Klikowicz
+  date: '2026-04-16'
+  email: mklikowicz@antmicro.com
+  module: zephyr
+  path: zephyr/0038-subsys-instrumentation-Fix-instrumentation-triggers-.patch
+  sha256sum: 3249f96d98bbc271759f724bad61b2489add0b0ceac03f4703285bdba91d25ea
 - author: Maciej Torhan
   date: '2025-06-04'
   email: mtorhan@antmicro.com
   module: tflite-micro
   path: tflite-micro/0001-pass-subgraph-and-op-idx-to-profiler.patch
-  sha256sum: 4b92b4cded72daa9ed2993052715533c02228b9437e276be4b23ab56da52acd4
+  sha256sum: f147b8c6655001643cb4f6709064ef6e743705f8517b7af423bcb8469cf77275
 - author: Andrii Chmutov
   date: '2025-09-10'
   email: achmutov@antmicro.com
   module: tflite-micro
   path: tflite-micro/0002-embed-custom-profiler.patch
-  sha256sum: 4825b6dcadebf542124a89568190bcaa9c73bfc549acae9f609375e8db2e90a2
+  sha256sum: bd71c6c931a393ab19ef1982aceefc1cb735a2950747df5c8444d817311c3f0f
 - author: Eryk Szpotanski
   date: '2025-10-08'
   email: eszpotanski@antmicro.com
   module: tflite-micro
   path: tflite-micro/0003-report-model-address-in-zpl_inference-events.patch
-  sha256sum: 28b724b96e078815c9f3f8b607ef587dcd53f3200438c191ff047ea1af47be53
+  sha256sum: 85c130f6758efb3c218a48393866515815506f6f72f1d789f5f5e4c4fd045e11
 - author: Eryk Szpotanski
   date: '2025-10-24'
   email: eszpotanski@antmicro.com
   module: tflite-micro
   path: tflite-micro/0004-emit-zpl_inference_exit-before-dumping-events-from-i.patch
-  sha256sum: 8675bbc19c2e68a7bc36da2f2beaf374fabc3ef5422e4041932da55f75d49e15
+  sha256sum: 6d1ff099c86be0f890a80e9ab5633a660b9fb3b2a98fbdcff02c2a7ee07b3347
 - author: Eryk Szpotanski
   date: '2025-10-31'
   email: eszpotanski@antmicro.com
   module: tflite-micro
   path: tflite-micro/0005-disable-instrumentation-of-custom-methods-based-on-c.patch
-  sha256sum: bed21d187b34b5a4158a10ca434c2b1a49d91b88d6fba226e6eb2d5a95d13b0b
-- author: Lukasz Kedziora
-  date: '2026-03-31'
-  email: lkedziora@antmicro.com
-  module: zephyr
-  path: zephyr/0037-subsys-instrumentation-Exclude-irq-lock-unlock-and-t.patch
-  sha256sum: 2032aeb393e51cf758364c4c2430ca49662adc35db181b1e97fd4a79fa324fd4
+  sha256sum: db20756891afe7c5492bc8367284f961dad34a9f5809ec03640d53f0c6429db7

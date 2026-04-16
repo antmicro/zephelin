@@ -1,7 +1,7 @@
-From 629a892da8f090962d9b9163f170a42a03982b9b Mon Sep 17 00:00:00 2001
+From c73917888fd3eff542608c4dc49dad61e4d84516 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 31 Oct 2025 19:02:27 +0100
-Subject: [PATCH 18/36] scripts: instrumentation: zaru: use full thread ID
+Subject: [PATCH 18/38] scripts: instrumentation: zaru: use full thread ID
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---
@@ -25,5 +25,5 @@ index 7cb74deed13..b28fa3419c6 100755
          # Set phase type according with the Event
          if event_type == "entry":
 -- 
-2.47.3
+2.47.1
 

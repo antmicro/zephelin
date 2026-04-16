@@ -1,7 +1,7 @@
-From 0a424e0476a891bd15b7e26dc22fb8c6eeb4f17c Mon Sep 17 00:00:00 2001
+From f844350135c3bf36ff5daeb8859003e11f19b96c Mon Sep 17 00:00:00 2001
 From: Filip Kokosinski <fkokosinski@antmicro.com>
 Date: Mon, 6 Oct 2025 12:46:51 +0200
-Subject: [PATCH 04/36] boards: st: stm32f746g_disco: renode/renode-robot
+Subject: [PATCH 04/38] boards: st: stm32f746g_disco: renode/renode-robot
  support
 
 Signed-off-by: Filip Kokosinski <fkokosinski@antmicro.com>
@@ -225,5 +225,5 @@ index 00000000000..d38ada716b1
 +"""
 +runMacro $reset
 -- 
-2.47.3
+2.47.1
 

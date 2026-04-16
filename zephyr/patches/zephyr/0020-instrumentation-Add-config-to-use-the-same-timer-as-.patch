@@ -1,7 +1,7 @@
-From 80e60015fc43d92d4624a4e86a8bbb7038ec2f85 Mon Sep 17 00:00:00 2001
+From bca037a2af0fa75810d70b3cc3bd7ff7c0e1ddc3 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Wed, 5 Nov 2025 14:26:48 +0100
-Subject: [PATCH 20/36] instrumentation: Add config to use the same timer as
+Subject: [PATCH 20/38] instrumentation: Add config to use the same timer as
  CTF events
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
@@ -79,5 +79,5 @@ index 0ac5a81af6a..fe122b75d2a 100644
 +#endif /* CONFIG_INSTRUMENTATION_CTF_TIMER */
  }
 -- 
-2.47.3
+2.47.1
 

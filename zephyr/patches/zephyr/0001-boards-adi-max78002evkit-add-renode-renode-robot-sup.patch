@@ -1,7 +1,7 @@
-From 1130adcec0e3fb21cfc5310917e7f92efc08e902 Mon Sep 17 00:00:00 2001
+From c04a8449b1bcbbc826388e4d01184085c8c3e671 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Fri, 1 Aug 2025 13:03:57 +0200
-Subject: [PATCH 01/36] boards: adi: max78002evkit: add renode/renode-robot
+Subject: [PATCH 01/38] boards: adi: max78002evkit: add renode/renode-robot
  support
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
@@ -160,5 +160,5 @@ index 00000000000..afd9237687d
 +"""
 +runMacro $reset
 -- 
-2.47.3
+2.47.1
 

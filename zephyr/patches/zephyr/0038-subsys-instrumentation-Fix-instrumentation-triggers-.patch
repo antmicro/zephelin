@@ -1,0 +1,61 @@
+From 5e3199cca24e277d94a590bc8741606049c83383 Mon Sep 17 00:00:00 2001
+From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+Date: Thu, 16 Apr 2026 15:54:40 +0200
+Subject: [PATCH 38/38] subsys: instrumentation: Fix instrumentation
+ triggers/stoppers
+
+Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+---
+ subsys/instrumentation/common/instr_common.c | 15 ---------------
+ 1 file changed, 15 deletions(-)
+
+diff --git a/subsys/instrumentation/common/instr_common.c b/subsys/instrumentation/common/instr_common.c
+index b039695cfe5..854b4a92a80 100644
+--- a/subsys/instrumentation/common/instr_common.c
++++ b/subsys/instrumentation/common/instr_common.c
+@@ -125,8 +125,6 @@ const struct device *instrumentation_triggers =
+ #endif
+ 
+ static bool _instr_initialized;
+-static bool _global_instr_on;
+-static bool _global_instr_stopped;
+ static Z_THREAD_LOCAL bool _instr_enabled;
+ static Z_THREAD_LOCAL bool _instr_on = true;
+ static Z_THREAD_LOCAL bool _instr_tracing_disabled;
+@@ -320,8 +318,6 @@ __no_instrumentation__ bool instr_enabled(void)
+ 
+ __no_instrumentation__ int instr_turn_on(void)
+ {
+-
+-	_global_instr_on = true;
+ 	_instr_on = true;
+ 	_instr_enabled = true;
+ 
+@@ -330,7 +326,6 @@ __no_instrumentation__ int instr_turn_on(void)
+ 
+ __no_instrumentation__ int instr_turn_off(void)
+ {
+-	_global_instr_stopped = true;
+ 	_instr_on = false;
+ 
+ 	return 0;
+@@ -607,16 +602,6 @@ __no_instrumentation__ void instr_event_handler(enum instr_event_types type, voi
+ 	/* For IRQ locking */
+ 	unsigned int key = 0;
+ #endif
+-
+-	if (_global_instr_stopped && _instr_on) {
+-		_instr_on = false;
+-	}
+-
+-	if (_global_instr_on && !_instr_on) {
+-		_instr_on = true;
+-		_instr_enabled = true;
+-	}
+-
+ 	/*
+ 	 * Essentially, the instrumented code can only generate events when a
+ 	 * function is called or returns. Event type promotion happens based on
+-- 
+2.47.1
+
