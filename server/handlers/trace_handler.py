@@ -147,9 +147,38 @@ class TraceHandler(BaseHandler):
         """Resets the trace buffer."""
         raise NotImplementedError
 
-    async def collect(self):
+    async def collect(self) -> dict:
         """Provides the increment of the trace buffer not yet sent."""
-        raise NotImplementedError
+        print("[TRACE HANDLER] Collecting trace increment")
+
+        if not self.raw_ctf_path.exists():
+            return {"status": "error", "message": "No trace data available to collect."}
+
+        if self.file_handle and not self.file_handle.closed:
+            self.file_handle.flush()
+
+        self._is_parsing = True
+
+        try:
+            payload_events, overlap_count, _ = await self._extract_trace_increment(
+                update_state=True
+            )
+
+            return {
+                "status": "success",
+                "data": {
+                    "events": payload_events,
+                    "overlap_count": overlap_count,
+                    "total_count": self.events_sent_count,
+                },
+            }
+
+        except Exception as e:
+            print(f"[Trace Handler] Full collection parse error: {e}")
+            return {"status": "error", "message": f"Failed to parse trace file: {e}"}
+        finally:
+            self._is_parsing = False
+
     async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         """
         Callback triggered when a remote capture script connects to the socket.
