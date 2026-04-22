@@ -11,9 +11,11 @@ Python script for running Zephelin profiling.
 
 import argparse
 import os
+import pty
 import re
 import sys
 import time
+import tty
 from pathlib import Path
 
 import serial
@@ -142,6 +144,19 @@ class RenodeMachine:
         self.trace_buffer = b""
         self.trace_index = 0
 
+        self.to_pty = args.to_pty
+
+        if self.to_pty:
+            self.bridge_master, self.bridge_slave = pty.openpty()
+            self.bridge_port_name = os.ttyname(self.bridge_slave)
+
+            tty.setraw(self.bridge_master)
+            tty.setraw(self.bridge_slave)
+
+            print("==================================================")
+            print(f"Connect Backend to: {self.bridge_port_name}")
+            print("==================================================")
+
         self.simulation_only = args.simulation_only
 
         self.shared_uart = (console_uart == trace_uart) and (console_uart is not None)
@@ -247,6 +262,8 @@ class RenodeMachine:
         if self.trace_serial:
             try:
                 new_traces = self.trace_serial.read_all()
+                if self.to_pty and new_traces:
+                    os.write(self.bridge_master, new_traces)
                 if self.trace_file:
                     self.trace_buffer += new_traces
                     self._handle_trace_rotation()
@@ -285,6 +302,9 @@ class RenodeMachine:
             self.console_serial.close()
         if self.trace_serial:
             self.trace_serial.close()
+        if self.to_pty:
+            os.close(self.bridge_master)
+            os.close(self.bridge_slave)
 
 
 if __name__ == "__main__":
@@ -310,6 +330,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--timeout", type=int, help="Defines for how long the simulation should run in seconds."
     )
+    parser.add_argument("--to-pty", action="store_true", help="Stream trace data directly to PTY")
+    parser.add_argument("--pause", action="store_true", help="Wait for ENTER before starting")
     parser.add_argument("--renode-logs", action="store_true", help="Print Renode logs to stdout")
 
     args = parser.parse_args()
@@ -341,7 +363,7 @@ if __name__ == "__main__":
         repl=args.repl,
     )
 
-    if args.debug:
+    if args.debug or args.pause:
         if not args.debug_start_immediately:
             print("Press ENTER to start simulation")
             inp = None
