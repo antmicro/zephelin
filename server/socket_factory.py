@@ -28,7 +28,7 @@ def create_socketio(traceConfig: TraceConfig) -> socketio.AsyncServer:
 
     dispatcher = RPCDispatcher()
 
-    trace_backend = TraceHandler()
+    trace_backend = TraceHandler(sio=sio, traceConfig=traceConfig)
     dispatcher.register_methods(trace_backend, namespace="trace")
 
     @sio.on("connect")

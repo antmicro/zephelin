@@ -18,18 +18,27 @@ class TraceHandler(BaseHandler):
     async def connect(self):
         """Starts the TCP server to listen for incoming trace streams from capture scripts."""
         raise NotImplementedError
+    def __init__(
+        self,
+    ):
+        """
+        Builds the TraceHandler.
 
     async def disconnect(self):
         """Terminates the background read task and tears down transportation backend."""
         raise NotImplementedError
 
-    async def stream_start(self):
-        """Enables continuous trace streaming to the frontend."""
-        raise NotImplementedError
+        self.continuous_streaming = False
 
-    async def stream_stop(self):
+    async def stream_start(self) -> dict[str, str]:
+        """Enables continuous trace streaming to the frontend."""
+        self.continuous_streaming = True
+        return {"status": "success"}
+
+    async def stream_stop(self) -> dict[str, str]:
         """Disables continuous trace streaming to the frontend."""
-        raise NotImplementedError
+        self.continuous_streaming = False
+        return {"status": "success"}
 
     async def metadata(self):
         """
