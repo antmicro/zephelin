@@ -8,14 +8,18 @@ Provides the entry point for starting the Zephelin trace gathering server.
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
 import socketio
 import uvicorn
 from config import TraceConfig
+from dotenv import load_dotenv
 from frontend import create_app
 from socket_factory import create_socketio
+
+load_dotenv()
 
 
 def create_backend(argv):
@@ -27,31 +31,35 @@ def create_backend(argv):
         "--tcp-server-host",
         type=str,
         help="Address of the Zephelin TCP Server (CTF trace ingestion)",
-        default="127.0.0.1",
+        default=os.environ.get("ZEPHELIN_TCP_HOST", "127.0.0.1"),
     )
     parser.add_argument(
         "--tcp-server-port",
         type=int,
         help="Port of the Zephelin TCP server (CTF trace ingestion)",
-        default=5000,
+        default=os.environ.get("ZEPHELIN_TCP_PORT", 5000),
     )
     parser.add_argument(
         "--backend-host",
         type=str,
         help="Address of the Zephelin backend",
-        default="127.0.0.1",
+        default=os.environ.get("ZEPHELIN_BACKEND_HOST", "127.0.0.1"),
     )
     parser.add_argument(
         "--backend-port",
         type=int,
         help="Port of the Zephelin backend",
-        default=8000,
+        default=os.environ.get("ZEPHELIN_BACKEND_PORT", 8000),
     )
+
+    frontend_dir_env = os.environ.get("ZEPHELIN_FRONTEND_DIR")
     parser.add_argument(
         "--frontend-directory",
         type=Path,
         help="Path to the fronetend build",
+        default=Path(frontend_dir_env) if frontend_dir_env else None,
     )
+
     args, _ = parser.parse_known_args(argv[1:])
 
     traceConfig = TraceConfig(
