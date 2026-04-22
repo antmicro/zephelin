@@ -62,6 +62,9 @@ if __name__ == "__main__":
         help="Hex address of shared clock, if provided all boards will \
             have access to peripheral with consistent time",
     )
+    parser.add_argument("--to-pty", action="store_true", help="Stream trace data directly to PTY")
+    parser.add_argument("--pause", action="store_true", help="Wait for ENTER before starting")
+
     parser.add_argument("--renode-logs", action="store_true", help="Print Renode logs to stdout")
     parser.add_argument("--uart-connect", type=str, help="UART name to connect thorugh")
 
@@ -100,7 +103,7 @@ if __name__ == "__main__":
             )
         )
 
-    if args.debug and not args.debug_start_immediately:
+    if args.pause or (args.debug and not args.debug_start_immediately):
         input("Press Enter to start simulation...")
     if args.uart_connect and len(machines) == 2:
         src_mach = machines[0].mach
