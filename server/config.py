@@ -7,7 +7,10 @@
 Provides configuration classes for server components.
 """
 
+import re
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
 
 @dataclass
@@ -18,3 +21,9 @@ class TraceConfig:
 
     tcp_host: str
     tcp_port: int
+    build_dir: Path = Path("build")
+    tflm_model_paths: Optional[list[Path]] = None
+    tvm_model_paths: Optional[list[Path]] = None
+    tvm_model_metadata_paths: Optional[list[Path]] = None
+    tvm_model_op_remove_prefix: Optional[re.Pattern] = None
+    tvm_model_op_remove_suffix: Optional[re.Pattern] = None

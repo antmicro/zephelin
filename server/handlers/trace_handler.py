@@ -7,27 +7,30 @@
 Provides a handler for trace collection related tasks.
 """
 
-from handlers.base import BaseHandler
 import asyncio
+import json
 from pathlib import Path
+from typing import Optional
 
 from config import TraceConfig
+from ctf2tef import ctf_to_tef, prepare_dir
+from extract_tvm_model_data import tvm_recalculate_model_numbers
+from handlers.base import BaseHandler
+from prepare_trace import (
+    CUSTOM_METADATA,
+    MODEL_IDS_MAPPING,
+    REGION_SIZES,
+    add_model_metadata,
+    create_custom_events,
+    extract_memory_symbols,
+    extract_symbol_map,
+    process_ram_report,
+)
 from socketio import AsyncServer
 from state_manager import global_state
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
-
-from ctf2tef import ctf_to_tef, prepare_dir  # noqa: E402
-from prepare_trace import (  # noqa: E402
-    CUSTOM_METADATA,
-    create_custom_events,
-)
-
 PARSE_THRESHOLD_BYTES = 8192
-
 
 
 class TraceHandler(BaseHandler):
@@ -53,6 +56,21 @@ class TraceHandler(BaseHandler):
         self.sio = sio
         self.tcp_host = traceConfig.tcp_host
         self.tcp_port = traceConfig.tcp_port
+
+        self.build_dir = traceConfig.build_dir
+        self.tflm_model_paths = traceConfig.tflm_model_paths
+        self.tvm_model_paths = traceConfig.tvm_model_paths
+        self.tvm_model_metadata_paths = traceConfig.tvm_model_metadata_paths
+
+        self.tvm_op_remove_prefix = traceConfig.tvm_model_op_remove_prefix
+        self.tvm_op_remove_suffix = traceConfig.tvm_model_op_remove_suffix
+
+        tflm_model_count = len(self.tflm_model_paths or [])
+        tvm_model_count = len(self.tvm_model_paths or [])
+        self.multi_model_trace = tflm_model_count + tvm_model_count >= 2
+
+        self.symbol_map = {}
+        self.tvm_prefix_to_model_id = {}
 
         self.raw_ctf_path = Path("live_capture.ctf")
         self.events_sent_count = 0
@@ -137,11 +155,81 @@ class TraceHandler(BaseHandler):
         self.continuous_streaming = False
         return {"status": "success"}
 
-    async def metadata(self):
+    async def metadata(self) -> dict:
         """
         Provides model metadata and memory symbols for the trace.
         """
-        raise NotImplementedError
+        print("[TRACE HANDLER] Collecting trace metadata")
+
+        try:
+            tef_metadata_events = []
+            zephyr_elf_path = self.build_dir / "zephyr" / "zephyr.elf"
+
+            if zephyr_elf_path.exists():
+                self.symbol_map = extract_symbol_map(zephyr_elf_path)
+
+                if REGION_SIZES:
+                    mem_symbols = extract_memory_symbols(self.symbol_map)
+                    tef_metadata_events.append({
+                        "name": "MEMORY::SYMBOLS",
+                        "cat": "zephyr",
+                        "ph": "M",
+                        "pid": 0,
+                        "tid": 0,
+                        "ts": 0,
+                        "args": mem_symbols,
+                    })
+
+                ram_report = self.build_dir / "ram.json"
+                if ram_report.exists():
+                    with ram_report.open("r") as fd:
+                        ram = json.load(fd).get("symbols", {})
+
+                    if ram:
+                        process_ram_report(ram)
+                        tef_metadata_events.append({
+                            "name": "MEMORY::STATICALLY_ASSIGNED_MEM",
+                            "cat": "zephyr",
+                            "ph": "M",
+                            "pid": 0,
+                            "tid": 0,
+                            "ts": 0,
+                            "args": ram.get("size", 0),
+                        })
+            else:
+                print(f"[TRACE HANDLER] Zephyr ELF not found at {zephyr_elf_path}.")
+
+            if self.tflm_model_paths:
+                from extract_tflite_model_data import extract_model_data
+
+                for tflm_model_path in self.tflm_model_paths:
+                    if tflm_model_path.exists():
+                        metadata = extract_model_data(
+                            tflm_model_path, PROJECT_ROOT, zephyr_elf_path, None
+                        )
+                        if "id" not in metadata:
+                            add_model_metadata(tef_metadata_events, metadata)
+                        else:
+                            for model_id in metadata["id"]:
+                                add_model_metadata(tef_metadata_events, metadata | {"id": model_id})
+
+            if self.tvm_model_paths:
+                from extract_tvm_model_data import extract_models_data
+
+                for metadata in extract_models_data(
+                    self.tvm_model_paths,
+                    self.tvm_model_metadata_paths,
+                    model_op_remove_prefix=self.tvm_op_remove_prefix,
+                    model_op_remove_suffix=self.tvm_op_remove_suffix,
+                    prefix_to_model_id=self.tvm_prefix_to_model_id,
+                ):
+                    add_model_metadata(tef_metadata_events, metadata)
+
+            return {"status": "success", "data": {"events": tef_metadata_events}}
+
+        except Exception as e:
+            print(f"[TRACE HANDLER] Metadata collection error: {e}")
+            return {"status": "error", "message": f"Failed to collect metadata: {e}"}
 
     async def reset(self):
         """Resets the trace buffer."""
@@ -251,10 +339,8 @@ class TraceHandler(BaseHandler):
             if not self.is_synced:
                 print("\n [Trace Handler] Found START TAG Valid CTF data starting")
                 self.is_synced = True
-            valid_data = self.sync_buffer[tag_idx + len(self.sync_tag) :]
 
-            self.sync_buffer.clear()
-            self.sync_buffer.extend(valid_data)
+            self.sync_buffer = self.sync_buffer[tag_idx + len(self.sync_tag) :]
 
         if self.is_synced:
             if len(self.sync_buffer) > len(self.sync_tag):
@@ -324,17 +410,48 @@ class TraceHandler(BaseHandler):
     async def _extract_trace_increment(self, update_state: bool) -> tuple[list, int, int]:
         """
         Parses the CTF file, calculates the sliding window, and formats thread metadata.
-        If update_state is True, it commits the changes to the internal tracking variables.
+
+        Parameters
+        ----------
+        update_state: bool
+            Serves as commit flag, if false only total_count is emitted.
+
+        Returns
+        -------
+        tuple[list, int, int]
+            TEF events, how big is the overlap, total count of events.
         """
 
         def run_sync_parse():
+            MODEL_IDS_MAPPING.clear()
+            self.tvm_prefix_to_model_id.clear()
+
             with prepare_dir(self.raw_ctf_path) as tmp_dir:
                 result = ctf_to_tef(
                     path=str(tmp_dir),
                     custom_metadata=CUSTOM_METADATA,
-                    custom_events=create_custom_events(),
+                    custom_events=create_custom_events(
+                        tvm_op_remove_prefix=self.tvm_op_remove_prefix,
+                        tvm_op_remove_suffix=self.tvm_op_remove_suffix,
+                        multi_model_trace=self.multi_model_trace,
+                        symbol_map=self.symbol_map,
+                    ),
                 )
-            return result.tef, result.thread_names
+
+            trace_events = result.tef
+
+            if self.tvm_model_paths:
+                if 0 in MODEL_IDS_MAPPING:
+                    MODEL_IDS_MAPPING.pop(0)
+
+                trace_events, tvm_prefix_to_model_id = tvm_recalculate_model_numbers(
+                    trace_events, len(MODEL_IDS_MAPPING)
+                )
+
+                MODEL_IDS_MAPPING.update(tvm_prefix_to_model_id)
+                self.tvm_prefix_to_model_id.update(tvm_prefix_to_model_id)
+
+            return trace_events, result.thread_names
 
         loop = asyncio.get_event_loop()
         trace_events, thread_names = await loop.run_in_executor(None, run_sync_parse)
@@ -345,24 +462,23 @@ class TraceHandler(BaseHandler):
 
         payload_events = []
 
-        if new_total_count > self.events_sent_count:
-            if update_state:
-                self.events_sent_count = new_total_count
+        if (new_total_count > self.events_sent_count) and update_state:
+            self.events_sent_count = new_total_count
 
-                new_metadata = []
-                for t_name, tid in thread_names.items():
-                    if self.trace_threads.get(tid) != t_name:
-                        new_metadata.append({
-                            "name": "thread_name",
-                            "cat": "zephyr",
-                            "ph": "M",
-                            "pid": 0,
-                            "tid": tid,
-                            "args": {"name": t_name},
-                        })
-                        self.trace_threads[tid] = t_name
+            new_metadata = []
+            for t_name, tid in thread_names.items():
+                if self.trace_threads.get(tid) != t_name:
+                    new_metadata.append({
+                        "name": "thread_name",
+                        "cat": "zephyr",
+                        "ph": "M",
+                        "pid": 0,
+                        "tid": tid,
+                        "args": {"name": t_name},
+                    })
+                    self.trace_threads[tid] = t_name
 
-                payload_events = new_metadata + windowed_events
+            payload_events = new_metadata + windowed_events
 
         return payload_events, overlap_count, new_total_count
 

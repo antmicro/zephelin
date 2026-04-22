@@ -14,20 +14,36 @@ a Zephelin Trace Viewer instance where traces can be visualized.
 import argparse
 import logging
 import os
+import re
 import sys
 from pathlib import Path
+from typing import Optional
 
 import socketio
 import uvicorn
-from config import TraceConfig
 from dotenv import load_dotenv
-from frontend import create_app
-from socket_factory import create_socketio
-from utils.logger import string_to_verbosity
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SCRIPTS_DIR = PROJECT_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from config import TraceConfig  # noqa: E402
+from extract_tvm_model_data import DEFAULT_OP_PREFIX_RE, DEFAULT_OP_SUFFIX_RE  # noqa: E402
+from frontend import create_app  # noqa: E402
+from socket_factory import create_socketio  # noqa: E402
+from utils.logger import string_to_verbosity  # noqa: E402
 
 load_dotenv()
 
 logger = logging.getLogger("Backend")
+
+
+def parse_env_path_list(env_var_name: str) -> Optional[list]:
+    """Helper to parse comma-separated paths from environment variables."""
+    val = os.environ.get(env_var_name)
+
+    return [Path(p.strip()) for p in val.split(",")] if val else None
 
 
 def create_backend(argv):
@@ -72,6 +88,46 @@ def create_backend(argv):
         help="Path to the fronetend build",
         default=Path(frontend_dir_env) if frontend_dir_env else None,
     )
+    # prepare_trace related options
+    parser.add_argument(
+        "--build-dir",
+        type=Path,
+        help="Path to the build directory",
+        default=Path(os.environ.get("ZEPHELIN_BUILD_DIR", "build")),
+    )
+    parser.add_argument(
+        "--tflm-model-paths",
+        type=Path,
+        nargs="+",
+        help="Paths to TFLM models",
+        default=parse_env_path_list("ZEPHELIN_TFLM_MODEL_PATHS"),
+    )
+    parser.add_argument(
+        "--tvm-model-paths",
+        type=Path,
+        nargs="+",
+        help="Paths to TVM models",
+        default=parse_env_path_list("ZEPHELIN_TVM_MODEL_PATHS"),
+    )
+    parser.add_argument(
+        "--tvm-model-metadata-paths",
+        type=Path,
+        nargs="+",
+        help="Paths to TVM models metadata",
+        default=parse_env_path_list("ZEPHELIN_TVM_MODEL_METADATA_PATHS"),
+    )
+    parser.add_argument(
+        "--tvm-model-op-remove-prefix",
+        type=re.compile,
+        help="Pattern removing TVM operator prefix",
+        default=os.environ.get("ZEPHELIN_TVM_DEFAULT_OP_PREFIX_RE", DEFAULT_OP_PREFIX_RE),
+    )
+    parser.add_argument(
+        "--tvm-model-op-remove-suffix",
+        type=re.compile,
+        help="Pattern removing TVM operator type suffix",
+        default=os.environ.get("ZEPHELIN_TVM_DEFAULT_OP_SUFFIX_RE", DEFAULT_OP_SUFFIX_RE),
+    )
 
     parser.add_argument(
         "--verbosity",
@@ -89,6 +145,12 @@ def create_backend(argv):
     traceConfig = TraceConfig(
         tcp_host=args.tcp_server_host,
         tcp_port=args.tcp_server_port,
+        build_dir=args.build_dir,
+        tflm_model_paths=args.tflm_model_paths,
+        tvm_model_paths=args.tvm_model_paths,
+        tvm_model_metadata_paths=args.tvm_model_metadata_paths,
+        tvm_model_op_remove_prefix=args.tvm_model_op_remove_prefix,
+        tvm_model_op_remove_suffix=args.tvm_model_op_remove_suffix,
     )
 
     sio = create_socketio(traceConfig=traceConfig)
