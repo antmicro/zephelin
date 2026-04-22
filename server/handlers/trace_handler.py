@@ -43,9 +43,6 @@ class TraceHandler(BaseHandler):
         """
         Builds the TraceHandler.
 
-    async def disconnect(self):
-        """Terminates the background read task and tears down transportation backend."""
-        raise NotImplementedError
         Parameters
         ----------
         sio: AsyncServer
@@ -98,6 +95,37 @@ class TraceHandler(BaseHandler):
             "status": "success",
             "message": f"Listening for traces on {self.tcp_host}:{self.tcp_port}",
         }
+
+    async def disconnect(self) -> dict[str, str]:
+        """
+        Terminates the background read task and tears down transportation backend.
+
+        Returns
+        -------
+            Message with connection status.
+        """
+        print("[TRACE HANDLER] Disconnecting")
+
+        global_state.trace_active = False
+
+        if self.trace_socket:
+            self.trace_socket.close()
+            await self.trace_socket.wait_closed()
+            self.trace_socket = None
+
+        if self.active_writer:
+            self.active_writer.close()
+            await self.active_writer.wait_closed()
+            self.active_writer = None
+
+        if not global_state.trace_active:
+            return {"status": "success", "message": "Trace was already stopped."}
+
+        if global_state.read_task:
+            global_state.read_task.cancel()
+            global_state.read_task = None
+
+        return {"status": "success", "message": "Trace stopping initiated."}
 
     async def stream_start(self) -> dict[str, str]:
         """Enables continuous trace streaming to the frontend."""
