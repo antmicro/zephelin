@@ -28,8 +28,16 @@ def generate(results: dict):
     for board, board_benchmarks in sorted(results["results"].items()):
         print(board)
         benchmarks[board] = tabulate(
-            [[k, v["cycles_mean"]] for k, v in sorted(board_benchmarks.items())],
-            headers=["Benchmark", "Cycles"],
+            [
+                [
+                    k,
+                    v["cycles_mean"],
+                    v["ram_report"]["RAM"]["used"],
+                    v["ram_report"]["FLASH"]["used"],
+                ]
+                for k, v in sorted(board_benchmarks.items())
+            ],
+            headers=["Benchmark", "Cycles", "FLASH", "RAM"],
             tablefmt=tablefmt,
         )
 
