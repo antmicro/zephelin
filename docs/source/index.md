@@ -16,4 +16,5 @@ new_runtime
 visual_interface
 examples
 development
+benchmark_report
 ```
