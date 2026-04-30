@@ -1,4 +1,4 @@
-From 8bd5879fd98f43dabda952ad423a916f073c1e81 Mon Sep 17 00:00:00 2001
+From 164d471530b23ad0674401442b681584783cd304 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Fri, 13 Jun 2025 11:53:05 +0200
 Subject: [PATCH] enable dlpack
@@ -19,5 +19,5 @@ index 0000000..9560ebb
 +  cmake-ext: True
 +  kconfig-ext: True
 -- 
-2.47.1
+2.47.3
 

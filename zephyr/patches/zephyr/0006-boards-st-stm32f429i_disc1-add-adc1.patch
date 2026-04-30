@@ -1,7 +1,7 @@
-From e088a7bb0dde0cc242c846925470b8587f56d514 Mon Sep 17 00:00:00 2001
+From 8baa309685a7cb9b1e3152e00dd1b24078576138 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Fri, 27 Jun 2025 14:38:43 +0200
-Subject: [PATCH 06/38] boards: st: stm32f429i_disc1: add adc1
+Subject: [PATCH 06/39] boards: st: stm32f429i_disc1: add adc1
 
 ---
  .../stm32f429i_disc1/support/hello_world.repl |  20 ++-
@@ -218,5 +218,5 @@ index 00000000000..78e2cf1b5be
 +    init add:
 +        ApplySVD @https://dl.antmicro.com/projects/renode/svd/STM32F40x.svd.gz
 -- 
-2.47.1
+2.47.3
 

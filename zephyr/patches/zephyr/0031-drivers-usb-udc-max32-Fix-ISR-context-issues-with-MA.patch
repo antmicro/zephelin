@@ -1,7 +1,7 @@
-From a049ec18af5e8fbb407f6cd5351bfd2230a16432 Mon Sep 17 00:00:00 2001
+From 97da820573f6f81426a8d5169989b3c88fafbe85 Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:54:46 -0800
-Subject: [PATCH 31/38] drivers: usb: udc: max32: Fix ISR context issues with
+Subject: [PATCH 31/39] drivers: usb: udc: max32: Fix ISR context issues with
  MAX32 USB
 
 MAX32 USB had some functions in ISR context allocating memory &
@@ -227,5 +227,5 @@ index 526a49b8ba9..5c561540a79 100644
  		.speed_idx = DT_ENUM_IDX(DT_DRV_INST(n), maximum_speed),                           \
  		.clock = DEVICE_DT_GET(DT_INST_CLOCKS_CTLR(n)),                                    \
 -- 
-2.47.1
+2.47.3
 

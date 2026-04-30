@@ -1,4 +1,4 @@
-From de948711a091cf098f630f0dc810098b170dcca8 Mon Sep 17 00:00:00 2001
+From 17a746ca16c4a8ed6ecb9fb4fdd81654f97b823e Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Wed, 10 Sep 2025 10:32:02 +0200
 Subject: [PATCH 2/5] embed custom profiler
@@ -158,5 +158,5 @@ index 594f0c00..cb168c44 100644
  
  }  // namespace tflite
 -- 
-2.47.1
+2.47.3
 

@@ -1,4 +1,4 @@
-From 3812082ac3508cbdfc33173a577cf805a9a44325 Mon Sep 17 00:00:00 2001
+From d9f2af159cba2edde55db784fcfbe90a2788ffe2 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Fri, 13 Jun 2025 11:53:05 +0200
 Subject: [PATCH 5/8] configurable packed function size
@@ -21,5 +21,5 @@ index 83d961baf..c5cd25e00 100644
    TVMArgs args;
    TVMArgs ret_value;
 -- 
-2.47.1
+2.47.3
 

@@ -1,4 +1,4 @@
-From 89d2da47e244a0d54e03532aa9fb34c3d59537ab Mon Sep 17 00:00:00 2001
+From bdae8ea18c145357287e21210892eb5fcb208fa6 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Thu, 26 Jun 2025 12:59:07 +0200
 Subject: [PATCH 6/8] graph_executor: fix nop duplicating operations
@@ -33,5 +33,5 @@ index 69926b918..a633ed630 100644
      } else {
        memset(&executor->op_execs[nid], 0, sizeof(TVMPackedFunc));
 -- 
-2.47.1
+2.47.3
 

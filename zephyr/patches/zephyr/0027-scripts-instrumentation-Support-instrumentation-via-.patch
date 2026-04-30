@@ -1,7 +1,7 @@
-From 5c21a7045f1813ba11b8bfac659efec811a2e588 Mon Sep 17 00:00:00 2001
+From 129185b39232c62cd7c4bef61abcf2e9f5944881 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Tue, 10 Feb 2026 15:09:40 +0100
-Subject: [PATCH 27/38] scripts: instrumentation: Support
+Subject: [PATCH 27/39] scripts: instrumentation: Support
  instrumentation-via-tracing in zaru
 
 Update zaru to support receiving instrumentation events when using the
@@ -545,5 +545,5 @@ index 7424ee7f12b..c312238da32 100755
      reboot_parser.add_argument('--verbose', '-v', action='store_true', help="verbose mode.")
      reboot_parser.set_defaults(func=reboot)
 -- 
-2.47.1
+2.47.3
 

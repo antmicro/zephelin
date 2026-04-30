@@ -1,7 +1,7 @@
-From 798b25551d47727da253ef3063cdf68d07d23def Mon Sep 17 00:00:00 2001
+From 640ce88647ce8b4245607f0f8b45e8772efee713 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Wed, 12 Nov 2025 19:50:49 +0100
-Subject: [PATCH 21/38] instrumentation: add option to dump events when buffer
+Subject: [PATCH 21/39] instrumentation: add option to dump events when buffer
  is full
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
@@ -387,5 +387,5 @@ index afac0c6eed6..e36a6d6a8ec 100644
  {
  	return ring_buf_is_empty(&instr_ring_buf);
 -- 
-2.47.1
+2.47.3
 

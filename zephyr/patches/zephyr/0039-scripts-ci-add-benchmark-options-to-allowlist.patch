@@ -1,0 +1,28 @@
+From 04d9342739815ed432348d79c5788953d4783471 Mon Sep 17 00:00:00 2001
+From: Jedrzej Czykier <jczykier@antmicro.com>
+Date: Thu, 30 Apr 2026 12:28:26 +0200
+Subject: [PATCH 39/39] scripts: ci: add benchmark options to allowlist
+
+---
+ scripts/ci/check_compliance.py | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/scripts/ci/check_compliance.py b/scripts/ci/check_compliance.py
+index 5e675d9595d..9b4c55e547c 100755
+--- a/scripts/ci/check_compliance.py
++++ b/scripts/ci/check_compliance.py
+@@ -1498,6 +1498,11 @@ flagged.
+         "WHATEVER",
+         "ZEPHYR_TRY_MASS_ERASE", # MCUBoot setting described in sysbuild
+                                  # documentation
++        "ZPL_BENCHMARK_ITERS",
++        "ZPL_BENCHMARK_MAGIC",
++        "ZPL_BENCHMARK_RUN_BASIC",
++        "ZPL_BENCHMARK_RUN_DHRYSTONE",
++        "ZPL_BENCHMARK_RUN_THREADS",
+         "ZPL_SAMPLE_RUNTIME_CONF_PROFILING",
+         "ZPL_SAMPLE_TFLM_MODEL",
+         "ZPL_SAMPLE_TFLM_BUFFER_SIZE",
+-- 
+2.47.3
+

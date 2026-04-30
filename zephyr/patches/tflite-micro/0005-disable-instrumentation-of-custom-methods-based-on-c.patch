@@ -1,4 +1,4 @@
-From 1fd39d5e63cf9378518fa5a32566de1c9dc73095 Mon Sep 17 00:00:00 2001
+From e20b39a810325b93891d078236aac7a100ad4b16 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 31 Oct 2025 14:12:54 +0100
 Subject: [PATCH 5/5] disable instrumentation of custom methods based on config
@@ -87,5 +87,5 @@ index 4edb2033..439be24a 100644
      if (profiler_ != nullptr) {
        profiler_->EndEvent(event_handle_);
 -- 
-2.47.1
+2.47.3
 

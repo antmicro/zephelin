@@ -1,7 +1,7 @@
-From 386d287bf3850503cb5f9461c98183722caa8acf Mon Sep 17 00:00:00 2001
+From f8e91a533342fcf82a54e9ef376b1161f8740768 Mon Sep 17 00:00:00 2001
 From: Brandon Hurst <brandon.hurst@analog.com>
 Date: Tue, 17 Feb 2026 10:56:47 -0800
-Subject: [PATCH 34/38] drivers: usb: udc: max32: Handle deferred endpoint
+Subject: [PATCH 34/39] drivers: usb: udc: max32: Handle deferred endpoint
  transfers
 
 Issue was corrected where transfers waiting on a busy
@@ -42,5 +42,5 @@ index 9897cc179a9..e2bb673c2e8 100644
  
  static int udc_ctrl_feed_dout(const struct device *dev, const size_t length)
 -- 
-2.47.1
+2.47.3
 

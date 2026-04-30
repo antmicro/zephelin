@@ -1,7 +1,7 @@
-From 0d4361edad310db906007d196600ee65f8dd0aaa Mon Sep 17 00:00:00 2001
+From 0ee903ce7e221ae1b0068de902a21dc01f3a6b2d Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
 Date: Tue, 3 Mar 2026 16:32:20 +0100
-Subject: [PATCH 23/38] boards: add resc for max32650fthr
+Subject: [PATCH 23/39] boards: add resc for max32650fthr
 
 Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
 ---
@@ -165,5 +165,5 @@ index 00000000000..59a4c491377
 +"""
 +runMacro $reset
 -- 
-2.47.1
+2.47.3
 

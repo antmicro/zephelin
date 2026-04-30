@@ -1,4 +1,4 @@
-From f16c9518aa58586683c621badd674995857e74b6 Mon Sep 17 00:00:00 2001
+From 14430f6b604d5e0e7bded220d7f85e8dda1c6903 Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Fri, 13 Jun 2025 11:53:05 +0200
 Subject: [PATCH 2/8] graph_executor: ignore nop
@@ -23,5 +23,5 @@ index 395a343cc..3b139c47b 100644
    TVMArgs targs = TVMArgs_Create(arg_ptr.arg_values, arg_ptr.arg_tcodes, arg_ptr.arg_values_count);
    status = TVMPackedFunc_InitModuleFunc(pf, executor->module_handle, param->func_name, &targs);
 -- 
-2.47.1
+2.47.3
 

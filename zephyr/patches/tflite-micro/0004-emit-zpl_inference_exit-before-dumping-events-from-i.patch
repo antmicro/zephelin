@@ -1,4 +1,4 @@
-From 33108654453bd6c2eea62fdcad79236131b09745 Mon Sep 17 00:00:00 2001
+From 9f5b4744f4d6ab8e845d8447e2b6cefcc62f7944 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 24 Oct 2025 11:56:57 +0200
 Subject: [PATCH 4/5] emit zpl_inference_exit before dumping events from
@@ -48,5 +48,5 @@ index a1f6657b..ace91960 100644
    }
  };
 -- 
-2.47.1
+2.47.3
 

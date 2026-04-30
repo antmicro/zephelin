@@ -1,7 +1,7 @@
-From 5713d25f42a82f60e581c8409090ca8e071458f3 Mon Sep 17 00:00:00 2001
+From f3bbad8baee2a55a57a9741967eb839b35624be2 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Tue, 8 Jul 2025 16:36:13 +0200
-Subject: [PATCH 19/38] instrumentation: make runtime configuration of
+Subject: [PATCH 19/39] instrumentation: make runtime configuration of
  trigger/stopper functions optional
 
 This makes using instrumentation much easier with any sample/board
@@ -237,5 +237,5 @@ index 3af7236557c..b1f5bd37c51 100644
  		printk("pong\n");
  	} else if (strncmp("dump_trace", cmd, length) == 0) {
 -- 
-2.47.1
+2.47.3
 

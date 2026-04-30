@@ -1,7 +1,7 @@
-From 5e3199cca24e277d94a590bc8741606049c83383 Mon Sep 17 00:00:00 2001
+From 11edc6a6ddd8e9f3cb8bf470f702999e8cd2fac9 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Thu, 16 Apr 2026 15:54:40 +0200
-Subject: [PATCH 38/38] subsys: instrumentation: Fix instrumentation
+Subject: [PATCH 38/39] subsys: instrumentation: Fix instrumentation
  triggers/stoppers
 
 Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
@@ -57,5 +57,5 @@ index b039695cfe5..854b4a92a80 100644
  	 * Essentially, the instrumented code can only generate events when a
  	 * function is called or returns. Event type promotion happens based on
 -- 
-2.47.1
+2.47.3
 
