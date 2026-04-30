@@ -9,6 +9,7 @@ Provides a handler for trace collection related tasks.
 
 import asyncio
 import json
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -31,6 +32,8 @@ from state_manager import global_state
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 PARSE_THRESHOLD_BYTES = 8192
+
+logger = logging.getLogger("TraceHandler")
 
 
 class TraceHandler(BaseHandler):
@@ -99,7 +102,7 @@ class TraceHandler(BaseHandler):
         Exception
             If the server is already listening or a trace is active.
         """
-        print("[TRACE HANDLER] Connection initializing")
+        logger.info("Connection initializing")
         if global_state.trace_active or self.trace_socket:
             raise Exception("Already listening for traces.")
 
@@ -108,7 +111,7 @@ class TraceHandler(BaseHandler):
         )
         global_state.trace_active = True
 
-        print(f"[TRACE HANDLER] Listening for trace streams on {self.tcp_host}:{self.tcp_port}")
+        logger.info(f" Listening for trace streams on {self.tcp_host}:{self.tcp_port}")
         return {
             "status": "success",
             "message": f"Listening for traces on {self.tcp_host}:{self.tcp_port}",
@@ -122,7 +125,7 @@ class TraceHandler(BaseHandler):
         -------
             Message with connection status.
         """
-        print("[TRACE HANDLER] Disconnecting")
+        logger.info("Disconnecting")
 
         global_state.trace_active = False
 
@@ -137,6 +140,7 @@ class TraceHandler(BaseHandler):
             self.active_writer = None
 
         if not global_state.trace_active:
+            logger.debug("Trace was already stopped.")
             return {"status": "success", "message": "Trace was already stopped."}
 
         if global_state.read_task:
@@ -148,18 +152,20 @@ class TraceHandler(BaseHandler):
     async def stream_start(self) -> dict[str, str]:
         """Enables continuous trace streaming to the frontend."""
         self.continuous_streaming = True
+        logger.debug("Continous streaming enabled.")
         return {"status": "success"}
 
     async def stream_stop(self) -> dict[str, str]:
         """Disables continuous trace streaming to the frontend."""
         self.continuous_streaming = False
+        logger.debug("Continous streaming disabled.")
         return {"status": "success"}
 
     async def metadata(self) -> dict:
         """
         Provides model metadata and memory symbols for the trace.
         """
-        print("[TRACE HANDLER] Collecting trace metadata")
+        logger.info("Collecting trace metadata")
 
         try:
             tef_metadata_events = []
@@ -197,9 +203,10 @@ class TraceHandler(BaseHandler):
                             "args": ram.get("size", 0),
                         })
             else:
-                print(f"[TRACE HANDLER] Zephyr ELF not found at {zephyr_elf_path}.")
+                logger.warning(f" Zephyr ELF not found at {zephyr_elf_path}.")
 
             if self.tflm_model_paths:
+                logger.debug("Adding TFLM model metadata.")
                 from extract_tflite_model_data import extract_model_data
 
                 for tflm_model_path in self.tflm_model_paths:
@@ -214,6 +221,7 @@ class TraceHandler(BaseHandler):
                                 add_model_metadata(tef_metadata_events, metadata | {"id": model_id})
 
             if self.tvm_model_paths:
+                logger.debug("Adding TVM model metadata.")
                 from extract_tvm_model_data import extract_models_data
 
                 for metadata in extract_models_data(
@@ -228,7 +236,7 @@ class TraceHandler(BaseHandler):
             return {"status": "success", "data": {"events": tef_metadata_events}}
 
         except Exception as e:
-            print(f"[TRACE HANDLER] Metadata collection error: {e}")
+            logger.error(f"Metadata collection error: {e}")
             return {"status": "error", "message": f"Failed to collect metadata: {e}"}
 
     async def reset(self):
@@ -237,9 +245,10 @@ class TraceHandler(BaseHandler):
 
     async def collect(self) -> dict:
         """Provides the increment of the trace buffer not yet sent."""
-        print("[TRACE HANDLER] Collecting trace increment")
+        logger.info("Collecting trace increment")
 
         if not self.raw_ctf_path.exists():
+            logger.warning("No trace data available to collect.")
             return {"status": "error", "message": "No trace data available to collect."}
 
         if self.file_handle and not self.file_handle.closed:
@@ -262,7 +271,7 @@ class TraceHandler(BaseHandler):
             }
 
         except Exception as e:
-            print(f"[Trace Handler] Full collection parse error: {e}")
+            logger.error(f" Trace collection parse error: {e}")
             return {"status": "error", "message": f"Failed to parse trace file: {e}"}
         finally:
             self._is_parsing = False
@@ -272,11 +281,11 @@ class TraceHandler(BaseHandler):
         Callback triggered when a remote capture script connects to the socket.
         """
         peer_name = writer.get_extra_info("peername")
-        print(f"[TRACE HANDLER] Client connected from {peer_name}")
+        logger.info(f"Client connected from {peer_name}")
 
         # Prevent multiple capture scripts from streaming at the exact same time
         if self.active_writer is not None:
-            print("[TRACE HANDLER] Rejecting new connection, already streaming.")
+            logger.warning("Rejecting new connection, already streaming.")
             writer.close()
             await writer.wait_closed()
             return
@@ -297,15 +306,15 @@ class TraceHandler(BaseHandler):
                 chunk = await reader.read(PARSE_THRESHOLD_BYTES)
 
                 if not chunk:
-                    print("[TRACE HANDLER] Client disconnected, EOF reached.")
+                    logger.info("Client disconnected, EOF reached.")
                     break
 
                 await self._handle_trace(chunk)
 
         except asyncio.CancelledError:
-            print("\n[TRACE HANDLER] Reading loop cancelled.")
+            logger.info("Reading loop cancelled.")
         except Exception as e:
-            print(f"\n[TRACE HANDLER] Error reading from socket: {e}")
+            logger.error(f"Error reading from socket: {e}")
         finally:
             if self.file_handle:
                 self.file_handle.close()
@@ -317,7 +326,7 @@ class TraceHandler(BaseHandler):
             writer.close()
             await writer.wait_closed()
             self.active_writer = None
-            print("[TRACE HANDLER] Client connection cleaned up.")
+            logger.info("Client connection cleaned up.")
 
     async def _handle_trace(self, trace_chunk: bytes):
         """
@@ -337,7 +346,7 @@ class TraceHandler(BaseHandler):
 
         if tag_idx != -1:
             if not self.is_synced:
-                print("\n [Trace Handler] Found START TAG Valid CTF data starting")
+                logger.debug("Found START TAG Valid CTF data starting")
                 self.is_synced = True
 
             self.sync_buffer = self.sync_buffer[tag_idx + len(self.sync_tag) :]
@@ -522,4 +531,4 @@ class TraceHandler(BaseHandler):
         except Exception as e:
             # It is expected that some parsed events will be incomplete
             if "LTTNG_CTF_LTTNG_INDEX" not in str(e):
-                print(f"[Trace Handler] Incremental parse error: {e}")
+                logger.error(f"Incremental parse error: {e}")
