@@ -20,3 +20,7 @@ https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp310-cp31
 https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp311-cp311-macosx_14_0_arm64.whl; python_version == '3.11' and sys_platform == "darwin"
 https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp312-cp312-macosx_14_0_arm64.whl; python_version == '3.12' and sys_platform == "darwin"
 https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp313-cp313-macosx_14_0_arm64.whl; python_version == '3.13' and sys_platform == "darwin"
+https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp310-cp310-win_amd64.whl; python_version == '3.10' and sys_platform == "win32"
+https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp311-cp311-win_amd64.whl; python_version == '3.11' and sys_platform == "win32"
+https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp312-cp312-win_amd64.whl; python_version == '3.12' and sys_platform == "win32"
+https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp313-cp313-win_amd64.whl; python_version == '3.13' and sys_platform == "win32"
