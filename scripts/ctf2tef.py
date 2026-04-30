@@ -443,7 +443,7 @@ def prepare_dir(trace: Path, zephyr_base: Path | None = None):
     Path
         The temporary directory with CTF and custom metadata.
     """
-    with TemporaryDirectory() as tmp_dir:
+    with TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir:
         tmp_dir = Path(tmp_dir)
 
         tmp_ctf = tmp_dir / trace.name
@@ -502,7 +502,7 @@ def prepare_dir_for_instrumentation(trace: Path, instrumentation_metadata: Path)
     Path
         The temporary directory with CTF and custom metadata.
     """
-    with TemporaryDirectory() as tmp_dir:
+    with TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir:
         tmp_dir = Path(tmp_dir)
 
         tmp_ctf = tmp_dir / trace.name
