@@ -7,8 +7,10 @@
 Provides a handler for trace collection related tasks.
 """
 
+from handlers.base import BaseHandler
 
-class TraceHandler:
+
+class TraceHandler(BaseHandler):
     """
     Handler responsible for managing the lifecycle of trace data collection.
     """

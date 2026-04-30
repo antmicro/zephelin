@@ -9,6 +9,7 @@ Module containing JSON-RPC handling logic.
 
 from typing import Any, Callable, Optional
 
+from handlers.base import BaseHandler
 from jsonrpc.exceptions import JSONRPCDispatchException
 from jsonrpc.jsonrpc2 import JSONRPC20BatchRequest, JSONRPC20Request, JSONRPC20Response
 
@@ -24,13 +25,13 @@ class RPCDispatcher:
         """
         self.rpc_methods: dict[str, Callable] = {}
 
-    def register_methods(self, instance: Any, namespace: str = ""):
+    def register_methods(self, instance: BaseHandler, namespace: str = ""):
         """
         Registers public methods from a handler class.
 
         Parameters
         ----------
-        instance: Any
+        instance: BaseHandler
             An instance of a handler class with implementations of RPC methods.
             Methods starting with '_' will be ignored.
 
