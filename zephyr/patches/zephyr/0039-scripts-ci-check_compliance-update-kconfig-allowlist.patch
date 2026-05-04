@@ -1,17 +1,20 @@
-From a2c541167070b2d38d85bc0c79a3712c473a1f02 Mon Sep 17 00:00:00 2001
-From: Jedrzej Czykier <jczykier@antmicro.com>
-Date: Thu, 30 Apr 2026 12:28:26 +0200
-Subject: [PATCH 39/40] scripts: ci: add benchmark options to allowlist
+From 5f852860568372e04dab8c7abbb749a0f78d52a6 Mon Sep 17 00:00:00 2001
+From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+Date: Fri, 15 May 2026 11:18:26 +0200
+Subject: [PATCH 39/40] scripts: ci: check_compliance: update kconfig allowlist
 
+Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+Signed-off-by: Grzegorz Latosinski <glatosinski@antmicro.com>
+Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
 ---
- scripts/ci/check_compliance.py | 5 +++++
- 1 file changed, 5 insertions(+)
+ scripts/ci/check_compliance.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/scripts/ci/check_compliance.py b/scripts/ci/check_compliance.py
-index 5e675d9595d..9b4c55e547c 100755
+index 5e675d9595d..dd87bc65cf2 100755
 --- a/scripts/ci/check_compliance.py
 +++ b/scripts/ci/check_compliance.py
-@@ -1498,6 +1498,11 @@ flagged.
+@@ -1498,6 +1498,12 @@ flagged.
          "WHATEVER",
          "ZEPHYR_TRY_MASS_ERASE", # MCUBoot setting described in sysbuild
                                   # documentation
@@ -19,6 +22,7 @@ index 5e675d9595d..9b4c55e547c 100755
 +        "ZPL_BENCHMARK_MAGIC",
 +        "ZPL_BENCHMARK_RUN_BASIC",
 +        "ZPL_BENCHMARK_RUN_DHRYSTONE",
++        "ZPL_BENCHMARK_RUN_TFLITE",
 +        "ZPL_BENCHMARK_RUN_THREADS",
          "ZPL_SAMPLE_RUNTIME_CONF_PROFILING",
          "ZPL_SAMPLE_TFLM_MODEL",

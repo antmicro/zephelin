@@ -1,4 +1,4 @@
-From 6c9729160a611be6224c75c2d57aeac3ca0552a6 Mon Sep 17 00:00:00 2001
+From 790551e7669cc9296a512d0b44eab3dc898914a7 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Mon, 18 May 2026 11:32:46 +0200
 Subject: [PATCH 40/40] instrumentation: Remove printk from recursive exclusion

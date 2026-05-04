@@ -282,18 +282,18 @@ patches:
   module: zephyr
   path: zephyr/0038-subsys-instrumentation-Fix-instrumentation-triggers-.patch
   sha256sum: 95ccb597b81b44035970f0d2b7b9e65a8b2a408ee629c6355b080c12040a469d
-- author: Jedrzej Czykier
-  date: '2026-04-30'
-  email: jczykier@antmicro.com
+- author: Mikolaj Klikowicz
+  date: '2026-05-15'
+  email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0039-scripts-ci-add-benchmark-options-to-allowlist.patch
-  sha256sum: 2aaefe3cd0abfcca849747a65e8fbd646a6e666dee0ed600dd4756db77aeb379
+  path: zephyr/0039-scripts-ci-check_compliance-update-kconfig-allowlist.patch
+  sha256sum: 20e6841dcd9e17d37d61a60765cc6c143a655a7760897a4cb4f206be9df3360a
 - author: Mikolaj Klikowicz
   date: '2026-05-18'
   email: mklikowicz@antmicro.com
   module: zephyr
   path: zephyr/0040-instrumentation-Remove-printk-from-recursive-exclusi.patch
-  sha256sum: 0ccb1404d95107719d8eaf0580251ff56d1be7c65ef1703454c4cb507b5d4357
+  sha256sum: 215c8f76f92d7146ac86613b54c0b0caf8f4962d3b430a2d4088661849bcb8fc
 - author: Maciej Torhan
   date: '2025-06-04'
   email: mtorhan@antmicro.com
