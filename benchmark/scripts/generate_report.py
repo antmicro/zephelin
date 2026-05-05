@@ -37,7 +37,7 @@ def generate(results: dict):
                 ]
                 for k, v in sorted(board_benchmarks.items())
             ],
-            headers=["Benchmark", "Cycles", "FLASH", "RAM"],
+            headers=["Benchmark", "Cycles", "FLASH [B]", "RAM [B]"],
             tablefmt=tablefmt,
         )
 
