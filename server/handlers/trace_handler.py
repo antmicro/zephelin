@@ -11,7 +11,7 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from config import TraceConfig
 from ctf2tef import ctf_to_tef, prepare_dir
@@ -97,6 +97,11 @@ class TraceHandler(BaseHandler):
         """
         Starts the TCP server to listen for incoming trace streams from capture scripts.
 
+        Returns
+        -------
+        dict[str, str]
+            Status message.
+
         Raises
         ------
         Exception
@@ -123,7 +128,8 @@ class TraceHandler(BaseHandler):
 
         Returns
         -------
-            Message with connection status.
+        dict[str, str]
+            Status message.
         """
         logger.info("Disconnecting")
 
@@ -150,20 +156,39 @@ class TraceHandler(BaseHandler):
         return {"status": "success", "message": "Trace stopping initiated."}
 
     async def stream_start(self) -> dict[str, str]:
-        """Enables continuous trace streaming to the frontend."""
+        """
+        Enables continuous trace streaming to the frontend.
+
+        Returns
+        -------
+        dict[str, str]
+            Status message.
+        """
         self.continuous_streaming = True
         logger.debug("Continous streaming enabled.")
         return {"status": "success"}
 
     async def stream_stop(self) -> dict[str, str]:
-        """Disables continuous trace streaming to the frontend."""
+        """
+        Disables continuous trace streaming to the frontend.
+
+        Returns
+        -------
+        dict[str, str]
+            Status message.
+        """
         self.continuous_streaming = False
         logger.debug("Continous streaming disabled.")
         return {"status": "success"}
 
-    async def metadata(self) -> dict:
+    async def metadata(self) -> dict[str, Union[str, dict]]:
         """
         Provides model metadata and memory symbols for the trace.
+
+        Returns
+        -------
+        dict[str, Union[str, dict]]
+            Message with metadata events or error.
         """
         logger.info("Collecting trace metadata")
 
@@ -243,8 +268,15 @@ class TraceHandler(BaseHandler):
         """Resets the trace buffer."""
         raise NotImplementedError
 
-    async def collect(self) -> dict:
-        """Provides the increment of the trace buffer not yet sent."""
+    async def collect(self) -> dict[str, Union[str, dict]]:
+        """
+        Provides the increment of the trace buffer not yet sent.
+
+        Returns
+        -------
+        dict[str, Union[str, dict]]
+            Message with all events present in the buffer or error.
+        """
         logger.info("Collecting trace increment")
 
         if not self.raw_ctf_path.exists():
@@ -279,6 +311,14 @@ class TraceHandler(BaseHandler):
     async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         """
         Callback triggered when a remote capture script connects to the socket.
+
+        Parameters
+        ----------
+        reader: asyncio.StreamReader
+            Instance of stream reader.
+
+        writer: asyncio.StreamWriter
+            Instance of stream writer.
         """
         peer_name = writer.get_extra_info("peername")
         logger.info(f"Client connected from {peer_name}")
