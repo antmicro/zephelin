@@ -1,19 +1,19 @@
 ai-edge-litert>=1.3.0; sys_platform != "darwin"
 ai-edge-litert==1.3.0; sys_platform == "darwin"
-fastapi==0.135.3
+fastapi==0.104.1
 json-rpc==1.15.0
 tflite
 pyelftools
 pyrenode3 @ git+https://github.com/antmicro/pyrenode3.git
 pyserial==3.5
-python-socketio==5.16.1
+python-socketio==5.10.0
 pyusb>=1.2.1,<2.0
 pyyaml==6.0.*
 robotframework-retryfailed==0.2.0
 robotframework==6.1
 telnetlib3==2.0.*
 tqdm
-uvicorn==0.44.0
+uvicorn==0.24.0.post1
 west>=1.3.0
 flatbuffers>=25.2.10
 https://github.com/antmicro/libbtrace/releases/download/tip/bt2-0.0.1-cp310-cp310-manylinux_2_28_x86_64.whl; python_version == '3.10' and sys_platform == "linux"
