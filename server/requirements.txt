@@ -1,0 +1,4 @@
+fastapi==0.104.1
+json-rpc==1.15.0
+python-socketio==5.10.0
+uvicorn==0.24.0.post1
