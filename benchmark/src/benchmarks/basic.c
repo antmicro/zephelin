@@ -9,7 +9,9 @@
 #include <bench.h>
 
 #include <zephyr/sys/util.h>
+#include <zpl.h>
 
+ZPL_CODE_SCOPE_DEFINE(mul, true);
 
 #define BENCH_ATTRS __attribute__((optimize("O0"), noinline))
 
@@ -30,7 +32,8 @@ int BENCH_ATTRS basic_add(int a, int b)
 int BENCH_ATTRS basic_mul(int a, int b)
 {
 	int acc = 0;
-	ZPL_MARK_CODE_SCOPE(mul) {
+	ZPL_MARK_CODE_SCOPE(mul)
+	{
 		for (int i = 0; i < b; i++) {
 			basic_add(acc, a);
 		}
