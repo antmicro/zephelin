@@ -15,6 +15,8 @@ elseif(CONFIG_ZPL_BENCHMARK_RUN_BASIC)
     set(bench_src "src/benchmarks/basic.c")
 elseif(CONFIG_ZPL_BENCHMARK_RUN_THREADS)
     set(bench_src "src/benchmarks/threads.c")
+elseif(CONFIG_ZPL_BENCHMARK_RUN_TFLITE)
+    set(bench_src "src/benchmarks/tflite.cpp")
 endif()
 
 target_sources(app PRIVATE src/main.c ${bench_src})

@@ -24,6 +24,10 @@ config ZPL_BENCHMARK_RUN_BASIC
 config ZPL_BENCHMARK_RUN_THREADS
 	bool "Threads-based Zephelin benchmark"
 
+config ZPL_BENCHMARK_RUN_TFLITE
+	bool "TFLite-based Zephelin benchmark"
+	help
+		Performs inference using a simple TFLite model. Uses ZPL scopes and model tracing.
 
 endchoice
 
