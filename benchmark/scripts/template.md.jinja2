@@ -3,5 +3,18 @@
 ### {{ board }}
 {{ tables }}
 {% endfor %}
+## Benchmarks
+{% for benchmark, desc in benchmark_desc.items()|sort %}
+### {{ benchmark }}
+{{ desc }}
+{% endfor %}
+
+## Configs
+{% for config, content in configs.items()|sort %}
+### {{ config }}
+```
+{{ content }}
+```
+{% endfor %}
 ## Commits
 {{ commits }}

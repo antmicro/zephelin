@@ -10,9 +10,12 @@ Script for extracting benchmark results from twister outputs.
 """
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
+
+import yaml
 
 
 def extract_benchmark_result(benchmark):
@@ -114,10 +117,78 @@ def extract_commit_ids(paths: list[Path | str]):
     return commits_ids
 
 
+def extract_configs(path: str | Path):
+    """Extract used config files."""
+    path = Path(path)
+    with (path / "sample.yaml").open() as f:
+        sample = yaml.safe_load(f)
+
+    all_conf_files = set(["prj.conf"])
+    benchmark_conf = {}
+    benchmark_names = {}
+
+    pattern_conf = re.compile("[;=](.*?\.conf)")
+    pattern_names = re.compile("(CONFIG_ZPL_BENCHMARK_RUN_.*?)=[yn]")
+
+    for benchmark, config in sample["tests"].items():
+        conf_files = pattern_conf.findall(config.get("extra_args", ""))
+        all_conf_files.update(conf_files)
+        benchmark_conf[benchmark] = conf_files
+        benchmark_names[benchmark] = (
+            pattern_names.search(config.get("extra_configs", [])[0])
+            .group(1)
+            .partition("CONFIG_")[-1]
+        )
+
+    all_conf = {p: (path / p).read_text() for p in all_conf_files}
+
+    configs = {
+        "benchmarks": {
+            "configs": benchmark_conf,
+            "names": benchmark_names,
+        },
+        "contents": all_conf,
+    }
+
+    return configs
+
+
+def extract_benchmarks(path: str | Path):
+    """Extract benchmark descriptions."""
+    path = Path(path)
+    conf = (path / "Kconfig").read_text()
+    pattern = re.compile(
+        """config\s(ZPL_BENCHMARK_RUN_.*?)\n
+        \s*bool\s(.*)\n
+        \s*help\s(.*)""",
+        flags=re.M | re.X,
+    )
+
+    name_map = {v: k for k, v in configs["benchmarks"]["names"].items()}
+    print(name_map)
+
+    benchmarks = {}
+    for name, prompt, desc in pattern.findall(conf):
+        prompt = prompt.strip('"')
+        benchmarks[name] = f"{prompt.strip()}\n\n{desc.strip()}\n"
+
+    return benchmarks
+
+
 if __name__ == "__main__":
     path = Path(sys.argv[1])
     out_path = Path(sys.argv[2])
 
-    results = {"results": extract_results(path), "commits": extract_commit_ids([".", "../zephyr"])}
+    results = extract_results(path)
+    commits = extract_commit_ids([".", "../zephyr"])
+    configs = extract_configs("./benchmark")
+    benchmarks = extract_benchmarks("./benchmark")
+
+    results = {
+        "results": results,
+        "commits": commits,
+        "configs": configs,
+        "benchmarks": benchmarks,
+    }
 
     out_path.write_text(json.dumps(results, indent=2))

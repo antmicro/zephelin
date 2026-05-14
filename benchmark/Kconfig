@@ -17,12 +17,18 @@ choice
 
 config ZPL_BENCHMARK_RUN_DHRYSTONE
 	bool "Dhrystone Zephelin benchmark"
+	help
+		Synthetic benchmark for integer operations. Doesn't rely on any Zephyr features.
 
 config ZPL_BENCHMARK_RUN_BASIC
 	bool "Basic Zephelin benchmark (a very inefficient dot product implementaton)"
+	help
+		Based on an inefficient dot product implementation. Uses ZPL scopes for tracing.
 
 config ZPL_BENCHMARK_RUN_THREADS
 	bool "Threads-based Zephelin benchmark"
+	help
+		Features multiple threads performing a dummy operation on a single resource. Uses Zephyr's mutexes and semaphores.
 
 config ZPL_BENCHMARK_RUN_TFLITE
 	bool "TFLite-based Zephelin benchmark"

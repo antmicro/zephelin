@@ -13,6 +13,8 @@ tests:
     harness: robot
     harness_config:
       robot_testsuite: bench.robot
+    extra_configs:
+      - CONFIG_ZPL_BENCHMARK_RUN_DHRYSTONE=y
   bench.dhry.instr:
     harness: robot
     harness_config:
