@@ -14,7 +14,7 @@ instrumentation
 ctf_to_tef
 new_runtime
 visual_interface
-server_endpoints
+live_tracing
 examples
 development
 benchmark_report

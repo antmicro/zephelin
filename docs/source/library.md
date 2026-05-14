@@ -236,6 +236,7 @@ against using both methods at the same time. Improper use will result in a compi
 The library can be configured both during building and during a run on a device.
 To find out how to configure the library and how to add new configurations, check {doc}`configuration`.
 
+(trace-collection)=
 ### Trace collection
 
 To enable Zephelin tracing support, the user should enable the symbol `CONFIG_ZPL_TRACE` in Kconfig.
@@ -271,6 +272,8 @@ Depending on the tracing backend used, the following commands can be used for tr
     -h, --help       show this help message and exit
     --send-enable    Send 'enable' to device before collecting data to enable tracing, requires
                      CONFIG_TRACING_HANDLE_HOST_CMD to be enabled in the app
+    --send-to-remote
+                     Forward collected data to specified address
   ```
 
 #### USB
@@ -293,6 +296,7 @@ Depending on the tracing backend used, the following commands can be used for tr
                           Timeout of the USB capture in seconds
     -w, --wait-for-device
                           When this flag is set, the command will wait for the device to connect
+    --send-to-remote      Forward collected data to specified address
   ```
 
 #### Debugger
@@ -319,6 +323,7 @@ Depending on the tracing backend used, the following commands can be used for tr
     --openocd OPENOCD    Path to custom OpenOCD
     --buffer-full        Run application until trace buffer is full
     --n-bytes N_BYTES    Run application until there is at least n in trace buffer
+    --send-to-remote     Forward collected data to specified address
   ```
 
 #### Trivial UART in Renode
