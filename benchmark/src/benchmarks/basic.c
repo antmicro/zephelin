@@ -10,6 +10,10 @@
 
 #include <zephyr/sys/util.h>
 
+
+#define BENCH_ATTRS __attribute__((optimize("O0"), noinline))
+
+
 void benchmark_setup(void)
 {
 }
@@ -18,22 +22,22 @@ void benchmark_teardown(void)
 {
 }
 
-int basic_add(int a, int b)
+int BENCH_ATTRS basic_add(int a, int b)
 {
 	return a + b;
 }
 
-int basic_mul(int a, int b)
+int BENCH_ATTRS basic_mul(int a, int b)
 {
 	int acc = 0;
-
-	for (int i = 0; i < b; i++) {
-		basic_add(acc, a);
+	ZPL_MARK_CODE_SCOPE(mul) {
+		for (int i = 0; i < b; i++) {
+			basic_add(acc, a);
+		}
 	}
 	return acc;
 }
-
-int basic_dot(int a[], int b[], int n)
+int BENCH_ATTRS basic_dot(int a[], int b[], int n)
 {
 	int acc = 0;
 
