@@ -62,7 +62,7 @@ if __name__ == "__main__":
         help="Hex address of shared clock, if provided all boards will \
             have access to peripheral with consistent time",
     )
-    parser.add_argument("--to-pty", action="store_true", help="Stream trace data directly to PTY")
+    parser.add_argument("--send-to-remote", type=str, help="Stream trace data directly to a socket")
     parser.add_argument("--pause", action="store_true", help="Wait for ENTER before starting")
 
     parser.add_argument("--renode-logs", action="store_true", help="Print Renode logs to stdout")
