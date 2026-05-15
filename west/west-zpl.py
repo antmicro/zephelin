@@ -5,8 +5,8 @@
 
 """Zephelin West extension for tracing data capture."""
 
-import os
 import signal
+import socket
 import subprocess
 import threading
 import time
@@ -193,35 +193,63 @@ class ZplGdbCapture(WestCommand):
 
 
 class SerialWrapper:
-    """Wrapper for serial port used for PTY passthrough."""
+    """Wrapper for serial port used for Socket passthrough."""
 
-    def __init__(self, ser, target=None, pty_forward=False):
+    def __init__(self, ser, socket_forward=False, socket_port=0):
         """Init SerialWrapper for a provided serial port."""
         self._ser = ser
-        self._target = target if target is not None else "zpl_pty"
-        self._pty_forward = pty_forward
-
-        master, slave = os.openpty()
-        self._master = master
-        self._slave = slave
-        self._pty_name = os.ttyname(slave)
-
-        if self._target is not None:
-            try:
-                os.unlink(self._target)
-            except FileNotFoundError:
-                ...
-            os.symlink(self._pty_name, self._target)
+        self._socket_forward = socket_forward
 
         self._ser_lock = threading.Lock()
-        self._write_thread = threading.Thread(target=self._write_loop, daemon=True)
-        self._write_thread.start()
+        self._client_socket = None
+
+        self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        self._server_socket.bind(("127.0.0.1", socket_port))
+        self._server_socket.listen(1)
+
+        try:
+            address = "socket://{}:{}".format(*self._server_socket.getsockname())
+            print(f"Connect zaru.py to {address}")
+        except OSError:
+            pass
+
+        threading.Thread(target=self._accept_loop, daemon=True).start()
+        threading.Thread(target=self._write_loop, daemon=True).start()
+
+    def _accept_loop(self):
+        """Listen for incoming socket connections."""
+        while True:
+            try:
+                conn, addr = self._server_socket.accept()
+
+                if self._client_socket is not None:
+                    print(f"Rejected connection from {addr}.")
+                    conn.close()
+                    continue
+
+                self._client_socket = conn
+                print(f"Client {addr} connected.")
+            except OSError:
+                break
 
     def _write_loop(self):
+        """Read data from the socket and write it to the serial port."""
         while True:
-            data = os.read(self._master, 1)
-            with self._ser_lock:
-                self._ser.write(data)
+            if not self._client_socket:
+                time.sleep(0.01)
+                continue
+
+            try:
+                data = self._client_socket.recv(1024)
+                if data:
+                    with self._ser_lock:
+                        self._ser.write(data)
+                else:
+                    self._client_socket = None
+            except OSError:
+                self._client_socket = None
 
     def write(self, data):
         with self._ser_lock:
@@ -230,16 +258,28 @@ class SerialWrapper:
     def read(self, size):
         with self._ser_lock:
             data = self._ser.read(size)
-        if self._pty_forward and data:
-            os.write(self._master, data)
+
+        if self._socket_forward and data and self._client_socket:
+            try:
+                self._client_socket.sendall(data)
+            except OSError:
+                pass
 
         return data
 
     def read_all(self):
+        if self._ser.in_waiting == 0:
+            time.sleep(0.001)
+            return b""
+
         with self._ser_lock:
             data = self._ser.read_all()
-        if self._pty_forward and data:
-            os.write(self._master, data)
+
+        if self._socket_forward and data and self._client_socket:
+            try:
+                self._client_socket.sendall(data)
+            except OSError:
+                pass
 
         return data
 
@@ -273,11 +313,11 @@ class ZplUartCapture(WestCommand):
             ),
         )
         parser.add_argument(
-            "--pty-forward",
+            "--socket-forward",
             action="store_true",
         )
         parser.add_argument(
-            "--pty-path",
+            "--socket-port", type=int, default=0, help="Specific port to bind the TCP server to"
         )
 
         return parser
@@ -292,8 +332,8 @@ class ZplUartCapture(WestCommand):
 
         serw = SerialWrapper(
             ser=ser,
-            target=args.pty_path,
-            pty_forward=args.pty_forward,
+            socket_forward=args.socket_forward,
+            socket_port=args.socket_port,
         )
 
         trace_idx = 0
