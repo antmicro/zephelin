@@ -1,7 +1,7 @@
-From e9da77cff11e5c3ec4287a4b40f6a3111e86fbd0 Mon Sep 17 00:00:00 2001
+From a1e13512c01851f40168645ff69152d5ec867c3b Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 12 Sep 2025 15:23:46 +0200
-Subject: [PATCH 11/39] tracing: ctf: use 64-bit timestamps
+Subject: [PATCH 11/40] tracing: ctf: use 64-bit timestamps
 
 Changes CTF events to use 64bit timestamp. This enables tracing of
 longer
@@ -108,5 +108,5 @@ index 90051505512..6bb9acbf23e 100644
  		tracing_set_state(TRACING_DISABLE);
  	} else {
 -- 
-2.47.3
+2.47.1
 

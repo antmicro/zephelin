@@ -1,7 +1,7 @@
-From b775045ab0933c4c41520cc0bc99134f19ca9b53 Mon Sep 17 00:00:00 2001
+From 0486bf118638f03f4660debf6e57ce668ce81fdf Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Fri, 17 Oct 2025 15:00:19 +0200
-Subject: [PATCH 09/39] check_compliance: exclude kconfig symbols
+Subject: [PATCH 09/40] check_compliance: exclude kconfig symbols
 
 ---
  scripts/ci/check_compliance.py | 5 +++++
@@ -24,5 +24,5 @@ index e2a66589204..c745cd00290 100755
          "ZVFS_OPEN_ADD_SIZE_", # Used as an option matching prefix
          # zephyr-keep-sorted-stop
 -- 
-2.47.3
+2.47.1
 

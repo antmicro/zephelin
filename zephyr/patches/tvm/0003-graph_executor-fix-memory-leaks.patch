@@ -1,4 +1,4 @@
-From 6e64f64d6f60b79c8bd8a0ed3c3e28a9b968cc96 Mon Sep 17 00:00:00 2001
+From 8f09a12fd8df695435c44cc3c170c06d7237672f Mon Sep 17 00:00:00 2001
 From: Maciej Torhan <mtorhan@antmicro.com>
 Date: Fri, 13 Jun 2025 11:53:05 +0200
 Subject: [PATCH 3/8] graph_executor: fix memory leaks
@@ -233,5 +233,5 @@ index 3b139c47b..df2a01216 100644
        lookup_linked_param.args.values[0].v_int64 = idx;
        CHECK_EQ(lookup_linked_param.Call(&lookup_linked_param), 0, "lookup_linked_param");
 -- 
-2.47.3
+2.47.1
 

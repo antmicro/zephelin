@@ -1,7 +1,7 @@
-From a624aba38141f24f8f4be46ba5f61232b3d363cf Mon Sep 17 00:00:00 2001
+From ecec3c3a841ec90f92128b3588c8b23ccf01c385 Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
 Date: Tue, 17 Mar 2026 14:48:41 +0100
-Subject: [PATCH 24/39] boards: add sysbuild domain export
+Subject: [PATCH 24/40] boards: add sysbuild domain export
 
 Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
 ---
@@ -23,5 +23,5 @@ index 3d42b3b8de1..d0be26fa754 100644
 +
  board_finalize_runner_args(renode-robot)
 -- 
-2.47.3
+2.47.1
 

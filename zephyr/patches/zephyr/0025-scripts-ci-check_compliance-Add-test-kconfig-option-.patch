@@ -1,7 +1,7 @@
-From 4913a7ac6ef43a16142caa70cd79080956594b72 Mon Sep 17 00:00:00 2001
+From 4e814e75786c37892f1249b9386cf0751a9dbf7b Mon Sep 17 00:00:00 2001
 From: Jedrzej Czykier <jczykier@antmicro.com>
 Date: Tue, 17 Mar 2026 10:10:57 +0100
-Subject: [PATCH 25/39] scripts: ci: check_compliance: Add test kconfig option
+Subject: [PATCH 25/40] scripts: ci: check_compliance: Add test kconfig option
  to igonred keywords
 
 Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
@@ -22,5 +22,5 @@ index c745cd00290..23d49ca6c44 100755
          "ZVFS_OPEN_ADD_SIZE_", # Used as an option matching prefix
          # zephyr-keep-sorted-stop
 -- 
-2.47.3
+2.47.1
 

@@ -1,7 +1,7 @@
-From 0280e921bd21d9410677d88431a170e47b94dcb5 Mon Sep 17 00:00:00 2001
+From 4d20163c16fee7272931f865fe33917e406dd71c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?=C5=81ukasz=20K=C4=99dziora?= <lkedziora@antmicro.com>
 Date: Tue, 31 Mar 2026 09:15:37 +0200
-Subject: [PATCH 37/39] subsys: instrumentation: Exclude irq lock/unlock and
+Subject: [PATCH 37/40] subsys: instrumentation: Exclude irq lock/unlock and
  timestamp getters
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -31,5 +31,5 @@ index 0309c7b93bf..553509703c5 100644
  	help
  	  Set the list of function names to be excluded from instrumentation.
 -- 
-2.47.3
+2.47.1
 
