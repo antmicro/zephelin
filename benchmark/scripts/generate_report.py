@@ -24,7 +24,7 @@ tablefmt = "github"
 
 def generate(results: dict):
     """Generate report from benchmark results."""
-    benchmarks = {}
+    benchmarks = dict()
     bench_names = results["configs"]["benchmarks"]["names"]
     for board, board_benchmarks in sorted(results["results"].items()):
         print(board)

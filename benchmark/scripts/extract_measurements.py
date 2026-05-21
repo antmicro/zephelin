@@ -42,7 +42,7 @@ def extract_benchmark_ram_report(benchmark):
             ram_report_end = i
             break
 
-    parsed = {}
+    parsed = dict()
 
     ram_report = lines[ram_report_start:ram_report_end]
     for line in ram_report[1:]:
@@ -77,11 +77,11 @@ def extract_results(path: Path):
 
     board_benchmarks = {board: list(board.glob("*/*/benchmark/*")) for board in boards}
 
-    results = {}
+    results = dict()
 
     for board, benchmarks in board_benchmarks.items():
         print(f"Board: {board.name}")
-        board_results = {}
+        board_results = dict()
         for benchmark in benchmarks:
             print(f"  Benchmark: {benchmark.name}")
 
@@ -104,8 +104,8 @@ def extract_commit_ids(paths: list[Path | str]):
         subprocess.check_output(["git", "--version"])
     except FileNotFoundError as e:
         print(f"Skipping commit ids: {e}")
-        return {}
-    commits_ids = {}
+        return dict()
+    commits_ids = dict()
     for path in paths:
         path = Path(path)
         raw = subprocess.check_output(
@@ -124,8 +124,8 @@ def extract_configs(path: str | Path):
         sample = yaml.safe_load(f)
 
     all_conf_files = set(["prj.conf"])
-    benchmark_conf = {}
-    benchmark_names = {}
+    benchmark_conf = dict()
+    benchmark_names = dict()
 
     pattern_conf = re.compile("[;=](.*?\.conf)")
     pattern_names = re.compile("(CONFIG_ZPL_BENCHMARK_RUN_.*?)=[yn]")
@@ -167,7 +167,7 @@ def extract_benchmarks(path: str | Path):
     name_map = {v: k for k, v in configs["benchmarks"]["names"].items()}
     print(name_map)
 
-    benchmarks = {}
+    benchmarks = dict()
     for name, prompt, desc in pattern.findall(conf):
         prompt = prompt.strip('"')
         benchmarks[name] = f"{prompt.strip()}\n\n{desc.strip()}\n"
