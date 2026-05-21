@@ -31,8 +31,8 @@ if str(SCRIPTS_DIR) not in sys.path:
 from config import TraceConfig  # noqa: E402
 from extract_tvm_model_data import DEFAULT_OP_PREFIX_RE, DEFAULT_OP_SUFFIX_RE  # noqa: E402
 from frontend import create_app  # noqa: E402
+from server_utils.logger import string_to_verbosity  # noqa: E402
 from socket_factory import create_socketio  # noqa: E402
-from utils.logger import string_to_verbosity  # noqa: E402
 
 load_dotenv()
 
