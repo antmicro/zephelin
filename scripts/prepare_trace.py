@@ -59,7 +59,7 @@ def create_custom_events(
     tvm_op_remove_prefix: re.Pattern = DEFAULT_OP_PREFIX_RE,
     tvm_op_remove_suffix: re.Pattern = DEFAULT_OP_SUFFIX_RE,
     multi_model_trace: bool = False,
-    symbol_map: dict[int, list[str]] | None = None,
+    symbol_map: dict[str, list[str]] | None = None,
 ) -> list[CustomEventDefinition]:
     """
     Creates custom events.
@@ -72,7 +72,7 @@ def create_custom_events(
         Pattern removing TVM operator type suffix.
     multi_model_trace : bool
         Whether the trace contains more than one model.
-    symbol_map : dict[int, list[str]] | None
+    symbol_map : dict[str, list[str]] | None
         Dict mapping addresses to mangled symbols.
 
     Returns
@@ -197,15 +197,15 @@ def create_custom_events(
         if callee.strip().lstrip("+-").isdigit():
             symbol_map_key = f"{int(callee):08x}"
         else:
-            symbol_map_key = 0
+            symbol_map_key = "0"
 
         symbol_list = symbol_map.get(symbol_map_key)
 
         if symbol_list:
             return demangle(symbol_list[0])
         else:
-            print(f"No symbols found - using callee address {hex(symbol_map_key)}")
-            return hex(symbol_map_key)
+            print(f"No symbols found - using callee address {symbol_map_key}")
+            return symbol_map_key
 
     return [
         CustomEventDefinition(
@@ -308,7 +308,7 @@ def add_model_metadata(trace: list, data: dict):
     )
 
 
-def extract_symbol_map(zephyr_elf_path: Path) -> dict[int, list[str]]:
+def extract_symbol_map(zephyr_elf_path: Path) -> dict[str, list[str]]:
     """
     Extracts memory symbols from the provided Zephyr ELF.
 
