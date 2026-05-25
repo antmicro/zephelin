@@ -51,7 +51,25 @@ INSTR_EVENT_PREFIX = "instr::"
 # Prefix for scheduling events
 INSTR_SCHED_PREFIX = "instr_sched_switch"
 
-CPPFILT_CMD = [os.environ.get("ZPL_DEMANGLE_CMD", "c++filt")]
+CPPFILT_CMD = os.environ.get("ZPL_DEMANGLE_CMD", None)
+
+
+def get_sdk_bin_path(build_dir: str | Path):
+    """
+    Extracts the SDK path from CMakeCache.
+    """
+    build_dir = Path(build_dir)
+    cmake_cache = build_dir / "CMakeCache.txt"
+    if not cmake_cache.exists():
+        return None
+
+    with cmake_cache.open("r") as f:
+        for line in f:
+            if line.startswith("CMAKE_CXX_COMPILER:STRING="):
+                path = line.removeprefix("CMAKE_CXX_COMPILER:STRING=")
+                return Path(path).parent
+
+    return None
 
 
 # The list of custom events definitions
@@ -183,7 +201,10 @@ def create_custom_events(
 
     @functools.lru_cache(maxsize=1024)
     def demangle(func: str):
-        cmd = CPPFILT_CMD + [func]
+        if CPPFILT_CMD is None:
+            return func
+
+        cmd = [CPPFILT_CMD, func]
         try:
             func_demangled = subprocess.check_output(cmd, text=True).strip()
         except subprocess.CalledProcessError as e:
@@ -788,6 +809,20 @@ def process_ram_report(ram: dict) -> float:
     return s
 
 
+def ensure_cppfilt(sdk_bin_path: str | Path):
+    """Ensures that CPPFILT_CMD is set."""
+    global CPPFILT_CMD
+    if CPPFILT_CMD is not None:
+        return
+
+    sdk_bin_path = Path(sdk_bin_path)
+    CPPFILT_CMD = next(sdk_bin_path.glob("*-c++filt"), None)
+    if CPPFILT_CMD:
+        print(f"Found c++filt at '{CPPFILT_CMD}'")
+    else:
+        print("c++filt is missing")
+
+
 def prepare(args: argparse.Namespace):
     """
     Prepares CTF trace to be visualized.
@@ -801,6 +836,10 @@ def prepare(args: argparse.Namespace):
     tef_trace, thread_name = [], {}
     if args.zephyr_elf_path is None:
         args.zephyr_elf_path = Path(".") / "build" / "zephyr" / "zephyr.elf"
+
+    if Path(args.build_dir).exists():
+        if sdk_bin_path := get_sdk_bin_path(args.build_dir):
+            ensure_cppfilt(sdk_bin_path)
 
     multiple_models = False
 
