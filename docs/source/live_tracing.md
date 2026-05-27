@@ -72,6 +72,8 @@ If the Visualizer is connected to the server, the live-tracing controls are avai
 * `Start streaming` - enables continuous rendering of received traces.
 * `Stop streaming` - disables continuous rendering.
 * `Collect` - visualizes all the traces gathered so far.
+* `Stop Tailing` - Stops the default behavior in which viewport follows live edge of visualized trace.
+* `Resume Tailing` - Snaps the viewport back to the live edge.
 
 
 ## Server API reference
