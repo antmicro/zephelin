@@ -16,3 +16,4 @@ This documentation describes the following aspects of Zephelin and the associate
 * {doc}`live_tracing` - describes how to trace the execution in real-time
 * {doc}`examples` - aggregates and describes various example applications present in the project
 * {doc}`development` - summarizes and links resources regarding development of Zephelin
+* {doc}`benchmark_report` - provides details on the overhead introduced by the library based on different options
