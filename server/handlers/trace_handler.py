@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Literal, Optional, Union
 
 from config import TraceConfig
-from ctf2tef import ctf_to_tef, prepare_dir
+from ctf2tef import stream_ctf_to_tef, ctf_to_tef, prepare_dir
 from endpoints import Endpoints
 from extract_tvm_model_data import tvm_recalculate_model_numbers
 from handlers.base import BaseHandler
@@ -30,6 +30,8 @@ from prepare_trace import (
 )
 from socketio import AsyncServer
 from state_manager import global_state
+import bt2
+import time
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 PARSE_THRESHOLD_BYTES = 8192
@@ -60,6 +62,7 @@ class TraceHandler(BaseHandler):
             Configuration for trace gathering.
         """
         self.sio = sio
+        self.trace_events = []
         self.tcp_host = traceConfig.tcp_host
         self.tcp_port = traceConfig.tcp_port
 
@@ -299,17 +302,10 @@ class TraceHandler(BaseHandler):
         self._is_parsing = True
 
         try:
-            payload_events, overlap_count, _ = await self._extract_trace_increment(
-                update_state=True
-            )
+            await self._parse_and_emit_diff()
 
             return {
-                "status": "success",
-                "data": {
-                    "events": payload_events,
-                    "overlap_count": overlap_count,
-                    "total_count": self.events_sent_count,
-                },
+                "status": "success"
             }
 
         except Exception as e:
@@ -387,6 +383,7 @@ class TraceHandler(BaseHandler):
         trace_chunk: bytes
             Raw trace in CTF format.
         """
+        print(trace_chunk)
         if not self.file_handle:
             return
 
@@ -434,39 +431,7 @@ class TraceHandler(BaseHandler):
         finally:
             self._is_parsing = False
 
-    def _get_sliding_window(
-        self, trace_events: list, window_size: int = 150
-    ) -> tuple[list, int, int]:
-        """
-        Applies a sliding window to the trace events to recover late-arriving packets
-        that Babeltrace inserts into the recent past.
-
-        Parameters
-        ----------
-        trace_events: list
-            List of all gathered events.
-        window_size: int
-            Determines how many safety events should be sent.
-
-        Returns
-        -------
-        tuple[list, int, int]
-            Safety events, how big is the overlap, total count of events.
-        """
-        total_events = len(trace_events)
-
-        if total_events <= self.events_sent_count:
-            return [], 0, self.events_sent_count
-
-        slice_start = max(0, self.events_sent_count - window_size)
-
-        overlap_count = min(self.events_sent_count, window_size)
-
-        windowed_events = trace_events[slice_start:]
-
-        return windowed_events, overlap_count, total_events
-
-    async def _extract_trace_increment(self, update_state: bool) -> tuple[list, int, int]:
+    async def _extract_trace_increment(self,q, update_state: bool) -> tuple[list, int]:
         """
         Parses the CTF file, calculates the sliding window, and formats thread metadata.
 
@@ -481,44 +446,30 @@ class TraceHandler(BaseHandler):
             TEF events, how big is the overlap, total count of events.
         """
 
-        def run_sync_parse():
-            MODEL_IDS_MAPPING.clear()
-            self.tvm_prefix_to_model_id.clear()
-
-            with prepare_dir(self.raw_ctf_path) as tmp_dir:
-                result = ctf_to_tef(
-                    path=str(tmp_dir),
+        new_trace_events, thread_names = await anext(stream_ctf_to_tef(
+                    q,
                     custom_metadata=CUSTOM_METADATA,
                     custom_events=create_custom_events(
                         tvm_op_remove_prefix=self.tvm_op_remove_prefix,
                         tvm_op_remove_suffix=self.tvm_op_remove_suffix,
                         multi_model_trace=self.multi_model_trace,
                         symbol_map=self.symbol_map,
-                    ),
-                )
+                    )))
+        if self.tvm_model_paths:
+            if 0 in MODEL_IDS_MAPPING:
+                MODEL_IDS_MAPPING.pop(0)
 
-            trace_events = result.tef
+            new_trace_events, tvm_prefix_to_model_id = tvm_recalculate_model_numbers(
+                new_trace_events, len(MODEL_IDS_MAPPING)
+            )
 
-            if self.tvm_model_paths:
-                if 0 in MODEL_IDS_MAPPING:
-                    MODEL_IDS_MAPPING.pop(0)
+            MODEL_IDS_MAPPING.update(tvm_prefix_to_model_id)
+            self.tvm_prefix_to_model_id.update(tvm_prefix_to_model_id)
 
-                trace_events, tvm_prefix_to_model_id = tvm_recalculate_model_numbers(
-                    trace_events, len(MODEL_IDS_MAPPING)
-                )
+        for i in new_trace_events:
+            self.trace_events.append(i)
 
-                MODEL_IDS_MAPPING.update(tvm_prefix_to_model_id)
-                self.tvm_prefix_to_model_id.update(tvm_prefix_to_model_id)
-
-            return trace_events, result.thread_names
-
-        loop = asyncio.get_event_loop()
-        trace_events, thread_names = await loop.run_in_executor(None, run_sync_parse)
-
-        windowed_events, overlap_count, new_total_count = self._get_sliding_window(
-            trace_events, window_size=150
-        )
-
+        new_total_count  = len(self.trace_events)
         payload_events = []
 
         if (new_total_count > self.events_sent_count) and update_state:
@@ -537,48 +488,73 @@ class TraceHandler(BaseHandler):
                     })
                     self.trace_threads[tid] = t_name
 
-            payload_events = new_metadata + windowed_events
-
-        return payload_events, overlap_count, new_total_count
+            payload_events = new_metadata + new_trace_events
+        return payload_events, len(new_trace_events)
 
     async def _parse_and_emit_diff(self):
         """
         Converts CTF data in the buffer file into TEF and emits events that were not previously
         emitted.
         """
-        try:
-            previous_count = self.events_sent_count
-
-            payload_events, overlap_count, new_total_count = await self._extract_trace_increment(
-                update_state=self.continuous_streaming
+        loop = asyncio.get_event_loop()
+        q = asyncio.Queue(1000)
+        def do_stream():
+            self.continuous_streaming = True
+            ctf_plugin = bt2.find_plugin("ctf")
+            dummy_cc = ctf_plugin.source_component_classes["live"]
+            msg_it = bt2.TraceCollectionMessageIterator(
+                bt2.ComponentSpec(
+                    dummy_cc,
+                    {},
+                ),
+                live_mode=True
             )
 
-            if new_total_count > previous_count:
-                if self.continuous_streaming:
+            # Iterate the trace messages.
+            while True:
+                try:
+                    msg = next(msg_it)
+                    asyncio.run_coroutine_threadsafe(q.put(msg), loop).result()
+                except bt2.TryAgain:
+                    # To avoid keeping the thread pinned at 100% all the time
+                    # At the same time, the delay has to be small enough to avoid
+                    # Issues with message throttling on the socket
+                    time.sleep(0.001)
+                    continue
+
+
+        t = __import__("threading").Thread(target=do_stream)
+        t.start()
+        cooldown = 0.1
+        last_emit = 0.0
+        pending_events = []
+        while 1:
+            try:
+
+                payload_events, _ = await self._extract_trace_increment(q,
+                    update_state=self.continuous_streaming
+                )
+                pending_events.extend(payload_events)
+
+                now = time.monotonic()
+
+                if now - last_emit >= cooldown:
                     await self.sio.emit(
                         "rpc_notification",
                         {
                             "jsonrpc": "2.0",
                             "method": "trace.events",
                             "params": {
-                                "events": payload_events,
-                                "overlap_count": overlap_count,
-                                "total_count": self.events_sent_count,
+                                "events": pending_events,
+                                "overlap_count": 0,
+                                "total_count": len(self.trace_events),
                             },
                         },
                     )
-                else:
-                    await self.sio.emit(
-                        "rpc_notification",
-                        {
-                            "jsonrpc": "2.0",
-                            "method": "trace.status",
-                            "params": {
-                                "total_count": new_total_count,
-                            },
-                        },
-                    )
-        except Exception as e:
-            # It is expected that some parsed events will be incomplete
-            if "LTTNG_CTF_LTTNG_INDEX" not in str(e):
-                logger.error(f"Incremental parse error: {e}")
+
+                    pending_events = []
+                    last_emit = now
+            except Exception as e:
+                # It is expected that some parsed events will be incomplete
+                if "LTTNG_CTF_LTTNG_INDEX" not in str(e):
+                    logger.error(f"Incremental parse error: {e}")

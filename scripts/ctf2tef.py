@@ -23,7 +23,7 @@ from math import isnan
 from pathlib import Path
 from shutil import copy2
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, NamedTuple
+from typing import Any, AsyncGenerator, Callable, NamedTuple
 
 import bt2  # From the babeltrace2 package.
 
@@ -229,6 +229,154 @@ class CTFConversionResult(NamedTuple):
     thread_names: dict[str, int]
 
 
+def _parse_msg(
+    msg,
+    thread_name,
+    current_thread,
+    custom_metadata,
+    custom_event_begin,
+    custom_event_end,
+    custom_event_name_func,
+    custom_event_args_func,
+    skip_args,
+):
+    fields = msg.event.payload_field if msg.event.payload_field else {}
+    thread_id = int(
+        fields.get("thread_id", current_thread[msg.event.payload_field.get("cpu_id", -1)])
+    )
+    # Process custom metadata
+    if msg.event.name in custom_metadata:
+        m = custom_metadata[msg.event.name]
+        return emit_event(
+            msg,
+            f"{m.new_name}{m.suffix_func(msg) if m.suffix_func else ''}",
+            thread_id,
+            EventPhase.METADATA,
+            skip_args=skip_args,
+            additional_args=m.additional_arg_func(msg) if m.additional_arg_func else {},
+        )
+    # Process custom events
+    if msg.event.name in custom_event_begin:
+        return emit_event(
+            msg,
+            f"{custom_event_begin[msg.event.name][0]}{custom_event_name_func[msg.event.name](msg)}",
+            thread_id,
+            EventPhase.BEGIN,
+            skip_args=skip_args,
+            additional_args=custom_event_args_func[msg.event.name](msg)
+            if custom_event_args_func[msg.event.name]
+            else None,
+        )
+    if msg.event.name in custom_event_end:
+        return emit_event(
+            msg,
+            f"{custom_event_end[msg.event.name][0]}{custom_event_name_func[msg.event.name](msg)}",
+            thread_id,
+            EventPhase.END,
+            skip_args=skip_args,
+            additional_args=custom_event_args_func[msg.event.name](msg)
+            if custom_event_args_func[msg.event.name]
+            else None,
+        )
+    # Process Zephyr events (starts with *_enter and finishes with *_exit)
+    if msg.event.name.endswith("_enter"):
+        return emit_event(
+            msg,
+            msg.event.name[:-6],
+            thread_id,
+            EventPhase.BEGIN,
+            skip_args=skip_args,
+        )
+    if msg.event.name.endswith("_exit"):
+        return emit_event(
+            msg,
+            msg.event.name[:-5],
+            thread_id,
+            EventPhase.END,
+            skip_args=skip_args,
+        )
+    # Check whether thread has changed
+    if str(msg.event.name).startswith("thread_") and "thread_id" in fields:
+        thread_name[str(fields["name"])] = int(fields["thread_id"])
+    # Check whether thread has changed
+    if msg.event.name == "thread_switched_in":
+        current_thread[msg.event.payload_field["cpu_id"]] = thread_id = int(fields["thread_id"])
+
+
+async def stream_ctf_to_tef(
+    q,
+    skip_args: bool = False,
+    custom_metadata: dict[str, CustomMetadataDefinition] | None = None,
+    custom_events: list[CustomEventDefinition] | None = None,
+) -> AsyncGenerator[CTFConversionResult, Any]:
+    """
+    Converts CTF trace to the JSON in TEF format.
+
+    Parameters
+    ----------
+    q: asyncio.Queue
+        Incoming message queue
+    path : str
+        Path to the file with trace in CTF.
+    skip_args : bool
+        Whether the arguments of events should be ignored.
+    custom_metadata : dict[str, CustomMetadataDefinition] | None
+        Dictionary mapping CTF event to the TEF metadata.
+    custom_events : list[CustomEventDefinition] | None
+        List with mapping of the beginning and the end represented by CTF events
+        to a new TEF event.
+
+    Returns
+    -------
+    CTFConversionResult
+        The converted trace and information about thread names
+    """
+    if custom_metadata is None:
+        custom_metadata = {}
+    if custom_events is None:
+        custom_events = []
+
+    # Prepare custom events mapping
+    custom_event_begin = defaultdict(list)
+    custom_event_end = defaultdict(list)
+    custom_event_name_func = {}
+    custom_event_args_func = {}
+    for event_def in custom_events:
+        custom_event_begin[event_def.enter_event_name].append(event_def.new_name)
+        custom_event_end[event_def.exit_event_name].append(event_def.new_name)
+        custom_event_name_func[event_def.enter_event_name] = event_def.suffix_func
+        custom_event_name_func[event_def.exit_event_name] = event_def.suffix_func
+        custom_event_args_func[event_def.enter_event_name] = event_def.additional_arg_func
+        custom_event_args_func[event_def.exit_event_name] = event_def.additional_arg_func
+
+    converted = []
+
+    thread_name = {}
+    current_thread = defaultdict(int)
+
+    while True:
+        if len(converted):
+            yield CTFConversionResult(converted, thread_name)
+            converted = []
+        msg = await q.get()
+        # Skip messages without events
+        if not hasattr(msg, "event"):
+            continue
+        event = _parse_msg(
+            msg,
+            thread_name,
+            current_thread,
+            custom_metadata,
+            custom_event_begin,
+            custom_event_end,
+            custom_event_name_func,
+            custom_event_args_func,
+            skip_args,
+        )
+        if event is not None:
+            converted.append(event)
+
+
 def ctf_to_tef(
     path: str,
     skip_args: bool = False,
@@ -308,82 +456,19 @@ def ctf_to_tef(
         # Skip messages without events
         if not hasattr(msg, "event"):
             continue
-        fields = msg.event.payload_field if msg.event.payload_field else {}
-        thread_id = int(
-            fields.get("thread_id", current_thread[msg.event.payload_field.get("cpu_id", -1)])
+        event = _parse_msg(
+            msg,
+            thread_name,
+            current_thread,
+            custom_metadata,
+            custom_event_begin,
+            custom_event_end,
+            custom_event_name_func,
+            custom_event_args_func,
+            skip_args,
         )
-        # Process custom metadata
-        if msg.event.name in custom_metadata:
-            m = custom_metadata[msg.event.name]
-            converted.append(
-                emit_event(
-                    msg,
-                    f"{m.new_name}{m.suffix_func(msg) if m.suffix_func else ''}",
-                    thread_id,
-                    EventPhase.METADATA,
-                    skip_args=skip_args,
-                    additional_args=m.additional_arg_func(msg) if m.additional_arg_func else {},
-                )
-            )
-            continue
-        # Process custom events
-        if msg.event.name in custom_event_begin:
-            converted.append(
-                emit_event(
-                    msg,
-                    f"{custom_event_begin[msg.event.name][0]}{custom_event_name_func[msg.event.name](msg)}",
-                    thread_id,
-                    EventPhase.BEGIN,
-                    skip_args=skip_args,
-                    additional_args=custom_event_args_func[msg.event.name](msg)
-                    if custom_event_args_func[msg.event.name]
-                    else None,
-                )
-            )
-            continue
-        if msg.event.name in custom_event_end:
-            converted.append(
-                emit_event(
-                    msg,
-                    f"{custom_event_end[msg.event.name][0]}{custom_event_name_func[msg.event.name](msg)}",
-                    thread_id,
-                    EventPhase.END,
-                    skip_args=skip_args,
-                    additional_args=custom_event_args_func[msg.event.name](msg)
-                    if custom_event_args_func[msg.event.name]
-                    else None,
-                )
-            )
-            continue
-        # Process Zephyr events (starts with *_enter and finishes with *_exit)
-        if msg.event.name.endswith("_enter"):
-            converted.append(
-                emit_event(
-                    msg,
-                    msg.event.name[:-6],
-                    thread_id,
-                    EventPhase.BEGIN,
-                    skip_args=skip_args,
-                )
-            )
-            continue
-        if msg.event.name.endswith("_exit"):
-            converted.append(
-                emit_event(
-                    msg,
-                    msg.event.name[:-5],
-                    thread_id,
-                    EventPhase.END,
-                    skip_args=skip_args,
-                )
-            )
-            continue
-        # Check whether thread has changed
-        if str(msg.event.name).startswith("thread_") and "thread_id" in fields:
-            thread_name[str(fields["name"])] = int(fields["thread_id"])
-        # Check whether thread has changed
-        if msg.event.name == "thread_switched_in":
-            current_thread[msg.event.payload_field["cpu_id"]] = thread_id = int(fields["thread_id"])
+        if event is not None:
+            converted.append(event)
 
     return CTFConversionResult(converted, thread_name)
 
