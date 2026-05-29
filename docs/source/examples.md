@@ -122,7 +122,7 @@ For more details on above flags check {doc}`ctf_to_tef`.
 To build a sample run:
 
 ```bash
-west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_profiler -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n
+west build -p -b max32690fthr/max32690/m4 samples/profiling/tvm_profiler -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n
 ```
 
 Secondly, the traces can be either obtained from hardware or Renode simulation with:
