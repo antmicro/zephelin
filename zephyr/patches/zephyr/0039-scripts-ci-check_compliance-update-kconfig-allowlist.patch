@@ -1,4 +1,4 @@
-From 5f852860568372e04dab8c7abbb749a0f78d52a6 Mon Sep 17 00:00:00 2001
+From de8a7ee2f14fe60fe61fecc31932f2df10891554 Mon Sep 17 00:00:00 2001
 From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Date: Fri, 15 May 2026 11:18:26 +0200
 Subject: [PATCH 39/40] scripts: ci: check_compliance: update kconfig allowlist
@@ -7,14 +7,14 @@ Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
 Signed-off-by: Grzegorz Latosinski <glatosinski@antmicro.com>
 Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
 ---
- scripts/ci/check_compliance.py | 6 ++++++
- 1 file changed, 6 insertions(+)
+ scripts/ci/check_compliance.py | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
 diff --git a/scripts/ci/check_compliance.py b/scripts/ci/check_compliance.py
-index 5e675d9595d..dd87bc65cf2 100755
+index 5e675d9595d..9ee8c126f57 100755
 --- a/scripts/ci/check_compliance.py
 +++ b/scripts/ci/check_compliance.py
-@@ -1498,6 +1498,12 @@ flagged.
+@@ -1498,9 +1498,16 @@ flagged.
          "WHATEVER",
          "ZEPHYR_TRY_MASS_ERASE", # MCUBoot setting described in sysbuild
                                   # documentation
@@ -27,6 +27,10 @@ index 5e675d9595d..dd87bc65cf2 100755
          "ZPL_SAMPLE_RUNTIME_CONF_PROFILING",
          "ZPL_SAMPLE_TFLM_MODEL",
          "ZPL_SAMPLE_TFLM_BUFFER_SIZE",
++        "ZPL_SAMPLE_TFLM_NUM_ITERS",
+         "ZPL_SAMPLE_TVM_QUANTIZED_MODEL",
+         "ZPL_SAMPLE_TVM_HEAP_SIZE",
+         "ZPL_SAMPLE_APP_STARTUP_DELAY_MS",
 -- 
-2.47.1
+2.54.0
 
