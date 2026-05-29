@@ -1,36 +1,53 @@
 # Real-time tracing
 
-This chapter covers the usage of [Zephelin Trace Viewer](visual_interface) for live visualization of the traces being gathered during application execution.
+This chapter covers the usage of [Zephelin Trace Viewer](visual_interface) for live visualization of traces being gathered during application execution.
 
-:::{note}
 Real-time visualization requires running a local Python server responsible for ingesting CTF traces, parsing them into TEF, and forwarding them to the visualizer.
-:::
 
 ## Prerequisites
 
 Before running the server, you need to install required backend dependencies and compile the frontend visualizer.
 
-**1. Install server dependencies**
+### Install server dependencies
 
-From the root of the project, run the following command:
+Apart from regular dependencies of Zephelin, server dependencies need to be installed as well with the following command:
 
 ```bash
 pip install -r server/requirements.txt
 ```
 
-**2. Build the Visualizer**
+### Build the frontend for Trace Viewer
 
 The server requires a compiled version of the [Zephelin Trace Viewer](visual_interface).
-After cloning the repository, build the frontend by running:
+First, clone the repository:
+
+```bash
+git clone --recursive https://github.com/antmicro/zephelin-trace-viewer.git
+```
+
+After cloning the repository, install `corepack` and install necessary dependencies with:
+
+```bash
+cd zephelin-trace-viewer
+corepack enable
+yarn
+```
+
+In the end, build the backend with:
+
 ```bash
 yarn build
+cd ..
 ```
+
+Built frontend will be available under `./zephelin-trace-viewer/dist` directory.
 
 ## Running the server
 
-To start the Zephelin Server and host the visualizer, execute the `run_backend.py` script.
+To start the Zephelin Server and host the visualizer, execute the `server/run_backend.py` script.
 
 ### Basic usage
+
 To run the server with default settings and serve the frontend, point it to the `dist` directory with the compiled frontend:
 
 ```bash
@@ -75,6 +92,32 @@ If the Visualizer is connected to the server, the live-tracing controls are avai
 * `Stop Tailing` - Stops the default behavior in which viewport follows live edge of visualized trace.
 * `Resume Tailing` - Snaps the viewport back to the live edge.
 
+## Sample collection of traces
+
+Let's run an application running profiling for TensorFlow Lite Micro model.
+
+First of, let's build a sample application running two TensorFlow Lite Micro models, with increased number of iterations:
+
+```bash
+west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_multi_model -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n -DCONFIG_ZPL_SAMPLE_TFLM_NUM_ITERS=200
+```
+
+After this, run server for live tracing, providing paths to models:
+
+```bash
+python server/run_backend.py --frontend-directory ./zephelin-trace-viewer/dist --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite ./samples/common/tflm/model/sine.tflite
+```
+
+In the end, run collection of traces from:
+
+* Renode:
+  ```bash
+  python scripts/run_renode.py --trace-output test.ctf --send-to-remote 127.0.0.1:5000
+  ```
+* From actual hardware (after flash), e.g.:
+  ```bash
+  west zpl-uart-capture <path-to-uart> 115200 ./trace-hw.ctf --send-to-remote 127.0.0.1:5000
+  ```
 
 ## Server API reference
 
