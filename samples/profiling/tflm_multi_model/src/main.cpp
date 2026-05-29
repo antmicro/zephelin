@@ -16,7 +16,6 @@ extern "C" {
 
 #include <tflm_model.h>
 
-#define N_SAMPLES 10
 #define INPUT0_SHAPE_0 128
 #define INPUT0_SHAPE_1 3
 #define INPUT0_MIN_VAL -2040.0f
@@ -57,7 +56,7 @@ int main(void)
 		return 1;
 	}
 
-	for (short i = 0; i < N_SAMPLES; ++i) {
+	for (short i = 0; i < CONFIG_ZPL_SAMPLE_TFLM_NUM_ITERS; ++i) {
 
 		rand_input0(model0_input);
 		status = model_load_input(interpreters[0], (uint8_t *)model0_input,

@@ -3,6 +3,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+config ZPL_SAMPLE_TFLM_NUM_ITERS
+	int "Number of inference iterations to run in the program"
+	default 10
+
 config ZPL_SAMPLE_TFLM_MODEL
 	string "TFLite Micro model to use"
 	default "magic-wand"
