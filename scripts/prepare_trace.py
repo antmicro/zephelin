@@ -971,7 +971,7 @@ def prepare(args: argparse.Namespace):
             add_model_metadata(tef_trace, metadata)
 
     # Metadata with memory symbols
-    if REGION_SIZES:
+    if REGION_SIZES and symbol_map:
         mem_symbols = extract_memory_symbols(symbol_map)
         tef_trace.append(
             {
