@@ -33,6 +33,7 @@ from extract_tvm_model_data import DEFAULT_OP_PREFIX_RE, DEFAULT_OP_SUFFIX_RE  #
 from frontend import create_app  # noqa: E402
 from server_utils.logger import string_to_verbosity  # noqa: E402
 from socket_factory import create_socketio  # noqa: E402
+from socket_mock import create_mock_socketio  # noqa: E402
 
 load_dotenv()
 
@@ -85,7 +86,7 @@ def create_backend(argv):
     parser.add_argument(
         "--frontend-directory",
         type=Path,
-        help="Path to the fronetend build",
+        help="Path to the frontend build",
         default=Path(frontend_dir_env) if frontend_dir_env else None,
     )
     # prepare_trace related options
@@ -129,6 +130,20 @@ def create_backend(argv):
         default=os.environ.get("ZEPHELIN_TVM_DEFAULT_OP_SUFFIX_RE", DEFAULT_OP_SUFFIX_RE),
     )
 
+    # testing related options
+    parser.add_argument(
+        "--mock-trace-file",
+        type=Path,
+        help="Path to a JSON trace file to use for the mock server.",
+        default=None,
+    )
+    parser.add_argument(
+        "--mock-playback-speed",
+        type=float,
+        help="Playback speed multiplier for the mock server.",
+        default=1.0,
+    )
+
     parser.add_argument(
         "--verbosity",
         help="Verbosity level",
@@ -153,7 +168,13 @@ def create_backend(argv):
         tvm_model_op_remove_suffix=args.tvm_model_op_remove_suffix,
     )
 
-    sio = create_socketio(traceConfig=traceConfig)
+    if args.mock_trace_file:
+        logger.info(f"Starting in mock mode. Trace file: {args.mock_trace_file}")
+        sio = create_mock_socketio(
+            trace_file_path=str(args.mock_trace_file), playback_speed=args.mock_playback_speed
+        )
+    else:
+        sio = create_socketio(traceConfig=traceConfig)
 
     app = create_app(args.frontend_directory)
 
@@ -166,7 +187,7 @@ def main(argv):  # noqa: D103
     asgi_app, args = create_backend(argv)
 
     logger.info(
-        f"Statring Zephelin Server and Zephelin Trace Viewer "
+        f"Starting Zephelin Server and Zephelin Trace Viewer "
         f"on http://{args.backend_host}:{args.backend_port}"
     )
 
