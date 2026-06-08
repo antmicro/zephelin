@@ -43,6 +43,8 @@ def create_socketio(traceConfig: TraceConfig) -> socketio.AsyncServer:
         """
         Handles client disconnection.
         """
+        if trace_backend.bt2_thread is not None:
+            await trace_backend.live_trace_cleanup()
         logger.info(f"Client {sid} disconnected.")
 
     @sio.on("rpc_request")

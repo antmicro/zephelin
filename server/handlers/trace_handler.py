@@ -29,9 +29,9 @@ from prepare_trace import (
     process_ram_report,
 )
 from socketio import AsyncServer
-from state_manager import global_state
 import bt2
 import time
+from threading import Thread, Lock
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 PARSE_THRESHOLD_BYTES = 8192
@@ -84,10 +84,6 @@ class TraceHandler(BaseHandler):
         self.raw_ctf_path = Path("live_capture.ctf")
         self.events_sent_count = 0
         self.unprocessed_bytes = 0
-        self.file_handle = None
-
-        self.trace_socket: Optional[asyncio.Server] = None
-        self.active_writer: Optional[asyncio.StreamWriter] = None
 
         self.sync_tag = b"_zpl_ctf_start__"
         self.is_synced = False
@@ -95,9 +91,12 @@ class TraceHandler(BaseHandler):
         self.trace_threads = {}
 
         # Prevents 2 threads from reading CTF file at the same time
-        self._is_parsing = False
 
         self.continuous_streaming = False
+        self.bt2_thread = None
+        self.bt2_thread_stop = False
+        self.diff_future = None
+        self.trace_lock = Lock()
 
     @endpoints.register_method("trace.connnect")
     async def connect(self) -> dict[Literal["status", "message"], str]:
@@ -115,18 +114,47 @@ class TraceHandler(BaseHandler):
             If the server is already listening or a trace is active.
         """
         logger.info("Connection initializing")
-        if global_state.trace_active or self.trace_socket:
+
+        if self.bt2_thread is not None:
             raise Exception("Already listening for traces.")
 
-        self.trace_socket = await asyncio.start_server(
-            self._handle_client, self.tcp_host, self.tcp_port
-        )
-        global_state.trace_active = True
+        self.async_loop = asyncio.get_event_loop()
+        self.async_q = asyncio.Queue(1000)
 
-        logger.info(f" Listening for trace streams on {self.tcp_host}:{self.tcp_port}")
+        # Worker thread function for receiving bt2 messages
+        def do_stream():
+            ctf_plugin = bt2.find_plugin("ctf")
+            dummy_cc = ctf_plugin.source_component_classes["live"]
+            msg_it = bt2.TraceCollectionMessageIterator(
+                bt2.ComponentSpec(
+                    dummy_cc,
+                    {},
+                ),
+                live_mode=True
+            )
+
+            # Iterate the trace messages.
+            while not self.bt2_thread_stop:
+                try:
+                    msg = next(msg_it)
+                    asyncio.run_coroutine_threadsafe(self.async_q.put(msg), self.async_loop).result()
+                except bt2.TryAgain:
+                    # To avoid keeping the thread pinned at 100% all the time
+                    # At the same time, the delay has to be small enough to avoid
+                    # Issues with message throttling on the socket
+                    time.sleep(0.001)
+                    continue
+
+
+
+        self.bt2_thread = Thread(target=do_stream)
+        self.bt2_thread.start()
+        self.diff_future = asyncio.run_coroutine_threadsafe(self._parse_and_emit_diff(), self.async_loop)
+
+        logger.info(f" BT2 Listening for trace streams on port 42674")
         return {
             "status": "success",
-            "message": f"Listening for traces on {self.tcp_host}:{self.tcp_port}",
+            "message": f" BT2 Listening for trace streams on port 42674",
         }
 
     @endpoints.register_method("trace.disconnect")
@@ -141,25 +169,7 @@ class TraceHandler(BaseHandler):
         """
         logger.info("Disconnecting")
 
-        global_state.trace_active = False
-
-        if self.trace_socket:
-            self.trace_socket.close()
-            await self.trace_socket.wait_closed()
-            self.trace_socket = None
-
-        if self.active_writer:
-            self.active_writer.close()
-            await self.active_writer.wait_closed()
-            self.active_writer = None
-
-        if not global_state.trace_active:
-            logger.debug("Trace was already stopped.")
-            return {"status": "success", "message": "Trace was already stopped."}
-
-        if global_state.read_task:
-            global_state.read_task.cancel()
-            global_state.read_task = None
+        await self.live_trace_cleanup()
 
         return {"status": "success", "message": "Trace stopping initiated."}
 
@@ -292,17 +302,30 @@ class TraceHandler(BaseHandler):
         """
         logger.info("Collecting trace increment")
 
-        if not self.raw_ctf_path.exists():
+        if len(self.pending_events) == 0:
             logger.warning("No trace data available to collect.")
             return {"status": "error", "message": "No trace data available to collect."}
 
-        if self.file_handle and not self.file_handle.closed:
-            self.file_handle.flush()
+        if self.continuous_streaming:
+            logger.warning("Can't collect data while streaming.")
+            return {"status": "error", "message": "Can't collect data while streaming."}
 
-        self._is_parsing = True
 
         try:
-            await self._parse_and_emit_diff()
+            with self.trace_lock:
+                await self.sio.emit(
+                    "rpc_notification",
+                    {
+                        "jsonrpc": "2.0",
+                        "method": "trace.events",
+                        "params": {
+                            "events": self.pending_events,
+                            "overlap_count": 0,
+                            "total_count": len(self.trace_events),
+                        },
+                    },
+                )
+                self.pending_events = []
 
             return {
                 "status": "success"
@@ -311,143 +334,51 @@ class TraceHandler(BaseHandler):
         except Exception as e:
             logger.error(f" Trace collection parse error: {e}")
             return {"status": "error", "message": f"Failed to parse trace file: {e}"}
-        finally:
-            self._is_parsing = False
 
-    async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+
+
+    async def live_trace_cleanup(self) -> bool:
         """
-        Callback triggered when a remote capture script connects to the socket.
+        Cleans up the state of the live tracing.
 
         Parameters
         ----------
-        reader: asyncio.StreamReader
-            Instance of stream reader.
 
-        writer: asyncio.StreamWriter
-            Instance of stream writer.
+        Returns
+        -------
+        bool
+            Cleanup status.
         """
-        peer_name = writer.get_extra_info("peername")
-        logger.info(f"Client connected from {peer_name}")
+        if self.bt2_thread:
+            self.bt2_thread_stop = True
+            print("join")
+            self.bt2_thread.join()
+            print("result")
+            self.diff_future.result()
+            print("loop kill")
+            self.async_loop.stop()
 
-        # Prevent multiple capture scripts from streaming at the exact same time
-        if self.active_writer is not None:
-            logger.warning("Rejecting new connection, already streaming.")
-            writer.close()
-            await writer.wait_closed()
-            return
+            self.pending_events = []
+            self.bt2_thread = None
+            self.trace_events = []
 
-        self.active_writer = writer
+        return True
 
-        self.raw_ctf_path.parent.mkdir(exist_ok=True)
-        self.file_handle = open(self.raw_ctf_path, "wb")
-        self.events_sent_count = 0
-        self.is_synced = False
-        self.sync_buffer.clear()
-        self.trace_threads.clear()
-
-        global_state.read_task = asyncio.current_task()
-
-        try:
-            while global_state.trace_active:
-                chunk = await reader.read(PARSE_THRESHOLD_BYTES)
-
-                if not chunk:
-                    logger.info("Client disconnected, EOF reached.")
-                    break
-
-                await self._handle_trace(chunk)
-
-        except asyncio.CancelledError:
-            logger.info("Reading loop cancelled.")
-        except Exception as e:
-            logger.error(f"Error reading from socket: {e}")
-        finally:
-            if self.file_handle:
-                self.file_handle.close()
-                self.file_handle = None
-
-            if self.is_synced:
-                await self._safe_parse_and_emmit()
-
-            writer.close()
-            await writer.wait_closed()
-            self.active_writer = None
-            logger.info("Client connection cleaned up.")
-
-    async def _handle_trace(self, trace_chunk: bytes):
+    async def _extract_trace_increment(self) -> tuple[list, int]:
         """
-        Handles the received chunk by converting it to TEF and emitting it further.
+        Parses the CTF queue and formats thread metadata.
 
         Parameters
         ----------
-        trace_chunk: bytes
-            Raw trace in CTF format.
-        """
-        print(trace_chunk)
-        if not self.file_handle:
-            return
-
-        self.sync_buffer.extend(trace_chunk)
-
-        tag_idx = self.sync_buffer.find(self.sync_tag)
-
-        if tag_idx != -1:
-            if not self.is_synced:
-                logger.debug("Found START TAG Valid CTF data starting")
-                self.is_synced = True
-
-            self.sync_buffer = self.sync_buffer[tag_idx + len(self.sync_tag) :]
-
-        if self.is_synced:
-            if len(self.sync_buffer) > len(self.sync_tag):
-                safe_to_write = self.sync_buffer[: -len(self.sync_tag)]
-
-                self.file_handle.write(safe_to_write)
-                self.file_handle.flush()
-                self.unprocessed_bytes += len(safe_to_write)
-
-                self.sync_buffer = self.sync_buffer[-len(self.sync_tag) :]
-
-            # Only one parsing thread can be spawned because of the limitation that bt2
-            # must parse data from byte 0 each time. This lock prevents multiple
-            # threads reading the same file. Also prevents race conditions from
-            # corrupting 'events_sent_count'.
-            if self.unprocessed_bytes >= PARSE_THRESHOLD_BYTES and not self._is_parsing:
-                self._is_parsing = True
-                self.unprocessed_bytes = 0
-                asyncio.create_task(self._safe_parse_and_emmit())
-        else:
-            # Keep enough bytes in memory to not miss the start tag
-            sliding_window_bytes = 50
-            if len(self.sync_buffer) > sliding_window_bytes:
-                self.sync_buffer = self.sync_buffer[-sliding_window_bytes:]
-
-    async def _safe_parse_and_emmit(self):
-        """
-        Makes sure the parsing lock is always cleared even if _parse_and_emit_diff crashes.
-        """
-        try:
-            await self._parse_and_emit_diff()
-        finally:
-            self._is_parsing = False
-
-    async def _extract_trace_increment(self,q, update_state: bool) -> tuple[list, int]:
-        """
-        Parses the CTF file, calculates the sliding window, and formats thread metadata.
-
-        Parameters
-        ----------
-        update_state: bool
-            Serves as commit flag, if false only total_count is emitted.
 
         Returns
         -------
         tuple[list, int, int]
-            TEF events, how big is the overlap, total count of events.
+            TEF events, total count of events.
         """
 
         new_trace_events, thread_names = await anext(stream_ctf_to_tef(
-                    q,
+                    self.async_q,
                     custom_metadata=CUSTOM_METADATA,
                     custom_events=create_custom_events(
                         tvm_op_remove_prefix=self.tvm_op_remove_prefix,
@@ -472,7 +403,7 @@ class TraceHandler(BaseHandler):
         new_total_count  = len(self.trace_events)
         payload_events = []
 
-        if (new_total_count > self.events_sent_count) and update_state:
+        if (new_total_count > self.events_sent_count):
             self.events_sent_count = new_total_count
 
             new_metadata = []
@@ -496,64 +427,44 @@ class TraceHandler(BaseHandler):
         Converts CTF data in the buffer file into TEF and emits events that were not previously
         emitted.
         """
-        loop = asyncio.get_event_loop()
-        q = asyncio.Queue(1000)
-        def do_stream():
-            self.continuous_streaming = True
-            ctf_plugin = bt2.find_plugin("ctf")
-            dummy_cc = ctf_plugin.source_component_classes["live"]
-            msg_it = bt2.TraceCollectionMessageIterator(
-                bt2.ComponentSpec(
-                    dummy_cc,
-                    {},
-                ),
-                live_mode=True
-            )
-
-            # Iterate the trace messages.
-            while True:
-                try:
-                    msg = next(msg_it)
-                    asyncio.run_coroutine_threadsafe(q.put(msg), loop).result()
-                except bt2.TryAgain:
-                    # To avoid keeping the thread pinned at 100% all the time
-                    # At the same time, the delay has to be small enough to avoid
-                    # Issues with message throttling on the socket
-                    time.sleep(0.001)
-                    continue
-
-
-        t = __import__("threading").Thread(target=do_stream)
-        t.start()
         cooldown = 0.1
         last_emit = 0.0
-        pending_events = []
-        while 1:
+        self.pending_events = []
+        while not self.bt2_thread_stop:
             try:
 
-                payload_events, _ = await self._extract_trace_increment(q,
-                    update_state=self.continuous_streaming
-                )
-                pending_events.extend(payload_events)
+                payload_events, _ = await self._extract_trace_increment()
+                self.pending_events.extend(payload_events)
 
                 now = time.monotonic()
 
-                if now - last_emit >= cooldown:
+                if now - last_emit >= cooldown and self.continuous_streaming:
+                    with self.trace_lock:
+                        await self.sio.emit(
+                            "rpc_notification",
+                            {
+                                "jsonrpc": "2.0",
+                                "method": "trace.events",
+                                "params": {
+                                    "events": self.pending_events,
+                                    "overlap_count": 0,
+                                    "total_count": len(self.trace_events),
+                                },
+                            },
+                        )
+                        self.pending_events = []
+                        last_emit = now
+                else:
                     await self.sio.emit(
                         "rpc_notification",
                         {
                             "jsonrpc": "2.0",
-                            "method": "trace.events",
+                            "method": "trace.status",
                             "params": {
-                                "events": pending_events,
-                                "overlap_count": 0,
                                 "total_count": len(self.trace_events),
                             },
                         },
                     )
-
-                    pending_events = []
-                    last_emit = now
             except Exception as e:
                 # It is expected that some parsed events will be incomplete
                 if "LTTNG_CTF_LTTNG_INDEX" not in str(e):
