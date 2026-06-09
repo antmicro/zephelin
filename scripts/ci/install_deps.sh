@@ -19,7 +19,7 @@ sudo apt install -yqq --no-install-recommends gdb-multiarch mono-complete \
   xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
   xxd git-lfs swig libelf-dev libdw-dev python3-packaging \
   policykit-1 libgtk2.0-0 screen uml-utilities gtk-sharp2 libc6-dev libicu-dev \
-  python3 python3-pip git cmake ninja-build gperf
+  python3 python3-pip git cmake ninja-build gperf unzip
 
 pip3 install --upgrade pip
 
