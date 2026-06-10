@@ -47,7 +47,7 @@ Configure a virtual environment and install `west` with `pip`:
 
 <!-- name="pip-init" -->
 ```shell
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Then, initialize the workspace using `west`:
