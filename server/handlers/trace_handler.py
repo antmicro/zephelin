@@ -97,6 +97,15 @@ class TraceHandler(BaseHandler):
         self.bt2_thread_stop = False
         self.diff_future = None
         self.trace_lock = Lock()
+        ctf_plugin = bt2.find_plugin("ctf")
+        dummy_cc = ctf_plugin.source_component_classes["live"]
+        self.msg_it = bt2.TraceCollectionMessageIterator(
+            bt2.ComponentSpec(
+                dummy_cc,
+                {},
+            ),
+            live_mode=True
+        )
 
     @endpoints.register_method("trace.connnect")
     async def connect(self) -> dict[Literal["status", "message"], str]:
@@ -119,24 +128,15 @@ class TraceHandler(BaseHandler):
             raise Exception("Already listening for traces.")
 
         self.async_loop = asyncio.get_event_loop()
-        self.async_q = asyncio.Queue(1000)
+        self.async_q = asyncio.Queue(0)
 
         # Worker thread function for receiving bt2 messages
         def do_stream():
-            ctf_plugin = bt2.find_plugin("ctf")
-            dummy_cc = ctf_plugin.source_component_classes["live"]
-            msg_it = bt2.TraceCollectionMessageIterator(
-                bt2.ComponentSpec(
-                    dummy_cc,
-                    {},
-                ),
-                live_mode=True
-            )
 
             # Iterate the trace messages.
             while not self.bt2_thread_stop:
                 try:
-                    msg = next(msg_it)
+                    msg = next(self.msg_it)
                     asyncio.run_coroutine_threadsafe(self.async_q.put(msg), self.async_loop).result()
                 except bt2.TryAgain:
                     # To avoid keeping the thread pinned at 100% all the time
@@ -146,10 +146,9 @@ class TraceHandler(BaseHandler):
                     continue
 
 
-
         self.bt2_thread = Thread(target=do_stream)
         self.bt2_thread.start()
-        self.diff_future = asyncio.run_coroutine_threadsafe(self._parse_and_emit_diff(), self.async_loop)
+        self.tef_task = asyncio.create_task(self._parse_and_emit_diff())
 
         logger.info(f" BT2 Listening for trace streams on port 42674")
         return {
@@ -310,7 +309,6 @@ class TraceHandler(BaseHandler):
             logger.warning("Can't collect data while streaming.")
             return {"status": "error", "message": "Can't collect data while streaming."}
 
-
         try:
             with self.trace_lock:
                 await self.sio.emit(
@@ -351,16 +349,17 @@ class TraceHandler(BaseHandler):
         """
         if self.bt2_thread:
             self.bt2_thread_stop = True
-            print("join")
-            self.bt2_thread.join()
-            print("result")
-            self.diff_future.result()
-            print("loop kill")
-            self.async_loop.stop()
+            await asyncio.get_event_loop().run_in_executor(None, self.bt2_thread.join)
+            self.tef_task.cancel()
+            await self.tef_task
 
             self.pending_events = []
             self.bt2_thread = None
             self.trace_events = []
+            self.tef_task = None
+            self.bt2_thread_stop = False
+            self.events_sent_count = 0
+            self.continuous_streaming = False
 
         return True
 
@@ -397,10 +396,9 @@ class TraceHandler(BaseHandler):
             MODEL_IDS_MAPPING.update(tvm_prefix_to_model_id)
             self.tvm_prefix_to_model_id.update(tvm_prefix_to_model_id)
 
-        for i in new_trace_events:
-            self.trace_events.append(i)
+        self.trace_events.extend(new_trace_events)
 
-        new_total_count  = len(self.trace_events)
+        new_total_count = len(self.trace_events)
         payload_events = []
 
         if (new_total_count > self.events_sent_count):
@@ -469,3 +467,5 @@ class TraceHandler(BaseHandler):
                 # It is expected that some parsed events will be incomplete
                 if "LTTNG_CTF_LTTNG_INDEX" not in str(e):
                     logger.error(f"Incremental parse error: {e}")
+            except asyncio.CancelledError:
+                break
