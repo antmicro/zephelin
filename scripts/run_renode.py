@@ -259,13 +259,6 @@ class RenodeMachine:
         if self.trace_serial:
             try:
                 new_traces = self.trace_serial.read_all()
-                if new_traces and self.remote_socket:
-                    try:
-                        self.remote_socket.sendall(new_traces)
-                    except Exception as e:
-                        print(f"[{self.board}-{self.index}] Remote socket disconnected: {e}")
-                        self.remote_socket.close()
-                        self.remote_socket = None
                 if self.trace_file:
                     self.trace_buffer += new_traces
                     self._handle_trace_rotation()
@@ -293,6 +286,13 @@ class RenodeMachine:
         elif len(self.trace_buffer) > len(CTF_TRACE_START_TAG):
             safe_to_write = len(self.trace_buffer) - len(CTF_TRACE_START_TAG)
             self.trace_file.write(self.trace_buffer[:safe_to_write])
+            if self.remote_socket:
+                try:
+                    self.remote_socket.sendall(self.trace_buffer[:safe_to_write])
+                except Exception as e:
+                    print(f"[{self.board}-{self.index}] Remote socket disconnected: {e}")
+                    self.remote_socket.close()
+                    self.remote_socket = None
             self.trace_buffer = self.trace_buffer[safe_to_write:]
 
     def cleanup(self):

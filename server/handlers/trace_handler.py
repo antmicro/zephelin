@@ -8,13 +8,17 @@ Provides a handler for trace collection related tasks.
 """
 
 import asyncio
+import gc
 import json
 import logging
+import time
 from pathlib import Path
-from typing import Literal, Optional, Union
+from threading import Lock, Thread
+from typing import Literal, Union
 
+import bt2
 from config import TraceConfig
-from ctf2tef import stream_ctf_to_tef, ctf_to_tef, prepare_dir
+from ctf2tef import stream_ctf_to_tef
 from endpoints import Endpoints
 from extract_tvm_model_data import tvm_recalculate_model_numbers
 from handlers.base import BaseHandler
@@ -29,9 +33,6 @@ from prepare_trace import (
     process_ram_report,
 )
 from socketio import AsyncServer
-import bt2
-import time
-from threading import Thread, Lock
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 PARSE_THRESHOLD_BYTES = 8192
@@ -97,15 +98,7 @@ class TraceHandler(BaseHandler):
         self.bt2_thread_stop = False
         self.diff_future = None
         self.trace_lock = Lock()
-        ctf_plugin = bt2.find_plugin("ctf")
-        dummy_cc = ctf_plugin.source_component_classes["live"]
-        self.msg_it = bt2.TraceCollectionMessageIterator(
-            bt2.ComponentSpec(
-                dummy_cc,
-                {},
-            ),
-            live_mode=True
-        )
+        self.msg_it = None
 
     @endpoints.register_method("trace.connnect")
     async def connect(self) -> dict[Literal["status", "message"], str]:
@@ -132,12 +125,23 @@ class TraceHandler(BaseHandler):
 
         # Worker thread function for receiving bt2 messages
         def do_stream():
+            ctf_plugin = bt2.find_plugin("ctf")
+            dummy_cc = ctf_plugin.source_component_classes["live"]
+            self.msg_it = bt2.TraceCollectionMessageIterator(
+                bt2.ComponentSpec(
+                    dummy_cc,
+                    {},
+                ),
+                live_mode=True,
+            )
 
             # Iterate the trace messages.
             while not self.bt2_thread_stop:
                 try:
                     msg = next(self.msg_it)
-                    asyncio.run_coroutine_threadsafe(self.async_q.put(msg), self.async_loop).result()
+                    asyncio.run_coroutine_threadsafe(
+                        self.async_q.put(msg), self.async_loop
+                    ).result()
                 except bt2.TryAgain:
                     # To avoid keeping the thread pinned at 100% all the time
                     # At the same time, the delay has to be small enough to avoid
@@ -145,15 +149,14 @@ class TraceHandler(BaseHandler):
                     time.sleep(0.001)
                     continue
 
-
         self.bt2_thread = Thread(target=do_stream)
         self.bt2_thread.start()
         self.tef_task = asyncio.create_task(self._parse_and_emit_diff())
 
-        logger.info(f" BT2 Listening for trace streams on port 42674")
+        logger.info(" BT2 Listening for trace streams on port 42674")
         return {
             "status": "success",
-            "message": f" BT2 Listening for trace streams on port 42674",
+            "message": " BT2 Listening for trace streams on port 42674",
         }
 
     @endpoints.register_method("trace.disconnect")
@@ -325,22 +328,15 @@ class TraceHandler(BaseHandler):
                 )
                 self.pending_events = []
 
-            return {
-                "status": "success"
-            }
+            return {"status": "success"}
 
         except Exception as e:
             logger.error(f" Trace collection parse error: {e}")
             return {"status": "error", "message": f"Failed to parse trace file: {e}"}
 
-
-
     async def live_trace_cleanup(self) -> bool:
         """
         Cleans up the state of the live tracing.
-
-        Parameters
-        ----------
 
         Returns
         -------
@@ -360,6 +356,8 @@ class TraceHandler(BaseHandler):
             self.bt2_thread_stop = False
             self.events_sent_count = 0
             self.continuous_streaming = False
+            self.msg_it = None
+            gc.collect()
 
         return True
 
@@ -367,24 +365,23 @@ class TraceHandler(BaseHandler):
         """
         Parses the CTF queue and formats thread metadata.
 
-        Parameters
-        ----------
-
         Returns
         -------
-        tuple[list, int, int]
+        tuple[list, int]
             TEF events, total count of events.
         """
-
-        new_trace_events, thread_names = await anext(stream_ctf_to_tef(
-                    self.async_q,
-                    custom_metadata=CUSTOM_METADATA,
-                    custom_events=create_custom_events(
-                        tvm_op_remove_prefix=self.tvm_op_remove_prefix,
-                        tvm_op_remove_suffix=self.tvm_op_remove_suffix,
-                        multi_model_trace=self.multi_model_trace,
-                        symbol_map=self.symbol_map,
-                    )))
+        new_trace_events, thread_names = await anext(
+            stream_ctf_to_tef(
+                self.async_q,
+                custom_metadata=CUSTOM_METADATA,
+                custom_events=create_custom_events(
+                    tvm_op_remove_prefix=self.tvm_op_remove_prefix,
+                    tvm_op_remove_suffix=self.tvm_op_remove_suffix,
+                    multi_model_trace=self.multi_model_trace,
+                    symbol_map=self.symbol_map,
+                ),
+            )
+        )
         if self.tvm_model_paths:
             if 0 in MODEL_IDS_MAPPING:
                 MODEL_IDS_MAPPING.pop(0)
@@ -398,27 +395,20 @@ class TraceHandler(BaseHandler):
 
         self.trace_events.extend(new_trace_events)
 
-        new_total_count = len(self.trace_events)
-        payload_events = []
+        new_metadata = []
+        for t_name, tid in thread_names.items():
+            if self.trace_threads.get(tid) != t_name:
+                new_metadata.append({
+                    "name": "thread_name",
+                    "cat": "zephyr",
+                    "ph": "M",
+                    "pid": 0,
+                    "tid": tid,
+                    "args": {"name": t_name},
+                })
+                self.trace_threads[tid] = t_name
 
-        if (new_total_count > self.events_sent_count):
-            self.events_sent_count = new_total_count
-
-            new_metadata = []
-            for t_name, tid in thread_names.items():
-                if self.trace_threads.get(tid) != t_name:
-                    new_metadata.append({
-                        "name": "thread_name",
-                        "cat": "zephyr",
-                        "ph": "M",
-                        "pid": 0,
-                        "tid": tid,
-                        "args": {"name": t_name},
-                    })
-                    self.trace_threads[tid] = t_name
-
-            payload_events = new_metadata + new_trace_events
-        return payload_events, len(new_trace_events)
+        return new_trace_events, new_metadata, len(new_trace_events)
 
     async def _parse_and_emit_diff(self):
         """
@@ -428,15 +418,24 @@ class TraceHandler(BaseHandler):
         cooldown = 0.1
         last_emit = 0.0
         self.pending_events = []
+        self.pending_metadata = []
         while not self.bt2_thread_stop:
             try:
-
-                payload_events, _ = await self._extract_trace_increment()
-                self.pending_events.extend(payload_events)
+                new_events, new_metadata, _ = await self._extract_trace_increment()
+                self.pending_events.extend(new_events)
+                self.pending_metadata.extend(new_metadata)
+                self.pending_events.sort(key=lambda x: x["ts"])
 
                 now = time.monotonic()
 
                 if now - last_emit >= cooldown and self.continuous_streaming:
+                    # Currently on renode the cooldown will gather ~25 events on the tested example
+                    # this method of avoiding unsorted events is faulty,
+                    # when an event is heavily delayed, it will be sent out of order.
+                    # To mitigate this, one can either increase the cooldown, or
+                    # add more sophisticated chunking logic, eg sending packets of 50
+                    # traces or after a much more substantial timeout
+                    to_send = int(len(self.pending_events) / 2)
                     with self.trace_lock:
                         await self.sio.emit(
                             "rpc_notification",
@@ -444,13 +443,14 @@ class TraceHandler(BaseHandler):
                                 "jsonrpc": "2.0",
                                 "method": "trace.events",
                                 "params": {
-                                    "events": self.pending_events,
+                                    "events": self.pending_metadata + self.pending_events[:to_send],
                                     "overlap_count": 0,
                                     "total_count": len(self.trace_events),
                                 },
                             },
                         )
-                        self.pending_events = []
+                        self.pending_events = self.pending_events[to_send:]
+                        self.pending_metadata = []
                         last_emit = now
                 else:
                     await self.sio.emit(
