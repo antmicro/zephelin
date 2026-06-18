@@ -400,14 +400,6 @@ class ZplUartCapture(WestCommand):
                 data = serw.read_all()
                 progress_bar.update(len(data))
 
-                if remote_socket:
-                    try:
-                        remote_socket.sendall(data)
-                    except Exception as e:
-                        self.wrn(f"Failed to send data: {e}")
-                        remote_socket.close()
-                        remote_socket = None
-
                 if args.send_enable:
                     f.write(data)
                     continue
@@ -430,6 +422,14 @@ class ZplUartCapture(WestCommand):
 
                 elif len(buff) > len(_CTF_TRACE_START_TAG):
                     f.write(buff[: -len(_CTF_TRACE_START_TAG)])
+                    if remote_socket:
+                        try:
+                            remote_socket.sendall(buff[: -len(_CTF_TRACE_START_TAG)])
+                        except Exception as e:
+                            self.wrn(f"Failed to send data: {e}")
+                            remote_socket.close()
+                            remote_socket = None
+
                     buff = buff[-len(_CTF_TRACE_START_TAG) :]
 
         except KeyboardInterrupt:
