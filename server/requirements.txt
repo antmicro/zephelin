@@ -1,3 +1,4 @@
+dotenv==0.9.9
 fastapi==0.104.1
 json-rpc==1.15.0
 python-socketio==5.10.0
