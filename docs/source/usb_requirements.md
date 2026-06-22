@@ -9,6 +9,11 @@ the `CONFIG_ZPL_TRACE_BACKEND_USB` Kconfig option. The
 `CONFIG_ZPL_TRACE_BACKEND_USB` option automatically selects every necessary
 software component in Zephyr required to run the USB device stack.
 
+:::{note}
+Capturing traces via the USB backend requires asynchronous tracing to be enabled.
+To use it, y-select `CONFIG_TRACING_ASYNC`.
+:::
+
 ## Driver requirements
 
 A USB device driver needs to be provided for the given platform when the
