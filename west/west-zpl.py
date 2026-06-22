@@ -524,7 +524,7 @@ class ZplUsbCapture(WestCommand):
                     chunk = buf[:n_bytes]
                     if remote_socket:
                         try:
-                            remote_socket.sendall(n_bytes)
+                            remote_socket.sendall(chunk)
                         except Exception as e:
                             self.wrn(f"Failed to send data: {e}")
                             remote_socket.close()
