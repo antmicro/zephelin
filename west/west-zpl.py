@@ -464,7 +464,7 @@ class ZplUsbCapture(WestCommand):
             "--send-to-remote", help="Stream captured data to a remote socket", default=None
         )
         parser.add_argument(
-            "-t", "--timeout", help="Timeout of the USB capture in seconds", type=int, default=2
+            "-t", "--timeout", help="Timeout of the USB capture in seconds", type=int, default=0
         )
         parser.add_argument(
             "-w",
