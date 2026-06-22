@@ -229,6 +229,8 @@ class CTFConversionResult(NamedTuple):
     thread_names: dict[str, int]
 
 
+thread_map = defaultdict(lambda: defaultdict(list))
+
 def _parse_msg(
     msg,
     thread_name,
@@ -240,6 +242,7 @@ def _parse_msg(
     custom_event_args_func,
     skip_args,
 ):
+    global thread_map
     fields = msg.event.payload_field if msg.event.payload_field else {}
     thread_id = int(
         fields.get("thread_id", current_thread[msg.event.payload_field.get("cpu_id", -1)])
@@ -300,7 +303,13 @@ def _parse_msg(
         thread_name[str(fields["name"])] = int(fields["thread_id"])
     # Check whether thread has changed
     if msg.event.name == "thread_switched_in":
+        oldtid = int(current_thread[msg.event.payload_field["cpu_id"]])
+        if str(oldtid) not in thread_map[str(msg.event.payload_field["cpu_id"])]:
+            thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)].append([0, extract_us(msg)])
         current_thread[msg.event.payload_field["cpu_id"]] = thread_id = int(fields["thread_id"])
+        thread_map[str(msg.event.payload_field["cpu_id"])][str(thread_id)].append([extract_us(msg), None])
+        thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)][-1][1] = extract_us(msg)
+
 
 
 async def stream_ctf_to_tef(
@@ -352,6 +361,7 @@ async def stream_ctf_to_tef(
     converted = []
 
     thread_name = {}
+    print("re-executed")
     current_thread = defaultdict(int)
 
     while True:
