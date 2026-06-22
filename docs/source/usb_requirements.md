@@ -11,7 +11,7 @@ software component in Zephyr required to run the USB device stack.
 
 ## Driver requirements
 
-A USB device device driver needs to be provided for the given platform when the
+A USB device driver needs to be provided for the given platform when the
 USB trace capture interface is used. Make sure there is a UDC driver available
 for your platform upstream (in `drivers/usb/udc/`), or provide your own UDC
 driver implementation as described in the
