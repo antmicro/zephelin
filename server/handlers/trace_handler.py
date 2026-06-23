@@ -530,41 +530,6 @@ class TraceHandler(BaseHandler):
 
         return new_trace_events, new_metadata
 
-    def print_queue_state(self, s):
-        import hashlib
-
-        def tok(o):
-            ph = (o if isinstance(o, dict) else {}).get("ph", "?")
-
-            n = (o.get("args") or {}).get("name") if isinstance(o.get("args"), dict) else None
-            n = n or o.get("name") if isinstance(o, dict) else None
-            n = n if isinstance(n, str) else str(n or "")
-
-            a = "".join(p[:1] for p in n.split("_")[:2] if p)
-
-            return f"{ph}({a.lower()})" if a else ph
-
-        def col(o):
-            n = (o.get("args") or {}).get("name") if isinstance(o.get("args"), dict) else None
-            n = n or o.get("name") if isinstance(o, dict) else None
-            if not isinstance(n, str) or not n:
-                return ""
-            h = hashlib.md5(n.encode()).hexdigest()
-            return f"\033[38;5;{16 + int(h[:8], 16) % 216}m"
-
-        if s:
-            print(" · ".join(
-                f"{col(o)}{tok(o)}\033[0m"
-                for o in self.pending_events
-            ))
-        else:
-            print(" · ".join(
-                f"{col(o)}{tok(o)}\033[0m"
-                for o in self.unpending_events
-            ))
-
-
-
     async def _parse_and_emit_diff(self):
         """
         Converts CTF data in the buffer file into TEF and emits events that were not previously
@@ -581,20 +546,20 @@ class TraceHandler(BaseHandler):
                 self.pending_metadata.extend(new_metadata)
                 self.pending_events.sort(key=lambda x: x["ts"])
 
-                for ev in self.pending_events:
-                    ts = ev['ts']
-                    for cpuid, threads in thread_map.items():
-                        for tid, pairlist in threads.items():
-                            print("#", tid, type(tid))
-                            for i, j in pairlist:
-                                print(i,j)
-                  # CHORE: remove tid 0 border
-                                if ts >= i and j is not None and ts <= j and 'tid' in ev and tid != "0" and ev["ph"] != "M":
-                                    print(tid, ev)
-                                    try:
-                                        assert(tid == str(ev['tid']))
-                                    except Exception as _:
-                                        breakpoint()
+                  # for ev in self.pending_events:
+                  #     ts = ev['ts']
+                  #     for cpuid, threads in thread_map.items():
+                  #         for tid, pairlist in threads.items():
+                  #             for i, j in pairlist:
+                  #   # CHORE: remove tid 0 border
+                  #                 if ts >= i and j is not None and ts <= j and 'tid' in ev and tid != "0" and ev["ph"] != "M":
+                  #                     try:
+                  #                         assert(tid == str(ev['tid']))
+                  #                     except Exception as _:
+                  #                         print("#", tid, type(tid))
+                  #                         print(i,j)
+                  #                         print(tid, ev)
+                  #                         breakpoint()
 
 
 
