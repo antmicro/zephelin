@@ -291,7 +291,8 @@ class TraceHandler(BaseHandler):
     @endpoints.register_method("trace.reset")
     async def reset(self):
         """Resets the trace buffer."""
-        raise NotImplementedError
+        await self._execute_reset()
+        return {"status": "success", "message": "Trace reset executed."}
 
     @endpoints.register_method("trace.collect")
     async def collect(self) -> dict[Literal["status", "message", "data"], Union[str, dict]]:
@@ -470,3 +471,34 @@ class TraceHandler(BaseHandler):
                     logger.error(f"Incremental parse error: {e}")
             except asyncio.CancelledError:
                 break
+
+    async def _execute_reset(self):
+        """
+        Clears the backend state, flushes the parsed event queue,
+        and notifies the frontend to wipe the UI.
+        """
+        logger.info("Trace reset triggered. Clearing state.")
+
+        with self.trace_lock:
+            self.trace_events.clear()
+            self.pending_events.clear()
+            self.pending_metadata.clear()
+            self.trace_threads.clear()
+
+            while not self.async_q.empty():
+                try:
+                    self.async_q.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+
+        try:
+            await self.sio.emit(
+                "rpc_notification",
+                {
+                    "jsonrpc": "2.0",
+                    "method": "trace.reset",
+                    "params": {},
+                },
+            )
+        except Exception as e:
+            logger.error(f"Failed to emit trace.reset RPC: {e}")
