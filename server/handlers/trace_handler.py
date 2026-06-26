@@ -69,6 +69,9 @@ class TraceHandler(BaseHandler):
         self.trace_events = []
         self.bt_port = traceConfig.bt_port
 
+        self.bt2_port = 42674
+        self.proxy_port = 42675
+
         self.build_dir = traceConfig.build_dir
         self.tflm_model_paths = traceConfig.tflm_model_paths
         self.tvm_model_paths = traceConfig.tvm_model_paths
@@ -160,10 +163,15 @@ class TraceHandler(BaseHandler):
         self.bt2_thread.start()
         self.tef_task = asyncio.create_task(self._parse_and_emit_diff())
 
-        logger.info(" BT2 Listening for trace streams on port " + str(self.bt_port))
+        self.interceptor_server = await asyncio.start_server(
+            self._raw_trace_interceptor, '127.0.0.1', self.proxy_port
+        )
+        self.interceptor_task = asyncio.create_task(self.interceptor_server.serve_forever())
+
         return {
             "status": "success",
-            "message": " BT2 Listening for trace streams on port " + str(self.bt_port),
+            "message": f"Interceptor proxy ready on port {self.proxy_port}."
+                       f"BT2 Listening on port {self.bt_port}.",
         }
 
     @endpoints.register_method("trace.disconnect")
@@ -479,6 +487,39 @@ class TraceHandler(BaseHandler):
                     logger.error(f"Incremental parse error: {e}")
             except asyncio.CancelledError:
                 break
+
+    async def _raw_trace_interceptor(
+        self,
+        reader: asyncio.StreamReader,
+        writer: asyncio.StreamWriter
+    ):
+        """
+        Receives raw bytes from the capture script, passes them
+        through the CTFPacketFramer, and feeds clean data to babeltrace2.
+        """
+        logger.info("Capture script connected to interceptor.")
+        bt2_writer = None
+
+        try:
+            _, bt2_writer = await asyncio.open_connection('127.0.0.1', self.bt2_port)
+            logger.info("Interceptor connected to BT2 socket.")
+
+            while not self.bt2_thread_stop:
+                data = await reader.read(DATA_CHUNK_BYTES)
+                if not data:
+                    break
+
+
+
+        except Exception as e:
+            logger.error(f"Interceptor proxy error: {e}")
+        finally:
+            if bt2_writer:
+                bt2_writer.close()
+                await bt2_writer.wait_closed()
+            writer.close()
+            await writer.wait_closed()
+            logger.info("Interceptor disconnected.")
 
     async def _execute_reset(self):
         """
