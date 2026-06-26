@@ -11,6 +11,7 @@ import asyncio
 import gc
 import json
 import logging
+import struct
 import tempfile
 import time
 from pathlib import Path
@@ -36,8 +37,81 @@ from prepare_trace import (
 from socketio import AsyncServer
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+DATA_CHUNK_BYTES = 8192
+_CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
 logger = logging.getLogger("TraceHandler")
+
+
+class StreamParserProxy:
+    """
+    Class for intercepting and parsing the CTF data stream before it touches libbtrace.
+    """
+
+    def __init__(self, size_is_bits=True):
+        """
+        Initializes the proxy responsible for stream processing.
+
+        Parameters
+        ----------
+        size_is_bits: bool
+            Indicates whether the packet size specified in the CTF header is measured in bits.
+        """
+        self.buffer = bytearray()
+        self.expected_size = None
+        self.size_is_bits = size_is_bits
+        self.is_synced = False
+
+    def process_data(self, data: bytes):
+        self.buffer.extend(data)
+
+        while True:
+            tag_idx = self.buffer.find(_CTF_TRACE_START_TAG)
+
+            if tag_idx != -1:
+                del self.buffer[: tag_idx + len(_CTF_TRACE_START_TAG)]
+                self.is_synced = True
+                self.expected_size = None
+                yield "RESET", None
+                continue
+
+            # Ignore data before sync tag is detected
+            if not self.is_synced:
+                keep_len = len(_CTF_TRACE_START_TAG)
+                if len(self.buffer) > keep_len:
+                    # Keep just enough bytes in case the tag is split across network reads
+                    del self.buffer[:-keep_len]
+                break
+
+            # Read the header of a packet to determine its size
+            if self.expected_size is None:
+                if len(self.buffer) >= 4:
+                    # The 3rd and 4th bytes hold the packet size
+                    _, packet_size = struct.unpack("<HH", self.buffer[:4])
+                    self.expected_size = (packet_size // 8) if self.size_is_bits else packet_size
+
+                    # A valid packet must at least contain its own 4-byte header
+                    if self.expected_size < 4:
+                        logger.warning(
+                            f"Corrupt packet header (size={self.expected_size}); resyncing."
+                        )
+                        self.buffer.clear()
+                        self.expected_size = None
+                        self.is_synced = False
+                        break
+                else:
+                    break
+
+            # Buffer data until the complete packet is collected than yield
+            if self.expected_size is not None:
+                if len(self.buffer) >= self.expected_size:
+                    packet = bytes(self.buffer[: self.expected_size])
+                    del self.buffer[: self.expected_size]
+                    self.expected_size = None
+                    yield "PACKET", packet
+                    continue
+                else:
+                    break
 
 
 class TraceHandler(BaseHandler):
@@ -67,10 +141,9 @@ class TraceHandler(BaseHandler):
         """
         self.sio = sio
         self.trace_events = []
+        self.tcp_host = traceConfig.tcp_host
+        self.tcp_port = traceConfig.tcp_port
         self.bt_port = traceConfig.bt_port
-
-        self.bt2_port = 42674
-        self.proxy_port = 42675
 
         self.build_dir = traceConfig.build_dir
         self.tflm_model_paths = traceConfig.tflm_model_paths
@@ -164,14 +237,14 @@ class TraceHandler(BaseHandler):
         self.tef_task = asyncio.create_task(self._parse_and_emit_diff())
 
         self.interceptor_server = await asyncio.start_server(
-            self._raw_trace_interceptor, '127.0.0.1', self.proxy_port
+            self._raw_trace_interceptor, self.tcp_host, self.tcp_port
         )
         self.interceptor_task = asyncio.create_task(self.interceptor_server.serve_forever())
 
         return {
             "status": "success",
-            "message": f"Interceptor proxy ready on port {self.proxy_port}."
-                       f"BT2 Listening on port {self.bt_port}.",
+            "message": f"Interceptor proxy ready on port {self.tcp_port}. "
+            f"BT2 listening on port {self.bt_port}.",
         }
 
     @endpoints.register_method("trace.disconnect")
@@ -489,19 +562,18 @@ class TraceHandler(BaseHandler):
                 break
 
     async def _raw_trace_interceptor(
-        self,
-        reader: asyncio.StreamReader,
-        writer: asyncio.StreamWriter
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     ):
         """
         Receives raw bytes from the capture script, passes them
         through the CTFPacketFramer, and feeds clean data to babeltrace2.
         """
         logger.info("Capture script connected to interceptor.")
+        proxy = StreamParserProxy()
         bt2_writer = None
 
         try:
-            _, bt2_writer = await asyncio.open_connection('127.0.0.1', self.bt2_port)
+            _, bt2_writer = await asyncio.open_connection("127.0.0.1", self.bt_port)
             logger.info("Interceptor connected to BT2 socket.")
 
             while not self.bt2_thread_stop:
@@ -509,7 +581,13 @@ class TraceHandler(BaseHandler):
                 if not data:
                     break
 
+                for action, payload in proxy.process_data(data):
+                    if action == "RESET":
+                        await self._execute_reset()
 
+                    elif action == "PACKET" and bt2_writer and payload:
+                        bt2_writer.write(payload)
+                        await bt2_writer.drain()
 
         except Exception as e:
             logger.error(f"Interceptor proxy error: {e}")
