@@ -26,6 +26,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, AsyncGenerator, Callable, NamedTuple
 
 import bt2  # From the babeltrace2 package.
+import time
 
 
 class EventPhase(Enum):
@@ -303,12 +304,12 @@ def _parse_msg(
         thread_name[str(fields["name"])] = int(fields["thread_id"])
     # Check whether thread has changed
     if msg.event.name == "thread_switched_in":
-        oldtid = int(current_thread[msg.event.payload_field["cpu_id"]])
-        if str(oldtid) not in thread_map[str(msg.event.payload_field["cpu_id"])]:
-            thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)].append([0, extract_us(msg)])
+        # oldtid = int(current_thread[msg.event.payload_field["cpu_id"]])
+        # if str(oldtid) not in thread_map[str(msg.event.payload_field["cpu_id"])]:
+        #     thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)].append([0, extract_us(msg)])
         current_thread[msg.event.payload_field["cpu_id"]] = thread_id = int(fields["thread_id"])
-        thread_map[str(msg.event.payload_field["cpu_id"])][str(thread_id)].append([extract_us(msg), None])
-        thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)][-1][1] = extract_us(msg)
+        # thread_map[str(msg.event.payload_field["cpu_id"])][str(thread_id)].append([extract_us(msg), None])
+        # thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)][-1][1] = extract_us(msg)
 
 
 
@@ -317,6 +318,8 @@ async def stream_ctf_to_tef(
     skip_args: bool = False,
     custom_metadata: dict[str, CustomMetadataDefinition] | None = None,
     custom_events: list[CustomEventDefinition] | None = None,
+    batch_size: int = 50,
+    flush_interval_s: float = 0.01,
 ) -> AsyncGenerator[CTFConversionResult, Any]:
     """
     Converts CTF trace to the JSON in TEF format.
@@ -345,46 +348,71 @@ async def stream_ctf_to_tef(
     if custom_events is None:
         custom_events = []
 
-    # Prepare custom events mapping
     custom_event_begin = defaultdict(list)
     custom_event_end = defaultdict(list)
     custom_event_name_func = {}
     custom_event_args_func = {}
-    for event_def in custom_events:
-        custom_event_begin[event_def.enter_event_name].append(event_def.new_name)
-        custom_event_end[event_def.exit_event_name].append(event_def.new_name)
-        custom_event_name_func[event_def.enter_event_name] = event_def.suffix_func
-        custom_event_name_func[event_def.exit_event_name] = event_def.suffix_func
-        custom_event_args_func[event_def.enter_event_name] = event_def.additional_arg_func
-        custom_event_args_func[event_def.exit_event_name] = event_def.additional_arg_func
+
+    for e in custom_events:
+        custom_event_begin[e.enter_event_name].append(e.new_name)
+        custom_event_end[e.exit_event_name].append(e.new_name)
+        custom_event_name_func[e.enter_event_name] = e.suffix_func
+        custom_event_name_func[e.exit_event_name] = e.suffix_func
+        custom_event_args_func[e.enter_event_name] = e.additional_arg_func
+        custom_event_args_func[e.exit_event_name] = e.additional_arg_func
 
     converted = []
-
     thread_name = {}
-    print("re-executed")
     current_thread = defaultdict(int)
 
+    last_flush = time.perf_counter()
+
+    def parse_batch(msgs):
+        out = []
+        for msg in msgs:
+            if not hasattr(msg, "event"):
+                continue
+
+            ev = _parse_msg(
+                msg,
+                thread_name,
+                current_thread,
+                custom_metadata,
+                custom_event_begin,
+                custom_event_end,
+                custom_event_name_func,
+                custom_event_args_func,
+                skip_args,
+            )
+
+            if ev is not None:
+                out.append(ev)
+
+        return out
+
+    batch = []
+
     while True:
-        if len(converted):
+        msg = await q.get()
+
+        batch.append(msg)
+
+        now = time.perf_counter()
+        should_flush = (
+            len(batch) >= batch_size
+            or (now - last_flush) >= flush_interval_s
+        )
+
+        if not should_flush:
+            continue
+
+        converted.extend(parse_batch(batch))
+        batch.clear()
+        last_flush = now
+
+        if converted:
             yield CTFConversionResult(converted, thread_name)
             converted = []
-        msg = await q.get()
-        # Skip messages without events
-        if not hasattr(msg, "event"):
-            continue
-        event = _parse_msg(
-            msg,
-            thread_name,
-            current_thread,
-            custom_metadata,
-            custom_event_begin,
-            custom_event_end,
-            custom_event_name_func,
-            custom_event_args_func,
-            skip_args,
-        )
-        if event is not None:
-            converted.append(event)
 
 
 def ctf_to_tef(

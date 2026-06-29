@@ -235,7 +235,7 @@ class TraceHandler(BaseHandler):
                     # To avoid keeping the thread pinned at 100% all the time
                     # At the same time, the delay has to be small enough to avoid
                     # Issues with message throttling on the socket
-                    time.sleep(0.001)
+                    # time.sleep(0.001)
                     continue
 
         self.bt2_thread = Thread(target=do_stream)
@@ -535,7 +535,7 @@ class TraceHandler(BaseHandler):
         Converts CTF data in the buffer file into TEF and emits events that were not previously
         emitted.
         """
-        cooldown = 1
+        cooldown = 0.25
         last_emit = 0.0
         self.pending_events = []
         self.pending_metadata = []
