@@ -36,7 +36,6 @@ from prepare_trace import (
 from socketio import AsyncServer
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-PARSE_THRESHOLD_BYTES = 8192
 
 logger = logging.getLogger("TraceHandler")
 
@@ -65,8 +64,6 @@ class TraceHandler(BaseHandler):
         """
         self.sio = sio
         self.trace_events = []
-        self.tcp_host = traceConfig.tcp_host
-        self.tcp_port = traceConfig.tcp_port
         self.bt_port = traceConfig.bt_port
 
         self.build_dir = traceConfig.build_dir
@@ -84,28 +81,18 @@ class TraceHandler(BaseHandler):
         self.symbol_map = {}
         self.tvm_prefix_to_model_id = {}
 
-        self.raw_ctf_path = Path("live_capture.ctf")
-        self.events_sent_count = 0
-        self.unprocessed_bytes = 0
-
-        self.sync_tag = b"_zpl_ctf_start__"
-        self.is_synced = False
-        self.sync_buffer = bytearray()
+        self.pending_events = []
         self.trace_threads = {}
-
-        # Prevents 2 threads from reading CTF file at the same time
-
         self.continuous_streaming = False
         self.bt2_thread = None
         self.bt2_thread_stop = False
-        self.diff_future = None
         self.trace_lock = Lock()
         self.msg_it = None
 
         self._metadata_tmp = None
         self.metadata_dir = None
 
-    @endpoints.register_method("trace.connnect")
+    @endpoints.register_method("trace.connect")
     async def connect(self) -> dict[Literal["status", "message"], str]:
         """
         Starts the TCP server to listen for incoming trace streams from capture scripts.
@@ -203,7 +190,7 @@ class TraceHandler(BaseHandler):
             Status message.
         """
         self.continuous_streaming = True
-        logger.debug("Continous streaming enabled.")
+        logger.debug("Continuous streaming enabled.")
         return {"status": "success"}
 
     @endpoints.register_method("trace.stream_stop")
@@ -217,7 +204,7 @@ class TraceHandler(BaseHandler):
             Status message.
         """
         self.continuous_streaming = False
-        logger.debug("Continous streaming disabled.")
+        logger.debug("Continuous streaming disabled.")
         return {"status": "success"}
 
     @endpoints.register_method("trace.metadata")
@@ -268,7 +255,7 @@ class TraceHandler(BaseHandler):
                             "args": ram.get("size", 0),
                         })
             else:
-                logger.warning(f" Zephyr ELF not found at {zephyr_elf_path}.")
+                logger.warning(f"Zephyr ELF not found at {zephyr_elf_path}.")
 
             if self.tflm_model_paths:
                 logger.debug("Adding TFLM model metadata.")
@@ -339,7 +326,6 @@ class TraceHandler(BaseHandler):
                         "method": "trace.events",
                         "params": {
                             "events": self.pending_events,
-                            "overlap_count": 0,
                             "total_count": len(self.trace_events),
                         },
                     },
@@ -372,7 +358,6 @@ class TraceHandler(BaseHandler):
             self.trace_events = []
             self.tef_task = None
             self.bt2_thread_stop = False
-            self.events_sent_count = 0
             self.continuous_streaming = False
             self.msg_it = None
             gc.collect()
@@ -384,13 +369,13 @@ class TraceHandler(BaseHandler):
 
         return True
 
-    async def _extract_trace_increment(self) -> tuple[list, int]:
+    async def _extract_trace_increment(self) -> tuple[list, list]:
         """
         Parses the CTF queue and formats thread metadata.
 
         Returns
         -------
-        tuple[list, int]
+        tuple[list, list]
             TEF events, total count of events.
         """
         new_trace_events, thread_names = await anext(
@@ -431,7 +416,7 @@ class TraceHandler(BaseHandler):
                 })
                 self.trace_threads[tid] = t_name
 
-        return new_trace_events, new_metadata, len(new_trace_events)
+        return new_trace_events, new_metadata
 
     async def _parse_and_emit_diff(self):
         """
@@ -444,7 +429,7 @@ class TraceHandler(BaseHandler):
         self.pending_metadata = []
         while not self.bt2_thread_stop:
             try:
-                new_events, new_metadata, _ = await self._extract_trace_increment()
+                new_events, new_metadata = await self._extract_trace_increment()
                 self.pending_events.extend(new_events)
                 self.pending_metadata.extend(new_metadata)
                 self.pending_events.sort(key=lambda x: x["ts"])
@@ -467,7 +452,6 @@ class TraceHandler(BaseHandler):
                                 "method": "trace.events",
                                 "params": {
                                     "events": self.pending_metadata + self.pending_events[:to_send],
-                                    "overlap_count": 0,
                                     "total_count": len(self.trace_events),
                                 },
                             },
