@@ -83,7 +83,6 @@ def create_mock_socketio(trace_file_path: str | None = None, playback_speed: flo
                         "method": "trace.events",
                         "params": {
                             "events": event_buffer,
-                            "overlap_count": 0,
                             "total_count": state["accumulated_count"],
                         },
                     },
@@ -105,7 +104,6 @@ def create_mock_socketio(trace_file_path: str | None = None, playback_speed: flo
                         "method": "trace.events",
                         "params": {
                             "events": event_buffer,
-                            "overlap_count": 0,
                             "total_count": state["accumulated_count"],
                         },
                     },
@@ -155,7 +153,6 @@ def create_mock_socketio(trace_file_path: str | None = None, playback_speed: flo
                         "status": "success",
                         "data": {
                             "events": metadata_events,
-                            "overlap_count": 0,
                             "total_count": len(metadata_events),
                         },
                     },
