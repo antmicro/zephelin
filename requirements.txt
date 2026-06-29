@@ -2,7 +2,7 @@ ai-edge-litert>=1.3.0; sys_platform != "darwin"
 ai-edge-litert==1.3.0; sys_platform == "darwin"
 tflite
 pyelftools
-pyrenode3 @ git+https://github.com/antmicro/pyrenode3.git
+pyrenode3 @ git+https://github.com/antmicro/pyrenode3.git@a80d3643934d471f290f049fc50f4973969a068a
 pyserial==3.5
 pyusb>=1.2.1,<2.0
 pyyaml==6.0.*
