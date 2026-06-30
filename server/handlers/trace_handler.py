@@ -66,6 +66,7 @@ class TraceHandler(BaseHandler):
         self.trace_events = []
         self.tcp_host = traceConfig.tcp_host
         self.tcp_port = traceConfig.tcp_port
+        self.bt_port = traceConfig.bt_port
 
         self.build_dir = traceConfig.build_dir
         self.tflm_model_paths = traceConfig.tflm_model_paths
@@ -130,7 +131,7 @@ class TraceHandler(BaseHandler):
             self.msg_it = bt2.TraceCollectionMessageIterator(
                 bt2.ComponentSpec(
                     dummy_cc,
-                    {},
+                    {"port": self.bt_port},
                 ),
                 live_mode=True,
             )
@@ -153,10 +154,10 @@ class TraceHandler(BaseHandler):
         self.bt2_thread.start()
         self.tef_task = asyncio.create_task(self._parse_and_emit_diff())
 
-        logger.info(" BT2 Listening for trace streams on port 42674")
+        logger.info(" BT2 Listening for trace streams on port " + str(self.bt_port))
         return {
             "status": "success",
-            "message": " BT2 Listening for trace streams on port 42674",
+            "message": " BT2 Listening for trace streams on port " + str(self.bt_port),
         }
 
     @endpoints.register_method("trace.disconnect")

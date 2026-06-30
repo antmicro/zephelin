@@ -81,6 +81,12 @@ def create_backend(argv):
         help="Port of the Zephelin backend",
         default=os.environ.get("ZEPHELIN_BACKEND_PORT", 8000),
     )
+    parser.add_argument(
+        "--bt-port",
+        type=int,
+        help="Port of the Zephelin backend",
+        default=os.environ.get("ZEPHELIN_BT_PORT", 42674),
+    )
 
     frontend_dir_env = os.environ.get("ZEPHELIN_FRONTEND_DIR")
     parser.add_argument(
@@ -166,6 +172,7 @@ def create_backend(argv):
         tvm_model_metadata_paths=args.tvm_model_metadata_paths,
         tvm_model_op_remove_prefix=args.tvm_model_op_remove_prefix,
         tvm_model_op_remove_suffix=args.tvm_model_op_remove_suffix,
+        bt_port=args.bt_port,
     )
 
     if args.mock_trace_file:

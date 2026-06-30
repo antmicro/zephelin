@@ -21,6 +21,7 @@ class TraceConfig:
 
     tcp_host: str
     tcp_port: int
+    bt_port: int = 42674
     build_dir: Path = Path("build")
     tflm_model_paths: Optional[list[Path]] = None
     tvm_model_paths: Optional[list[Path]] = None
