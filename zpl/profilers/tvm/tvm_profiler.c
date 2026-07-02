@@ -77,9 +77,14 @@ int zpl_tvm_profiler_begin_event(void *state, int op_idx, const char *tag)
 	int event_handle = zpl_state->num_events_;
 
 	ZPL_DISABLE_INSTRUMENTATION {
-		zpl_state->begin_cycles_[event_handle] = zpl_cycles_get();
 		zpl_state->op_idx_[event_handle] = op_idx;
 		zpl_state->tags_[event_handle] = tag;
+
+#ifdef CONFIG_ZPL_TVM_PROFILER_DELAYED_EMISSION
+		zpl_state->begin_cycles_[event_handle] = zpl_cycles_get();
+#else
+		zpl_emit_tvm_enter_event(zpl_cycles_get(), op_idx, tag);
+#endif
 
 		++(zpl_state->num_events_);
 	}
@@ -96,7 +101,15 @@ void zpl_tvm_profiler_end_event(void *state, int event_handle)
 	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
 
 	ZPL_DISABLE_INSTRUMENTATION {
+#ifdef CONFIG_ZPL_TVM_PROFILER_DELAYED_EMISSION
 		zpl_state->end_cycles_[event_handle] = zpl_cycles_get();
+#else
+		zpl_emit_tvm_exit_event(
+			zpl_cycles_get(),
+			zpl_state->op_idx_[event_handle],
+			zpl_state->tags_[event_handle]
+		);
+#endif
 	}
 }
 
@@ -105,6 +118,7 @@ void zpl_tvm_profiler_dump_events(void *state)
 	ZPL_CONF_RETURN_IF_DISABLED(tvm_profiler);
 	ZPL_TVMProfilerState *zpl_state = (ZPL_TVMProfilerState *)(state);
 
+#ifdef CONFIG_ZPL_TVM_PROFILER_DELAYED_EMISSION
 	for (int i = 0; i < zpl_state->num_events_; ++i) {
 		zpl_emit_tvm_enter_event(
 			zpl_state->begin_cycles_[i],
@@ -115,6 +129,7 @@ void zpl_tvm_profiler_dump_events(void *state)
 			zpl_state->op_idx_[i],
 			zpl_state->tags_[i]);
 	}
+#endif
 
 	zpl_state->num_events_ = 0;
 }
