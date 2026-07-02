@@ -34,18 +34,34 @@ uint32_t TFLMProfiler::BeginEvent(uint16_t subgraph_idx, uint16_t op_idx, const 
 	int event_handle = num_events_;
 
 	ZPL_DISABLE_INSTRUMENTATION {
-		begin_cycles_[event_handle] = zpl_cycles_get();
 		subgraph_idx_[event_handle] = subgraph_idx;
 		op_idx_[event_handle] = op_idx;
 		tags_[event_handle] = tag;
-		begin_arena_used_bytes_[event_handle] = -1;
-		begin_arena_tail_usage_[event_handle] = -1;
+
+		int32_t current_arena_used = -1;
+		int32_t current_arena_tail = -1;
+
 		if (nullptr != allocator_) {
-			begin_arena_used_bytes_[event_handle] = allocator_->used_bytes();
-			begin_arena_tail_usage_[event_handle] = allocator_->GetDefaultTailUsage(true);
+			current_arena_used = allocator_->used_bytes();
+			current_arena_tail = allocator_->GetDefaultTailUsage(true);
 		} else if (nullptr != interpreter_) {
-			begin_arena_used_bytes_[event_handle] = interpreter_->arena_used_bytes();
+			current_arena_used = interpreter_->arena_used_bytes();
 		}
+
+		begin_arena_used_bytes_[event_handle] = current_arena_used;
+		begin_arena_tail_usage_[event_handle] = current_arena_tail;
+#ifdef CONFIG_ZPL_TFLM_PROFILER_DELAYED_EMISSION
+		begin_cycles_[event_handle] = zpl_cycles_get();
+#else
+		zpl_emit_tflm_enter_event(
+			zpl_cycles_get(),
+			subgraph_idx,
+			op_idx,
+			tag,
+			current_arena_used,
+			current_arena_tail
+		);
+#endif
 	}
 
 	++num_events_;
@@ -58,20 +74,35 @@ void TFLMProfiler::EndEvent(uint32_t event_handle) {
 	}
 
 	ZPL_DISABLE_INSTRUMENTATION {
-		end_cycles_[event_handle] = zpl_cycles_get();
-		end_arena_used_bytes_[event_handle] = -1;
-		end_arena_tail_usage_[event_handle] = -1;
+		int32_t current_arena_used = -1;
+		int32_t current_arena_tail = -1;
+
 		if (nullptr != allocator_) {
-			end_arena_used_bytes_[event_handle] = allocator_->used_bytes();
-			end_arena_tail_usage_[event_handle] = allocator_->GetDefaultTailUsage(true);
+			current_arena_used = allocator_->used_bytes();
+			current_arena_tail = allocator_->GetDefaultTailUsage(true);
 		} else if (nullptr != interpreter_) {
-			end_arena_used_bytes_[event_handle] = interpreter_->arena_used_bytes();
+			current_arena_used = interpreter_->arena_used_bytes();
 		}
+#ifdef CONFIG_ZPL_TFLM_PROFILER_DELAYED_EMISSION
+		end_cycles_[event_handle] = zpl_cycles_get();
+		end_arena_used_bytes_[event_handle] = current_arena_used;
+		end_arena_tail_usage_[event_handle] = current_arena_tail;
+#else
+		zpl_emit_tflm_exit_event(
+			zpl_cycles_get(),
+			subgraph_idx_[event_handle],
+			op_idx_[event_handle],
+			tags_[event_handle],
+			current_arena_used,
+			current_arena_tail
+		);
+#endif
 	}
 }
 
 void TFLMProfiler::DumpEvents() {
 	ZPL_CONF_RETURN_IF_DISABLED(tflm_profiler);
+#ifdef CONFIG_ZPL_TFLM_PROFILER_DELAYED_EMISSION
 	for (int i = 0; i < num_events_; ++i) {
 		zpl_emit_tflm_enter_event(
 			begin_cycles_[i],
@@ -88,6 +119,8 @@ void TFLMProfiler::DumpEvents() {
 			end_arena_used_bytes_[i],
 			end_arena_tail_usage_[i]);
 	}
+
+#endif
 
 	num_events_ = 0;
 }

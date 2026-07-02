@@ -18,3 +18,12 @@ config ZPL_TFLM_PROFILER_MAX_EVENTS
 	int "Maximum number of stored events"
 	default 32
 	depends on ZPL_TFLM_PROFILER
+
+config ZPL_TFLM_PROFILER_DELAYED_EMISSION
+	bool "Buffer and delay TFLM profiling events"
+	depends on ZPL_TFLM_PROFILER
+	help
+	  Instead of emitting a trace event on every TFLM operator boundary,
+	  store the timestamps in memory and emit all the events at once when
+	  the inference is done. This keeps the tracing overhead out of the
+	  measured inference.
