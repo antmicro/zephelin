@@ -55,6 +55,9 @@ class TraceHandler(BaseHandler):
         """
         Builds the TraceHandler.
 
+        Every public method becomes and endpoint.
+        Place '_' before methods that are not meant to be called externally.
+
         Parameters
         ----------
         sio: AsyncServer
@@ -175,7 +178,7 @@ class TraceHandler(BaseHandler):
         """
         logger.info("Disconnecting")
 
-        await self.live_trace_cleanup()
+        await self._live_trace_cleanup()
 
         return {"status": "success", "message": "Trace stopping initiated."}
 
@@ -338,7 +341,7 @@ class TraceHandler(BaseHandler):
             logger.error(f" Trace collection parse error: {e}")
             return {"status": "error", "message": f"Failed to parse trace file: {e}"}
 
-    async def live_trace_cleanup(self) -> bool:
+    async def _live_trace_cleanup(self) -> bool:
         """
         Cleans up the state of the live tracing.
 
