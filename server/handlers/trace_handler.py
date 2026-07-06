@@ -8,6 +8,7 @@ Provides a handler for trace collection related tasks.
 """
 
 import asyncio
+import collections
 import gc
 import json
 import logging
@@ -20,7 +21,7 @@ from typing import Literal, Union
 
 import bt2
 from config import TraceConfig
-from ctf2tef import merge_metadata, stream_ctf_to_tef, thread_map
+from ctf2tef import StreamingCTFToTEF, merge_metadata, stream_ctf_to_tef
 from endpoints import Endpoints
 from extract_tvm_model_data import tvm_recalculate_model_numbers
 from handlers.base import BaseHandler
@@ -169,9 +170,20 @@ class TraceHandler(BaseHandler):
         self.trace_lock = Lock()
         self.msg_it = None
         self.async_q = None
+        self.tef_task = None
         self.interceptor_server = None
         self.interceptor_task = None
-        self.tef_task = None
+        self.ctf_tef: StreamingCTFToTEF | None = None
+        self.ctf_tef_task: asyncio.Task | None = None
+        self._emit_queue: asyncio.Queue[dict] | None = None
+        self._emit_task: asyncio.Task | None = None
+
+    def _init_emit(self) -> None:
+        """Initialize the background emit task and its queue."""
+        if self._emit_queue is not None:
+            return
+        self._emit_queue = asyncio.Queue()
+        self._emit_task = asyncio.create_task(self._emit_loop())
 
         self._metadata_tmp = None
         self.metadata_dir = None
@@ -207,7 +219,6 @@ class TraceHandler(BaseHandler):
 
         self.async_loop = asyncio.get_event_loop()
         self.async_q = asyncio.Queue(0)
-        self.ctf_tef = None
 
         # Worker thread function for receiving bt2 messages
         def do_stream():
@@ -240,6 +251,7 @@ class TraceHandler(BaseHandler):
 
         self.bt2_thread = Thread(target=do_stream)
         self.bt2_thread.start()
+        self._init_emit()
         self.tef_task = asyncio.create_task(self._parse_and_emit_diff())
 
         self.interceptor_server = await asyncio.start_server(
@@ -409,20 +421,22 @@ class TraceHandler(BaseHandler):
             return {"status": "error", "message": "Can't collect data while streaming."}
 
         try:
-            with self.trace_lock:
-                await self.sio.emit(
-                    "rpc_notification",
-                    {
-                        "jsonrpc": "2.0",
-                        "method": "trace.events",
-                        "params": {
-                            "events": self.pending_events,
-                            "total_count": len(self.trace_events),
-                        },
-                    },
-                )
-                self.pending_events = []
+            events, metadata = self.pending_events[:], list(self.pending_metadata)
+            self.pending_events.clear()
+            self.pending_metadata.clear()
 
+            await self.sio.emit(
+                "rpc_notification",
+                {
+                    "jsonrpc": "2.0",
+                    "method": "trace.events",
+                    "params": {
+                        "events": metadata + events,
+                        "overlap_count": 0,
+                        "total_count": len(self.trace_events),
+                    },
+                },
+            )
             return {"status": "success"}
 
         except Exception as e:
@@ -461,6 +475,19 @@ class TraceHandler(BaseHandler):
                 except asyncio.CancelledError:
                     pass
 
+            if self._emit_task is not None:
+                self._emit_task.cancel()
+                try:
+                    await self._emit_task
+                except asyncio.CancelledError:
+                    pass
+                self._emit_task = None
+                self._emit_queue = None
+
+            if self.ctf_tef is not None:
+                self.ctf_tef.stop()
+                self.ctf_tef = None
+
             self.pending_events = []
             self.pending_metadata = []
             self.bt2_thread = None
@@ -469,8 +496,6 @@ class TraceHandler(BaseHandler):
             self.bt2_thread_stop = False
             self.continuous_streaming = False
             self.msg_it = None
-            self.async_q = None
-            self.ctf_tef = None
             gc.collect()
 
         if self._metadata_tmp is not None:
@@ -500,8 +525,10 @@ class TraceHandler(BaseHandler):
                     symbol_map=self.symbol_map,
                 ),
             )
+            self.ctf_tef_task = self.ctf_tef.start()
 
-        new_trace_events, thread_names = await anext(self.ctf_tef)
+        result = await self.ctf_tef.output_queue.get()
+        new_trace_events, thread_names = result.tef, result.thread_names
         if self.tvm_model_paths:
             if 0 in MODEL_IDS_MAPPING:
                 MODEL_IDS_MAPPING.pop(0)
@@ -532,64 +559,77 @@ class TraceHandler(BaseHandler):
 
     async def _parse_and_emit_diff(self):
         """
-        Converts CTF data in the buffer file into TEF and emits events that were not previously
-        emitted.
+        Consumes parsed TEF events from the converter, maintains a sorted
+        pending buffer, and pushes batches to the emit queue.
         """
         cooldown = 0.25
         last_emit = 0.0
         self.pending_events = []
-        self.pending_metadata = []
-        while not self.bt2_thread_stop:
-            try:
-                new_events, new_metadata = await self._extract_trace_increment()
-                self.pending_events.extend(new_events)
+        self.pending_metadata = collections.deque()
+        try:
+            while not self.bt2_thread_stop:
+                try:
+                    new_events, new_metadata = await self._extract_trace_increment()
+                except Exception as e:
+                    if "LTTNG_CTF_LTTNG_INDEX" not in str(e):
+                        logger.error(f"Incremental parse error: {e}")
+                    continue
+
+                # Insertion-sort incrementally instead of re-sorting everything
+                for ev in new_events:
+                    bisect.insort(self.pending_events, ev, key=lambda x: x["ts"])
+
                 self.pending_metadata.extend(new_metadata)
-                self.pending_events.sort(key=lambda x: x["ts"])
-
-                  # for ev in self.pending_events:
-                  #     ts = ev['ts']
-                  #     for cpuid, threads in thread_map.items():
-                  #         for tid, pairlist in threads.items():
-                  #             for i, j in pairlist:
-                  #   # CHORE: remove tid 0 border
-                  #                 if ts >= i and j is not None and ts <= j and 'tid' in ev and tid != "0" and ev["ph"] != "M":
-                  #                     try:
-                  #                         assert(tid == str(ev['tid']))
-                  #                     except Exception as _:
-                  #                         print("#", tid, type(tid))
-                  #                         print(i,j)
-                  #                         print(tid, ev)
-                  #                         breakpoint()
-
-
-
 
                 now = time.monotonic()
 
                 if now - last_emit >= cooldown and self.continuous_streaming:
-                    # Currently on renode the cooldown will gather ~25 events on the tested example
-                    # this method of avoiding unsorted events is faulty,
-                    # when an event is heavily delayed, it will be sent out of order.
-                    # To mitigate this, one can either increase the cooldown, or
-                    # add more sophisticated chunking logic, eg sending packets of 50
-                    # traces or after a much more substantial timeout
-                    to_send = int(len(self.pending_events) / 2)
-                    with self.trace_lock:
+                    to_send = max(1, len(self.pending_events) // 2)
+                    batch = (
+                        list(self.pending_metadata)
+                        + self.pending_events[:to_send]
+                    )
+                    self.pending_metadata.clear()
+                    del self.pending_events[:to_send]
+
+                    await self._emit_queue.put({
+                        "type": "events",
+                        "events": batch,
+                    })
+                    last_emit = now
+                else:
+                    await self._emit_queue.put({
+                        "type": "status",
+                    })
+        except asyncio.CancelledError:
+            pass
+
+    async def _emit_loop(self):
+        """
+        Background task that reads from _emit_queue and performs Socket.IO
+        emits. Runs independently so async I/O doesn't block the consumer loop.
+        """
+        while True:
+            msg = await self._emit_queue.get()
+
+            if msg["type"] == "events":
+                with self.trace_lock:
+                    try:
                         await self.sio.emit(
                             "rpc_notification",
                             {
                                 "jsonrpc": "2.0",
                                 "method": "trace.events",
                                 "params": {
-                                    "events": self.pending_metadata + self.pending_events[:to_send],
+                                    "events": msg["events"],
                                     "total_count": len(self.trace_events),
                                 },
                             },
                         )
-                        self.pending_events = self.pending_events[to_send:]
-                        self.pending_metadata = []
-                        last_emit = now
-                else:
+                    except Exception as e:
+                        logger.error(f"Emit error: {e}")
+            elif msg["type"] == "status":
+                try:
                     await self.sio.emit(
                         "rpc_notification",
                         {
@@ -600,12 +640,8 @@ class TraceHandler(BaseHandler):
                             },
                         },
                     )
-            except Exception as e:
-                # It is expected that some parsed events will be incomplete
-                if "LTTNG_CTF_LTTNG_INDEX" not in str(e):
-                    logger.error(f"Incremental parse error: {e}")
-            except asyncio.CancelledError:
-                break
+                except Exception as e:
+                    logger.error(f"Status emit error: {e}")
 
     async def _raw_trace_interceptor(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
@@ -651,6 +687,19 @@ class TraceHandler(BaseHandler):
         and notifies the frontend to wipe the UI.
         """
         logger.info("Trace reset triggered. Clearing state.")
+
+        if self.ctf_tef is not None:
+            self.ctf_tef.stop()
+            self.ctf_tef = None
+
+        if self._emit_task is not None:
+            self._emit_task.cancel()
+            try:
+                await self._emit_task
+            except asyncio.CancelledError:
+                pass
+            self._emit_task = None
+            self._emit_queue = None
 
         with self.trace_lock:
             self.trace_events.clear()

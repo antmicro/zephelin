@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-
 # Copyright (c) 2025 Analog Devices, Inc.
 # Copyright (c) 2025 Antmicro <www.antmicro.com>
 #
 # SPDX-License-Identifier: Apache-2.0
-
 """
 Script converting Common Trace Format (CTF) trace
 to the JSON-based Trace Event Format (TEF), which can be consumed by Speedscope.
 """
 
 import argparse
+import asyncio
 import collections
 import json
 import os
 import sys
+import time
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -23,10 +23,9 @@ from math import isnan
 from pathlib import Path
 from shutil import copy2
 from tempfile import TemporaryDirectory
-from typing import Any, AsyncGenerator, Callable, NamedTuple
+from typing import Any, Callable, NamedTuple
 
 import bt2  # From the babeltrace2 package.
-import time
 
 
 class EventPhase(Enum):
@@ -313,61 +312,121 @@ def _parse_msg(
 
 
 
-async def stream_ctf_to_tef(
-    q,
-    skip_args: bool = False,
-    custom_metadata: dict[str, CustomMetadataDefinition] | None = None,
-    custom_events: list[CustomEventDefinition] | None = None,
-    batch_size: int = 50,
-    flush_interval_s: float = 0.01,
-) -> AsyncGenerator[CTFConversionResult, Any]:
+class StreamingCTFToTEF:
     """
-    Converts CTF trace to the JSON in TEF format.
-
-    Parameters
-    ----------
-    q: asyncio.Queue
-        Incoming message queue
-    path : str
-        Path to the file with trace in CTF.
-    skip_args : bool
-        Whether the arguments of events should be ignored.
-    custom_metadata : dict[str, CustomMetadataDefinition] | None
-        Dictionary mapping CTF event to the TEF metadata.
-    custom_events : list[CustomEventDefinition] | None
-        List with mapping of the beginning and the end represented by CTF events
-        to a new TEF event.
-
-    Returns
-    -------
-    CTFConversionResult
-        The converted trace and information about thread names
+    Converts CTF trace to the JSON in TEF format using a background task.
     """
-    if custom_metadata is None:
-        custom_metadata = {}
-    if custom_events is None:
-        custom_events = []
 
-    custom_event_begin = defaultdict(list)
-    custom_event_end = defaultdict(list)
-    custom_event_name_func = {}
-    custom_event_args_func = {}
+    def __init__(
+        self,
+        q: asyncio.Queue,
+        skip_args: bool = False,
+        custom_metadata: dict[str, CustomMetadataDefinition] | None = None,
+        custom_events: list[CustomEventDefinition] | None = None,
+        batch_size: int = 50,
+        flush_interval_s: float = 0.01,
+    ):
+        """
+        Initialize the converter and calculate custom events.
 
-    for e in custom_events:
-        custom_event_begin[e.enter_event_name].append(e.new_name)
-        custom_event_end[e.exit_event_name].append(e.new_name)
-        custom_event_name_func[e.enter_event_name] = e.suffix_func
-        custom_event_name_func[e.exit_event_name] = e.suffix_func
-        custom_event_args_func[e.enter_event_name] = e.additional_arg_func
-        custom_event_args_func[e.exit_event_name] = e.additional_arg_func
+        Parameters
+        ----------
+        q : asyncio.Queue
+            Incoming message queue.
+        skip_args : bool
+            Whether the arguments of events should be ignored.
+        custom_metadata : dict[str, CustomMetadataDefinition] | None
+            Dictionary mapping CTF event to the TEF metadata.
+        custom_events : list[CustomEventDefinition] | None
+            List with mapping of the beginning and the end represented by CTF events
+            to a new TEF event.
+        batch_size : int
+            Number of messages to accumulate before flushing.
+        flush_interval_s : float
+            Maximum time (seconds) to wait before flushing regardless of batch size.
 
-    converted = []
-    thread_name = {}
-    current_thread = defaultdict(int)
+        Returns
+        -------
+        StreamingCTFToTEF
+            Instance with an ``output_queue`` attribute yielding CTFConversionResult objects.
+        """
+        if custom_metadata is None:
+            custom_metadata = {}
+        if custom_events is None:
+            custom_events = []
 
-    last_flush = time.perf_counter()
+        self._input_queue = q
+        self._custom_metadata = custom_metadata
+        self._skip_args = skip_args
+        self._batch_size = batch_size
+        self._flush_interval_s = flush_interval_s
 
-    def parse_batch(msgs):
+        custom_event_begin = defaultdict(list)
+        custom_event_end = defaultdict(list)
+        custom_event_name_func = {}
+        custom_event_args_func = {}
+
+        for e in custom_events:
+            custom_event_begin[e.enter_event_name].append(e.new_name)
+            custom_event_end[e.exit_event_name].append(e.new_name)
+            custom_event_name_func[e.enter_event_name] = e.suffix_func
+            custom_event_name_func[e.exit_event_name] = e.suffix_func
+            custom_event_args_func[e.enter_event_name] = e.additional_arg_func
+            custom_event_args_func[e.exit_event_name] = e.additional_arg_func
+
+        self._custom_event_begin = custom_event_begin
+        self._custom_event_end = custom_event_end
+        self._custom_event_name_func = custom_event_name_func
+        self._custom_event_args_func = custom_event_args_func
+
+        self._thread_name: dict[str, int] = {}
+        self._current_thread = defaultdict(int)
+        self._converted: list[dict] = []
+        self._batch: list = []
+        self._last_flush = time.perf_counter()
+
+        self.output_queue: asyncio.Queue[CTFConversionResult] = asyncio.Queue()
+        self._task: asyncio.Task | None = None
+
+    def start(self) -> asyncio.Task:
+        """Start the background conversion task. Returns the task handle."""
+        self._task = asyncio.create_task(self._run())
+        return self._task
+
+    def stop(self) -> None:
+        """Signal the background task to stop and cancel it."""
+        if self._task is not None:
+            self._task.cancel()
+            self._task = None
+
+    async def _run(self) -> None:
+        try:
+            while True:
+                msg = await self._input_queue.get()
+                self._batch.append(msg)
+
+                now = time.perf_counter()
+                should_flush = (
+                    len(self._batch) >= self._batch_size
+                    or (now - self._last_flush) >= self._flush_interval_s
+                )
+
+                if not should_flush:
+                    continue
+
+                self._converted.extend(self._parse_batch(self._batch))
+                self._batch.clear()
+                self._last_flush = now
+
+                if self._converted:
+                    await self.output_queue.put(
+                        CTFConversionResult(self._converted, dict(self._thread_name))
+                    )
+                    self._converted = []
+        except asyncio.CancelledError:
+            pass
+
+    def _parse_batch(self, msgs: list) -> list[dict]:
         out = []
         for msg in msgs:
             if not hasattr(msg, "event"):
@@ -375,14 +434,14 @@ async def stream_ctf_to_tef(
 
             ev = _parse_msg(
                 msg,
-                thread_name,
-                current_thread,
-                custom_metadata,
-                custom_event_begin,
-                custom_event_end,
-                custom_event_name_func,
-                custom_event_args_func,
-                skip_args,
+                self._thread_name,
+                self._current_thread,
+                self._custom_metadata,
+                self._custom_event_begin,
+                self._custom_event_end,
+                self._custom_event_name_func,
+                self._custom_event_args_func,
+                self._skip_args,
             )
 
             if ev is not None:
@@ -390,29 +449,49 @@ async def stream_ctf_to_tef(
 
         return out
 
-    batch = []
 
-    while True:
-        msg = await q.get()
+def stream_ctf_to_tef(
+    q: asyncio.Queue,
+    skip_args: bool = False,
+    custom_metadata: dict[str, CustomMetadataDefinition] | None = None,
+    custom_events: list[CustomEventDefinition] | None = None,
+    batch_size: int = 50,
+    flush_interval_s: float = 0.01,
+) -> StreamingCTFToTEF:
+    """
+    Creates a streaming CTF-to-TEF converter backed by a background task.
 
-        batch.append(msg)
+    Parameters
+    ----------
+    q : asyncio.Queue
+        Incoming message queue.
+    skip_args : bool
+        Whether the arguments of events should be ignored.
+    custom_metadata : dict[str, CustomMetadataDefinition] | None
+        Dictionary mapping CTF event to the TEF metadata.
+    custom_events : list[CustomEventDefinition] | None
+        List with mapping of the beginning and the end represented by CTF events
+        to a new TEF event.
+    batch_size : int
+        Number of messages to accumulate before flushing.
+    flush_interval_s : float
+        Maximum time (seconds) to wait before flushing regardless of batch size.
 
-        now = time.perf_counter()
-        should_flush = (
-            len(batch) >= batch_size
-            or (now - last_flush) >= flush_interval_s
-        )
-
-        if not should_flush:
-            continue
-
-        converted.extend(parse_batch(batch))
-        batch.clear()
-        last_flush = now
-
-        if converted:
-            yield CTFConversionResult(converted, thread_name)
-            converted = []
+    Returns
+    -------
+    StreamingCTFToTEF
+        Instance with an ``output_queue`` attribute yielding CTFConversionResult objects.
+        Call ``.start()`` to begin the background task, and ``.stop()`` to cancel it.
+    """
+    converter = StreamingCTFToTEF(
+        q,
+        skip_args=skip_args,
+        custom_metadata=custom_metadata,
+        custom_events=custom_events,
+        batch_size=batch_size,
+        flush_interval_s=flush_interval_s,
+    )
+    return converter
 
 
 def ctf_to_tef(
