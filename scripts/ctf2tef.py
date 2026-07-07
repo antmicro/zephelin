@@ -169,27 +169,30 @@ def convert_from_bt2(x: Any) -> str | int | float | bool | dict:
 
 
 def emit_event(
-    msg: bt2._EventMessageConst,
     name: str,
     tid: int,
     phase: EventPhase,
+    ts_micros: float,
+    payload_field=None,
     shift: float = 0,
     skip_args: bool = False,
     additional_args: dict | None = None,
 ):
     """
-    Prints the event in TEF format.
+    Constructs a TEF event dict from pre-extracted values.
 
     Parameters
     ----------
-    msg : bt2._EventMessageConst
-        Representation of the event message to be printed.
     name : str
         The name of event.
     tid : int
         The thread ID.
     phase : EventPhase
         The event phase, usually either begin or end.
+    ts_micros : float
+        The timestamp in microseconds (pre-extracted).
+    payload_field : bt2._StructureFieldConst | None
+        Pre-extracted event payload field.
     shift : float
         The shift added to a timestamp.
     skip_args : bool
@@ -197,25 +200,20 @@ def emit_event(
     additional_args : dict | None
         Additional data appended to "args".
     """
-    if name == "named_event":
-        name = str(msg.event.payload_field.get("name", name))
-    return {
+    result = {
         "name": name,
         "cat": "zephyr",
         "ph": phase.value,
-        "ts": extract_us(msg) + shift,
+        "ts": ts_micros + shift,
         "pid": 0,
         "tid": tid,
-    } | (
-        {
-            "args": {
-                **convert_from_bt2(msg.event.payload_field),
-                **(additional_args if additional_args else {}),
-            }
-        }
-        if not skip_args and msg.event.payload_field
-        else {}
-    )
+    }
+    if not skip_args and payload_field:
+        args = convert_from_bt2(payload_field)
+        if additional_args:
+            args.update(additional_args)
+        result["args"] = args
+    return result
 
 
 class CTFConversionResult(NamedTuple):
@@ -229,8 +227,6 @@ class CTFConversionResult(NamedTuple):
     thread_names: dict[str, int]
 
 
-thread_map = defaultdict(lambda: defaultdict(list))
-
 def _parse_msg(
     msg,
     thread_name,
@@ -242,74 +238,59 @@ def _parse_msg(
     custom_event_args_func,
     skip_args,
 ):
-    global thread_map
-    fields = msg.event.payload_field if msg.event.payload_field else {}
-    thread_id = int(
-        fields.get("thread_id", current_thread[msg.event.payload_field.get("cpu_id", -1)])
-    )
+    event = msg.event
+    event_name = event.name
+    payload_field = event.payload_field or {}
+
+    ts_micros = msg.default_clock_snapshot.value * 1e-3
+    thread_id = int(payload_field.get("thread_id", current_thread[payload_field.get("cpu_id", -1)]))
+
+    ev_name = None
+    ev_phase = None
+    ev_additional_args = None
     # Process custom metadata
-    if msg.event.name in custom_metadata:
-        m = custom_metadata[msg.event.name]
-        return emit_event(
-            msg,
-            f"{m.new_name}{m.suffix_func(msg) if m.suffix_func else ''}",
-            thread_id,
-            EventPhase.METADATA,
-            skip_args=skip_args,
-            additional_args=m.additional_arg_func(msg) if m.additional_arg_func else {},
-        )
+    if event_name in custom_metadata:
+        m = custom_metadata[event_name]
+        ev_name = f"{m.new_name}{m.suffix_func(msg) if m.suffix_func else ''}"
+        ev_phase = EventPhase.METADATA
+        ev_additional_args = m.additional_arg_func(msg) if m.additional_arg_func else {}
     # Process custom events
-    if msg.event.name in custom_event_begin:
-        return emit_event(
-            msg,
-            f"{custom_event_begin[msg.event.name][0]}{custom_event_name_func[msg.event.name](msg)}",
-            thread_id,
-            EventPhase.BEGIN,
-            skip_args=skip_args,
-            additional_args=custom_event_args_func[msg.event.name](msg)
-            if custom_event_args_func[msg.event.name]
-            else None,
+    if event_name in custom_event_begin:
+        ev_name = f"{custom_event_begin[event_name][0]}{custom_event_name_func[event_name](msg)}"
+        ev_phase = EventPhase.BEGIN
+        ev_additional_args = (
+            custom_event_args_func[event_name](msg) if custom_event_args_func[event_name] else None
         )
-    if msg.event.name in custom_event_end:
-        return emit_event(
-            msg,
-            f"{custom_event_end[msg.event.name][0]}{custom_event_name_func[msg.event.name](msg)}",
-            thread_id,
-            EventPhase.END,
-            skip_args=skip_args,
-            additional_args=custom_event_args_func[msg.event.name](msg)
-            if custom_event_args_func[msg.event.name]
-            else None,
+    if event_name in custom_event_end:
+        ev_name = f"{custom_event_end[event_name][0]}{custom_event_name_func[event_name](msg)}"
+        ev_phase = EventPhase.END
+        ev_additional_args = (
+            custom_event_args_func[event_name](msg) if custom_event_args_func[event_name] else None
         )
     # Process Zephyr events (starts with *_enter and finishes with *_exit)
-    if msg.event.name.endswith("_enter"):
-        return emit_event(
-            msg,
-            msg.event.name[:-6],
-            thread_id,
-            EventPhase.BEGIN,
-            skip_args=skip_args,
-        )
-    if msg.event.name.endswith("_exit"):
-        return emit_event(
-            msg,
-            msg.event.name[:-5],
-            thread_id,
-            EventPhase.END,
-            skip_args=skip_args,
-        )
+    if event_name.endswith("_enter"):
+        ev_name = event_name[:-6]
+        ev_phase = EventPhase.BEGIN
+    if event_name.endswith("_exit"):
+        ev_name = event_name[:-5]
+        ev_phase = EventPhase.END
     # Check whether thread has changed
-    if str(msg.event.name).startswith("thread_") and "thread_id" in fields:
-        thread_name[str(fields["name"])] = int(fields["thread_id"])
+    if str(event_name).startswith("thread_") and "thread_id" in payload_field:
+        thread_name[str(payload_field["name"])] = int(payload_field["thread_id"])
     # Check whether thread has changed
-    if msg.event.name == "thread_switched_in":
-        # oldtid = int(current_thread[msg.event.payload_field["cpu_id"]])
-        # if str(oldtid) not in thread_map[str(msg.event.payload_field["cpu_id"])]:
-        #     thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)].append([0, extract_us(msg)])
-        current_thread[msg.event.payload_field["cpu_id"]] = thread_id = int(fields["thread_id"])
-        # thread_map[str(msg.event.payload_field["cpu_id"])][str(thread_id)].append([extract_us(msg), None])
-        # thread_map[str(msg.event.payload_field["cpu_id"])][str(oldtid)][-1][1] = extract_us(msg)
+    if event_name == "thread_switched_in":
+        current_thread[payload_field["cpu_id"]] = thread_id = int(payload_field["thread_id"])
 
+    if ev_name is not None:
+        return emit_event(
+            ev_name,
+            thread_id,
+            ev_phase,
+            ts_micros,
+            payload_field=event.payload_field,
+            skip_args=skip_args,
+            additional_args=ev_additional_args,
+        )
 
 
 class StreamingCTFToTEF:
@@ -387,6 +368,7 @@ class StreamingCTFToTEF:
 
         self.output_queue: asyncio.Queue[CTFConversionResult] = asyncio.Queue()
         self._task: asyncio.Task | None = None
+        self.checked_timebase = False
 
     def start(self) -> asyncio.Task:
         """Start the background conversion task. Returns the task handle."""
@@ -402,8 +384,18 @@ class StreamingCTFToTEF:
     async def _run(self) -> None:
         try:
             while True:
-                msg = await self._input_queue.get()
-                self._batch.append(msg)
+                # Use a timeout on the queue get so we can periodically check
+                # if a partial batch needs flushing when input pauses or stops.
+                try:
+                    item = await asyncio.wait_for(
+                        self._input_queue.get(), timeout=self._flush_interval_s
+                    )
+                    if isinstance(item, tuple):
+                        self._batch.extend(item)
+                    else:
+                        self._batch.append(item)
+                except asyncio.TimeoutError:
+                    pass
 
                 now = time.perf_counter()
                 should_flush = (
@@ -411,26 +403,46 @@ class StreamingCTFToTEF:
                     or (now - self._last_flush) >= self._flush_interval_s
                 )
 
-                if not should_flush:
-                    continue
+                if should_flush:
+                    self._converted.extend(self._parse_batch(self._batch))
+                    self._batch.clear()
+                    self._last_flush = now
 
+                    if self._converted:
+                        await self.output_queue.put(
+                            CTFConversionResult(self._converted, dict(self._thread_name))
+                        )
+                        self._converted = []
+        except asyncio.CancelledError:
+            # Flush remaining messages on cancellation before exiting.
+            if self._batch:
                 self._converted.extend(self._parse_batch(self._batch))
                 self._batch.clear()
-                self._last_flush = now
+            if self._converted:
+                await self.output_queue.put(
+                    CTFConversionResult(self._converted, dict(self._thread_name))
+                )
 
-                if self._converted:
-                    await self.output_queue.put(
-                        CTFConversionResult(self._converted, dict(self._thread_name))
-                    )
-                    self._converted = []
-        except asyncio.CancelledError:
-            pass
+    def _flush_remaining(self) -> list[dict]:
+        """Flush any remaining unprocessed messages in the batch."""
+        if not self._batch:
+            return []
+        result = self._parse_batch(self._batch)
+        self._batch.clear()
+        return result
 
     def _parse_batch(self, msgs: list) -> list[dict]:
         out = []
         for msg in msgs:
-            if not hasattr(msg, "event"):
+            # A slightly faster hasattr, the error does not signify any actual failure
+            try:
+                _ = msg.event
+            except AttributeError:
                 continue
+
+            if not self.checked_timebase:
+                assert msg.default_clock_snapshot.clock_class.frequency == 1e9
+                self.checked_timebase = True
 
             ev = _parse_msg(
                 msg,
@@ -552,13 +564,15 @@ def ctf_to_tef(
         except bt2._Error:
             break
 
-        if not hasattr(msg, "event"):
+        try:
+            ev = msg.event
+        except AttributeError:
             continue
-        fields = msg.event.payload_field
-        if not msg.event.name.startswith("thread_") or fields.get("name", None) != "main":
+        fields = ev.payload_field
+        if not ev.name.startswith("thread_") or fields.get("name", None) != "main":
             continue
         thread_name["main"] = int(fields.get("thread_id", 0))
-        current_thread[msg.event.payload_field["cpu_id"]] = thread_name["main"]
+        current_thread[fields["cpu_id"]] = thread_name["main"]
         break
     # Restart the iterator
     msg_it = bt2.TraceCollectionMessageIterator(path)
@@ -570,10 +584,11 @@ def ctf_to_tef(
         except bt2._Error:
             break
 
-        # Skip messages without events
-        if not hasattr(msg, "event"):
+        try:
+            ev = msg.event
+        except AttributeError:
             continue
-        event = _parse_msg(
+        parsed = _parse_msg(
             msg,
             thread_name,
             current_thread,
@@ -584,8 +599,8 @@ def ctf_to_tef(
             custom_event_args_func,
             skip_args,
         )
-        if event is not None:
-            converted.append(event)
+        if parsed is not None:
+            converted.append(parsed)
 
     return CTFConversionResult(converted, thread_name)
 

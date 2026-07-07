@@ -38,6 +38,7 @@ from prepare_trace import (
 from socketio import AsyncServer
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+BT2_BATCH_SIZE = 50
 DATA_CHUNK_BYTES = 8192
 _CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
@@ -235,19 +236,35 @@ class TraceHandler(BaseHandler):
                 live_mode=True,
             )
 
+            # Batch messages before crossing the thread boundary to avoid
+            # per-message asyncio.run_coroutine_threadsafe overhead.
+            batch = []
+
             # Iterate the trace messages.
             while not self.bt2_thread_stop:
                 try:
                     msg = next(self.msg_it)
-                    asyncio.run_coroutine_threadsafe(
-                        self.async_q.put(msg), self.async_loop
-                    ).result()
+                    batch.append(msg)
+
+                    if len(batch) >= BT2_BATCH_SIZE:
+                        asyncio.run_coroutine_threadsafe(
+                            self.async_q.put(tuple(batch)), self.async_loop
+                        ).result()
+                        batch = []
                 except bt2.TryAgain:
-                    # To avoid keeping the thread pinned at 100% all the time
-                    # At the same time, the delay has to be small enough to avoid
-                    # Issues with message throttling on the socket
-                    # time.sleep(0.001)
+                    # Flush any accumulated batch on TryAgain to avoid losing messages.
+                    if batch:
+                        asyncio.run_coroutine_threadsafe(
+                            self.async_q.put(tuple(batch)), self.async_loop
+                        ).result()
+                        batch = []
                     continue
+
+            # Drain remaining batch on shutdown
+            if batch:
+                asyncio.run_coroutine_threadsafe(
+                    self.async_q.put(tuple(batch)), self.async_loop
+                ).result()
 
         self.bt2_thread = Thread(target=do_stream)
         self.bt2_thread.start()
@@ -575,9 +592,20 @@ class TraceHandler(BaseHandler):
                         logger.error(f"Incremental parse error: {e}")
                     continue
 
-                # Insertion-sort incrementally instead of re-sorting everything
-                for ev in new_events:
-                    bisect.insort(self.pending_events, ev, key=lambda x: x["ts"])
+                # Sort incoming batch by ts once, then merge-scan into pending list
+                new_events.sort(key=lambda x: x["ts"])
+                merged = []
+                i = j = 0
+                while i < len(self.pending_events) and j < len(new_events):
+                    if self.pending_events[i]["ts"] <= new_events[j]["ts"]:
+                        merged.append(self.pending_events[i])
+                        i += 1
+                    else:
+                        merged.append(new_events[j])
+                        j += 1
+                merged.extend(self.pending_events[i:])
+                merged.extend(new_events[j:])
+                self.pending_events = merged
 
                 self.pending_metadata.extend(new_metadata)
 
@@ -585,10 +613,7 @@ class TraceHandler(BaseHandler):
 
                 if now - last_emit >= cooldown and self.continuous_streaming:
                     to_send = max(1, len(self.pending_events) // 2)
-                    batch = (
-                        list(self.pending_metadata)
-                        + self.pending_events[:to_send]
-                    )
+                    batch = list(self.pending_metadata) + self.pending_events[:to_send]
                     self.pending_metadata.clear()
                     del self.pending_events[:to_send]
 
@@ -602,7 +627,18 @@ class TraceHandler(BaseHandler):
                         "type": "status",
                     })
         except asyncio.CancelledError:
-            pass
+            # Flush remaining pending events before cancellation.
+            if self.pending_events or self.pending_metadata:
+                batch = list(self.pending_metadata) + self.pending_events
+                self.pending_events.clear()
+                self.pending_metadata.clear()
+                try:
+                    await self._emit_queue.put({
+                        "type": "events",
+                        "events": batch,
+                    })
+                except Exception as e:
+                    logger.error(f"Final flush error: {e}")
 
     async def _emit_loop(self):
         """
