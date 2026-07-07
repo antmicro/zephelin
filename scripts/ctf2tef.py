@@ -518,6 +518,41 @@ def instrumentation_ctf_to_tef(
     return CTFConversionResult(converted, None)
 
 
+def merge_metadata(dst_dir: Path, zephyr_base: Path | None = None) -> Path:
+    """
+    Write the merged Zephyr + Zephelin CTF metadata into provided directory.
+
+    Parameters
+    ----------
+    dst_dir : Path
+        Directory the merged metadata file is written into.
+    zephyr_base : Path | None
+        Path to the Zephyr repository.
+
+    Returns
+    -------
+    Path
+        Path to the metadata file.
+
+    Raises
+    ------
+    FileNotFoundError
+        When either the Zephyr base or Zephelin metadata cannot be found.
+    """
+    zephyr_base = zephyr_base if zephyr_base else deduce_zephyr_base()
+    zephyr_metadata = zephyr_base / "subsys" / "tracing" / "ctf" / "tsdl" / "metadata"
+    if not zephyr_metadata.exists():
+        raise FileNotFoundError(f"Zephyr CTF metadata ({zephyr_metadata}) does not exist")
+
+    zpl_metadata = Path(__file__).parents[1] / "zpl" / "metadata"
+    if not zpl_metadata.exists():
+        raise FileNotFoundError(f"Zephelin metadata ({zpl_metadata}) does not exist")
+
+    dst_metadata = dst_dir / "metadata"
+    dst_metadata.write_text(zephyr_metadata.read_text() + zpl_metadata.read_text())
+    return dst_metadata
+
+
 @contextmanager
 def prepare_dir(trace: Path, zephyr_base: Path | None = None):
     """
@@ -551,28 +586,11 @@ def prepare_dir(trace: Path, zephyr_base: Path | None = None):
                 trace_out_f.write(packet_size)
                 trace_out_f.write(packet)
 
-        base = Path(__file__).parent.parent
-        zephyr_base = zephyr_base if zephyr_base else base.parent / "zephyr"
-        zephyr_metadata = zephyr_base / "subsys" / "tracing" / "ctf" / "tsdl" / "metadata"
-        if not zephyr_metadata.exists():
-            print(
-                f"Zephyr CTF metadata ({zephyr_metadata}) does not exist",
-                file=sys.stderr,
-            )
+        try:
+            merge_metadata(tmp_dir, zephyr_base)
+        except FileNotFoundError as e:
+            print(str(e), file=sys.stderr)
             exit(1)
-
-        tmp_metadata = tmp_dir / zephyr_metadata.name
-        copy2(zephyr_metadata, tmp_metadata)
-
-        zpl_metadata = Path(__file__).parents[1] / "zpl" / "metadata"
-        if not zpl_metadata.exists():
-            print(f"Zephelin metadata ({zpl_metadata}) does not exist", file=sys.stderr)
-            exit(1)
-
-        with zpl_metadata.open("r") as fd:
-            zpl_meta_raw = fd.read()
-        with tmp_metadata.open("a") as fd:
-            fd.write(zpl_meta_raw)
 
         yield tmp_dir
 
