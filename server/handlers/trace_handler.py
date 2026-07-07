@@ -11,6 +11,7 @@ import asyncio
 import gc
 import json
 import logging
+import tempfile
 import time
 from pathlib import Path
 from threading import Lock, Thread
@@ -18,7 +19,7 @@ from typing import Literal, Union
 
 import bt2
 from config import TraceConfig
-from ctf2tef import stream_ctf_to_tef
+from ctf2tef import merge_metadata, stream_ctf_to_tef
 from endpoints import Endpoints
 from extract_tvm_model_data import tvm_recalculate_model_numbers
 from handlers.base import BaseHandler
@@ -101,6 +102,9 @@ class TraceHandler(BaseHandler):
         self.trace_lock = Lock()
         self.msg_it = None
 
+        self._metadata_tmp = None
+        self.metadata_dir = None
+
     @endpoints.register_method("trace.connnect")
     async def connect(self) -> dict[Literal["status", "message"], str]:
         """
@@ -121,6 +125,15 @@ class TraceHandler(BaseHandler):
         if self.bt2_thread is not None:
             raise Exception("Already listening for traces.")
 
+        self._metadata_tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        try:
+            merge_metadata(Path(self._metadata_tmp.name))
+        except FileNotFoundError as e:
+            self._metadata_tmp.cleanup()
+            self._metadata_tmp = None
+            raise Exception(f"Failed to prepare CTF metadata: {e}")
+        self.metadata_dir = self._metadata_tmp.name
+
         self.async_loop = asyncio.get_event_loop()
         self.async_q = asyncio.Queue(0)
 
@@ -131,7 +144,10 @@ class TraceHandler(BaseHandler):
             self.msg_it = bt2.TraceCollectionMessageIterator(
                 bt2.ComponentSpec(
                     dummy_cc,
-                    {"port": self.bt_port},
+                    {
+                        "port": self.bt_port,
+                        "metadata-path": self.metadata_dir,
+                    },
                 ),
                 live_mode=True,
             )
@@ -360,6 +376,11 @@ class TraceHandler(BaseHandler):
             self.continuous_streaming = False
             self.msg_it = None
             gc.collect()
+
+        if self._metadata_tmp is not None:
+            self._metadata_tmp.cleanup()
+            self._metadata_tmp = None
+            self.metadata_dir = None
 
         return True
 
