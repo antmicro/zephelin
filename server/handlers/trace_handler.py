@@ -161,12 +161,17 @@ class TraceHandler(BaseHandler):
         self.tvm_prefix_to_model_id = {}
 
         self.pending_events = []
+        self.pending_metadata = []
         self.trace_threads = {}
         self.continuous_streaming = False
         self.bt2_thread = None
         self.bt2_thread_stop = False
         self.trace_lock = Lock()
         self.msg_it = None
+        self.async_q = None
+        self.interceptor_server = None
+        self.interceptor_task = None
+        self.tef_task = None
 
         self._metadata_tmp = None
         self.metadata_dir = None
@@ -431,19 +436,38 @@ class TraceHandler(BaseHandler):
         bool
             Cleanup status.
         """
+        if self.interceptor_server is not None:
+            self.interceptor_server.close()
+            await self.interceptor_server.wait_closed()
+            self.interceptor_server = None
+
+        if self.interceptor_task is not None:
+            self.interceptor_task.cancel()
+            try:
+                await self.interceptor_task
+            except asyncio.CancelledError:
+                pass
+            self.interceptor_task = None
+
         if self.bt2_thread:
             self.bt2_thread_stop = True
             await asyncio.get_event_loop().run_in_executor(None, self.bt2_thread.join)
-            self.tef_task.cancel()
-            await self.tef_task
+            if self.tef_task is not None:
+                self.tef_task.cancel()
+                try:
+                    await self.tef_task
+                except asyncio.CancelledError:
+                    pass
 
             self.pending_events = []
+            self.pending_metadata = []
             self.bt2_thread = None
             self.trace_events = []
             self.tef_task = None
             self.bt2_thread_stop = False
             self.continuous_streaming = False
             self.msg_it = None
+            self.async_q = None
             gc.collect()
 
         if self._metadata_tmp is not None:
@@ -612,7 +636,7 @@ class TraceHandler(BaseHandler):
             self.pending_metadata.clear()
             self.trace_threads.clear()
 
-            while not self.async_q.empty():
+            while self.async_q is not None and not self.async_q.empty():
                 try:
                     self.async_q.get_nowait()
                 except asyncio.QueueEmpty:
