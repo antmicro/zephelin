@@ -47,6 +47,10 @@ def apply_patches(
         patches = sorted(list((source_root / source).glob("*.patch")))
         str_patches = [str(x.resolve()) for x in patches]
 
+        if not str_patches:
+            print(f"No patches found for '{source}'")
+            continue
+
         subprocess.run(
             ["git", "am", "--abort"],
             cwd=repo,
