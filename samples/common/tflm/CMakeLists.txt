@@ -7,6 +7,8 @@ zephyr_library_named(tflm_model)
 zephyr_library_sources(src/tflm_model.cpp)
 zephyr_include_directories("${CMAKE_CURRENT_BINARY_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+add_dependencies(tflm_model zephyr_generated_headers)
+
 # generate header with model data
 
 set(i 0)

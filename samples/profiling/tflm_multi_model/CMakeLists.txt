@@ -12,4 +12,4 @@ project(app)
 target_sources(app PRIVATE src/main.cpp)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../common/tflm ${CMAKE_CURRENT_BINARY_DIR}/tflm)
-zephyr_link_libraries(tflm_model)
+target_link_libraries(app PRIVATE tflm_model)
