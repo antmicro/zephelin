@@ -1,0 +1,127 @@
+From 4597b767824afc09ecd525a6db15bd632309a244 Mon Sep 17 00:00:00 2001
+From: Andrii Chmutov <achmutov@antmicro.com>
+Date: Wed, 31 Dec 2025 14:02:33 +0100
+Subject: [PATCH 13/35] tracing: make CTF timestamp function configurable
+
+Signed-off-by: Andrii Chmutov <achmutov@antmicro.com>
+---
+ subsys/tracing/Kconfig                |  7 +++++++
+ subsys/tracing/ctf/ctf_top.c          | 18 ++++++++++++++++++
+ subsys/tracing/ctf/ctf_top.h          | 14 +++++++++++++-
+ subsys/tracing/include/tracing_core.h |  4 ++++
+ subsys/tracing/tracing_core.c         |  8 ++++++++
+ 5 files changed, 50 insertions(+), 1 deletion(-)
+
+diff --git a/subsys/tracing/Kconfig b/subsys/tracing/Kconfig
+index 2dec7bc17ac..9df4f0cec01 100644
+--- a/subsys/tracing/Kconfig
++++ b/subsys/tracing/Kconfig
+@@ -84,6 +84,13 @@ config TRACING_CTF_TIMESTAMP
+ 	  Timestamp prefix will be added to the beginning of CTF
+ 	  event internally.
+ 
++
++config TRACING_CTF_CONFIGURABLE_TIMER
++	bool "CTF configurable timestamp function"
++	depends on TRACING_CTF_TIMESTAMP
++	help
++	  Enable configurable timestamp function.
++
+ choice TRACING_METHOD_CHOICE
+ 	prompt "Tracing Method"
+ 	default TRACING_ASYNC
+diff --git a/subsys/tracing/ctf/ctf_top.c b/subsys/tracing/ctf/ctf_top.c
+index 7d1a1704275..e10d97a4efe 100644
+--- a/subsys/tracing/ctf/ctf_top.c
++++ b/subsys/tracing/ctf/ctf_top.c
+@@ -15,6 +15,24 @@
+ #include <zephyr/net/net_pkt.h>
+ #include <zephyr/debug/cpu_load.h>
+ 
++#if defined(CONFIG_TRACING_CTF_TIMESTAMP) && defined(CONFIG_TRACING_CTF_CONFIGURABLE_TIMER)
++static ctf_timestamp_get_t ctf_timestamp_func = ctf_top_timestamp_get;
++
++int ctf_set_timestamp_func(ctf_timestamp_get_t timestamp_getter)
++{
++	if (timestamp_getter == NULL) {
++		return -EINVAL;
++	}
++	ctf_timestamp_func = timestamp_getter;
++	return 0;
++}
++
++uint64_t ctf_timestamp_get(void)
++{
++	return ctf_timestamp_func();
++}
++#endif /* CONFIG_TRACING_CTF_TIMESTAMP && CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
++
+ static void _get_thread_name(struct k_thread *thread, ctf_bounded_string_t *name)
+ {
+ 	const char *tname = k_thread_name_get(thread);
+diff --git a/subsys/tracing/ctf/ctf_top.h b/subsys/tracing/ctf/ctf_top.h
+index 2fa277f39e6..d4dc1075777 100644
+--- a/subsys/tracing/ctf/ctf_top.h
++++ b/subsys/tracing/ctf/ctf_top.h
+@@ -66,6 +66,18 @@ static inline uint64_t ctf_top_timestamp_get(void)
+ 	return timing_cycles_to_ns(now_cycles);
+ }
+ 
++#ifdef CONFIG_TRACING_CTF_CONFIGURABLE_TIMER
++typedef uint64_t (*ctf_timestamp_get_t)(void);
++int ctf_set_timestamp_func(ctf_timestamp_get_t timestamp_getter);
++uint64_t ctf_timestamp_get(void);
++#else /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
++static inline uint64_t ctf_timestamp_get(void)
++{
++	return ctf_top_timestamp_get();
++}
++#endif /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
++
++
+ #define CTF_EVENT(event_id, ...)                                                                   \
+ 	{                                                                                          \
+ 		if (!is_tracing_enabled()) {                                                       \
+@@ -74,7 +86,7 @@ static inline uint64_t ctf_top_timestamp_get(void)
+ 		int key = irq_lock();                                                              \
+ 		const uint16_t stream_id = 0;                                                      \
+ 		const uint16_t packet_size = 0;                                                    \
+-		const uint64_t tstamp = ctf_top_timestamp_get();                                   \
++		const uint64_t tstamp = ctf_timestamp_get();                                       \
+ 		const uint8_t cpu_id = arch_curr_cpu()->id;                                        \
+ 		CTF_GATHER_FIELDS(stream_id, packet_size, tstamp, event_id, cpu_id, ##__VA_ARGS__) \
+ 		irq_unlock(key);                                                                   \
+diff --git a/subsys/tracing/include/tracing_core.h b/subsys/tracing/include/tracing_core.h
+index 84eab0eb8e6..bc6687246b4 100644
+--- a/subsys/tracing/include/tracing_core.h
++++ b/subsys/tracing/include/tracing_core.h
+@@ -60,6 +60,10 @@ void tracing_trigger_output(bool before_put_is_empty);
+  */
+ bool is_tracing_thread(void);
+ 
++#ifdef CONFIG_TRACING_CTF_CONFIGURABLE_TIMER
++int tracing_set_ctf_timestamp_func(uint64_t (*ctf_timestamp_func)(void));
++#endif /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/subsys/tracing/tracing_core.c b/subsys/tracing/tracing_core.c
+index 6bb9acbf23e..61e05bee593 100644
+--- a/subsys/tracing/tracing_core.c
++++ b/subsys/tracing/tracing_core.c
+@@ -154,3 +154,11 @@ void tracing_packet_drop_handle(void)
+ {
+ 	atomic_inc(&tracing_packet_drop_num);
+ }
++
++#ifdef CONFIG_TRACING_CTF_CONFIGURABLE_TIMER
++#include <../ctf/ctf_top.h>
++int tracing_set_ctf_timestamp_func(uint64_t (*ctf_timestamp_func)(void))
++{
++	return ctf_set_timestamp_func(ctf_timestamp_func);
++}
++#endif /* CONFIG_TRACING_CTF_CONFIGURABLE_TIMER */
+-- 
+2.55.0
+

@@ -1,7 +1,7 @@
-From 33108654453bd6c2eea62fdcad79236131b09745 Mon Sep 17 00:00:00 2001
+From 78f70c24f7b60a6514eb6235057c38f0969ce955 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 24 Oct 2025 11:56:57 +0200
-Subject: [PATCH 4/5] emit zpl_inference_exit before dumping events from
+Subject: [PATCH 4/6] emit zpl_inference_exit before dumping events from
  inference
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
@@ -11,7 +11,7 @@ Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
  2 files changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
-index 42762cc8..04b2fb0d 100644
+index befbcb39..7971ff5e 100644
 --- a/tensorflow/lite/micro/micro_interpreter.cc
 +++ b/tensorflow/lite/micro/micro_interpreter.cc
 @@ -299,7 +299,7 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
@@ -35,10 +35,10 @@ index 42762cc8..04b2fb0d 100644
    if (nullptr != this->context_.profiler) {
      reinterpret_cast<MicroProfilerInterface*>(this->context_.profiler)->DumpEvents();
 diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
-index a1f6657b..ace91960 100644
+index 235437a9..1a3ca0c4 100644
 --- a/tensorflow/lite/micro/micro_interpreter.h
 +++ b/tensorflow/lite/micro/micro_interpreter.h
-@@ -221,7 +221,7 @@ struct ScopedMicroInterpreterInvoke {
+@@ -224,7 +224,7 @@ struct ScopedMicroInterpreterInvoke {
      model_ = model;
      zpl_inference_enter((uint32_t) model_);
    }
@@ -48,5 +48,5 @@ index a1f6657b..ace91960 100644
    }
  };
 -- 
-2.47.1
+2.55.0
 

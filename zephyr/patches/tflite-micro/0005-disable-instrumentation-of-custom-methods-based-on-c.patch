@@ -1,7 +1,7 @@
-From 1fd39d5e63cf9378518fa5a32566de1c9dc73095 Mon Sep 17 00:00:00 2001
+From 5e95ee878b5ca0f47046c6550a392569f5bfb7b8 Mon Sep 17 00:00:00 2001
 From: Eryk Szpotanski <eszpotanski@antmicro.com>
 Date: Fri, 31 Oct 2025 14:12:54 +0100
-Subject: [PATCH 5/5] disable instrumentation of custom methods based on config
+Subject: [PATCH 5/6] disable instrumentation of custom methods based on config
 
 Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
  3 files changed, 16 insertions(+), 1 deletion(-)
 
 diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
-index 04b2fb0d..1e617f98 100644
+index 7971ff5e..b7eeabb8 100644
 --- a/tensorflow/lite/micro/micro_interpreter.cc
 +++ b/tensorflow/lite/micro/micro_interpreter.cc
 @@ -297,8 +297,10 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
@@ -27,7 +27,7 @@ index 04b2fb0d..1e617f98 100644
  #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
    if (initialization_status_ != kTfLiteOk) {
 diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
-index ace91960..db209368 100644
+index 1a3ca0c4..51f0196d 100644
 --- a/tensorflow/lite/micro/micro_interpreter.h
 +++ b/tensorflow/lite/micro/micro_interpreter.h
 @@ -39,6 +39,7 @@ limitations under the License.
@@ -38,7 +38,7 @@ index ace91960..db209368 100644
  #include <zpl/inference_event.h>
  }
  #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
-@@ -217,10 +218,12 @@ class MicroInterpreter {
+@@ -220,10 +221,12 @@ class MicroInterpreter {
  struct ScopedMicroInterpreterInvoke {
    const Model *model_;
  
@@ -87,5 +87,5 @@ index 4edb2033..439be24a 100644
      if (profiler_ != nullptr) {
        profiler_->EndEvent(event_handle_);
 -- 
-2.47.1
+2.55.0
 

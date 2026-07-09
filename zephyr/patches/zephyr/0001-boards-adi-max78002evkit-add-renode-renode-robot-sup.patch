@@ -1,17 +1,17 @@
-From c04a8449b1bcbbc826388e4d01184085c8c3e671 Mon Sep 17 00:00:00 2001
+From c07d4451224aa0d9724d69062602201423309cd8 Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Fri, 1 Aug 2025 13:03:57 +0200
-Subject: [PATCH 01/40] boards: adi: max78002evkit: add renode/renode-robot
+Subject: [PATCH 01/35] boards: adi: max78002evkit: add renode/renode-robot
  support
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
 Signed-off-by: Krzysztof Sychla <ksychla@antmicro.com>
 ---
  boards/adi/max78002evkit/board.cmake          |  9 +++
- .../max78002evkit_max78002_m4.yaml            |  7 ++
+ .../max78002evkit_max78002_m4.yaml            |  9 ++-
  .../max78002evkit/support/hello_world.repl    | 77 +++++++++++++++++++
  .../adi/max78002evkit/support/max78002.resc   | 20 +++++
- 4 files changed, 113 insertions(+)
+ 4 files changed, 114 insertions(+), 1 deletion(-)
  create mode 100644 boards/adi/max78002evkit/support/hello_world.repl
  create mode 100644 boards/adi/max78002evkit/support/max78002.resc
 
@@ -36,13 +36,15 @@ index 42001337f58..00462d12be3 100644
  
  include(${ZEPHYR_BASE}/boards/common/openocd-adi-max32.boards.cmake)
 diff --git a/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml b/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml
-index 4ba1fe340f5..9825469be14 100644
+index 537b4d01c3f..8617f803119 100644
 --- a/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml
 +++ b/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml
-@@ -23,3 +23,10 @@ supported:
+@@ -23,4 +23,11 @@ supported:
    - flash
+   - mbox
  ram: 64
- flash: 2560
+-flash: 1024
++flash: 2560
 +simulation:
 +  - name: renode
 +    exec: renode
@@ -160,5 +162,5 @@ index 00000000000..afd9237687d
 +"""
 +runMacro $reset
 -- 
-2.47.1
+2.55.0
 

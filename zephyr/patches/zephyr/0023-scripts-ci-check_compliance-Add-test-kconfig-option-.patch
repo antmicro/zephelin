@@ -1,0 +1,26 @@
+From 3ff50cc381bfb438a7b3a87c45033c7cf5790f3f Mon Sep 17 00:00:00 2001
+From: Jedrzej Czykier <jczykier@antmicro.com>
+Date: Tue, 17 Mar 2026 10:10:57 +0100
+Subject: [PATCH 23/35] scripts: ci: check_compliance: Add test kconfig option
+ to igonred keywords
+
+Signed-off-by: Jedrzej Czykier <jczykier@antmicro.com>
+---
+ scripts/ci/check_compliance.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/scripts/ci/check_compliance.py b/scripts/ci/check_compliance.py
+index 5e93cc91d84..b083c06700d 100755
+--- a/scripts/ci/check_compliance.py
++++ b/scripts/ci/check_compliance.py
+@@ -1659,6 +1659,7 @@ flagged.
+         "ZPL_SAMPLE_TFLM_BUFFER_SIZE",
+         "ZPL_SAMPLE_TVM_QUANTIZED_MODEL",
+         "ZPL_SAMPLE_TVM_HEAP_SIZE",
++        "ZPL_SAMPLE_APP_STARTUP_DELAY_MS",
+         "ZTEST_FAIL_TEST_",  # regex in tests/ztest/fail/CMakeLists.txt
+         "ZVFS_OPEN_ADD_SIZE_",  # Used as an option matching prefix
+         # zephyr-keep-sorted-stop
+-- 
+2.55.0
+

@@ -1,7 +1,7 @@
-From de948711a091cf098f630f0dc810098b170dcca8 Mon Sep 17 00:00:00 2001
+From 172d05edcaffc170ef2cfc838aab4ef780817235 Mon Sep 17 00:00:00 2001
 From: Andrii Chmutov <achmutov@antmicro.com>
 Date: Wed, 10 Sep 2025 10:32:02 +0200
-Subject: [PATCH 2/5] embed custom profiler
+Subject: [PATCH 2/6] embed custom profiler
 
 ---
  tensorflow/lite/micro/micro_interpreter.cc    | 48 +++++++++++++------
@@ -10,7 +10,7 @@ Subject: [PATCH 2/5] embed custom profiler
  3 files changed, 61 insertions(+), 14 deletions(-)
 
 diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
-index 666516c6..bfd54ba7 100644
+index 1e96d505..3fc4999c 100644
 --- a/tensorflow/lite/micro/micro_interpreter.cc
 +++ b/tensorflow/lite/micro/micro_interpreter.cc
 @@ -32,6 +32,10 @@ limitations under the License.
@@ -101,7 +101,7 @@ index 666516c6..bfd54ba7 100644
  
  TfLiteTensor* MicroInterpreter::input(size_t index) {
 diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
-index 4a03c3fe..e9a3de04 100644
+index f1de9196..283368f9 100644
 --- a/tensorflow/lite/micro/micro_interpreter.h
 +++ b/tensorflow/lite/micro/micro_interpreter.h
 @@ -37,6 +37,13 @@ limitations under the License.
@@ -118,7 +118,7 @@ index 4a03c3fe..e9a3de04 100644
  /// Copied from tensorflow/lite/version.h to avoid a dependency chain into
  // tensorflow/core.
  #define TFLITE_SCHEMA_VERSION (3)
-@@ -200,7 +207,23 @@ class MicroInterpreter {
+@@ -203,7 +210,23 @@ class MicroInterpreter {
    TfLiteTensor** output_tensors_;
  
    MicroInterpreterContext micro_context_;
@@ -158,5 +158,5 @@ index 594f0c00..cb168c44 100644
  
  }  // namespace tflite
 -- 
-2.47.1
+2.55.0
 

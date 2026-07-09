@@ -1,0 +1,31 @@
+From 2c54a92fda2e39ad5bdcb124efabcf7dc6e576af Mon Sep 17 00:00:00 2001
+From: Maciej Sobkowski <msobkowski@antmicro.com>
+Date: Tue, 8 Jul 2025 16:36:13 +0200
+Subject: [PATCH 17/35] instrumentation: make runtime configuration of
+ trigger/stopper functions optional
+
+This makes using instrumentation much easier with any sample/board
+combination much easier, as it eliminates the need to define a custom
+dt overlay. Trigger/stopper functions need to be configured at build time.
+
+Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
+---
+ scripts/instrumentation/zaru.py | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
+index 604840afc5d..8af298ce4d2 100755
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
+@@ -138,8 +138,6 @@ def get_symbols_from_elf(elf_file, verbose=False):
+     if verbose:
+         print(f"Reading symbols from '{pathlib.Path(elf_file).resolve()}'.")
+ 
+-    lines = output.split("\n")
+-    r = re.compile(PATTERN)
+     # dict: {addr: symbol}
+     addr_to_symbol = {}
+ 
+-- 
+2.55.0
+

@@ -1,0 +1,142 @@
+From 59cd98a003d574c08c3569fbac3bbd6b50f95525 Mon Sep 17 00:00:00 2001
+From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+Date: Thu, 5 Mar 2026 12:27:50 +0100
+Subject: [PATCH 28/35] boards: add support for uart_ctf
+
+Added support for dedicated CTF UART
+
+Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+---
+ boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml     | 1 +
+ boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml   | 1 +
+ boards/adi/max78002evkit/support/max78002.resc            | 2 ++
+ boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml          | 1 +
+ boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl | 3 +++
+ boards/st/stm32f746g_disco/stm32f746g_disco.yaml          | 1 +
+ scripts/pylib/twister/twisterlib/handlers.py              | 4 +++-
+ scripts/pylib/twister/twisterlib/platform.py              | 2 ++
+ scripts/schemas/twister/platform-schema.yaml              | 2 ++
+ 9 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml b/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
+index 2fc03352b59..4a2425f493a 100644
+--- a/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
++++ b/boards/adi/max32690fthr/max32690fthr_max32690_m4.yaml
+@@ -24,4 +24,5 @@ simulation:
+ testing:
+   renode:
+     uart: sysbus.uart0
++    uart_ctf: sysbus.uart2
+     resc: boards/adi/max32690fthr/support/max32690.resc
+diff --git a/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml b/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml
+index 8617f803119..ac734dd219a 100644
+--- a/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml
++++ b/boards/adi/max78002evkit/max78002evkit_max78002_m4.yaml
+@@ -30,4 +30,5 @@ simulation:
+ testing:
+   renode:
+     uart: sysbus.uart0
++    uart_ctf: sysbus.uart2
+     resc: boards/adi/max78002evkit/support/max78002.resc
+diff --git a/boards/adi/max78002evkit/support/max78002.resc b/boards/adi/max78002evkit/support/max78002.resc
+index afd9237687d..6454f32da3f 100644
+--- a/boards/adi/max78002evkit/support/max78002.resc
++++ b/boards/adi/max78002evkit/support/max78002.resc
+@@ -8,6 +8,8 @@ machine LoadPlatformDescriptionFromString
+ """
+ cpu0:
+     PerformanceInMips: 30
++uart2: UART.MAX32655_UART @ sysbus 0x40044000
++    ->nvic0@34
+ """
+ 
+ showAnalyzer uart0
+diff --git a/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml b/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml
+index f160f837986..cda149d40b6 100644
+--- a/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml
++++ b/boards/st/stm32f429i_disc1/stm32f429i_disc1.yaml
+@@ -19,4 +19,5 @@ simulation:
+ testing:
+   renode:
+     uart: sysbus.usart1
++    uart_ctf: sysbus.usart2
+     resc: boards/st/stm32f429i_disc1/support/stm32f4_discovery.resc
+diff --git a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
+index 83959055025..f350465d15b 100644
+--- a/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
++++ b/boards/st/stm32f429i_disc1/support/stm32f4_discovery.repl
+@@ -62,6 +62,9 @@ timers2: Timers.STM32_Timer @ sysbus 0x40000000
+ usart1: UART.STM32_UART @ sysbus <0x40011000, +0x400>
+     ->nvic0@37
+ 
++usart2: UART.STM32_UART @ sysbus <0x40004400, +0x400>
++    ->nvic0@38
++
+ gpioa: GPIOPort.STM32_GPIOPort @ sysbus <0x40020000, +0x400>
+ 
+ gpiob: GPIOPort.STM32_GPIOPort @ sysbus <0x40020400, +0x400>
+diff --git a/boards/st/stm32f746g_disco/stm32f746g_disco.yaml b/boards/st/stm32f746g_disco/stm32f746g_disco.yaml
+index 395e532f49c..67be7f9f4eb 100644
+--- a/boards/st/stm32f746g_disco/stm32f746g_disco.yaml
++++ b/boards/st/stm32f746g_disco/stm32f746g_disco.yaml
+@@ -26,4 +26,5 @@ simulation:
+ testing:
+   renode:
+     uart: sysbus.usart1
++    uart_ctf: sysbus.usart2
+     resc: boards/st/stm32f746g_disco/support/stm32f746g_disco.resc
+diff --git a/scripts/pylib/twister/twisterlib/handlers.py b/scripts/pylib/twister/twisterlib/handlers.py
+index 9686edea83c..123c3b1971f 100755
+--- a/scripts/pylib/twister/twisterlib/handlers.py
++++ b/scripts/pylib/twister/twisterlib/handlers.py
+@@ -309,11 +309,13 @@ class BinaryHandler(Handler):
+                         resc = path
+                         break
+                 uart = self.instance.platform.uart
++                uart_ctf = self.instance.platform.uart_ctf
+                 command = ["renode-test",
+                             "--variable", "KEYWORDS:" + keywords,
+                             "--variable", "ELF:@" + elf,
+                             "--variable", "RESC:@" + resc,
+-                            "--variable", "UART:" + uart]
++                            "--variable", "UART:" + uart,
++                            "--variable", "UART_CTF:" + uart_ctf]
+         elif self.call_make_run:
+             if self.options.sim_name:
+                 target = f"run_{self.options.sim_name}"
+diff --git a/scripts/pylib/twister/twisterlib/platform.py b/scripts/pylib/twister/twisterlib/platform.py
+index 245e4e60053..31413856f8b 100644
+--- a/scripts/pylib/twister/twisterlib/platform.py
++++ b/scripts/pylib/twister/twisterlib/platform.py
+@@ -88,6 +88,7 @@ class Platform:
+         self.env_satisfied = True
+         self.filter_data = dict()
+         self.uart = ""
++        self.uart_ctf = ""
+         self.resc = ""
+ 
+     def load(self, board, target, aliases, data, variant_data):
+@@ -128,6 +129,7 @@ class Platform:
+         self.flash_before = testing_var.get("flash_before", self.flash_before)
+         renode = testing.get("renode", {})
+         self.uart = renode.get("uart", "")
++        self.uart_ctf = renode.get("uart_ctf", "")
+         self.resc = renode.get("resc", "")
+ 
+         self.supported = set()
+diff --git a/scripts/schemas/twister/platform-schema.yaml b/scripts/schemas/twister/platform-schema.yaml
+index beea8888d2a..1e9b5214993 100644
+--- a/scripts/schemas/twister/platform-schema.yaml
++++ b/scripts/schemas/twister/platform-schema.yaml
+@@ -113,6 +113,8 @@ $defs:
+             properties:
+               uart:
+                 type: string
++              uart_ctf:
++                type: string
+               resc:
+                 type: string
+             additionalProperties: false
+-- 
+2.55.0
+

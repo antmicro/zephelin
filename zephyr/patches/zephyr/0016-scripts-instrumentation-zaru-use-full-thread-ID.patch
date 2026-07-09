@@ -1,0 +1,29 @@
+From 874aae691810c884540d9ac607bdd0974a61b3b6 Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Fri, 31 Oct 2025 19:02:27 +0100
+Subject: [PATCH 16/35] scripts: instrumentation: zaru: use full thread ID
+
+Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
+---
+ scripts/instrumentation/zaru.py | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
+index b791fbf0947..604840afc5d 100755
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
+@@ -773,11 +773,7 @@ def get_traces_in_trace_event_format(tmpdir, elf, demangle, verbose=False):
+     named_thread_list = []
+     for trace in ge:
+         event_type, func, tid, cpu, _, ts, tn = trace.values()
+-
+-        # Use 4 LSB in tid (address) as the final thread ID just to ease
+-        # displaying it in Perfetto. Hardly there will be a collision.
+         tid = int(tid, 0)
+-        tid = tid & 0xFFFF
+ 
+         # Set phase type according with the Event
+         if event_type == "entry":
+-- 
+2.55.0
+

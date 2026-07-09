@@ -1,7 +1,7 @@
-From ab1add56b3539f8a5f63b2e706106689d15af842 Mon Sep 17 00:00:00 2001
+From 10608c9a1d89f7d94c110502db0e8340c938a83f Mon Sep 17 00:00:00 2001
 From: Maciej Sobkowski <msobkowski@antmicro.com>
 Date: Fri, 1 Aug 2025 13:06:32 +0200
-Subject: [PATCH 02/40] boards: adi: max32690fthr: add renode/renode-robot
+Subject: [PATCH 02/35] boards: adi: max32690fthr: add renode/renode-robot
  support
 
 Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
@@ -188,5 +188,5 @@ index 00000000000..2be7b411a3f
 +"""
 +runMacro $reset
 -- 
-2.47.1
+2.55.0
 

@@ -1,0 +1,31 @@
+From 4a4de11915226676c4b5dab0fd35dfe49cdda9f9 Mon Sep 17 00:00:00 2001
+From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+Date: Mon, 18 May 2026 11:32:46 +0200
+Subject: [PATCH 34/35] instrumentation: Remove printk from recursive exclusion
+ when disabled
+
+Signed-off-by: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+---
+ subsys/instrumentation/Kconfig | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/subsys/instrumentation/Kconfig b/subsys/instrumentation/Kconfig
+index 553509703c5..d01ad15963f 100644
+--- a/subsys/instrumentation/Kconfig
++++ b/subsys/instrumentation/Kconfig
+@@ -29,9 +29,11 @@ config INSTRUMENTATION_RECURSIVE_EXCLUDE
+ 	default y
+ 
+ if INSTRUMENTATION_RECURSIVE_EXCLUDE
++
+ config INSTRUMENTATION_RECURSIVE_EXCLUDE_LIST
+ 	string "Comma separated list of functions"
+-	default "sys_clock_isr,z_impl_k_sem_give,z_impl_k_sem_take,z_impl_k_mutex_lock,z_impl_k_mutex_unlock,z_impl_k_sleep,printk,instr_timestamp_ns"
++	default "sys_clock_isr,z_impl_k_sem_give,z_impl_k_sem_take,z_impl_k_mutex_lock,z_impl_k_mutex_unlock,z_impl_k_sleep,instr_timestamp_ns" if !PRINTK
++	default "sys_clock_isr,z_impl_k_sem_give,z_impl_k_sem_take,z_impl_k_mutex_lock,z_impl_k_mutex_unlock,z_impl_k_sleep,instr_timestamp_ns,printk" if PRINTK
+ endif
+ 
+ config INSTRUMENTATION_MODE_CALLGRAPH
+-- 
+2.55.0
+
