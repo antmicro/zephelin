@@ -131,7 +131,7 @@
             ]
         },
         {
-            "name": "west zpl-uart-trace",
+            "name": "west zpl-uart-capture",
             "layer": "",
             "category": "west subcommands",
             "description": "",
@@ -158,6 +158,22 @@
                 "__edited"
             ],
             "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
+        },
+        {
+            "name": "west zpl-uart-capture (remote)",
+            "extends": [
+                "west zpl-uart-capture"
+            ],
+            "interfaces": [
+                {
+                    "name": "CTF trace over TCP",
+                    "direction": "output"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ]
         },
         {
             "name": "west zpl-usb-capture",
@@ -189,6 +205,22 @@
             "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
         },
         {
+            "name": "west zpl-usb-capture (remote)",
+            "extends": [
+                "west zpl-usb-capture"
+            ],
+            "interfaces": [
+                {
+                    "name": "CTF trace over TCP",
+                    "direction": "output"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ]
+        },
+        {
             "name": "west zpl-gdb-capture",
             "layer": "",
             "category": "west subcommands",
@@ -216,6 +248,22 @@
                 "__edited"
             ],
             "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
+        },
+        {
+            "name": "west zpl-gdb-capture (remote)",
+            "extends": [
+                "west zpl-gdb-capture"
+            ],
+            "interfaces": [
+                {
+                    "name": "CTF trace over TCP",
+                    "direction": "output"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ]
         },
         {
             "name": "west zpl-prepare-trace",
@@ -259,6 +307,10 @@
                 {
                     "name": "TEF trace",
                     "direction": "input"
+                },
+                {
+                    "name": "RPC",
+                    "direction": "inout"
                 }
             ],
             "properties": [
@@ -274,7 +326,6 @@
                 }
             ],
             "style": [
-                "host",
                 "__edited"
             ],
             "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
@@ -292,9 +343,123 @@
             ],
             "properties": [],
             "style": [
-                "host",
                 "__edited"
             ]
+        },
+        {
+            "name": "CTF File",
+            "layer": "",
+            "category": "File formats",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": " ",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "  ",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "style": [
+                "__edited"
+            ]
+        },
+        {
+            "name": "TEF File",
+            "layer": "",
+            "category": "File formats",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": " ",
+                    "direction": "input"
+                },
+                {
+                    "name": "  ",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "style": [
+                "__edited"
+            ]
+        },
+        {
+            "name": "libbtrace live plugin",
+            "layer": "",
+            "category": "Server",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "CTF trace",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "BT2 messages with TEF",
+                    "direction": "output",
+                    "maxConnectionsCount": -1
+                }
+            ],
+            "properties": [],
+            "style": "__edited"
+        },
+        {
+            "name": "Stream Parser Proxy",
+            "layer": "",
+            "category": "Server",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "CTF traces + metadata",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "Clean CTF traces",
+                    "direction": "output",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "commands",
+                    "direction": "inout",
+                    "maxConnectionsCount": -1
+                }
+            ],
+            "properties": [],
+            "style": "__edited"
+        },
+        {
+            "name": "Trace Handler",
+            "layer": "",
+            "category": "Server",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "TEF trace",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "Input model",
+                    "direction": "input"
+                },
+                {
+                    "name": "commands",
+                    "direction": "inout",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "RPC",
+                    "direction": "inout",
+                    "maxConnectionsCount": -1
+                }
+            ],
+            "properties": [],
+            "style": "__edited"
         }
     ],
     "metadata": {
@@ -318,7 +483,7 @@
                 "interfaceColor": "#CACACA"
             }
         },
-        "connectionStyle": "orthogonal",
+        "connectionStyle": "curved",
         "layers": [
             {
                 "name": "IOs",
@@ -350,20 +515,13 @@
                 "icon": null
             },
             "mcu": {
-                "pill": {
-                    "text": "MCU",
-                    "color": "#6e32ca"
-                },
                 "color": "#6e32ca"
             },
             "host": {
-                "pill": {
-                    "text": "HOST",
-                    "color": "#004972"
-                },
                 "color": "#004972"
             }
         },
-        "movementStep": 50
-    }
+        "movementStep": 1
+    },
+    "graphs": []
 }

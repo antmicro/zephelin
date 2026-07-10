@@ -5,95 +5,10 @@
             "name": "Zephelin Trace Collection Flow",
             "nodes": [
                 {
-                    "id": "56b28612-9c87-47a0-8e86-130760d9fd6c",
-                    "position": {
-                        "x": 2156,
-                        "y": -378
-                    },
-                    "width": 300,
-                    "twoColumn": true,
-                    "interfaces": [
-                        {
-                            "name": "TEF trace",
-                            "id": "ccf621b7-7e9d-436b-b881-562e9d8513a7",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "RPC",
-                            "id": "29e81c05-40e4-4f1b-8e30-afc53dbc24be",
-                            "direction": "inout",
-                            "side": "left",
-                            "sidePosition": 1
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "name": "Trace Viewer",
-                            "id": "6ae609a8-ffd3-4569-addf-5c15b5b487a1",
-                            "value": "https://antmicro.github.io/zephelin-trace-viewer/",
-                            "hidden": false
-                        },
-                        {
-                            "name": "UI",
-                            "id": "0c3f5828-2d8f-43c5-a651-1a490cd71d89",
-                            "value": "![](https://github.com/antmicro/zephelin-trace-viewer/raw/main/imgs/trace_viewer_view.png)",
-                            "hidden": false
-                        }
-                    ],
-                    "enabledInterfaceGroups": [],
-                    "name": "Zephelin Trace Viewer",
-                    "instanceName": "Zephelin Trace Viewer"
-                },
-                {
-                    "id": "cae21ffb-aac6-4c11-a823-867c1048ee1e",
-                    "position": {
-                        "x": 1466,
-                        "y": -91
-                    },
-                    "width": 300,
-                    "twoColumn": true,
-                    "interfaces": [
-                        {
-                            "name": "CTF trace",
-                            "id": "25756c34-07aa-4914-8fba-114fdc65b274",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "Model",
-                            "id": "658806a8-eb2a-4304-a9de-813a97e9bfd1",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 1
-                        },
-                        {
-                            "name": "TEF trace",
-                            "id": "aff23eef-9954-41d6-934e-46bd4f4a4138",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 0
-                        }
-                    ],
-                    "properties": [
-                        {
-                            "name": "Documentation",
-                            "id": "89995031-9f22-4a46-821b-a2e536bc0ead",
-                            "value": "https://antmicro.github.io/zephelin/ctf_to_tef.html",
-                            "hidden": false
-                        }
-                    ],
-                    "enabledInterfaceGroups": [],
-                    "name": "west zpl-prepare-trace",
-                    "instanceName": "west zpl-prepare-trace"
-                },
-                {
                     "id": "0a996557-59ce-4114-8d6b-328abdcd2ddf",
                     "position": {
-                        "x": 714,
-                        "y": -90
+                        "x": 715,
+                        "y": -82
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -104,6 +19,13 @@
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
+                        },
+                        {
+                            "name": "CTF trace over TCP",
+                            "id": "0af0767e-3391-43c1-85cd-8546b3804fc7",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
                         },
                         {
                             "name": "CTF trace",
@@ -122,14 +44,14 @@
                         }
                     ],
                     "enabledInterfaceGroups": [],
-                    "name": "west zpl-usb-capture",
-                    "instanceName": "west zpl-usb-capture"
+                    "name": "west zpl-usb-capture (remote)",
+                    "instanceName": "west zpl-usb-capture (remote)"
                 },
                 {
                     "id": "e1c7c06e-c026-4293-b9c2-47e8a658259f",
                     "position": {
-                        "x": -155,
-                        "y": 51
+                        "x": -149,
+                        "y": 112
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -157,8 +79,8 @@
                 {
                     "id": "7f79c4b4-9114-47e8-9255-9ad7370a9093",
                     "position": {
-                        "x": -154,
-                        "y": -131
+                        "x": -150,
+                        "y": -128
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -186,8 +108,8 @@
                 {
                     "id": "78375353-709b-4fe6-a3c1-857d80eb8f7f",
                     "position": {
-                        "x": -153,
-                        "y": -268
+                        "x": -160,
+                        "y": -309
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -208,8 +130,8 @@
                 {
                     "id": "7df5974f-7ca5-4273-8d9a-20175f7f0189",
                     "position": {
-                        "x": -157,
-                        "y": 230
+                        "x": -150,
+                        "y": 344
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -238,7 +160,7 @@
                     "id": "4a22260c-4ecf-465f-a834-63bc485a4c8e",
                     "position": {
                         "x": 321,
-                        "y": -98
+                        "y": -100
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -301,8 +223,8 @@
                 {
                     "id": "7f15aaeb-35a9-488f-8f36-37d5e3df9303",
                     "position": {
-                        "x": 1097,
-                        "y": 160
+                        "x": 1493,
+                        "y": 291
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -321,68 +243,10 @@
                     "instanceName": "Input models"
                 },
                 {
-                    "id": "3e1990f2-bde7-482f-ad09-ee224677daee",
-                    "position": {
-                        "x": 1813,
-                        "y": -34
-                    },
-                    "width": 300,
-                    "twoColumn": true,
-                    "interfaces": [
-                        {
-                            "name": " ",
-                            "id": "1747dc67-f10e-4d18-8bbe-7f979ef2e455",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "  ",
-                            "id": "fd19cb0a-eb2d-4036-9b8f-644961ada5ba",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 0
-                        }
-                    ],
-                    "properties": [],
-                    "enabledInterfaceGroups": [],
-                    "name": "TEF File",
-                    "instanceName": "TEF File"
-                },
-                {
-                    "id": "440c5a76-2f4b-4584-9802-3d59806f1e5e",
-                    "position": {
-                        "x": 1101,
-                        "y": -36
-                    },
-                    "width": 300,
-                    "twoColumn": true,
-                    "interfaces": [
-                        {
-                            "name": " ",
-                            "id": "f479bc12-ca0a-4863-bc59-a379f5896a52",
-                            "direction": "input",
-                            "side": "left",
-                            "sidePosition": 0
-                        },
-                        {
-                            "name": "  ",
-                            "id": "f2cc6956-98b3-401c-ba07-4eb7b45a9adf",
-                            "direction": "output",
-                            "side": "right",
-                            "sidePosition": 0
-                        }
-                    ],
-                    "properties": [],
-                    "enabledInterfaceGroups": [],
-                    "name": "CTF File",
-                    "instanceName": "CTF File"
-                },
-                {
                     "id": "cefa733a-46e8-4d5e-92dc-5e960f572de4",
                     "position": {
-                        "x": 716,
-                        "y": -270
+                        "x": 717,
+                        "y": -311
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -393,6 +257,13 @@
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
+                        },
+                        {
+                            "name": "CTF trace over TCP",
+                            "id": "78c4f2d1-d128-4b7e-a399-3439cbac911b",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
                         },
                         {
                             "name": "CTF trace",
@@ -411,14 +282,14 @@
                         }
                     ],
                     "enabledInterfaceGroups": [],
-                    "name": "west zpl-uart-capture",
-                    "instanceName": "west zpl-uart-capture"
+                    "name": "west zpl-uart-capture (remote)",
+                    "instanceName": "west zpl-uart-capture (remote)"
                 },
                 {
                     "id": "0448b166-a455-43e0-ba81-2dc869e84136",
                     "position": {
-                        "x": 714,
-                        "y": 95
+                        "x": 713,
+                        "y": 146
                     },
                     "width": 300,
                     "twoColumn": true,
@@ -429,6 +300,13 @@
                             "direction": "input",
                             "side": "left",
                             "sidePosition": 0
+                        },
+                        {
+                            "name": "CTF trace over TCP",
+                            "id": "be4171e3-1779-455e-9092-15bff451158c",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
                         },
                         {
                             "name": "CTF trace",
@@ -447,15 +325,165 @@
                         }
                     ],
                     "enabledInterfaceGroups": [],
-                    "name": "west zpl-gdb-capture",
-                    "instanceName": "west zpl-gdb-capture"
+                    "name": "west zpl-gdb-capture (remote)",
+                    "instanceName": "west zpl-gdb-capture (remote)"
+                },
+                {
+                    "id": "d5b0e6ec-86ba-4e2d-98d8-904d08de2294",
+                    "position": {
+                        "x": 1127,
+                        "y": -4
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "CTF traces + metadata",
+                            "id": "6084d24d-6164-4a7d-b54b-6c7de042e2af",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "commands",
+                            "id": "abb5d2a0-d991-428c-b41d-21e12a2ef1bc",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Clean CTF traces",
+                            "id": "8b444ed8-5d4d-475a-a194-b37e23118dcb",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Stream Parser Proxy",
+                    "instanceName": "Stream Parser Proxy"
+                },
+                {
+                    "id": "fa89beab-1072-460b-aa00-e828497c2047",
+                    "position": {
+                        "x": 1869,
+                        "y": -2
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "TEF trace",
+                            "id": "b746f65e-72a3-4115-b785-26382d2103cb",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "Input model",
+                            "id": "adf1e1c9-a52d-4351-9b8e-6cc8401eca30",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "commands",
+                            "id": "489473f2-9207-4af5-a7c7-9f1097d9a541",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "RPC",
+                            "id": "fd1e71b6-6667-4d81-b0c0-d6cdd9c58584",
+                            "direction": "inout",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Trace Handler",
+                    "instanceName": "Trace Handler"
+                },
+                {
+                    "id": "a34af7b8-8165-4fe3-9987-1cd8b85bd41d",
+                    "position": {
+                        "x": 2259,
+                        "y": -371
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "TEF trace",
+                            "id": "ccf621b7-7e9d-436b-b881-562e9d8513a7",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "RPC",
+                            "id": "4236bd24-ef0d-4ce3-b58f-f34ddc32c8ec",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Trace Viewer",
+                            "id": "6ae609a8-ffd3-4569-addf-5c15b5b487a1",
+                            "value": "https://antmicro.github.io/zephelin-trace-viewer/",
+                            "hidden": false
+                        },
+                        {
+                            "name": "UI",
+                            "id": "0c3f5828-2d8f-43c5-a651-1a490cd71d89",
+                            "value": "![](https://github.com/antmicro/zephelin-trace-viewer/raw/main/imgs/trace_viewer_view.png)",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Zephelin Trace Viewer",
+                    "instanceName": "Zephelin Trace Viewer"
+                },
+                {
+                    "id": "99dd825e-47e3-4354-b79f-be4a667fbf3f",
+                    "position": {
+                        "x": 1497,
+                        "y": 109
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "CTF trace",
+                            "id": "10065a61-b70b-4c5a-a2a7-393883cd42e9",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "BT2 messages with TEF",
+                            "id": "1075e66c-f69e-4a33-8339-ba3ab03dfa10",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "libbtrace live plugin",
+                    "instanceName": "libbtrace live plugin"
                 }
             ],
             "groups": [
                 {
                     "id": "04598afe-ad2f-436c-8019-243ef9310810",
                     "color": "#6e32ca",
-                    "name": "Zephelin on board",
+                    "name": "Board",
                     "nodes": [
                         "e1c7c06e-c026-4293-b9c2-47e8a658259f",
                         "7f79c4b4-9114-47e8-9255-9ad7370a9093",
@@ -473,82 +501,100 @@
                         "cefa733a-46e8-4d5e-92dc-5e960f572de4",
                         "0a996557-59ce-4114-8d6b-328abdcd2ddf"
                     ]
+                },
+                {
+                    "id": "800b1665-0d26-43c4-838c-86a96649b12c",
+                    "color": "#00af91",
+                    "name": "Server",
+                    "nodes": [
+                        "d5b0e6ec-86ba-4e2d-98d8-904d08de2294",
+                        "fa89beab-1072-460b-aa00-e828497c2047",
+                        "99dd825e-47e3-4354-b79f-be4a667fbf3f"
+                    ]
                 }
             ],
             "connections": [
                 {
-                    "id": "329a1d18-fad6-4cbe-b73b-61976b2eac68",
+                    "id": "c0a0912c-70b1-4c1c-96f4-9aa6972417de",
                     "from": "27b0117f-2494-4911-9df1-b76bed3e876c",
                     "to": "58011dcf-1c35-46e4-8689-7d02ad978a5d"
                 },
                 {
-                    "id": "a855977d-b576-48b8-bc42-82b181ae3a51",
+                    "id": "613802fb-7917-46ee-ad85-ac486bcc1f78",
                     "from": "bb1177e4-eea4-4ad0-abd2-d5b3bc781bed",
                     "to": "bae3d0e3-60b2-47c0-a0ee-8463a5d09a45"
                 },
                 {
-                    "id": "9aaf43ab-619f-4515-bfed-74d095b98627",
+                    "id": "5d965241-2922-404a-bcf4-a015ae51b666",
                     "from": "447d18c2-7560-4ba0-a9ca-ff319d212375",
                     "to": "1304f6b0-b7db-48ef-a1d1-713d728aaa4e"
                 },
                 {
-                    "id": "a9a5865e-e7f5-4e9f-96e2-0c0168767834",
+                    "id": "6e32c161-d187-4edd-801c-812884cff613",
                     "from": "6b9b998a-08ea-4b8b-90b0-ca044f5a63f0",
                     "to": "37b37666-5df2-4132-83a8-49753a646770"
                 },
                 {
-                    "id": "d5ebf82e-4afb-460a-9104-80254d9af2fc",
+                    "id": "d323e0aa-346f-4895-8fd0-85ec1c1268e5",
                     "from": "73bf5840-d9bf-4bf0-9df1-f973c07ac8e9",
                     "to": "42c09056-1e76-48bd-9fe5-803d7cc90537"
                 },
                 {
-                    "id": "58a06434-0b23-4ce0-8a74-38a6c07f3bf6",
-                    "from": "7df7f528-fd76-4a3a-97d9-db823679060f",
-                    "to": "658806a8-eb2a-4304-a9de-813a97e9bfd1"
-                },
-                {
-                    "id": "7acc355e-6cb3-4ce6-a515-7c5880d705f9",
-                    "from": "aff23eef-9954-41d6-934e-46bd4f4a4138",
-                    "to": "1747dc67-f10e-4d18-8bbe-7f979ef2e455"
-                },
-                {
-                    "id": "23fd6df8-cba1-4a0a-aa54-ebf60d3432f3",
-                    "from": "fd19cb0a-eb2d-4036-9b8f-644961ada5ba",
-                    "to": "ccf621b7-7e9d-436b-b881-562e9d8513a7"
-                },
-                {
-                    "id": "65f52718-ba21-441c-a2b0-dbd76a818085",
-                    "from": "d3435ea8-e4dd-447d-a177-b86fb56f9f07",
-                    "to": "f479bc12-ca0a-4863-bc59-a379f5896a52"
-                },
-                {
-                    "id": "67fde8ce-8529-4c2f-97cc-a8e065f99880",
-                    "from": "f2cc6956-98b3-401c-ba07-4eb7b45a9adf",
-                    "to": "25756c34-07aa-4914-8fba-114fdc65b274"
-                },
-                {
-                    "id": "f9b01fcf-169e-40eb-b01b-faf277e05ba0",
+                    "id": "23960e51-c768-4790-ab68-a49ca4d7d130",
                     "from": "39bce671-2f1e-48d0-a3e3-a49e330e36f8",
                     "to": "17c139b8-58d3-49cc-9b69-a04f6d5d6281"
                 },
                 {
-                    "id": "2f3f3bb9-11f0-4e2a-9578-6f162a34e76b",
-                    "from": "d48d7070-4c50-45f3-a487-61250c699dd0",
-                    "to": "f479bc12-ca0a-4863-bc59-a379f5896a52"
-                },
-                {
-                    "id": "ab3f0df3-8237-48fd-8035-d0d80de24354",
-                    "from": "a9815eaf-f50e-4500-b57d-ba92633ba399",
-                    "to": "f479bc12-ca0a-4863-bc59-a379f5896a52"
-                },
-                {
-                    "id": "47734fa7-1320-4c9e-aae2-eee5ffe29dfb",
+                    "id": "e418fa22-1322-428f-9cfd-3361ca57e89d",
                     "from": "075022f2-8c4b-4203-9f52-69460b324306",
                     "to": "cc327f81-78ca-4598-8e82-ebd88f311a57"
+                },
+                {
+                    "id": "1dc22a08-b11e-4177-8f11-5cdc96481d05",
+                    "from": "abb5d2a0-d991-428c-b41d-21e12a2ef1bc",
+                    "to": "489473f2-9207-4af5-a7c7-9f1097d9a541"
+                },
+                {
+                    "id": "6bd460be-e738-436d-ba05-96f7336cf435",
+                    "from": "7df7f528-fd76-4a3a-97d9-db823679060f",
+                    "to": "adf1e1c9-a52d-4351-9b8e-6cc8401eca30"
+                },
+                {
+                    "id": "f3373050-e3ed-4f6b-b23f-42f8f9d7bf82",
+                    "from": "78c4f2d1-d128-4b7e-a399-3439cbac911b",
+                    "to": "6084d24d-6164-4a7d-b54b-6c7de042e2af"
+                },
+                {
+                    "id": "29ce6834-473c-4705-aa31-1269e595c511",
+                    "from": "0af0767e-3391-43c1-85cd-8546b3804fc7",
+                    "to": "6084d24d-6164-4a7d-b54b-6c7de042e2af"
+                },
+                {
+                    "id": "fc57f9e6-05b1-48ce-811f-92fbe7ab574d",
+                    "from": "be4171e3-1779-455e-9092-15bff451158c",
+                    "to": "6084d24d-6164-4a7d-b54b-6c7de042e2af"
+                },
+                {
+                    "id": "7462b3e7-997f-4acd-838b-f9b87aab3f86",
+                    "from": "fd1e71b6-6667-4d81-b0c0-d6cdd9c58584",
+                    "to": "4236bd24-ef0d-4ce3-b58f-f34ddc32c8ec"
+                },
+                {
+                    "id": "8f689c94-4d06-4951-857e-bfa5aaff2909",
+                    "from": "8b444ed8-5d4d-475a-a194-b37e23118dcb",
+                    "to": "10065a61-b70b-4c5a-a2a7-393883cd42e9"
+                },
+                {
+                    "id": "6c2bf56c-1c40-4d4b-b0f7-bb6c1688246c",
+                    "from": "1075e66c-f69e-4a33-8339-ba3ab03dfa10",
+                    "to": "b746f65e-72a3-4115-b785-26382d2103cb"
                 }
             ]
         }
     ],
     "entryGraph": "d53adf53-15b0-4f8e-adea-499ec8067770",
-    "version": "20250623.14"
+    "version": "20250623.14",
+    "metadata": {
+        "connectionStyle": "curved"
+    }
 }
