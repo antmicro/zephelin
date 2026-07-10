@@ -611,7 +611,7 @@ class TraceHandler(BaseHandler):
         Returns
         -------
         tuple[list, list]
-            TEF events, total count of events.
+            New TEF events and new thread-name metadata events.
         """
         if self.ctf_tef is None:
             self.ctf_tef = stream_ctf_to_tef(
