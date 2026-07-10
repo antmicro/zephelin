@@ -19,7 +19,8 @@ Zephelin can be used to analyze:
 * AI runtimes
 * Multithreaded applications
 
-## Data collected by Zephelin
+(zephelin-trace-collection)=
+## Zephelin trace collection
 
 ```{pipeline_manager}
 :spec: ./zephelin-flow-spec.json

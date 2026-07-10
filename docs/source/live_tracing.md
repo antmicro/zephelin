@@ -1,8 +1,26 @@
-# Real-time tracing
+# Live tracing of events from the board
 
 This chapter covers the usage of [Zephelin Trace Viewer](visual_interface) for live visualization of traces being gathered during application execution.
 
 Real-time visualization requires running a local Python server responsible for ingesting CTF traces, parsing them into TEF, and forwarding them to the visualizer.
+
+## Real-time tracing server structure
+
+```{pipeline_manager} Live tracing diagram
+:spec: ./zephelin-flow-spec.json
+:graph: ./zephelin-flow-graph-live.json
+:preview: true
+```
+
+Compared to diagram from {ref}`zephelin-trace-collection`, instead of saving and converting complete CTF traces to TEF format and uploading them to Zephelin Trace Viewer, we continuously deliver traces over TCP to a Zephelin's server, convert them chunk by chunk to TEF format and deliver to Zephelin Trace Viewer over Remote Procedure Calls (RPC).
+
+The Zephelin's server consists of:
+
+* [Trace Handler](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py) - configures Parser Proxy, `libbtrace` live plugin and RPC Dispatcher and controls delivery of traces and commands to the Zephelin Trace Viewer.
+* [RPC Dispatcher](https://github.com/antmicro/zephelin/blob/main/server/rpc_dispatcher.py) - sends and receives messages from Zephelin Trace Viewer.
+* [Stream Parser Proxy](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py) - collects data from `west zpl-<backend>-capture` over TCP and subdivides it to the commands' stream and traces.
+  Traces are delivered to `libbtrace` live plugin.
+* [`libbtrace` live plugin](https://github.com/antmicro/libbtrace/tree/main/src/plugins/ctf/live-src) - receives parts of CTF traces and converts them to parts of TEF messages that are later delivered to Trace Handler.
 
 ## Prerequisites
 
@@ -10,7 +28,7 @@ Before running the server, you need to install required backend dependencies and
 
 ### Install server dependencies
 
-Apart from regular dependencies of Zephelin, server dependencies need to be installed as well with the following command:
+Apart from installing Zephelin's dependencies (see {ref}`setting-up-workspace`), server dependencies need to be installed as well with the following command:
 
 ```bash
 pip install -r server/requirements.txt
@@ -62,6 +80,7 @@ You can customize the server's networking interfaces, and specify trace parsing 
 * `--tcp-server-port`- Port of the Zephelin TCP socket for CTF trace ingestion (Default: `5000`).
 * `--backend-host` - Address where the backend API and visualizer are hosted (Default: `127.0.0.1`).
 * `--backend-port` - Port where the backend API and visualizer are hosted (Default: `8000`).
+* `--bt-port` - Port used by `libbtrace` live plugin to collect pure CTF traces (Default: `42674`).
 * `--frontend-directory` - Path to compiled frontend directory.
 * `--build-dir` - Path to the traced application build directory.
 * `--tflm-model-paths` - Paths to the TFLM models.
@@ -70,6 +89,13 @@ You can customize the server's networking interfaces, and specify trace parsing 
 * `--tvm-model-op-remove-prefix` - Regex pattern used for removing TVM operator prefixes.
 * `--tvm-model-op-remove-suffix` - Regex pattern used for removing TVM operator suffixes.
 * `--verbosity` - Set the logging verbosity level (`DEBUG, INFO, WARNING, ERROR, CRITICAL`).
+
+### Additional configuration options for tests
+
+There is a possibility to run the server in a mock mode, where TEF traces are delivered as inputs and sent to the website at specified speed:
+
+* `--mock-trace-file` - Path to the TEF/JSON trace file to use for the mock.
+* `--mock-playback-speed` - Playback speed multiplier for the mock.
 
 ## Providing traces to the server
 
@@ -119,6 +145,33 @@ In the end, run collection of traces from:
   west zpl-uart-capture <path-to-uart> 115200 ./trace-hw.ctf --send-to-remote 127.0.0.1:5000
   ```
 
+## Communication flow
+
+Server implementation in `server/run_backend.py` consists of following access points:
+
+* `<tcp_server_host>:<tcp_server_port>` - allows communication between `west` capture subcommands and the server.
+* `<backend_host>:<backend_port>` - this hosts the website loaded from `--frontend-directory` directory and configures communication between website and server.
+* `127.0.0.1:<bt_port>` - allows delivery of pure CTF events to the `libbtrace` live plugin (it is a one-way communication).
+
+As in file-based Zephelin flow, the traces are first collected and sent by the board to the host using a selected backend (e.g. UART).
+After this, `west zpl-<backend>-capture` command with `--send-to-remote` flag configured to e.g. `127.0.0.1:5000` will send CTF traces with additional data (such as `_zpl_ctf_start__` start tag) to a given address.
+
+This address should match `--tcp-server-host` and `--tcp-server-port` settings in the `server/run_backend.py` script.
+[`Stream Parser Proxy`](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py) will receive packets sent by the `west` subcommand and subdivide them into commands (such as restart the viewer based on start tag) that should be sent as RPC commands to the website, and pure CTF events.
+
+Pure CTF events are sent to [`libbtrace` live plugin](https://github.com/antmicro/libbtrace/tree/main/src/plugins/ctf/live-src) over `--bt-port` port on loopback (e.g. `127.0.0.1:42674`), for fast conversion to TEF events in C++.
+The plugin communicates with the `libbtrace` module running in the server, delivering `bt2` messages with parts of parsed TEF events - it is not socket-based communication.
+
+:::{note}
+It is possible to deliver pure CTF events directly to `libbtrace` live plugin by sending events directly to `--bt-port`, skipping the `Stream Parser Proxy`.
+:::
+
+Those `bt2` messages are delivered to the [`Trace Handler`](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py).
+Trace Handler performs final adjustments of the TEF events and sends them to the website.
+
+In the meantime, [`RPC Dispatcher`](https://github.com/antmicro/zephelin/blob/main/server/rpc_dispatcher.py) allows sending calls between server and website, and controls the state of the Zephelin Trace Viewer using procedures described in {ref}`server-api-reference`.
+
+(server-api-reference)=
 ## Server API reference
 
 The Zephelin real-time tracing server supports the following JSON-RPC requests sent as rpc_request WebSocket event:
