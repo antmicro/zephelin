@@ -7,10 +7,7 @@
 
 set -xeuo pipefail
 
-if [ -z "${RENODE_VERSION:-}" ]; then
-	echo "RENODE_VERSION is not set!"
-	exit 1
-fi
+export RENODE_VERSION="renode-1.16.0+20250929gitc16006c94.linux-portable-dotnet.tar.gz"
 
 # install deps with apt
 sudo apt update -qq
@@ -18,13 +15,19 @@ sudo apt install -yqq --no-install-recommends gdb-multiarch mono-complete \
   ccache dfu-util device-tree-compiler wget python3-dev python3-venv python3-tk \
   xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
   xxd git-lfs swig libelf-dev libdw-dev python3-packaging \
-  policykit-1 libgtk2.0-0 screen uml-utilities gtk-sharp2 libc6-dev libicu-dev \
-  python3 python3-pip git cmake ninja-build gperf unzip
+  libgtk2.0-0 screen uml-utilities libc6-dev libicu-dev \
+  python3 python3-pip git cmake ninja-build gperf unzip qemu-system-arm
 
-pip3 install --upgrade pip
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+uv venv -p 3.11
+source .venv/bin/activate
+
+uv pip install --upgrade pip
 
 # install deps with pip
-pip3 install -r requirements.txt
+uv pip install -r requirements.txt
+uv pip install bt2 -f $BT2_INDEX --force-reinstall
 
 # install recent flatbuffers-compiler
 FLATC_URL=https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g++-13.zip
@@ -33,6 +36,8 @@ sudo unzip flatc.zip -d /usr/bin
 rm flatc.zip
 
 # install Renode
-wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.deb
-sudo dpkg -i renode.deb
-rm renode.deb
+wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.tar.gz
+rm -rf /opt/renode
+mkdir /opt/renode
+tar -xf  renode.tar.gz -C /opt/renode --strip-components=1
+rm renode.tar.gz

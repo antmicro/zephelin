@@ -7,17 +7,13 @@
 
 set -xeuo pipefail
 
+wget -N --progress=dot:giga https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.2/zephyr-sdk-0.17.2_linux-x86_64.tar.xz -O zephyr-sdk.tar.gz && \
+    mkdir -p /opt/zephyr-sdk && \
+    tar -xf zephyr-sdk.tar.gz --strip 1 -C /opt/zephyr-sdk && \
+    rm zephyr-sdk.tar.gz
+
 west init -l .
 west update
+uv pip install -r ../zephyr/scripts/requirements.txt
 west patch apply
 west zephyr-export
-west packages pip --install --ignore-venv-check
-
-SDK_INSTALL_ARGS=""
-if [[ ! -z "${ZEPHYR_SDK_VERSION:-}" ]]; then
-  SDK_INSTALL_ARGS="--version ${ZEPHYR_SDK_VERSION}"
-fi
-
-if [[ -z "${ZEPHYR_SDK_SKIP_INSTALLATION:-}" ]]; then
-  west sdk install $SDK_INSTALL_ARGS
-fi
