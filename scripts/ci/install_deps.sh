@@ -7,10 +7,7 @@
 
 set -xeuo pipefail
 
-if [ -z "${RENODE_VERSION:-}" ]; then
-	echo "RENODE_VERSION is not set!"
-	exit 1
-fi
+export RENODE_VERSION="renode-1.16.1+20260703gitca700d32d.linux-portable.tar.gz"
 
 # install deps with apt
 sudo apt update -qq
@@ -19,10 +16,16 @@ sudo apt install -yqq --no-install-recommends gdb-multiarch \
   xz-utils file make gcc gcc-multilib g++-multilib libsdl2-dev libmagic1 \
   xxd git-lfs swig libelf-dev libdw-dev python3-packaging \
   libgtk2.0-0 screen uml-utilities libc6-dev libicu-dev \
-  python3 python3-pip git cmake ninja-build gperf unzip
+  python3 python3-pip git cmake ninja-build gperf unzip qemu-system-arm
+
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+uv venv -p 3.12
+source .venv/bin/activate
 
 # install deps with pip
-pip3 install -r requirements.txt
+uv pip install -r requirements.txt
+uv pip install bt2 -f $BT2_INDEX --force-reinstall
 
 # install recent flatbuffers-compiler
 FLATC_URL=https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g++-13.zip
