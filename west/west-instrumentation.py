@@ -77,8 +77,8 @@ class ZplInstrumentationUartCapture(WestCommand):
                 self.name, help=self.help, description=self.description
             )
 
-        parser.add_argument("serial_port", help="Seral port")
-        parser.add_argument("serial_baudrate", help="Seral baudrate")
+        parser.add_argument("serial_port", help="Serial port")
+        parser.add_argument("serial_baudrate", help="Serial baudrate")
         if add_output:
             parser.add_argument("output_path", help="Capture output path", type=Path)
         parser.add_argument(
