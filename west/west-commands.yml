@@ -31,3 +31,8 @@ west-commands:
       - name: zpl-instrumentation-uart-gdb-capture
         class: ZplInstrumentationUartGdbCapture
         help: Capture instrumentation traces using UART and ZPL traces using GDB
+  - file: west/west-run-live-server.py
+    commands:
+      - name: zpl-live-server
+        class: ZplLiveServer
+        help: Run live tracing server
