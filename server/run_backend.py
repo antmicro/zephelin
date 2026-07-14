@@ -47,16 +47,10 @@ def parse_env_path_list(env_var_name: str) -> Optional[list]:
     return [Path(p.strip()) for p in val.split(",")] if val else None
 
 
-def create_backend(argv):
+def setup_parser_args(parser):
     """
-    Initializes backend components.
+    Sets up main args in parser.
     """
-    parser = argparse.ArgumentParser(
-        argv[0],
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        allow_abbrev=False,
-    )
     parser.add_argument(
         "--tcp-server-host",
         type=str,
@@ -136,6 +130,13 @@ def create_backend(argv):
         default=os.environ.get("ZEPHELIN_TVM_DEFAULT_OP_SUFFIX_RE", DEFAULT_OP_SUFFIX_RE),
     )
 
+    return parser
+
+
+def setup_parser_mock_args(parser):
+    """
+    Sets up mock related args in parser.
+    """
     # testing related options
     parser.add_argument(
         "--mock-trace-file",
@@ -150,6 +151,13 @@ def create_backend(argv):
         default=1.0,
     )
 
+    return parser
+
+
+def setup_parser_helper_args(parser):
+    """
+    Sets up helper args in parser.
+    """
     parser.add_argument(
         "--verbosity",
         help="Verbosity level",
@@ -157,12 +165,31 @@ def create_backend(argv):
         default="INFO",
         type=str,
     )
+    return parser
 
-    args, _ = parser.parse_known_args(argv[1:])
-    logging.basicConfig(
-        level=string_to_verbosity(args.verbosity), format="[%(levelname)s][%(name)s] %(message)s"
+
+def create_parser(argv):
+    """
+    Creates a parser object with set up parameters.
+    """
+    parser = argparse.ArgumentParser(
+        argv[0],
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        allow_abbrev=False,
     )
 
+    parser = setup_parser_args(parser)
+    parser = setup_parser_mock_args(parser)
+    parser = setup_parser_helper_args(parser)
+
+    return parser
+
+
+def create_backend(args):
+    """
+    Initializes backend components.
+    """
     traceConfig = TraceConfig(
         tcp_host=args.tcp_server_host,
         tcp_port=args.tcp_server_port,
@@ -175,7 +202,7 @@ def create_backend(argv):
         bt_port=args.bt_port,
     )
 
-    if args.mock_trace_file:
+    if hasattr(args, "mock_trace_file") and args.mock_trace_file:
         logger.info(f"Starting in mock mode. Trace file: {args.mock_trace_file}")
         sio = create_mock_socketio(
             trace_file_path=str(args.mock_trace_file), playback_speed=args.mock_playback_speed
@@ -187,11 +214,14 @@ def create_backend(argv):
 
     asgi_app = socketio.ASGIApp(sio, other_asgi_app=app)
 
-    return asgi_app, args
+    return asgi_app
 
 
-def main(argv):  # noqa: D103
-    asgi_app, args = create_backend(argv)
+def run_backend(args):
+    """
+    Runs backend server.
+    """
+    asgi_app = create_backend(args)
 
     logger.info(
         f"Starting Zephelin Server and Zephelin Trace Viewer "
@@ -203,6 +233,16 @@ def main(argv):  # noqa: D103
         host=args.backend_host,
         port=args.backend_port,
     )
+
+
+def main(argv):  # noqa: D103
+    parser = create_parser(argv)
+
+    args, _ = parser.parse_known_args(argv[1:])
+    logging.basicConfig(
+        level=string_to_verbosity(args.verbosity), format="[%(levelname)s][%(name)s] %(message)s"
+    )
+    run_backend(args)
 
 
 if __name__ == "__main__":
