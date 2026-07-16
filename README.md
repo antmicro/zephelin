@@ -63,13 +63,14 @@ west sdk install
 source zpl_env.sh
 ```
 
-In the end, download [Renode](https://renode.io) (version `v1.16.0.4276` or newer) and configure environment variables for [pyrenode3](https://github.com/antmicro/pyrenode3) package:
+In the end, download [Renode](https://renode.io) and configure environment variables for [pyrenode3](https://github.com/antmicro/pyrenode3) package:
 
 <!-- name="renode-prepare" -->
 ```bash
-wget https://builds.renode.io/renode-latest.pkg.tar.xz
-export PYRENODE_PKG=$(pwd)/renode-latest.pkg.tar.xz
+source ./scripts/prepare_renode.sh
 ```
+
+Since the script sets environment variables, it will need to be re-ran every time a new shell is used.
 
 > NOTE: For setting up Renode on Mac OS, check out [the documentation](https://antmicro.github.io/zephelin/library.html#setup-renode)
 
