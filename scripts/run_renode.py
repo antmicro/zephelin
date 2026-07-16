@@ -163,7 +163,7 @@ class RenodeMachine:
                 self.trace_serial.close()
             self.console_serial = self.trace_serial = None
             self.trace_file = None
-        else:
+        elif args.trace_output:
             base = Path(args.trace_output)
             if self.index == 0:
                 self.filename = base
@@ -259,33 +259,36 @@ class RenodeMachine:
         if self.trace_serial:
             try:
                 new_traces = self.trace_serial.read_all()
-                if self.trace_file:
+                if self.trace_file or self.remote_socket:
                     self.trace_buffer += new_traces
-                    self._handle_trace_rotation()
+                    self._handle_traces()
             except Exception as e:
                 print(f"[{self.board}-{self.index}] Error reading trace Uart: {e}")
 
-    def _handle_trace_rotation(self):
+    def _handle_traces(self):
         if CTF_TRACE_START_TAG in self.trace_buffer:
             tag_idx = self.trace_buffer.index(CTF_TRACE_START_TAG)
-            self.trace_file.write(self.trace_buffer[:tag_idx])
+            if self.trace_file:
+                self.trace_file.write(self.trace_buffer[:tag_idx])
 
-            if tag_idx > 0:
-                self.trace_file.close()
-                self.trace_index += 1
+                if tag_idx > 0:
+                    self.trace_file.close()
+                    self.trace_index += 1
 
-                if self.filename:
-                    new_path = f"{self.filename}_{self.trace_index}"
-                else:
-                    new_path = f"trace_{self.board}.bin_{self.trace_index}"
+                    if self.filename:
+                        new_path = f"{self.filename}_{self.trace_index}"
+                    else:
+                        new_path = f"trace_{self.board}.bin_{self.trace_index}"
 
-                self.trace_file = open(new_path, "wb")
-
+                    self.trace_file = open(new_path, "wb")
+            if self.remote_socket:
+                self.remote_socket.sendall(CTF_TRACE_START_TAG)
             self.trace_buffer = self.trace_buffer[tag_idx + len(CTF_TRACE_START_TAG) :]
 
         elif len(self.trace_buffer) > len(CTF_TRACE_START_TAG):
             safe_to_write = len(self.trace_buffer) - len(CTF_TRACE_START_TAG)
-            self.trace_file.write(self.trace_buffer[:safe_to_write])
+            if self.trace_file:
+                self.trace_file.write(self.trace_buffer[:safe_to_write])
             if self.remote_socket:
                 try:
                     self.remote_socket.sendall(self.trace_buffer[:safe_to_write])
