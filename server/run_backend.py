@@ -31,6 +31,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 from config import TraceConfig  # noqa: E402
 from extract_tvm_model_data import DEFAULT_OP_PREFIX_RE, DEFAULT_OP_SUFFIX_RE  # noqa: E402
 from frontend import create_app  # noqa: E402
+from frontend_downloader import download_frontend  # noqa: E402
 from server_utils.logger import string_to_verbosity  # noqa: E402
 from socket_factory import create_socketio  # noqa: E402
 from socket_mock import create_mock_socketio  # noqa: E402
@@ -210,7 +211,14 @@ def create_backend(args):
     else:
         sio = create_socketio(traceConfig=traceConfig)
 
-    app = create_app(args.frontend_directory)
+    if args.frontend_directory:
+        frontend_directory = args.frontend_directory
+    else:
+        logger.info("Downloading frontend from GitHub Pages...")
+        frontend_directory = download_frontend()
+        logger.info(f"Frontend downloaded to: {frontend_directory}")
+
+    app = create_app(frontend_directory)
 
     asgi_app = socketio.ASGIApp(sio, other_asgi_app=app)
 
