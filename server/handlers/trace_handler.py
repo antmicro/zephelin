@@ -460,9 +460,43 @@ class TraceHandler(BaseHandler):
             logger.error(f" Trace collection parse error: {e}")
             return {"status": "error", "message": f"Failed to parse trace file: {e}"}
 
+    async def _cancel_all_tasks(self) -> None:
+        """
+        Cancels all async tasks and stops the CTF converter.
+        Used by both full cleanup and soft reset.
+        """
+        if self.ctf_tef is not None:
+            self.ctf_tef.stop()
+            self.ctf_tef = None
+
+        if self.ctf_tef_task is not None:
+            self.ctf_tef_task.cancel()
+            try:
+                await self.ctf_tef_task
+            except asyncio.CancelledError:
+                pass
+            self.ctf_tef_task = None
+
+        if self.tef_task is not None:
+            self.tef_task.cancel()
+            try:
+                await self.tef_task
+            except asyncio.CancelledError:
+                pass
+            self.tef_task = None
+
+        if self._emit_task is not None:
+            self._emit_task.cancel()
+            try:
+                await self._emit_task
+            except asyncio.CancelledError:
+                pass
+            self._emit_task = None
+            self._emit_queue = None
+
     async def _live_trace_cleanup(self) -> bool:
         """
-        Cleans up the state of the live tracing.
+        Cleans up the state of the live tracing and tears down all resources.
 
         Returns
         -------
@@ -485,31 +519,13 @@ class TraceHandler(BaseHandler):
         if self.bt2_thread:
             self.bt2_thread_stop = True
             await asyncio.get_event_loop().run_in_executor(None, self.bt2_thread.join)
-            if self.tef_task is not None:
-                self.tef_task.cancel()
-                try:
-                    await self.tef_task
-                except asyncio.CancelledError:
-                    pass
 
-            if self._emit_task is not None:
-                self._emit_task.cancel()
-                try:
-                    await self._emit_task
-                except asyncio.CancelledError:
-                    pass
-                self._emit_task = None
-                self._emit_queue = None
-
-            if self.ctf_tef is not None:
-                self.ctf_tef.stop()
-                self.ctf_tef = None
+            await self._cancel_all_tasks()
 
             self.pending_events = []
             self.pending_metadata = []
             self.bt2_thread = None
             self.trace_events = []
-            self.tef_task = None
             self.bt2_thread_stop = False
             self.continuous_streaming = False
             self.msg_it = None
@@ -724,18 +740,10 @@ class TraceHandler(BaseHandler):
         """
         logger.info("Trace reset triggered. Clearing state.")
 
-        if self.ctf_tef is not None:
-            self.ctf_tef.stop()
-            self.ctf_tef = None
+        await self._cancel_all_tasks()
 
-        if self._emit_task is not None:
-            self._emit_task.cancel()
-            try:
-                await self._emit_task
-            except asyncio.CancelledError:
-                pass
-            self._emit_task = None
-            self._emit_queue = None
+        self._init_emit()
+        self.tef_task = asyncio.create_task(self._parse_and_emit_diff())
 
         with self.trace_lock:
             self.trace_events.clear()
