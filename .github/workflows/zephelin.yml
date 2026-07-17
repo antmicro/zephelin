@@ -65,9 +65,11 @@ jobs:
           ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
+          source ./scripts/ci/env.sh
           ./scripts/ci/setup_zephyr.sh
       - name: Run Twister
         run: |
+          source ./scripts/ci/env.sh
           normalized_name=$(echo ${{ matrix.platform}} | tr '/' '_')
           echo "TWISTER_SUFFIX=$normalized_name" >> $GITHUB_ENV
           export ZPL_BASE="$(pwd)"
@@ -100,9 +102,11 @@ jobs:
           ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
+          source ./scripts/ci/env.sh
           ./scripts/ci/setup_zephyr.sh
       - name: Run Compliance Check
         run: |
+          source ./scripts/ci/env.sh
           git config --global --add safe.directory $(pwd)
           excludes="-e SysbuildKconfig -e GitLint -e Identity -e ClangFormat -e BinaryFiles"
           ../zephyr/scripts/ci/check_compliance.py $excludes -c origin/${BASE_REF}..
@@ -124,11 +128,14 @@ jobs:
           ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
+          source ./scripts/ci/env.sh
           ./scripts/ci/setup_zephyr.sh
       - name: Install PyTest
         run: |
+          source ./scripts/ci/env.sh
           pip install --no-cache-dir pytest -r requirements.txt -r tests/requirements.txt
       - run: |
+          source ./scripts/ci/env.sh
           pytest
 
   Run-PrepareTrace:
@@ -148,12 +155,15 @@ jobs:
           ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
+          source ./scripts/ci/env.sh
           ./scripts/ci/setup_zephyr.sh
       - name: Install PyTest
         run: |
+          source ./scripts/ci/env.sh
           pip install --no-cache-dir  pytest -r requirements.txt
       - name: Run PrepareTrace
         run: |
+          source ./scripts/ci/env.sh
           python ./scripts/prepare_trace.py tests/ctf2tef/trace.ctf -o trace.tef
           diff tests/ctf2tef/trace.tef trace.tef
       - uses: actions/upload-artifact@v4

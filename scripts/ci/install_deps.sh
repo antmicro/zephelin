@@ -18,8 +18,7 @@ sudo apt install -yqq --no-install-recommends gdb-multiarch mono-complete \
   libgtk2.0-0 screen uml-utilities libc6-dev libicu-dev \
   python3 python3-pip git cmake ninja-build gperf unzip qemu-system-arm
 
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source $HOME/.local/bin/env
+pip install --break-system-packages uv
 uv venv -p 3.11
 source .venv/bin/activate
 
@@ -27,7 +26,6 @@ uv pip install --upgrade pip
 
 # install deps with pip
 uv pip install -r requirements.txt
-uv pip install bt2 -f $BT2_INDEX --force-reinstall
 
 # install recent flatbuffers-compiler
 FLATC_URL=https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g++-13.zip
