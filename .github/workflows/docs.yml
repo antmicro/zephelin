@@ -31,13 +31,16 @@ jobs:
           ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
         run: |
+          source ./scripts/ci/env.sh
           ./scripts/ci/setup_zephyr.sh
       - name: Run Twister
         run: |
+          source ./scripts/ci/env.sh
           export ZPL_BASE="$(pwd)"
           west twister -v -p max32690fthr/max32690/m4 -p stm32f746g_disco -T benchmark -j 1 --timeout-multiplier 3
       - name: Run Benchmark
         run: |
+          source ./scripts/ci/env.sh
           python3 benchmark/scripts/extract_measurements.py twister-out results.json
           python3 benchmark/scripts/generate_report.py results.json report.md
       - uses: actions/upload-artifact@v4
@@ -63,9 +66,13 @@ jobs:
       - name: Install dependencies
         run: ./scripts/ci/install_deps.sh
       - name: Setup Zephyr
-        run: ./scripts/ci/setup_zephyr.sh
+        run: |
+          source ./scripts/ci/env.sh
+          ./scripts/ci/setup_zephyr.sh
       - name: Gather Traces
-        run: ./scripts/ci/gather_traces.sh
+        run: |
+          source ./scripts/ci/env.sh
+          ./scripts/ci/gather_traces.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
