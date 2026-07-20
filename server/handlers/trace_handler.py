@@ -313,7 +313,8 @@ class TraceHandler(BaseHandler):
             zephyr_elf_path = self.build_dir / "zephyr" / "zephyr.elf"
 
             if zephyr_elf_path.exists():
-                self.symbol_map = extract_symbol_map(zephyr_elf_path)
+                self.symbol_map.clear()
+                self.symbol_map.update(extract_symbol_map(zephyr_elf_path))
 
                 if REGION_SIZES:
                     mem_symbols = extract_memory_symbols(self.symbol_map)
