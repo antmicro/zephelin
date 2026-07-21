@@ -398,10 +398,10 @@ class StreamingCTFToTEF:
                     pass
 
                 now = time.perf_counter()
-                should_flush = (
-                    len(self._batch) >= self._batch_size
-                    or (now - self._last_flush) >= self._flush_interval_s
-                )
+                should_flush = len(self._batch) >= self._batch_size
+                # Flush partial batch if we've been idle long enough since last item arrived
+                if not should_flush and self._batch:
+                    should_flush = (now - self._last_flush) >= self._flush_interval_s
 
                 if should_flush:
                     self._converted.extend(self._parse_batch(self._batch))
