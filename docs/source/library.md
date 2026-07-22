@@ -363,6 +363,31 @@ Memory profiling along with memory events are described in {doc}`memory_profilin
 
 To use Zephelin custom events with Tensorflow Lite Micro (TLFM), use the functions `zpl_emit_tflm_begin_event()` and `zpl_emit_tflm_end_event()`, provided by `zpl/tflm_events.h`.
 
+### Delayed emission of layer profiling events
+
+By default, the TFLM and microTVM profilers emit a trace event on every operator boundary, right when that boundary is reached.
+Formatting and pushing an event into the tracing buffer takes time, and since it happens between the operators, that time is included in the inference being measured.
+
+The delayed emission mechanism removes this overhead from the measurement.
+When it is enabled, the profiler only reads the cycle counter at each operator boundary and stores the timestamps in memory.
+All the events are formatted and emitted at once, once the inference finishes.
+
+The mechanism is disabled by default and can be enabled per runtime:
+
+* `CONFIG_ZPL_TFLM_PROFILER_DELAYED_EMISSION` for TFLM,
+* `CONFIG_ZPL_TVM_PROFILER_DELAYED_EMISSION` for microTVM.
+
+The number of operator events buffered during a single inference is limited by `CONFIG_ZPL_TFLM_PROFILER_MAX_EVENTS` / `CONFIG_ZPL_TVM_PROFILER_MAX_EVENTS` (32 by default).
+Operators beyond that limit are not traced, and a warning is logged.
+
+:::{warning}
+Delayed emission makes the trace stream non-chronological - the buffered operator events reach the host after events that were emitted while the inference was running (for example code scopes marked from an interrupt), but they carry earlier timestamps.
+
+Offline processing with {doc}`ctf_to_tef` handles this, because the whole trace is sorted before conversion.
+{doc}`live_tracing` does not - it converts and renders the events as they arrive, and the trace viewer drops events whose timestamp is older than the newest one already displayed for a given thread.
+With delayed emission enabled, the layer profiling events are therefore likely to be lost in live tracing.
+:::
+
 ## Testing Zephelin
 
 To run unit and integration tests, use the following commands:
