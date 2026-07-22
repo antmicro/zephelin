@@ -37,8 +37,8 @@ from prepare_trace import (
 )
 from socketio import AsyncServer
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 BT2_BATCH_SIZE = 50
+ZEPHYR_BASE = Path(__file__).resolve().parent.parent.parent.with_name("zephyr")
 DATA_CHUNK_BYTES = 8192
 _CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
@@ -387,7 +387,7 @@ class TraceHandler(BaseHandler):
                 for tflm_model_path in self.tflm_model_paths:
                     if tflm_model_path.exists():
                         metadata = extract_model_data(
-                            tflm_model_path, PROJECT_ROOT, zephyr_elf_path, None
+                            tflm_model_path, ZEPHYR_BASE, zephyr_elf_path, None
                         )
                         if "id" not in metadata:
                             add_model_metadata(tef_metadata_events, metadata)
