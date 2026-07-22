@@ -186,6 +186,22 @@ When using actual hardware, the server will only start processing traces after b
 
 Once the simulation is connected to the backend, open the visualizer at configured address (default: `http://127.0.0.1:8000`), press `Start streaming` and unpause the simulation.
 
+::::{only} html
+The recording below shows the sample being visualized live.
+
+:::{note}
+The presented trace was gathered using Renode.
+Running the sample on actual hardware may result in extended execution time due to instrumentation overhead.
+:::
+
+```{raw} html
+<video controls playsinline preload="metadata" width="100%" style="max-width: 100%;">
+  <source src="https://dl.antmicro.com/kenning/media/live_tracing_instrumentation.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+```
+::::
+
 ## Communication flow
 
 Server implementation in `server/run_backend.py` consists of following access points:
