@@ -20,6 +20,7 @@ from threading import Lock, Thread
 from typing import Literal, Union
 
 import bt2
+import server_utils.network as networking_utils
 from config import TraceConfig
 from ctf2tef import StreamingCTFToTEF, merge_metadata, stream_ctf_to_tef
 from endpoints import Endpoints
@@ -228,16 +229,26 @@ class TraceHandler(BaseHandler):
         def do_stream():
             ctf_plugin = bt2.find_plugin("ctf")
             dummy_cc = ctf_plugin.source_component_classes["live"]
-            self.msg_it = bt2.TraceCollectionMessageIterator(
-                bt2.ComponentSpec(
-                    dummy_cc,
-                    {
-                        "port": self.bt_port,
-                        "metadata-path": self.metadata_dir,
-                    },
-                ),
-                live_mode=True,
-            )
+            while True:
+                try:
+                    self.msg_it = bt2.TraceCollectionMessageIterator(
+                        bt2.ComponentSpec(
+                            dummy_cc,
+                            {
+                                "port": self.bt_port,
+                                "metadata-path": self.metadata_dir,
+                            },
+                        ),
+                        live_mode=True,
+                    )
+                    break
+                except bt2._AddressInUseSocketError:
+                    new_port = networking_utils.find_free_port()
+                    logger.warning(
+                        f"Port {self.bt_port}, set as --bt-port, is busy."
+                        f" Using port {new_port} instead."
+                    )
+                    self.bt_port = new_port
 
             # Batch messages before crossing the thread boundary to avoid
             # per-message asyncio.run_coroutine_threadsafe overhead.
