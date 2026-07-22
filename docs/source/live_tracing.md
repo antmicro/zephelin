@@ -145,6 +145,47 @@ In the end, run collection of traces from:
   west zpl-uart-capture <path-to-uart> 115200 ./trace-hw.ctf --send-to-remote 127.0.0.1:5000
   ```
 
+## Live tracing with instrumentation
+
+Traces produced by the [instrumentation subsystem](instrumentation) can be visualized live as well, as long as they are delivered over the same channel as the regular Zephelin traces.
+This is the case for the tracing subsystem backend (`CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE=y`), which packs instrumentation events into a separate CTF stream of the regular trace.
+Thanks to this, no additional capture command is needed - a single `west zpl-<backend>-capture` with `--send-to-remote` feeds both streams to the server.
+
+Let's use the {zpl_repo}`samples/profiling/tflm_instrumentation` sample, which runs a TFLM model with both Zephelin profilers and the instrumentation subsystem enabled.
+
+First, build the sample with the instrumentation tracing backend configuration:
+
+```bash
+west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_instrumentation -- \
+  -DEXTRA_CONF_FILE="zpl.conf;instrumentation_tracing.conf"
+```
+
+Then, start the server, pointing it to the model used by the sample and to the build directory:
+
+```bash
+python server/run_backend.py --frontend-directory ./zephelin-trace-viewer/dist \
+  --tflm-model-paths ./samples/common/tflm/model/sine.tflite \
+  --build-dir ./build
+```
+
+Next, run collection of traces from:
+
+* Renode:
+  ```bash
+  python scripts/run_renode.py --send-to-remote 127.0.0.1:5000 --pause
+  ```
+* From actual hardware (after flash), e.g.:
+  ```bash
+  west zpl-uart-capture <path-to-uart> 115200 ./trace-hw.ctf --send-to-remote 127.0.0.1:5000
+  ```
+
+:::{note}
+Starting simulation with `--pause` allows to postpone the execution of the sample until the frontend is set up and ready.
+When using actual hardware, the server will only start processing traces after board reset.
+:::
+
+Once the simulation is connected to the backend, open the visualizer at configured address (default: `http://127.0.0.1:8000`), press `Start streaming` and unpause the simulation.
+
 ## Communication flow
 
 Server implementation in `server/run_backend.py` consists of following access points:
