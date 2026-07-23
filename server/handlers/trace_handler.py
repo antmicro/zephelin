@@ -537,11 +537,6 @@ class TraceHandler(BaseHandler):
             self.msg_it = None
             gc.collect()
 
-        if self._metadata_tmp is not None:
-            self._metadata_tmp.cleanup()
-            self._metadata_tmp = None
-            self.metadata_dir = None
-
         return True
 
     async def _extract_trace_increment(self) -> tuple[list, list]:
