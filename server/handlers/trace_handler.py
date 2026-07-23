@@ -179,15 +179,14 @@ class TraceHandler(BaseHandler):
         self._emit_queue: asyncio.Queue[dict] | None = None
         self._emit_task: asyncio.Task | None = None
 
+        self._prepare_metadata()
+
     def _init_emit(self) -> None:
         """Initialize the background emit task and its queue."""
         if self._emit_queue is not None:
             return
         self._emit_queue = asyncio.Queue()
         self._emit_task = asyncio.create_task(self._emit_loop())
-
-        self._metadata_tmp = None
-        self.metadata_dir = None
 
     def _prepare_metadata(self) -> None:
         """
@@ -221,8 +220,6 @@ class TraceHandler(BaseHandler):
 
         if self.bt2_thread is not None:
             raise Exception("Already listening for traces.")
-
-        self._prepare_metadata()
 
         self.async_loop = asyncio.get_event_loop()
         self.async_q = asyncio.Queue(0)
