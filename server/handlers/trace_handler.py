@@ -189,6 +189,19 @@ class TraceHandler(BaseHandler):
         self._metadata_tmp = None
         self.metadata_dir = None
 
+    def _prepare_metadata(self) -> None:
+        """
+        Write the merged CTF metadata into a fresh temporary directory.
+        """
+        self._metadata_tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        try:
+            merge_metadata(Path(self._metadata_tmp.name))
+        except FileNotFoundError as e:
+            self._metadata_tmp.cleanup()
+            self._metadata_tmp = None
+            raise Exception(f"Failed to prepare CTF metadata: {e}")
+        self.metadata_dir = self._metadata_tmp.name
+
     @endpoints.register_method("trace.connect")
     async def connect(self) -> dict[Literal["status", "message"], str]:
         """
@@ -209,14 +222,7 @@ class TraceHandler(BaseHandler):
         if self.bt2_thread is not None:
             raise Exception("Already listening for traces.")
 
-        self._metadata_tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
-        try:
-            merge_metadata(Path(self._metadata_tmp.name))
-        except FileNotFoundError as e:
-            self._metadata_tmp.cleanup()
-            self._metadata_tmp = None
-            raise Exception(f"Failed to prepare CTF metadata: {e}")
-        self.metadata_dir = self._metadata_tmp.name
+        self._prepare_metadata()
 
         self.async_loop = asyncio.get_event_loop()
         self.async_q = asyncio.Queue(0)
