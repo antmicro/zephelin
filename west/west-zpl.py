@@ -52,7 +52,9 @@ class ZplGdbCapture(WestCommand):
                 self.name, help=self.help, description=self.description
             )
         if add_output:
-            parser.add_argument("output_path", help="Capture output path")
+            parser.add_argument(
+                "output_path", help="Capture output path", nargs="?", default=None
+            )
 
         add_gdb_common_args(parser)
         parser.add_argument(
@@ -399,7 +401,9 @@ class ZplUartCapture(WestCommand):
 
         parser.add_argument("serial_port", help="Seral port")
         parser.add_argument("serial_baudrate", help="Seral baudrate")
-        parser.add_argument("output_path", help="Capture output path", type=Path)
+        parser.add_argument(
+            "output_path", help="Capture output path", type=Path, nargs="?", default=None
+        )
         parser.add_argument(
             "--send-to-remote", help="Stream captured data to a remote socket", default=None
         )
@@ -442,9 +446,11 @@ class ZplUartCapture(WestCommand):
         trace_idx = 0
         buff = b""
         progress_bar = tqdm(unit="B", unit_scale=True)
-        f = open(args.output_path, "wb")
-
-        tqdm.write(f"Writing trace to {args.output_path}")
+        if args.output_path:
+            f = open(args.output_path, "wb")
+            tqdm.write(f"Writing trace to {args.output_path}")
+        else:
+            f = None
 
         if args.send_enable:
             ser.write(b"enable\r\n")
@@ -462,6 +468,9 @@ class ZplUartCapture(WestCommand):
                         self.wrn(f"Failed to send data: {e}")
                         remote_socket.close()
                         remote_socket = None
+
+                if f is None:
+                    continue
 
                 if args.send_enable:
                     f.write(data)
@@ -488,9 +497,11 @@ class ZplUartCapture(WestCommand):
                     buff = buff[-len(_CTF_TRACE_START_TAG) :]
 
         except KeyboardInterrupt:
-            f.write(buff)
+            if f:
+                f.write(buff)
         finally:
-            f.close()
+            if f:
+                f.close()
             ser.close()
             progress_bar.close()
 
@@ -514,7 +525,9 @@ class ZplUsbCapture(WestCommand):
 
         parser.add_argument("vendor_id", help="Vendor ID")
         parser.add_argument("product_id", help="Product ID")
-        parser.add_argument("output_path", help="Capture output path")
+        parser.add_argument(
+            "output_path", help="Capture output path", nargs="?", default=None
+        )
         parser.add_argument(
             "--send-to-remote", help="Stream captured data to a remote socket", default=None
         )
@@ -573,28 +586,35 @@ class ZplUsbCapture(WestCommand):
             if remote_socket:
                 remote_socket.sendall(_CTF_TRACE_START_TAG)
 
-        with open(args.output_path, "wb") as f:
-            buf = usb.util.create_buffer(10 * 1024)
-            while True:
-                try:
-                    n_bytes = read_ep.read(buf, args.timeout * 1000)
-                    chunk = buf[:n_bytes]
-                    if remote_socket:
-                        try:
-                            remote_socket.sendall(chunk)
-                        except Exception as e:
-                            self.wrn(f"Failed to send data: {e}")
-                            remote_socket.close()
-                            remote_socket = None
+        if args.output_path:
+            f = open(args.output_path, "wb")
+        else:
+            f = None
 
+        buf = usb.util.create_buffer(10 * 1024)
+        while True:
+            try:
+                n_bytes = read_ep.read(buf, args.timeout * 1000)
+                chunk = buf[:n_bytes]
+                if remote_socket:
+                    try:
+                        remote_socket.sendall(chunk)
+                    except Exception as e:
+                        self.wrn(f"Failed to send data: {e}")
+                        remote_socket.close()
+                        remote_socket = None
+
+                if f:
                     f.write(chunk)
-                    progress_bar.update(n_bytes)
-                except usb.core.USBTimeoutError:
-                    self.die("USB operation timeout!")
-                except KeyboardInterrupt:
-                    break
-            if remote_socket:
-                remote_socket.close()
+                progress_bar.update(n_bytes)
+            except usb.core.USBTimeoutError:
+                self.die("USB operation timeout!")
+            except KeyboardInterrupt:
+                break
+        if remote_socket:
+            remote_socket.close()
+        if f:
+            f.close()
 
 
 class ZplDebugConfig(WestCommand):
