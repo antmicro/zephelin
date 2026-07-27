@@ -431,9 +431,14 @@ def extract_model_data(
 
     model_data["ops"] = []
 
-    ops_parameters = extract_ops_parameters(model_path, zephyr_base) or cycle([{}])
+    ops_parameters = extract_ops_parameters(model_path, zephyr_base)
+    ops_parameters_extracted = ops_parameters is not None
+    if not ops_parameters_extracted:
+        ops_parameters = cycle([{}])
 
-    for op, parameters in zip(interpreter._get_ops_details(), ops_parameters, strict=True):
+    for op, parameters in zip(
+        interpreter._get_ops_details(), ops_parameters, strict=ops_parameters_extracted
+    ):
         op_data = {}
         op_data["op_name"] = op["op_name"]
         op_data["index"] = op["index"]
