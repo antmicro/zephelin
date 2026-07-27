@@ -515,6 +515,8 @@ class ZplUsbCapture(WestCommand):
         remote_socket = None
         if args.send_to_remote:
             remote_socket = _open_socket(self, args.send_to_remote)
+            if remote_socket:
+                remote_socket.sendall(_CTF_TRACE_START_TAG)
 
         with open(args.output_path, "wb") as f:
             buf = usb.util.create_buffer(10 * 1024)
