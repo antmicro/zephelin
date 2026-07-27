@@ -255,23 +255,23 @@ def _parse_msg(
         ev_phase = EventPhase.METADATA
         ev_additional_args = m.additional_arg_func(msg) if m.additional_arg_func else {}
     # Process custom events
-    if event_name in custom_event_begin:
+    elif event_name in custom_event_begin:
         ev_name = f"{custom_event_begin[event_name][0]}{custom_event_name_func[event_name](msg)}"
         ev_phase = EventPhase.BEGIN
         ev_additional_args = (
             custom_event_args_func[event_name](msg) if custom_event_args_func[event_name] else None
         )
-    if event_name in custom_event_end:
+    elif event_name in custom_event_end:
         ev_name = f"{custom_event_end[event_name][0]}{custom_event_name_func[event_name](msg)}"
         ev_phase = EventPhase.END
         ev_additional_args = (
             custom_event_args_func[event_name](msg) if custom_event_args_func[event_name] else None
         )
     # Process Zephyr events (starts with *_enter and finishes with *_exit)
-    if event_name.endswith("_enter"):
+    elif event_name.endswith("_enter"):
         ev_name = event_name[:-6]
         ev_phase = EventPhase.BEGIN
-    if event_name.endswith("_exit"):
+    elif event_name.endswith("_exit"):
         ev_name = event_name[:-5]
         ev_phase = EventPhase.END
     # Check whether thread has changed
