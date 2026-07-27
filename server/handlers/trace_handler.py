@@ -181,6 +181,23 @@ class TraceHandler(BaseHandler):
         self._emit_task: asyncio.Task | None = None
 
         self._prepare_metadata()
+        self._metadata_cache = None
+        self._prepare_metadata_sync()
+
+    def _prepare_metadata_sync(self) -> None:
+        """
+        Pre-populate all metadata during initialization.
+
+        This ensures the streaming parser has symbol resolution and all
+        metadata ready before any trace events arrive, eliminating latency
+        variance based on system load when metadata() is later called.
+        """
+        now = time.monotonic()
+        result = self._metadata_sync()
+        elapsed = time.monotonic() - now
+        logger.info(f"Pre-populated metadata in {elapsed:.3f}s")
+        if result.get("status") == "success":
+            self._metadata_cache = result.get("data", {}).get("events", [])
 
     def _init_emit(self) -> None:
         """Initialize the background emit task and its queue."""
@@ -340,17 +357,15 @@ class TraceHandler(BaseHandler):
         logger.debug("Continuous streaming disabled.")
         return {"status": "success"}
 
-    @endpoints.register_method("trace.metadata")
-    async def metadata(self) -> dict[Literal["status", "message", "data"], Union[str, dict]]:
+    def _metadata_sync(self) -> dict[Literal["status", "message", "data"], Union[str, dict]]:
         """
-        Provides model metadata and memory symbols for the trace.
+        Synchronous implementation of metadata collection.
 
-        Returns
-        -------
-        dict[Literal["status", "message", "data"], Union[str, dict]]
-            Message with metadata events or error.
+        Performs all the heavy I/O and CPU work (ELF parsing, model
+        metadata extraction) without touching the event loop.  Meant to
+        be run via ``asyncio.to_thread`` so the streaming pipeline keeps
+        running while this executes.
         """
-        logger.info("Collecting trace metadata")
 
         try:
             tef_metadata_events = []
@@ -419,11 +434,43 @@ class TraceHandler(BaseHandler):
                 ):
                     add_model_metadata(tef_metadata_events, metadata)
 
+            self._metadata_cache = tef_metadata_events
             return {"status": "success", "data": {"events": tef_metadata_events}}
 
         except Exception as e:
             logger.error(f"Metadata collection error: {e}")
             return {"status": "error", "message": f"Failed to collect metadata: {e}"}
+
+    @endpoints.register_method("trace.metadata")
+    async def metadata(self) -> dict[Literal["status", "message", "data"], Union[str, dict]]:
+        """
+        Provides model metadata and memory symbols for the trace.
+
+        Runs the heavy collection work in a background thread so the
+        async event loop (and thus the streaming pipeline) is not
+        blocked.  Once the work finishes any events that accumulated in
+        the emit queue during the collection are flushed immediately.
+
+        Returns
+        -------
+        dict[Literal["status", "message", "data"], Union[str, dict]]
+            Message with metadata events or error.
+        """
+        logger.info("Collecting trace metadata")
+        now = time.monotonic()
+
+        # Return cached results if already populated during initialization
+        if self._metadata_cache is not None:
+            elapsed = time.monotonic() - now
+            logger.info(f"Returning cached metadata in {elapsed:.3f}s")
+            return {"status": "success", "data": {"events": self._metadata_cache}}
+
+        result = await asyncio.to_thread(self._metadata_sync)
+
+        elapsed = time.monotonic() - now
+        logger.info(f"Ended Collecting trace metadata in {elapsed:.3f}s")
+
+        return result
 
     @endpoints.register_method("trace.reset")
     async def reset(self):
