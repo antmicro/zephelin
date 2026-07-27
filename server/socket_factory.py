@@ -44,7 +44,12 @@ def create_socketio(traceConfig: TraceConfig) -> socketio.AsyncServer:
         Handles client disconnection.
         """
         if trace_backend.bt2_thread is not None:
-            await trace_backend._live_trace_cleanup()
+            await trace_backend._execute_reset()
+            # As this handles an F5 reload scenario, the default frontend state is that the
+            # streaming is disabled. If we don't set it, we'll continue streaming to a frontend
+            # that didn't have it selected.
+            if trace_backend.continuous_streaming:
+                trace_backend.continuous_streaming = False
         logger.info(f"Client {sid} disconnected.")
 
     @sio.on("rpc_request")
