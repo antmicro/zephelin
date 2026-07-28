@@ -24,6 +24,10 @@ config ZPL_TRACE_BACKEND_USB
 	select HWINFO
 	select TRACING_HANDLE_HOST_CMD
 	select USB_DEVICE_STACK_NEXT
+	# Required to advertise the Microsoft OS 2.0 descriptors that make
+	# Windows auto-bind WinUSB.sys to the vendor-specific tracing interface.
+	select USBD_BOS_SUPPORT
+	select USBD_VREQ_SUPPORT
 	depends on TRACING_ASYNC
 
 config ZPL_TRACE_BACKEND_DEBUGGER
