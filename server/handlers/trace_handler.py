@@ -647,8 +647,8 @@ class TraceHandler(BaseHandler):
 
     async def _parse_and_emit_diff(self):
         """
-        Consumes parsed TEF events from the converter, maintains a sorted
-        pending buffer, and pushes batches to the emit queue.
+        Consumes parsed TEF events from the converter, and pushes sorted
+        batches to the emit queue.
         """
         cooldown = 0.25
         last_emit = 0.0
@@ -663,26 +663,12 @@ class TraceHandler(BaseHandler):
                         logger.error(f"Incremental parse error: {e}")
                     continue
 
-                # Sort incoming batch by ts once, then merge-scan into pending list
-                new_events.sort(key=lambda x: x["ts"])
-                merged = []
-                i = j = 0
-                while i < len(self.pending_events) and j < len(new_events):
-                    if self.pending_events[i]["ts"] <= new_events[j]["ts"]:
-                        merged.append(self.pending_events[i])
-                        i += 1
-                    else:
-                        merged.append(new_events[j])
-                        j += 1
-                merged.extend(self.pending_events[i:])
-                merged.extend(new_events[j:])
-                self.pending_events = merged
-
-                self.pending_metadata.extend(new_metadata)
+                self.pending_events.extend(new_events)
 
                 now = time.monotonic()
 
                 if now - last_emit >= cooldown and self.continuous_streaming:
+                    self.pending_events.sort(key=lambda x: x["ts"])
                     to_send = max(1, len(self.pending_events) // 2)
                     batch = list(self.pending_metadata) + self.pending_events[:to_send]
                     self.pending_metadata.clear()
