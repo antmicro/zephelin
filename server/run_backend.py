@@ -209,7 +209,7 @@ def create_backend(args):
             trace_file_path=str(args.mock_trace_file), playback_speed=args.mock_playback_speed
         )
     else:
-        sio = create_socketio(traceConfig=traceConfig)
+        sio, trace_backend = create_socketio(traceConfig=traceConfig)
 
     if args.frontend_directory:
         frontend_directory = args.frontend_directory
@@ -218,7 +218,7 @@ def create_backend(args):
         frontend_directory = download_frontend()
         logger.info(f"Frontend downloaded to: {frontend_directory}")
 
-    app = create_app(frontend_directory)
+    app = create_app(frontend_directory, trace_backend)
 
     asgi_app = socketio.ASGIApp(sio, other_asgi_app=app)
 

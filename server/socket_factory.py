@@ -63,4 +63,4 @@ def create_socketio(traceConfig: TraceConfig) -> socketio.AsyncServer:
         if response is not None:
             await sio.emit("rpc_response", response, to=sid)
 
-    return sio
+    return sio, trace_backend

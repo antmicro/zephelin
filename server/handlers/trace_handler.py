@@ -366,7 +366,6 @@ class TraceHandler(BaseHandler):
         be run via ``asyncio.to_thread`` so the streaming pipeline keeps
         running while this executes.
         """
-
         try:
             tef_metadata_events = []
             zephyr_elf_path = self.build_dir / "zephyr" / "zephyr.elf"
