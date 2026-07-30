@@ -203,6 +203,7 @@ def create_backend(args):
         bt_port=args.bt_port,
     )
 
+    trace_backend = None
     if hasattr(args, "mock_trace_file") and args.mock_trace_file:
         logger.info(f"Starting in mock mode. Trace file: {args.mock_trace_file}")
         sio = create_mock_socketio(

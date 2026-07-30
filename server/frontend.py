@@ -35,7 +35,8 @@ def create_app(frontend_dir: Path, trace_backend: TraceHandler) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app):
         yield
-        await trace_backend._live_trace_cleanup()
+        if trace_backend is not None:
+            await trace_backend._live_trace_cleanup()
 
     app = FastAPI(title="Zephelin Trace Viewer", lifespan=lifespan)
 
