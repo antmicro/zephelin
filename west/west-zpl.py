@@ -63,6 +63,12 @@ class ZplGdbCapture(WestCommand):
             "--send-to-remote", help="Stream captured data to a remote socket", default=None
         )
         parser.add_argument(
+            "--trace-processing-throttling-delay",
+            help="Delay (in miliseconds) in the loop that processes/sends captured traces",
+            type=int,
+            default=1000,
+        )
+        parser.add_argument(
             "--capture-once", help="Dump data from buffer only once and exit", action="store_true"
         )
         parser.add_argument(
@@ -201,7 +207,7 @@ class ZplGdbCapture(WestCommand):
                             progress_bar.update(size_diff)
                             output_last_size = stats.st_size
                     total_processing_time_seconds = time.time() - start_time
-                    time.sleep(1)
+                    time.sleep(args.trace_processing_throttling_delay / 1000)
                     total_processing_time_seconds_with_delay = time.time() - start_time
             except KeyboardInterrupt:
                 # Stop running GDB
