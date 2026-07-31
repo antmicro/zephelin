@@ -13,6 +13,10 @@ twister-out*
 *.xml
 logs/
 snapshots/
+renode_portable/
+
+# Zephelin Trace Viewer
+zephelin-trace-viewer/
 
 # Python
 venv/*
