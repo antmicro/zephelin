@@ -26,13 +26,27 @@ define calculate_start_end
 	set $end = (char*)&ram_tracing + pos
 end
 
+define strcmp
+	python print cmp(gdb.execute("output $arg0", to_string=True).strip('"'), $arg1)
+end
+
 # $arg0 : Path to the file
 # $arg1 : The size of buffer
+# $arg2 : Path to the log file
 define dump_data_to_file
 	break tracing_backend_ram_output if (pos + length) > $arg1
 	set $append = 0
+	set $measure_time = !$_streq("$arg2", "/dev/null")
+	if $measure_time
+		set logging file $arg2
+		set logging on
+		python import time
+	end
 	while (1)
 		continue
+		if $measure_time
+			python starttime = time.time()
+		end
 		calculate_start_end
 		if $append
 			append binary memory $arg0 $start $end
@@ -41,5 +55,10 @@ define dump_data_to_file
 		end
 		call tracing_backend_ram_init()
 		set $append = 1
+		if $measure_time
+			python print ("save_time:", time.time() - starttime)
+			print $start
+			print $end
+		end
 	end
 end

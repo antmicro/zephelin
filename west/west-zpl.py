@@ -5,9 +5,12 @@
 
 """Zephelin West extension for tracing data capture."""
 
+import os
+import re
 import signal
 import socket
 import subprocess
+import tempfile
 import threading
 import time
 from argparse import ArgumentParser
@@ -23,6 +26,8 @@ from utils import add_gdb_common_args, get_kconfigs, get_zephyr_elf, start_debug
 from west.commands import WestCommand
 
 _CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
+
+BYTES_IN_KILOBYTE = 1024
 
 
 class ZplGdbCapture(WestCommand):
@@ -59,6 +64,12 @@ class ZplGdbCapture(WestCommand):
         )
         parser.add_argument(
             "--capture-once", help="Dump data from buffer only once and exit", action="store_true"
+        )
+        parser.add_argument(
+            "--measure-throughput",
+            help="Display maximum trace gathering speed on shutdown (for continuous tracing)",
+            default=False,
+            action="store_true",
         )
         stop_condition_group = parser.add_mutually_exclusive_group()
         stop_condition_group.add_argument(
@@ -105,6 +116,8 @@ class ZplGdbCapture(WestCommand):
         ]
         cmd_gdb = cmd_prefix[:]
 
+        gdb_logfile = tempfile.NamedTemporaryFile().name if args.measure_throughput else "/dev/null"
+
         if args.capture_once:
             if args.buffer_full:
                 cmd_gdb += ["-ex", "wait_buffer_full"]
@@ -125,7 +138,7 @@ class ZplGdbCapture(WestCommand):
                 buffer_size = "1024"
             cmd_gdb += [
                 "-ex",
-                f"dump_data_to_file {args.output_path} {buffer_size}",
+                f"dump_data_to_file {args.output_path} {buffer_size} {gdb_logfile}",
             ]
         cmd_gdb += [
             "-ex",
@@ -164,9 +177,12 @@ class ZplGdbCapture(WestCommand):
             # Monitor the output file and report its size
             output, stats = None, None
             progress_bar = tqdm(unit="B", unit_scale=True)
+            total_processing_time_seconds = 0
+            total_processing_time_seconds_with_delay = 0
             try:
                 tqdm.write("Press C-c to stop.")
                 while True:
+                    start_time = time.time()
                     if output_file.exists():
                         stats = output_file.stat()
                         size_diff = stats.st_size - output_last_size
@@ -184,7 +200,9 @@ class ZplGdbCapture(WestCommand):
 
                             progress_bar.update(size_diff)
                             output_last_size = stats.st_size
+                    total_processing_time_seconds = time.time() - start_time
                     time.sleep(1)
+                    total_processing_time_seconds_with_delay = time.time() - start_time
             except KeyboardInterrupt:
                 # Stop running GDB
                 proc_gdb.send_signal(signal.SIGINT)
@@ -220,6 +238,37 @@ class ZplGdbCapture(WestCommand):
                 progress_bar.close()
                 if remote_socket:
                     remote_socket.close()
+                if args.measure_throughput:
+                    bytes = 0
+                    seconds = 0
+                    with open(gdb_logfile, "r") as file:
+                        gdb_logs = file.readlines()
+                        hex_regex = re.compile("0x[0-9a-f]+ ")
+                        i = 0
+                        while i < len(gdb_logs):
+                            if "save_time" not in gdb_logs[i]:
+                                i += 1
+                                continue
+                            seconds += float(gdb_logs[i].rsplit(":")[-1])
+                            hex_base = 16
+                            start = int(hex_regex.findall(gdb_logs[i + 1])[0], hex_base)
+                            end = int(hex_regex.findall(gdb_logs[i + 2])[0], hex_base)
+                            bytes += end - start
+                            i += 3
+                    os.remove(gdb_logfile)
+                    self.inf(f"Actual GDB trace dumping speed: {(bytes / seconds) / 1024}kB/s")
+                    if output_file.exists():
+                        no_delay_rate = stats.st_size / total_processing_time_seconds
+                        no_delay_rate = no_delay_rate / BYTES_IN_KILOBYTE
+                        actual_rate = stats.st_size / total_processing_time_seconds_with_delay
+                        actual_rate = actual_rate / BYTES_IN_KILOBYTE
+                        self.inf(
+                            f"Theoretical maximum trace file processing speed: {no_delay_rate}kB/s"
+                        )
+                        self.inf(
+                            "Actual trace file processing speed (with"
+                            f" throttling delays): {actual_rate}kB/s"
+                        )
 
         if exit_code != 0:
             if output:
