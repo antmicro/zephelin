@@ -94,8 +94,19 @@ class ZplGdbCapture(WestCommand):
 
         return parser
 
+    def _cleanup_temp(self, path):
+        if path:
+            try:
+                Path(path).unlink(missing_ok=True)
+            except OSError:
+                pass
+
     def do_run(self, args, unknown_args):
-        self.inf(f"Capturing traces to {args.output_path}...")
+        if args.output_path is None and not args.send_to_remote:
+            self.die("Output path is required unless --send-to-remote is used")
+
+        if args.output_path:
+            self.inf(f"Capturing traces to {args.output_path}...")
 
         if args.gdb_port not in range(65536):
             self.die(f"The GDB port ({args.gdb_port}) is invalid. Should be a 0-65535 value.")
@@ -124,8 +135,19 @@ class ZplGdbCapture(WestCommand):
         ]
         cmd_gdb = cmd_prefix[:]
 
-        gdb_logfile = tempfile.NamedTemporaryFile().name if args.measure_throughput else "/dev/null"
+        _temp_path = None
+        if args.output_path is None and args.send_to_remote:
+            _temp_path = tempfile.mktemp(prefix="zpl_trace_")
+            args.output_path = _temp_path
+            Path(_temp_path).touch()
 
+        try:
+            self._run_capture(args, cmd_prefix, cmd_gdb, proc_debugserver)
+        finally:
+            self._cleanup_temp(_temp_path)
+
+    def _run_capture(self, args, cmd_prefix, cmd_gdb, proc_debugserver):
+        gdb_logfile = tempfile.NamedTemporaryFile().name if args.measure_throughput else "/dev/null"
         if args.capture_once:
             if args.buffer_full:
                 cmd_gdb += ["-ex", "wait_buffer_full"]
@@ -165,6 +187,7 @@ class ZplGdbCapture(WestCommand):
         remote_socket = None
         if args.send_to_remote:
             remote_socket = _open_socket(self, args.send_to_remote)
+            remote_socket.sendall(_CTF_TRACE_START_TAG)
 
         self.inf("Saving traces...")
         proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
