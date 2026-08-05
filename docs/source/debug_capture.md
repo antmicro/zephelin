@@ -41,3 +41,5 @@ Moreover, the command dumps trace at the moment the connection with a debug serv
 This does not guaranty that data have been gathered, therefore one of two arguments can be used:
 * `--buffer-full` - GDB runs an application and dumps trace only when buffer is full,
 * `--n-bytes N` - GDB runs an application and dumps trace only when buffer has at least `N` bytes.
+
+It's possible to measure trace capturing speed, by using the option `--measure-throughput`.
