@@ -51,8 +51,7 @@ int zpl_init(void)
 	return 0;
 }
 
-#if defined(CONFIG_ZPL_TRACE_BACKEND_UART) && defined(CONFIG_ZPL_TRACE_FORMAT_CTF) && \
-	!defined(CONFIG_TRACING_HANDLE_HOST_CMD)
+#if defined(CONFIG_ZPL_TRACE_FORMAT_CTF) && !defined(CONFIG_TRACING_HANDLE_HOST_CMD)
 
 int zpl_ctf_start_tag_emit(void)
 {
@@ -62,9 +61,7 @@ int zpl_ctf_start_tag_emit(void)
 
 SYS_INIT(zpl_ctf_start_tag_emit, APPLICATION, 0);
 
-#endif /* defined(CONFIG_ZPL_TRACE_BACKEND_UART) && defined(CONFIG_ZPL_TRACE_FORMAT_CTF) &&
-	* !defined(CONFIG_TRACING_HANDLE_HOST_CMD)
-	*/
+#endif /* defined(CONFIG_ZPL_TRACE_FORMAT_CTF) && !defined(CONFIG_TRACING_HANDLE_HOST_CMD) */
 
 #if defined(CONFIG_ZPL) && defined(CONFIG_ZPL_AUTORUN_INIT) && defined(CONFIG_ZPL_INIT_PRIO)
 
