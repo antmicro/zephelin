@@ -7,6 +7,7 @@
 
 #include <zephyr/device.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/usb/msos_desc.h>
 #include <zephyr/usb/usbd.h>
 
 LOG_MODULE_REGISTER(zpl_usb_backend);
@@ -16,6 +17,8 @@ LOG_MODULE_REGISTER(zpl_usb_backend);
 #define ZPL_PRODUCT_MANUFACTURER	"Antmicro"
 #define ZPL_PRODUCT_STRING		"Zephelin"
 #define ZPL_USBD_MAX_POWER		100	/* 100 mA */
+#define ZPL_MSOS_VENDOR_CODE	0x01U
+#define ZPL_MSOS_WINDOWS_VERSION	0x0A000000UL
 
 USBD_DEVICE_DEFINE(zpl_usbd,
 		   DEVICE_DT_GET(DT_NODELABEL(zephyr_udc0)),
@@ -34,6 +37,68 @@ static const char *blocklist[] = { NULL };
 USBD_CONFIGURATION_DEFINE(zpl_fs_config, attributes, ZPL_USBD_MAX_POWER, &fs_cfg_desc);
 USBD_CONFIGURATION_DEFINE(zpl_hs_config, attributes, ZPL_USBD_MAX_POWER, &hs_cfg_desc);
 
+struct tracing_msosv2_descriptor {
+	struct msosv2_descriptor_set_header header;
+	struct msosv2_compatible_id compatible_id;
+} __packed;
+
+static const struct tracing_msosv2_descriptor tracing_msosv2_desc = {
+	.header = {
+		.wLength = sys_cpu_to_le16(sizeof(struct msosv2_descriptor_set_header)),
+		.wDescriptorType = sys_cpu_to_le16(MS_OS_20_SET_HEADER_DESCRIPTOR),
+		.dwWindowsVersion = sys_cpu_to_le32(ZPL_MSOS_WINDOWS_VERSION),
+		.wTotalLength = sys_cpu_to_le16(sizeof(tracing_msosv2_desc)),
+	},
+	.compatible_id = {
+		.wLength = sys_cpu_to_le16(sizeof(struct msosv2_compatible_id)),
+		.wDescriptorType = sys_cpu_to_le16(MS_OS_20_FEATURE_COMPATIBLE_ID),
+		.CompatibleID = {'W', 'I', 'N', 'U', 'S', 'B'},
+	},
+};
+
+struct tracing_bos_msosv2_descriptor {
+	struct usb_bos_platform_descriptor platform;
+	struct usb_bos_capability_msos cap;
+} __packed;
+
+static const struct tracing_bos_msosv2_descriptor tracing_bos_msosv2_desc = {
+	.platform = {
+		.bLength = sizeof(struct tracing_bos_msosv2_descriptor),
+		.bDescriptorType = USB_DESC_DEVICE_CAPABILITY,
+		.bDevCapabilityType = USB_BOS_CAPABILITY_PLATFORM,
+		.PlatformCapabilityUUID = {
+			0xDF, 0x60, 0xDD, 0xD8, 0x89, 0x45, 0xC7, 0x4C,
+			0x9C, 0xD2, 0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F,
+		},
+	},
+	.cap = {
+		.dwWindowsVersion = sys_cpu_to_le32(ZPL_MSOS_WINDOWS_VERSION),
+		.wMSOSDescriptorSetTotalLength = sys_cpu_to_le16(sizeof(tracing_msosv2_desc)),
+		.bMS_VendorCode = ZPL_MSOS_VENDOR_CODE,
+	},
+};
+
+static int tracing_msosv2_to_host(const struct usbd_context *const ctx,
+				  const struct usb_setup_packet *const setup,
+				  struct net_buf *const buf)
+{
+	ARG_UNUSED(ctx);
+
+	if (setup->bRequest != ZPL_MSOS_VENDOR_CODE ||
+	    setup->wIndex != MS_OS_20_DESCRIPTOR_INDEX) {
+		return -ENOTSUP;
+	}
+
+	net_buf_add_mem(buf, &tracing_msosv2_desc,
+			MIN(net_buf_tailroom(buf), sizeof(tracing_msosv2_desc)));
+
+	return 0;
+}
+
+USBD_DESC_BOS_VREQ_DEFINE(tracing_bos_vreq_msosv2,
+			  sizeof(tracing_bos_msosv2_desc), &tracing_bos_msosv2_desc,
+			  ZPL_MSOS_VENDOR_CODE, tracing_msosv2_to_host, NULL);
+
 static struct usbd_context *zpl_usbd_setup_device(void)
 {
 	int ret;
@@ -50,11 +115,28 @@ static struct usbd_context *zpl_usbd_setup_device(void)
 		return NULL;
 	}
 
+	ret = usbd_add_descriptor(&zpl_usbd, &tracing_bos_vreq_msosv2);
+	if (ret) {
+		LOG_ERR("Descriptors: failed to initialize BOS descriptor (%d)!", ret);
+		return NULL;
+	}
+
+	ret = usbd_device_set_bcd_usb(&zpl_usbd, USBD_SPEED_FS, USB_SRN_2_0_1);
+	if (ret) {
+		LOG_ERR("Descriptors: Failed to set full-speed bcdUSB");
+		return NULL;
+	}
+
 	if (USBD_SUPPORTS_HIGH_SPEED && usbd_caps_speed(&zpl_usbd) == USBD_SPEED_HS) {
 		ret = usbd_add_configuration(&zpl_usbd, USBD_SPEED_HS,
 					     &zpl_hs_config);
 		if (ret) {
 			LOG_ERR("Configuration: Failed to add high-speed configuration");
+			return NULL;
+		}
+		ret = usbd_device_set_bcd_usb(&zpl_usbd, USBD_SPEED_HS, USB_SRN_2_0_1);
+		if (ret) {
+			LOG_ERR("Descriptors: Failed to set high-speed bcdUSB");
 			return NULL;
 		}
 
