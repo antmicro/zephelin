@@ -7,8 +7,11 @@
 
 #include <zephyr/device.h>
 #include <zephyr/logging/log.h>
-#include <zephyr/usb/msos_desc.h>
 #include <zephyr/usb/usbd.h>
+
+#ifdef CONFIG_USBD_BOS_SUPPORT
+#include <zephyr/usb/msos_desc.h>
+#endif /* CONFIG_USBD_BOS_SUPPORT */
 
 LOG_MODULE_REGISTER(zpl_usb_backend);
 
@@ -36,6 +39,8 @@ static const char *blocklist[] = { NULL };
 /* USB Configurations */
 USBD_CONFIGURATION_DEFINE(zpl_fs_config, attributes, ZPL_USBD_MAX_POWER, &fs_cfg_desc);
 USBD_CONFIGURATION_DEFINE(zpl_hs_config, attributes, ZPL_USBD_MAX_POWER, &hs_cfg_desc);
+
+#ifdef CONFIG_USBD_BOS_SUPPORT
 
 struct tracing_msosv2_descriptor {
 	struct msosv2_descriptor_set_header header;
@@ -99,6 +104,8 @@ USBD_DESC_BOS_VREQ_DEFINE(tracing_bos_vreq_msosv2,
 			  sizeof(tracing_bos_msosv2_desc), &tracing_bos_msosv2_desc,
 			  ZPL_MSOS_VENDOR_CODE, tracing_msosv2_to_host, NULL);
 
+#endif /* CONFIG_USBD_BOS_SUPPORT */
+
 static struct usbd_context *zpl_usbd_setup_device(void)
 {
 	int ret;
@@ -115,6 +122,7 @@ static struct usbd_context *zpl_usbd_setup_device(void)
 		return NULL;
 	}
 
+#ifdef CONFIG_USBD_BOS_SUPPORT
 	ret = usbd_add_descriptor(&zpl_usbd, &tracing_bos_vreq_msosv2);
 	if (ret) {
 		LOG_ERR("Descriptors: failed to initialize BOS descriptor (%d)!", ret);
@@ -126,6 +134,7 @@ static struct usbd_context *zpl_usbd_setup_device(void)
 		LOG_ERR("Descriptors: Failed to set full-speed bcdUSB");
 		return NULL;
 	}
+#endif /* CONFIG_USBD_BOS_SUPPORT */
 
 	if (USBD_SUPPORTS_HIGH_SPEED && usbd_caps_speed(&zpl_usbd) == USBD_SPEED_HS) {
 		ret = usbd_add_configuration(&zpl_usbd, USBD_SPEED_HS,
@@ -134,11 +143,14 @@ static struct usbd_context *zpl_usbd_setup_device(void)
 			LOG_ERR("Configuration: Failed to add high-speed configuration");
 			return NULL;
 		}
+
+#ifdef CONFIG_USBD_BOS_SUPPORT
 		ret = usbd_device_set_bcd_usb(&zpl_usbd, USBD_SPEED_HS, USB_SRN_2_0_1);
 		if (ret) {
 			LOG_ERR("Descriptors: Failed to set high-speed bcdUSB");
 			return NULL;
 		}
+#endif /* CONFIG_USBD_BOS_SUPPORT */
 
 		ret = usbd_register_all_classes(&zpl_usbd, USBD_SPEED_HS, 1,
 						blocklist);
