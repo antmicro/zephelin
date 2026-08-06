@@ -41,6 +41,8 @@ from socketio import AsyncServer
 BT2_BATCH_SIZE = 50
 ZEPHYR_BASE = Path(__file__).resolve().parent.parent.parent.with_name("zephyr")
 DATA_CHUNK_BYTES = 8192
+# Upper bound on teardown
+CLEANUP_TIMEOUT_S = 5
 _CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
 logger = logging.getLogger("TraceHandler")
@@ -565,7 +567,16 @@ class TraceHandler(BaseHandler):
         """
         if self.interceptor_server is not None:
             self.interceptor_server.close()
-            await self.interceptor_server.wait_closed()
+
+            try:
+                await asyncio.wait_for(
+                    self.interceptor_server.wait_closed(), timeout=CLEANUP_TIMEOUT_S
+                )
+            except (asyncio.TimeoutError, TimeoutError):
+                logger.warning(
+                    "Interceptor connections did not close within "
+                    f"{CLEANUP_TIMEOUT_S}s. Continuing teardown."
+                )
             self.interceptor_server = None
 
         if self.interceptor_task is not None:
