@@ -32,6 +32,7 @@ from config import TraceConfig  # noqa: E402
 from extract_tvm_model_data import DEFAULT_OP_PREFIX_RE, DEFAULT_OP_SUFFIX_RE  # noqa: E402
 from frontend import create_app  # noqa: E402
 from frontend_downloader import download_frontend  # noqa: E402
+from prepare_trace import ensure_cppfilt, get_sdk_bin_path  # noqa: E402
 from server_utils.logger import string_to_verbosity  # noqa: E402
 from socket_factory import create_socketio  # noqa: E402
 from socket_mock import create_mock_socketio  # noqa: E402
@@ -191,6 +192,10 @@ def create_backend(args):
     """
     Initializes backend components.
     """
+    if Path(args.build_dir).exists():
+        if sdk_bin_path := get_sdk_bin_path(args.build_dir):
+            ensure_cppfilt(sdk_bin_path)
+
     traceConfig = TraceConfig(
         tcp_host=args.tcp_server_host,
         tcp_port=args.tcp_server_port,
