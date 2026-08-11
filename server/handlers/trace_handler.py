@@ -230,16 +230,16 @@ class TraceHandler(BaseHandler):
         -------
         dict[Literal["status", "message"], str]
             Status message.
-
-        Raises
-        ------
-        Exception
-            If the server is already listening or a trace is active.
         """
         logger.info("Connection initializing")
 
         if self.bt2_thread is not None:
-            raise Exception("Already listening for traces.")
+            logger.info("Already listening for traces, keeping the current one.")
+            return {
+                "status": "success",
+                "message": "Already listening for traces. "
+                f"Interceptor proxy on port {self.tcp_port}. BT2 listening on port {self.bt_port}.",
+            }
 
         self.async_loop = asyncio.get_event_loop()
         self.async_q = asyncio.Queue(0)
