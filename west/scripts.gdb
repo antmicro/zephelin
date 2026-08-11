@@ -53,7 +53,8 @@ define dump_data_to_file
 		else
 			dump binary memory $arg0 $start $end
 		end
-		call tracing_backend_ram_init()
+		set pos = 0
+		set buffer_full = 0
 		set $append = 1
 		if $measure_time
 			python print ("save_time:", time.time() - starttime)
