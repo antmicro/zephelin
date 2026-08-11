@@ -118,6 +118,13 @@ If the Visualizer is connected to the server, the live-tracing controls are avai
 * `Stop Tailing` - Stops the default behavior in which viewport follows live edge of visualized trace.
 * `Resume Tailing` - Snaps the viewport back to the live edge.
 
+:::{note}
+Additionally, `Alt`+`R` performs a hard reset of the tracing session, which restarts the `libbtrace` instance parsing the trace.
+It should only be used to recover from a `libbtrace` failure, as it drops the traces gathered so far.
+
+Such failure can manifest itself as the Trace Viewer no longer receiving any new events, even though the capture command keeps streaming data to the server, with a `libbtrace` error traceback printed in the server log.
+:::
+
 ## Sample collection of traces
 
 Let's run an application running profiling for TensorFlow Lite Micro model.
