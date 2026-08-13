@@ -16,6 +16,7 @@ new_runtime
 visual_interface
 live_tracing
 examples
+troubleshooting
 development
 benchmark_report
 ```
