@@ -195,7 +195,7 @@ RENODE_SIM=$!
 while [ ! -e /tmp/uart-trace-0 ]; do sleep 0.05; done
 timeout --preserve-status -s INT 50 west zpl-uart-capture /tmp/uart-trace-0 115200 ./renode_tflm_instrumentation.ctf
 kill -9 $RENODE_SIM && rm -f /tmp/uart-log
-west zpl-prepare-trace -o tef_tflm_instrumentation_capture.json renode_tflm_instrumentation_0.ctf \
+west zpl-prepare-trace -o tef_tflm_instrumentation_capture.json renode_tflm_instrumentation.ctf \
   --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
 
 # Validate generated CTFs
