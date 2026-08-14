@@ -10,7 +10,6 @@ import importlib
 import signal
 import subprocess
 import time
-from copy import copy
 from pathlib import Path
 from textwrap import dedent
 
@@ -254,14 +253,34 @@ class ZplInstrumentationUartGdbCapture(ZplInstrumentationUartCapture):
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(self.name, help=self.help, description=self.description)
-
         ZplInstrumentationUartCapture.do_add_parser(self, parser_adder, parser, False)
-        west_zpl.ZplGdbCapture.do_add_parser(self, parser_adder, parser, False)
-
         parser.add_argument(
             "instr_output_path", help="Instrumentation capture output path", type=Path
         )
         parser.add_argument("output_path", help="Capture output path", type=Path)
+        west_zpl.add_gdb_common_args(parser)
+        parser.add_argument(
+            "--no-debug-server", help="Don't set up the debug server", action="store_true"
+        )
+        parser.add_argument("--openocd", help="Path to custom OpenOCD", type=Path, default=None)
+        parser.add_argument(
+            "--send-to-remote", help="Stream captured data to a remote socket", default=None
+        )
+        parser.add_argument(
+            "--capture-once", help="Dump data from buffer only once and exit", action="store_true"
+        )
+        stop_condition_group = parser.add_mutually_exclusive_group()
+        stop_condition_group.add_argument(
+            "--buffer-full",
+            help="Run application until trace buffer is full; works only with --capture-once",
+            action="store_true",
+        )
+        stop_condition_group.add_argument(
+            "--n-bytes",
+            help="Run application until there is at least n in trace buffer;"
+            " works only with --capture-once",
+            type=int,
+        )
 
         return parser
 
@@ -313,12 +332,67 @@ class ZplInstrumentationUartGdbCapture(ZplInstrumentationUartCapture):
             time.sleep(2.0)
             self.inf(f"GDB return code {proc_gdb.poll()}")
 
-            args_gdb_capture = copy(args)
-            args_gdb_capture.capture_once = True
-            args_gdb_capture.no_debug_server = True
-            args_gdb_capture.output_path = str(original_output)
+            self.inf(f"Capturing traces to {original_output}...")
 
-            west_zpl.ZplGdbCapture.do_run(self, args_gdb_capture, unknown_args)
+            if args.gdb_port not in range(65536):
+                self.die(f"The GDB port ({args.gdb_port}) is invalid. Should be a 0-65535 value.")
+
+            if args.elf_path is None:
+                elf = get_zephyr_elf()
+                if elf is None:
+                    self.die("Cannot deduce Zephyr ELF path, please provide it with --elf-path")
+                args.elf_path = elf
+
+            cmd_gdb = [
+                args.gdb,
+                "-batch",
+                "-ex",
+                f"source {str(west_zpl.ZplGdbCapture.script_file)}",
+                "-ex",
+                f"target remote :{args.gdb_port}",
+            ]
+
+            if args.buffer_full:
+                cmd_gdb += ["-ex", "wait_buffer_full"]
+            elif args.n_bytes:
+                cmd_gdb += ["-ex", f"wait_n_bytes {args.n_bytes}"]
+
+            cmd_gdb += [
+                "-ex",
+                "calculate_start_end",
+                "-ex",
+                f"dump binary memory {original_output} $start $end",
+                "-ex",
+                "quit",
+                args.elf_path,
+            ]
+
+            if original_output.exists():
+                original_output.unlink()
+
+            self.inf("Saving traces...")
+            proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            (output, _) = proc_gdb.communicate()
+            exit_code = proc_gdb.wait()
+
+            if exit_code != 0:
+                if output:
+                    self.err(output)
+                self.die("Failed to capture tracing data!")
+
+            self.inf("Processing CTF start tag...")
+            with open(original_output, mode="r+b") as file:
+                traces = file.read()
+                file.truncate(0)
+                file.seek(0)
+                if west_zpl._CTF_TRACE_START_TAG in traces:
+                    tag_idx = traces.index(west_zpl._CTF_TRACE_START_TAG)
+                    traces = traces[tag_idx + len(west_zpl._CTF_TRACE_START_TAG) :]
+                file.write(traces)
+
+            self.inf("Done.")
+
         finally:
             if proc_debugserver and proc_debugserver.poll() is None:
                 proc_debugserver.send_signal(signal.SIGINT)
