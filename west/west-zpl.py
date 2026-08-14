@@ -5,7 +5,6 @@
 
 """Zephelin West extension for tracing data capture."""
 
-import os
 import re
 import signal
 import socket
@@ -28,6 +27,114 @@ from west.commands import WestCommand
 _CTF_TRACE_START_TAG = b"_zpl_ctf_start__"
 
 BYTES_IN_KILOBYTE = 1024
+
+
+class CtfFileHandler:
+    """
+    Universal class, that manages CTF file juggling based on the
+    '_zpl_ctf_start__' tags. Everything before the first passed tag is ignored.
+    """
+
+    def __init__(self, path: Path):
+        """
+        Initializes the class.
+
+        Parameters
+        ----------
+        path: Path
+            Path to the file, that the traces are to be saved to. If the file
+            exists, it will be overriden. Everything after the first tag
+            ('_zpl_ctf_start__') will be written to this file. Everything
+            after subsequent tags will be written into other files (with '_1',
+            '_02' etc. suffix added to the file name).
+        """
+        self.file_number = -1
+        self.output_path = path
+        self.sliding_window_chunk_buffer = b""
+        self.current_output_path = path
+        if path.exists():
+            path.unlink()
+
+    def _save_integral_chunk(self, chunk: bytes):
+        """
+        Takes the data stream piece by piece, and splits it into files based on
+        tags.
+
+        NOTE: This method assumes, that no tag is split between multiple
+        pieces (chunks).
+
+        Parameters
+        ----------
+        chunk: bytes
+            Piece of the captured trace data.
+        """
+        if _CTF_TRACE_START_TAG in chunk:
+            tag_idx = chunk.index(_CTF_TRACE_START_TAG)
+            previous_file_chunk_part = chunk[:tag_idx]
+            chunk = chunk[tag_idx + len(_CTF_TRACE_START_TAG) :]
+            if self.file_number >= 0:
+                with open(self.current_output_path, "ab") as of:
+                    of.write(previous_file_chunk_part)
+            self.file_number += 1
+            if self.file_number == 0:
+                self.current_output_path = self.output_path
+            else:
+                self.output_path.with_stem(self.output_path.stem + f"_{self.file_number}")
+            if self.current_output_path.exists():
+                self.current_output_path.unlink()
+            tqdm.write(
+                f"Found CTF trace start, writing trace to new file {self.current_output_path}"
+            )
+        if self.file_number >= 0:
+            with open(self.current_output_path, "ab") as of:
+                of.write(chunk)
+
+    def save_chunk(self, chunk: bytes):
+        """
+        Takes the data stream piece by piece, and splits it into files based on
+        tags.
+
+        This method allows tags to be split between multiple pieces (chunks),
+        and handles it with a sliding window chunk stored in an intermediate
+        buffer. This buffer needs to be flushed by calling the 'close' method
+        at the end of trace capture.
+
+        Parameters
+        ----------
+        chunk: bytes
+            Piece of the captured trace data.
+        """
+        # Ignore empty chunks
+        if len(chunk) == 0:
+            return
+        joined_chunk = self.sliding_window_chunk_buffer + chunk
+        # If the stored sliding window chunk is too small to ensure that no start tag
+        # is missed - enlarge it.
+        if len(self.sliding_window_chunk_buffer) < (len(_CTF_TRACE_START_TAG) - 1):
+            self.sliding_window_chunk_buffer = joined_chunk
+            return
+        # If the tag is found between chunks, adjust chunk boundary to correct it.
+        if (
+            (_CTF_TRACE_START_TAG not in self.sliding_window_chunk_buffer)
+            and (_CTF_TRACE_START_TAG not in chunk)
+            and (_CTF_TRACE_START_TAG in joined_chunk)
+        ):
+            tag_idx = joined_chunk.index(_CTF_TRACE_START_TAG)
+            self.sliding_window_chunk_buffer = joined_chunk[:tag_idx]
+            chunk = joined_chunk[tag_idx:]
+        # At this point we know for sure, that no tag is split between chunks.
+        self._save_integral_chunk(self.sliding_window_chunk_buffer)
+        # Our entire sliding window chunk is being processed, and the un-processed new
+        # chunk becomes the new sliding window chunk.
+        self.sliding_window_chunk_buffer = chunk
+
+    def close(self):
+        """
+        Finalizes the work of the handler. Flushes the intermediate buffer,
+        ensuring that the final sliding window chunk is processed.
+        """
+        if len(self.sliding_window_chunk_buffer) > 0:
+            self._save_integral_chunk(self.sliding_window_chunk_buffer)
 
 
 class ZplGdbCapture(WestCommand):
@@ -53,7 +160,7 @@ class ZplGdbCapture(WestCommand):
             )
         if add_output:
             parser.add_argument(
-                "output_path", help="Capture output path", nargs="?", default=None
+                "output_path", help="Capture output path", nargs="?", default=None, type=Path
             )
 
         add_gdb_common_args(parser)
@@ -135,19 +242,11 @@ class ZplGdbCapture(WestCommand):
         ]
         cmd_gdb = cmd_prefix[:]
 
-        _temp_path = None
-        if args.output_path is None and args.send_to_remote:
-            _temp_path = tempfile.mktemp(prefix="zpl_trace_")
-            args.output_path = _temp_path
-            Path(_temp_path).touch()
+        _temp_path = tempfile.mktemp(prefix="zpl_trace_")
+        Path(_temp_path).touch()
 
-        try:
-            self._run_capture(args, cmd_prefix, cmd_gdb, proc_debugserver)
-        finally:
-            self._cleanup_temp(_temp_path)
-
-    def _run_capture(self, args, cmd_prefix, cmd_gdb, proc_debugserver):
         gdb_logfile = tempfile.NamedTemporaryFile().name if args.measure_throughput else "/dev/null"
+
         if args.capture_once:
             if args.buffer_full:
                 cmd_gdb += ["-ex", "wait_buffer_full"]
@@ -158,7 +257,7 @@ class ZplGdbCapture(WestCommand):
                 "-ex",
                 "calculate_start_end",
                 "-ex",
-                f"dump binary memory {args.output_path} $start $end",
+                f"dump binary memory {_temp_path} $start $end",
             ]
         else:
             kconfigs = get_kconfigs()
@@ -168,7 +267,7 @@ class ZplGdbCapture(WestCommand):
                 buffer_size = "1024"
             cmd_gdb += [
                 "-ex",
-                f"dump_data_to_file {args.output_path} {buffer_size} {gdb_logfile}",
+                f"dump_data_to_file {_temp_path} {buffer_size} {gdb_logfile}",
             ]
         cmd_gdb += [
             "-ex",
@@ -177,13 +276,14 @@ class ZplGdbCapture(WestCommand):
         ]
 
         # Gather info about output file
-        output_file = Path(args.output_path)
+        temp_file = Path(_temp_path)
         original_mtime = 0
         output_last_size = 0
-        if output_file.exists():
-            stats = output_file.stat()
-            original_mtime = stats.st_mtime
-
+        stats = temp_file.stat()
+        original_mtime = stats.st_mtime
+        file_handler = None
+        if args.output_path:
+            file_handler = CtfFileHandler(args.output_path)
         remote_socket = None
         if args.send_to_remote:
             remote_socket = _open_socket(self, args.send_to_remote)
@@ -196,17 +296,21 @@ class ZplGdbCapture(WestCommand):
             (output, _) = proc_gdb.communicate()
             exit_code = proc_gdb.wait()
 
-            if exit_code == 0 and remote_socket and output_file.exists():
+            if exit_code == 0 and remote_socket:
                 try:
-                    with open(output_file, "rb") as f:
-                        remote_socket.sendall(f.read())
+                    with open(temp_file, "rb") as tf:
+                        buf = tf.read()
+                        if remote_socket:
+                            remote_socket.sendall(buf)
+                        if file_handler:
+                            file_handler.save_chunk(buf)
                 except Exception as e:
                     self.wrn(f"Failed to send data: {e}")
                 finally:
                     remote_socket.close()
         else:
             # Monitor the output file and report its size
-            output, stats = None, None
+            stats = temp_file.stat()
             progress_bar = tqdm(unit="B", unit_scale=True)
             total_processing_time_seconds = 0
             total_processing_time_seconds_with_delay = 0
@@ -214,26 +318,28 @@ class ZplGdbCapture(WestCommand):
                 tqdm.write("Press C-c to stop.")
                 while True:
                     start_time = time.time()
-                    if output_file.exists():
-                        stats = output_file.stat()
-                        size_diff = stats.st_size - output_last_size
-                        if stats.st_mtime > original_mtime and size_diff > 0:
+                    stats = temp_file.stat()
+                    size_diff = stats.st_size - output_last_size
+                    if stats.st_mtime > original_mtime and size_diff > 0:
+                        try:
+                            with open(temp_file, "rb") as tf:
+                                tf.seek(output_last_size)
+                                chunk = tf.read(size_diff)
+                                if remote_socket:
+                                    remote_socket.sendall(chunk)
+                                if file_handler:
+                                    file_handler.save_chunk(chunk)
+                        except Exception as e:
+                            self.wrn(f"Failed to send data {e}")
                             if remote_socket:
-                                try:
-                                    with open(output_file, "rb") as f:
-                                        f.seek(output_last_size)
-                                        chunk = f.read(size_diff)
-                                        remote_socket.sendall(chunk)
-                                except Exception as e:
-                                    self.wrn(f"Failed to send data {e}")
-                                    remote_socket.close()
-                                    remote_socket = None
-
-                            progress_bar.update(size_diff)
-                            output_last_size = stats.st_size
+                                remote_socket.close()
+                                remote_socket = None
+                        progress_bar.update(size_diff)
+                        output_last_size = stats.st_size
                     total_processing_time_seconds = time.time() - start_time
                     time.sleep(args.trace_processing_throttling_delay / 1000)
                     total_processing_time_seconds_with_delay = time.time() - start_time
+
             except KeyboardInterrupt:
                 # Stop running GDB
                 proc_gdb.send_signal(signal.SIGINT)
@@ -246,29 +352,34 @@ class ZplGdbCapture(WestCommand):
                     "-ex",
                     "calculate_start_end",
                     "-ex",
-                    f"append binary memory {args.output_path} $start $end",
+                    f"append binary memory {_temp_path} $start $end",
                 ]
                 tqdm.write("Saving remaining traces...")
                 proc_gdb = subprocess.Popen(cmd_gdb, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 proc_gdb.communicate()
                 proc_gdb.wait()
-
-                if remote_socket and output_file.exists():
-                    stats = output_file.stat()
-                    size_diff = stats.st_size - output_last_size
-                    if size_diff > 0:
-                        try:
-                            with open(output_file, "rb") as f:
-                                f.seek(output_last_size)
-                                remote_socket.sendall(f.read(size_diff))
-                        except Exception:
-                            pass
+                size_diff = temp_file.stat().st_size - output_last_size
+                stats = temp_file.stat()
+                size_diff = stats.st_size - output_last_size
+                if size_diff > 0:
+                    try:
+                        with open(temp_file, "rb") as tf:
+                            tf.seek(output_last_size)
+                            chunk = tf.read(size_diff)
+                            if remote_socket:
+                                remote_socket.sendall(chunk)
+                            if file_handler:
+                                file_handler.save_chunk(chunk)
+                    except Exception:
+                        pass
                 # If mtime is newer, then part of a trace was captured
                 exit_code = int(not (stats and stats.st_mtime > original_mtime))
             finally:
                 progress_bar.close()
                 if remote_socket:
                     remote_socket.close()
+                if file_handler:
+                    file_handler.close()
                 if args.measure_throughput:
                     bytes = 0
                     seconds = 0
@@ -286,31 +397,35 @@ class ZplGdbCapture(WestCommand):
                             end = int(hex_regex.findall(gdb_logs[i + 2])[0], hex_base)
                             bytes += end - start
                             i += 3
-                    os.remove(gdb_logfile)
+                    gdb_logfile.unlink()
                     self.inf(f"Actual GDB trace dumping speed: {(bytes / seconds) / 1024}kB/s")
-                    if output_file.exists():
-                        no_delay_rate = stats.st_size / total_processing_time_seconds
-                        no_delay_rate = no_delay_rate / BYTES_IN_KILOBYTE
-                        actual_rate = stats.st_size / total_processing_time_seconds_with_delay
-                        actual_rate = actual_rate / BYTES_IN_KILOBYTE
-                        self.inf(
-                            f"Theoretical maximum trace file processing speed: {no_delay_rate}kB/s"
-                        )
-                        self.inf(
-                            "Actual trace file processing speed (with"
-                            f" throttling delays): {actual_rate}kB/s"
-                        )
+                    no_delay_rate = stats.st_size / total_processing_time_seconds
+                    no_delay_rate = no_delay_rate / BYTES_IN_KILOBYTE
+                    actual_rate = stats.st_size / total_processing_time_seconds_with_delay
+                    actual_rate = actual_rate / BYTES_IN_KILOBYTE
+                    self.inf(
+                        f"Theoretical maximum trace file processing speed: {no_delay_rate}kB/s"
+                    )
+                    self.inf(
+                        "Actual trace file processing speed (with"
+                        f" throttling delays): {actual_rate}kB/s"
+                    )
 
         if exit_code != 0:
             if output:
                 self.err(output)
             self.die("Failed to capture tracing data!")
 
+        self.inf("Done.")
+        if _temp_path:
+            try:
+                Path(_temp_path).unlink(missing_ok=True)
+            except OSError:
+                pass
+
         if not args.no_debug_server:
             self.inf("Stopping the debugserver...")
             proc_debugserver.send_signal(signal.SIGINT)
-
-        self.inf("Done.")
 
 
 class SerialWrapper:
@@ -466,24 +581,22 @@ class ZplUartCapture(WestCommand):
         if args.send_to_remote:
             remote_socket = _open_socket(self, args.send_to_remote)
 
-        trace_idx = 0
-        buff = b""
-        progress_bar = tqdm(unit="B", unit_scale=True)
+        file_handler = None
         if args.output_path:
-            f = open(args.output_path, "wb")
+            file_handler = CtfFileHandler(args.output_path)
             tqdm.write(f"Writing trace to {args.output_path}")
-        else:
-            f = None
+
+        progress_bar = tqdm(unit="B", unit_scale=True)
+
+        data = b""
 
         if args.send_enable:
             ser.write(b"enable\r\n")
             tqdm.write("Sent b'enable'")
-
         try:
             while True:
                 data = serw.read_all()
                 progress_bar.update(len(data))
-
                 if remote_socket:
                     try:
                         remote_socket.sendall(data)
@@ -491,42 +604,18 @@ class ZplUartCapture(WestCommand):
                         self.wrn(f"Failed to send data: {e}")
                         remote_socket.close()
                         remote_socket = None
-
-                if f is None:
-                    continue
-
-                if args.send_enable:
-                    f.write(data)
-                    continue
-
-                buff += data
-
-                if _CTF_TRACE_START_TAG in buff:
-                    tag_idx = buff.index(_CTF_TRACE_START_TAG)
-                    f.write(buff[:tag_idx])
-                    f.close()
-                    output_path = args.output_path.with_stem(
-                        args.output_path.stem + f"_{trace_idx}"
-                    )
-                    tqdm.write(f"Found CTF trace start, writing trace to new file {output_path}")
-                    f = open(output_path, "wb")
-                    buff = buff[tag_idx + len(_CTF_TRACE_START_TAG) :]
-                    progress_bar.reset()
-                    progress_bar.update(len(buff))
-                    trace_idx += 1
-
-                elif len(buff) > len(_CTF_TRACE_START_TAG):
-                    f.write(buff[: -len(_CTF_TRACE_START_TAG)])
-                    buff = buff[-len(_CTF_TRACE_START_TAG) :]
-
+                if file_handler:
+                    file_handler.save_chunk(data)
         except KeyboardInterrupt:
-            if f:
-                f.write(buff)
+            if file_handler:
+                file_handler.save_chunk(data)
         finally:
-            if f:
-                f.close()
             ser.close()
             progress_bar.close()
+            if remote_socket:
+                remote_socket.close()
+            if file_handler:
+                file_handler.close()
 
 
 class ZplUsbCapture(WestCommand):
@@ -548,9 +637,7 @@ class ZplUsbCapture(WestCommand):
 
         parser.add_argument("vendor_id", help="Vendor ID")
         parser.add_argument("product_id", help="Product ID")
-        parser.add_argument(
-            "output_path", help="Capture output path", nargs="?", default=None
-        )
+        parser.add_argument("output_path", help="Capture output path", nargs="?", default=None)
         parser.add_argument(
             "--send-to-remote", help="Stream captured data to a remote socket", default=None
         )
