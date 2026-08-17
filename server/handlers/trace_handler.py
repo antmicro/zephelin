@@ -675,6 +675,7 @@ class TraceHandler(BaseHandler):
                     continue
 
                 self.pending_events.extend(new_events)
+                self.pending_metadata.extend(new_metadata)
 
                 now = time.monotonic()
 
