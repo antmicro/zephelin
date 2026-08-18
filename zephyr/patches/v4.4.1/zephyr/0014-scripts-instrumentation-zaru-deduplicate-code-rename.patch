@@ -1,0 +1,43 @@
+From 3e3b5958611743546ad2d53cef48e82996cb562e Mon Sep 17 00:00:00 2001
+From: Maciej Sobkowski <msobkowski@antmicro.com>
+Date: Tue, 22 Jul 2025 17:35:46 +0200
+Subject: [PATCH 14/35] scripts: instrumentation: zaru: deduplicate code,
+ rename perfetto to trace event
+
+Signed-off-by: Maciej Sobkowski <msobkowski@antmicro.com>
+Signed-off-by: Krzysztof Sychla <ksychla@antmicro.com>
+---
+ scripts/instrumentation/zaru.py | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/scripts/instrumentation/zaru.py b/scripts/instrumentation/zaru.py
+index f9a645e3400..6b51653e7e2 100755
+--- a/scripts/instrumentation/zaru.py
++++ b/scripts/instrumentation/zaru.py
+@@ -427,7 +427,6 @@ def get_stream(port):
+                     ll = ll[:-4]  # trim terminator
+                     return ll
+ 
+-
+ # Generator for getting an event with symbols resolved.
+ # The event returned is a dict().
+ def get_trace_event_generator(msg_it, symbols):
+@@ -453,6 +452,7 @@ def get_trace_event_generator(msg_it, symbols):
+ 
+             # Resolve callee symbol.
+             callee = event.payload_field.get("callee").real
++            callee = f'{callee:08x}'  # Format before lookup
+             callee_symbol = symbols.get(callee)
+ 
+             if callee_symbol is None:
+@@ -490,7 +490,6 @@ def get_trace_event_generator(msg_it, symbols):
+ 
+             yield e  # event
+ 
+-
+ def get_and_print_trace(args, tmpdir, elf, demangle, annotate_ret=False, verbose=False):
+     """Get traces from target and print them.
+ 
+-- 
+2.55.0
+

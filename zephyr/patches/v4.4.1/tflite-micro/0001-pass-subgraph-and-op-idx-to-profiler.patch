@@ -1,0 +1,94 @@
+From 89d092bdcbd03d62e97932ecb9c80735313b0769 Mon Sep 17 00:00:00 2001
+From: Maciej Torhan <mtorhan@antmicro.com>
+Date: Wed, 4 Jun 2025 15:26:13 +0200
+Subject: [PATCH 1/6] pass subgraph and op idx to profiler
+
+---
+ tensorflow/lite/micro/micro_interpreter_graph.cc |  2 ++
+ tensorflow/lite/micro/micro_profiler.cc          |  2 +-
+ tensorflow/lite/micro/micro_profiler.h           | 12 ++++++++----
+ tensorflow/lite/micro/micro_profiler_interface.h |  2 +-
+ 4 files changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/tensorflow/lite/micro/micro_interpreter_graph.cc b/tensorflow/lite/micro/micro_interpreter_graph.cc
+index f0bcb60f..5080780a 100644
+--- a/tensorflow/lite/micro/micro_interpreter_graph.cc
++++ b/tensorflow/lite/micro/micro_interpreter_graph.cc
+@@ -269,6 +269,8 @@ TfLiteStatus MicroInterpreterGraph::InvokeSubgraph(int subgraph_idx) {
+ // only defined for builds with the error strings.
+ #if !defined(TF_LITE_STRIP_ERROR_STRINGS)
+     ScopedMicroProfiler scoped_profiler(
++        subgraph_idx,
++        current_operator_index_,
+         OpNameFromRegistration(registration),
+         reinterpret_cast<MicroProfilerInterface*>(context_->profiler));
+ #endif
+diff --git a/tensorflow/lite/micro/micro_profiler.cc b/tensorflow/lite/micro/micro_profiler.cc
+index cace8145..7a59eec8 100644
+--- a/tensorflow/lite/micro/micro_profiler.cc
++++ b/tensorflow/lite/micro/micro_profiler.cc
+@@ -26,7 +26,7 @@ limitations under the License.
+ 
+ namespace tflite {
+ 
+-uint32_t MicroProfiler::BeginEvent(const char* tag) {
++uint32_t MicroProfiler::BeginEvent(uint16_t subgraph_idx, uint16_t op_idx, const char* tag) {
+   if (num_events_ == kMaxEvents) {
+     MicroPrintf(
+         "MicroProfiler errored out because total number of events exceeded the "
+diff --git a/tensorflow/lite/micro/micro_profiler.h b/tensorflow/lite/micro/micro_profiler.h
+index fd8bc42f..4edb2033 100644
+--- a/tensorflow/lite/micro/micro_profiler.h
++++ b/tensorflow/lite/micro/micro_profiler.h
+@@ -33,7 +33,7 @@ class MicroProfiler : public MicroProfilerInterface {
+   // Marks the start of a new event and returns an event handle that can be used
+   // to mark the end of the event via EndEvent. The lifetime of the tag
+   // parameter must exceed that of the MicroProfiler.
+-  virtual uint32_t BeginEvent(const char* tag) override;
++  virtual uint32_t BeginEvent(uint16_t subgraph_idx, uint16_t op_idx, const char* tag) override;
+ 
+   // Marks the end of an event associated with event_handle. It is the
+   // responsibility of the caller to ensure than EndEvent is called once and
+@@ -97,7 +97,9 @@ class MicroProfiler : public MicroProfilerInterface {
+ // MicroInterpreter and we want to ensure zero overhead for the release builds.
+ class ScopedMicroProfiler {
+  public:
+-  explicit ScopedMicroProfiler(const char* tag,
++  explicit ScopedMicroProfiler(uint16_t subgraph_idx,
++                               uint16_t op_idx,
++                               const char* tag,
+                                MicroProfilerInterface* profiler) {}
+ };
+ 
+@@ -115,11 +117,13 @@ class ScopedMicroProfiler {
+ // }
+ class ScopedMicroProfiler {
+  public:
+-  explicit ScopedMicroProfiler(const char* tag,
++  explicit ScopedMicroProfiler(uint16_t subgraph_idx,
++                               uint16_t op_idx,
++                               const char* tag,
+                                MicroProfilerInterface* profiler)
+       : profiler_(profiler) {
+     if (profiler_ != nullptr) {
+-      event_handle_ = profiler_->BeginEvent(tag);
++      event_handle_ = profiler_->BeginEvent(subgraph_idx, op_idx, tag);
+     }
+   }
+ 
+diff --git a/tensorflow/lite/micro/micro_profiler_interface.h b/tensorflow/lite/micro/micro_profiler_interface.h
+index f839a74a..594f0c00 100644
+--- a/tensorflow/lite/micro/micro_profiler_interface.h
++++ b/tensorflow/lite/micro/micro_profiler_interface.h
+@@ -27,7 +27,7 @@ class MicroProfilerInterface {
+ 
+   // Marks the start of a new event and returns an event handle that can be used
+   // to mark the end of the event via EndEvent.
+-  virtual uint32_t BeginEvent(const char* tag) = 0;
++  virtual uint32_t BeginEvent(uint16_t subgraph_idx, uint16_t op_idx, const char* tag) = 0;
+ 
+   // Marks the end of an event associated with event_handle.
+   virtual void EndEvent(uint32_t event_handle) = 0;
+-- 
+2.55.0
+

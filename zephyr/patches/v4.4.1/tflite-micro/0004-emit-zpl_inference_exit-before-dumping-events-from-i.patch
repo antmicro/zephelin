@@ -1,0 +1,52 @@
+From 78f70c24f7b60a6514eb6235057c38f0969ce955 Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Fri, 24 Oct 2025 11:56:57 +0200
+Subject: [PATCH 4/6] emit zpl_inference_exit before dumping events from
+ inference
+
+Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
+---
+ tensorflow/lite/micro/micro_interpreter.cc | 6 +++++-
+ tensorflow/lite/micro/micro_interpreter.h  | 2 +-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
+index befbcb39..7971ff5e 100644
+--- a/tensorflow/lite/micro/micro_interpreter.cc
++++ b/tensorflow/lite/micro/micro_interpreter.cc
+@@ -299,7 +299,7 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
+ TfLiteStatus MicroInterpreter::Invoke() {
+ #ifdef CONFIG_ZPL_INFERENCE_PROFILING
+   LOG_INF("Starting inference for model %p", model_);
+-  ScopedMicroInterpreterInvoke _(model_);
++  ScopedMicroInterpreterInvoke inference(model_);
+ #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+   if (initialization_status_ != kTfLiteOk) {
+     MicroPrintf("Invoke() called after initialization failed\n");
+@@ -312,6 +312,10 @@ TfLiteStatus MicroInterpreter::Invoke() {
+     TF_LITE_ENSURE_OK(&context_, AllocateTensors());
+   }
+   auto status = graph_.InvokeSubgraph(0);
++#ifdef CONFIG_ZPL_INFERENCE_PROFILING
++  // Report inference end before dumping events to not include time of tracing
++  inference.EndInference();
++#endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+ #ifdef CONFIG_ZPL_TFLM_PROFILER
+   if (nullptr != this->context_.profiler) {
+     reinterpret_cast<MicroProfilerInterface*>(this->context_.profiler)->DumpEvents();
+diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
+index 235437a9..1a3ca0c4 100644
+--- a/tensorflow/lite/micro/micro_interpreter.h
++++ b/tensorflow/lite/micro/micro_interpreter.h
+@@ -224,7 +224,7 @@ struct ScopedMicroInterpreterInvoke {
+     model_ = model;
+     zpl_inference_enter((uint32_t) model_);
+   }
+-  ~ScopedMicroInterpreterInvoke() {
++  void EndInference() {
+     zpl_inference_exit((uint32_t) model_);
+   }
+ };
+-- 
+2.55.0
+

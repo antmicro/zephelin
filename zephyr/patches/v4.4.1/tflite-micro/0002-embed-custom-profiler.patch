@@ -1,0 +1,162 @@
+From 172d05edcaffc170ef2cfc838aab4ef780817235 Mon Sep 17 00:00:00 2001
+From: Andrii Chmutov <achmutov@antmicro.com>
+Date: Wed, 10 Sep 2025 10:32:02 +0200
+Subject: [PATCH 2/6] embed custom profiler
+
+---
+ tensorflow/lite/micro/micro_interpreter.cc    | 48 +++++++++++++------
+ tensorflow/lite/micro/micro_interpreter.h     | 23 +++++++++
+ .../lite/micro/micro_profiler_interface.h     |  4 ++
+ 3 files changed, 61 insertions(+), 14 deletions(-)
+
+diff --git a/tensorflow/lite/micro/micro_interpreter.cc b/tensorflow/lite/micro/micro_interpreter.cc
+index 1e96d505..3fc4999c 100644
+--- a/tensorflow/lite/micro/micro_interpreter.cc
++++ b/tensorflow/lite/micro/micro_interpreter.cc
+@@ -32,6 +32,10 @@ limitations under the License.
+ #include "tensorflow/lite/schema/schema_generated.h"
+ #include "tensorflow/lite/schema/schema_utils.h"
+ 
++#ifdef CONFIG_ZPL_TFLM_PROFILER
++#include <zpl/tflm_profiler.hpp>
++#endif /* CONFIG_ZPL_TFLM_PROFILER */
++
+ namespace tflite {
+ namespace {
+ MemoryPlannerType FlagToMemoryPlannerType(bool preserve_all_tensors) {
+@@ -50,19 +54,12 @@ MicroInterpreter::MicroInterpreter(const Model* model,
+                                    MicroResourceVariables* resource_variables,
+                                    MicroProfilerInterface* profiler,
+                                    bool preserve_all_tensors)
+-    : model_(model),
+-      op_resolver_(op_resolver),
+-      allocator_(*MicroAllocator::Create(
+-          tensor_arena, tensor_arena_size,
+-          FlagToMemoryPlannerType(preserve_all_tensors))),
+-      graph_(&context_, model, &allocator_, resource_variables),
+-      tensors_allocated_(false),
+-      initialization_status_(kTfLiteError),
+-      input_tensors_(nullptr),
+-      output_tensors_(nullptr),
+-      micro_context_(&allocator_, model_, &graph_) {
+-  Init(profiler);
+-}
++    : MicroInterpreter::MicroInterpreter(
++        model,
++        op_resolver,
++        MicroAllocator::Create(tensor_arena, tensor_arena_size, FlagToMemoryPlannerType(preserve_all_tensors)),
++        resource_variables,
++        profiler) {}
+ 
+ MicroInterpreter::MicroInterpreter(const Model* model,
+                                    const MicroOpResolver& op_resolver,
+@@ -78,10 +75,24 @@ MicroInterpreter::MicroInterpreter(const Model* model,
+       input_tensors_(nullptr),
+       output_tensors_(nullptr),
+       micro_context_(&allocator_, model_, &graph_) {
++#ifdef CONFIG_ZPL_TFLM_PROFILER
++  if (nullptr == profiler) {
++    auto tflm_profiler = new zpl::TFLMProfiler();
++    tflm_profiler->SetAllocator(&this->allocator_);
++    tflm_profiler->SetInterpreter(this);
++    own_profiler_ = true;
++    profiler = tflm_profiler;
++  }
++#endif /*  CONFIG_ZPL_TFLM_PROFILER */
+   Init(profiler);
+ }
+ 
+ MicroInterpreter::~MicroInterpreter() {
++#ifdef CONFIG_ZPL_TFLM_PROFILER
++  if (own_profiler_) {
++    delete reinterpret_cast<zpl::TFLMProfiler*>(this->context_.profiler);
++  }
++#endif /*  CONFIG_ZPL_TFLM_PROFILER */
+   if (graph_.GetAllocations() != nullptr) {
+     graph_.FreeSubgraphs();
+   }
+@@ -281,6 +292,9 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
+ }
+ 
+ TfLiteStatus MicroInterpreter::Invoke() {
++#ifdef CONFIG_ZPL_INFERENCE_PROFILING
++  ScopedMicroInterpreterInvoke _;
++#endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+   if (initialization_status_ != kTfLiteOk) {
+     MicroPrintf("Invoke() called after initialization failed\n");
+     return kTfLiteError;
+@@ -291,7 +305,13 @@ TfLiteStatus MicroInterpreter::Invoke() {
+   if (!tensors_allocated_) {
+     TF_LITE_ENSURE_OK(&context_, AllocateTensors());
+   }
+-  return graph_.InvokeSubgraph(0);
++  auto status = graph_.InvokeSubgraph(0);
++#ifdef CONFIG_ZPL_TFLM_PROFILER
++  if (nullptr != this->context_.profiler) {
++    reinterpret_cast<MicroProfilerInterface*>(this->context_.profiler)->DumpEvents();
++  }
++#endif /* CONFIG_ZPL_TFLM_PROFILER */
++  return status;
+ }
+ 
+ TfLiteTensor* MicroInterpreter::input(size_t index) {
+diff --git a/tensorflow/lite/micro/micro_interpreter.h b/tensorflow/lite/micro/micro_interpreter.h
+index f1de9196..283368f9 100644
+--- a/tensorflow/lite/micro/micro_interpreter.h
++++ b/tensorflow/lite/micro/micro_interpreter.h
+@@ -37,6 +37,13 @@ limitations under the License.
+ #include "tensorflow/lite/portable_type_to_tflitetype.h"
+ #include "tensorflow/lite/schema/schema_generated.h"
+ 
++#ifdef CONFIG_ZPL_INFERENCE_PROFILING
++extern "C" {
++#include <zpl/inference_event.h>
++}
++#endif /* CONFIG_ZPL_INFERENCE_PROFILING */
++
++
+ /// Copied from tensorflow/lite/version.h to avoid a dependency chain into
+ // tensorflow/core.
+ #define TFLITE_SCHEMA_VERSION (3)
+@@ -203,7 +210,23 @@ class MicroInterpreter {
+   TfLiteTensor** output_tensors_;
+ 
+   MicroInterpreterContext micro_context_;
++
++#ifdef CONFIG_ZPL_TFLM_PROFILER
++  bool own_profiler_ = false;
++#endif /* CONFIG_ZPL_TFLM_PROFILER */
++};
++
++#ifdef CONFIG_ZPL_INFERENCE_PROFILING
++struct ScopedMicroInterpreterInvoke {
++  explicit ScopedMicroInterpreterInvoke() {
++    zpl_inference_enter();
++  }
++  ~ScopedMicroInterpreterInvoke() {
++    zpl_inference_exit();
++  }
+ };
++#endif /* CONFIG_ZPL_INFERENCE_PROFILING */
++
+ 
+ }  // namespace tflite
+ 
+diff --git a/tensorflow/lite/micro/micro_profiler_interface.h b/tensorflow/lite/micro/micro_profiler_interface.h
+index 594f0c00..cb168c44 100644
+--- a/tensorflow/lite/micro/micro_profiler_interface.h
++++ b/tensorflow/lite/micro/micro_profiler_interface.h
+@@ -31,6 +31,10 @@ class MicroProfilerInterface {
+ 
+   // Marks the end of an event associated with event_handle.
+   virtual void EndEvent(uint32_t event_handle) = 0;
++
++#ifdef CONFIG_ZPL_TFLM_PROFILER
++  virtual void DumpEvents() {}
++#endif /* CONFIG_ZPL_TFLM_PROFILER */
+ };
+ 
+ }  // namespace tflite
+-- 
+2.55.0
+

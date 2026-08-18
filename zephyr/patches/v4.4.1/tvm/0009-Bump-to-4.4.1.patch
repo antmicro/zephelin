@@ -1,0 +1,25 @@
+From 2bbe69bc58593ec493907096c831088c02708ca1 Mon Sep 17 00:00:00 2001
+From: Mikolaj Klikowicz <mklikowicz@antmicro.com>
+Date: Mon, 6 Jul 2026 18:08:05 +0200
+Subject: [PATCH 9/9] Bump to 4.4.1
+
+---
+ src/runtime/crt/graph_executor/graph_executor.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/runtime/crt/graph_executor/graph_executor.c b/src/runtime/crt/graph_executor/graph_executor.c
+index c518ff12d..60168c714 100644
+--- a/src/runtime/crt/graph_executor/graph_executor.c
++++ b/src/runtime/crt/graph_executor/graph_executor.c
+@@ -940,7 +940,7 @@ void TVMGraphExecutor_Run(TVMGraphExecutor* executor) {
+   zpl_inference_enter(0);
+ #endif /* CONFIG_ZPL_INFERENCE_PROFILING */
+ 
+-  void* profiler_state;
++  void* profiler_state = NULL;
+   TVMProfiler* profiler = executor->profiler;
+   if (NULL != profiler) {
+     profiler_state = executor->profiler->state;
+-- 
+2.55.0
+

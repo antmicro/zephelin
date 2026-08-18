@@ -1,0 +1,23 @@
+From c8fd39c8b27e2626ba1953e23e07d0a414a81aa2 Mon Sep 17 00:00:00 2001
+From: Maciej Torhan <mtorhan@antmicro.com>
+Date: Fri, 13 Jun 2025 11:53:05 +0200
+Subject: [PATCH] enable dlpack
+
+---
+ zephyr/module.yml | 4 ++++
+ 1 file changed, 4 insertions(+)
+ create mode 100644 zephyr/module.yml
+
+diff --git a/zephyr/module.yml b/zephyr/module.yml
+new file mode 100644
+index 0000000..9560ebb
+--- /dev/null
++++ b/zephyr/module.yml
+@@ -0,0 +1,4 @@
++name: dlpack
++build:
++  cmake-ext: True
++  kconfig-ext: True
+-- 
+2.55.0
+

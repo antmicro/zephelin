@@ -1,0 +1,26 @@
+From 936d3ec55bbb0cb974f497539ae5691ec6eaf720 Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Fri, 26 Sep 2025 14:58:27 +0200
+Subject: [PATCH 09/35] boards: openocd-adi-max32: remove unsupported args
+
+---
+ boards/common/openocd-adi-max32.boards.cmake | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/boards/common/openocd-adi-max32.boards.cmake b/boards/common/openocd-adi-max32.boards.cmake
+index 3c53b7239ee..99a4be9482c 100644
+--- a/boards/common/openocd-adi-max32.boards.cmake
++++ b/boards/common/openocd-adi-max32.boards.cmake
+@@ -25,9 +25,5 @@ board_runner_args(openocd --cmd-pre-init "source [find target/${MAX32_TARGET_CFG
+ board_runner_args(openocd "--target-handle=_CHIPNAME.cpu")
+ 
+ if(CONFIG_SOC_FAMILY_MAX32_M4 OR CONFIG_SOC_FAMILY_MAX32_M33)
+-  # allow_low_pwr_dbg causes reset to fail on some boards after flashing
+-  if(NOT DEFINED CONFIG_SOC_MAX32660)
+-    board_runner_args(openocd --cmd-pre-init "allow_low_pwr_dbg")
+-  endif()
+   board_runner_args(openocd "--cmd-erase=max32xxx mass_erase 0")
+ endif()
+-- 
+2.55.0
+

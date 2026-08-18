@@ -1,0 +1,28 @@
+From a495522c8821689b3910963b07071f298d0c7210 Mon Sep 17 00:00:00 2001
+From: Andrii Chmutov <achmutov@antmicro.com>
+Date: Fri, 17 Oct 2025 15:00:19 +0200
+Subject: [PATCH 08/35] check_compliance: exclude kconfig symbols
+
+---
+ scripts/ci/check_compliance.py | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/scripts/ci/check_compliance.py b/scripts/ci/check_compliance.py
+index 9c3aa721b83..5e93cc91d84 100755
+--- a/scripts/ci/check_compliance.py
++++ b/scripts/ci/check_compliance.py
+@@ -1654,6 +1654,11 @@ flagged.
+         "USE_STDC_",
+         "WHATEVER",
+         "ZEPHYR_TRY_MASS_ERASE",  # MCUBoot setting described in sysbuild documentation
++        "ZPL_SAMPLE_RUNTIME_CONF_PROFILING",
++        "ZPL_SAMPLE_TFLM_MODEL",
++        "ZPL_SAMPLE_TFLM_BUFFER_SIZE",
++        "ZPL_SAMPLE_TVM_QUANTIZED_MODEL",
++        "ZPL_SAMPLE_TVM_HEAP_SIZE",
+         "ZTEST_FAIL_TEST_",  # regex in tests/ztest/fail/CMakeLists.txt
+         "ZVFS_OPEN_ADD_SIZE_",  # Used as an option matching prefix
+         # zephyr-keep-sorted-stop
+-- 
+2.55.0
+

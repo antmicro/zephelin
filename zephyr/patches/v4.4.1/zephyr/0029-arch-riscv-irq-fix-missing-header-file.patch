@@ -1,0 +1,26 @@
+From 7fd0445af9d852a37f0f4c4ef1c42dbae11e4270 Mon Sep 17 00:00:00 2001
+From: Eryk Szpotanski <eszpotanski@antmicro.com>
+Date: Thu, 19 Mar 2026 19:27:55 +0100
+Subject: [PATCH 29/35] arch: riscv: irq: fix missing header file
+
+Signed-off-by: Eryk Szpotanski <eszpotanski@antmicro.com>
+---
+ include/zephyr/arch/riscv/irq.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/zephyr/arch/riscv/irq.h b/include/zephyr/arch/riscv/irq.h
+index 4fece44ca60..f7bda24c4c2 100644
+--- a/include/zephyr/arch/riscv/irq.h
++++ b/include/zephyr/arch/riscv/irq.h
+@@ -100,6 +100,8 @@ extern void sys_trace_isr_enter(void);
+ extern void sys_trace_isr_exit(void);
+ #endif
+ 
++#include <zephyr/arch/riscv/arch_inlines.h>
++
+ static inline void arch_isr_direct_header(void)
+ {
+ #ifdef CONFIG_TRACING_ISR
+-- 
+2.55.0
+
