@@ -13,5 +13,7 @@ target_sources(app PRIVATE src/main.cpp)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../common/tflm ${CMAKE_CURRENT_BINARY_DIR}/tflm)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../common/tvm ${CMAKE_CURRENT_BINARY_DIR}/tvm)
-zephyr_link_libraries(tflm_model)
-target_link_libraries(app PRIVATE tvm_model)
+target_link_libraries(app
+    PRIVATE tflm_model
+    PRIVATE tvm_model
+)
