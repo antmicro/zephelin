@@ -5,6 +5,7 @@
 """Script for applying patches as commits."""
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -23,8 +24,8 @@ def _confirm(prompt):
 
 
 def apply_patches(
+    source_root,
     map_path="zephyr/patch_map.yml",
-    source_root="zephyr/patches",
     target_root="../",
     assume_yes=False,
 ):
@@ -84,10 +85,21 @@ def apply_patches(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument(
+        "-s",
+        "--source-root",
+        default=None,
+        help="Patch base to read.",
+    )
+    parser.add_argument(
         "-y",
         "--yes",
         action="store_true",
         help="Skip confirmation prompts before resetting repos to manifest-rev.",
     )
     args = parser.parse_args()
-    apply_patches(assume_yes=args.yes)
+
+    source_root = args.source_root or os.environ.get("ZPL_PATCH_BASE")
+    if not source_root:
+        sys.exit("error: no patch base. Run `source ./scripts/zephyr_version.sh` first, or pass -s")
+
+    apply_patches(source_root, assume_yes=args.yes)

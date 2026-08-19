@@ -4,6 +4,8 @@
 
 """Script for converting commits into patches."""
 
+import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -15,17 +17,20 @@ import yaml
 
 
 def update_patches(
+    source_root,
+    patches_yml_path,
     map_path="zephyr/patch_map.yml",
-    source_root="zephyr/patches",
     target_root="../",
-    patches_yml_path="zephyr/patches.yml",
 ):
-    """Update patches from commits."""
+    """Regenerate one Zephyr version's patch set from the module checkouts."""
     patch_map_path = Path(map_path)
     patch_map: dict[str, str] = yaml.safe_load(patch_map_path.read_text())
 
     source_root = Path(source_root)
     target_root = Path(target_root)
+
+    if not source_root.is_dir():
+        sys.exit(f"error: patch base '{source_root}' does not exist.")
 
     for source, target in patch_map.items():
         shutil.rmtree(source_root / source, ignore_errors=True)
@@ -79,4 +84,18 @@ def update_patches(
 
 
 if __name__ == "__main__":
-    update_patches()
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser.add_argument(
+        "-s",
+        "--source-root",
+        default=None,
+        help="Patch base to rewrite.",
+    )
+    args = parser.parse_args()
+
+    source_root = args.source_root or os.environ.get("ZPL_PATCH_BASE")
+    patches_yml = os.environ.get("ZPL_PATCH_YML")
+    if not source_root or not patches_yml:
+        sys.exit("error: no patch set selected. Run `source ./scripts/zephyr_version.sh` first.")
+
+    update_patches(source_root, patches_yml)
