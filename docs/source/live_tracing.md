@@ -105,7 +105,7 @@ To route the traces read from one of the available backends (described in [Trace
 **Example**:
 
 ```bash
-west zpl-uart-capture /dev/pts/12 115200 ./trace-hw.ctf --send-to-remote 127.0.0.1:5000
+west zpl-uart-capture /dev/pts/12 115200 --send-to-remote 127.0.0.1:5000
 ```
 
 ## Live-tracing controls
