@@ -106,7 +106,7 @@ Available configs:
  code_scope4: enabled
 ```
 
-To change the state of the scope use `dynamic_conf enable <scope>` to enable and `dynamic_conf disable <scope>` to disable the scopes:
+To change the state of the scope, use `dynamic_conf enable <scope>` to enable and `dynamic_conf disable <scope>` to disable the scopes:
 
 ```
 uart:~$ dynamic_conf enable code_scope1

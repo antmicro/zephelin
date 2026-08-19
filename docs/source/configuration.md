@@ -4,7 +4,7 @@ The library can be configured at build-time as well as at runtime.
 
 ## Configuring the library
 
-To enable Zephelin tracing support, enable the symbol `CONFIG_ZPL_TRACE` in Kconfig.
+To enable Zephelin's tracing support, enable the symbol `CONFIG_ZPL_TRACE` in Kconfig.
 
 ### Build-time configuration
 
@@ -34,8 +34,8 @@ In the code, there are two ways to use the runtime configuration as guards for t
 
 ##### Wait-for function
 
-The "wait-for" function stops the thread, and waits for a signal.
-Once the signal arrives, the thread is woken up, and continues execution.
+The "wait-for" function stops the thread and waits for a signal.
+Once the signal arrives, the thread is woken up and continues execution.
 This is useful when the functionality which this configuration guards is in a separate thread.
 This "wait-for" functionality can be called using the macro `ZPL_CONF_WAIT`.
 Example:
@@ -48,7 +48,7 @@ while (true) {
 ```
 
 :::{note}
-Code is guarded only if the given configuration is defined with `threading` parameter set to `1`.
+The code is guarded only if the given configuration is defined with `threading` parameter set to `1`.
 See [adding new configuration entry](#new-configuration-entry) for details.
 :::
 
@@ -89,7 +89,7 @@ The runtime configuration supports the following interfaces:
 
 ##### C API
 
-To toggle configuration from code, use `ZPL_CONF_SET` macro, e.g.:
+To toggle configuration from the code, use the `ZPL_CONF_SET` macro, e.g.:
 
 ```c
 #include <zpl/configuration.h>
@@ -125,7 +125,7 @@ Each config can then be either enabled or disabled using the following syntax:
 <command> disable
 ```
 
-For example, the memory profiler configuration:
+For example, this would be the memory profiler configuration:
 
 ```
 memory_profiler enable
@@ -186,21 +186,19 @@ You can choose how the traces will be delivered to the host PC by selecting one 
 * Debugger, by y-selecting `CONFIG_ZPL_TRACE_BACKEND_DEBUGGER`
 * Renode's simulated trivial UART, by y-selecting `CONFIG_ZPL_TRACE_BACKEND_TRIVIAL_UART`
 
-Depending on the tracing backend used, the following commands can be used for trace capture.
-
 ## Profiling tiers
 
 The library supports three distinct profiling tiers, each offering a different balance of performance impact and tracing detail:
-* `ZPL_TRACE_MINIMAL_MODE` - This mode provides extremely lightweight profiling with minimal overhead.
+* `ZPL_TRACE_MINIMAL_MODE` - this mode provides extremely lightweight profiling with minimal overhead.
   * It is designed for environments where performance is critical, and persistent trace data is not required.
   * When enabled, it activates basic inference profiling (`ZPL_INFERENCE_PROFILING`) and memory usage tracing (`ZPL_MEMORY_USAGE_TRACE`) to give a high-level view of system behavior without introducing measurable latency.
 
-* `ZPL_TRACE_LAYER_PROFILING_MODE` - This mode enables layer-level timing.
+* `ZPL_TRACE_LAYER_PROFILING_MODE` - this mode enables layer-level timing.
   * It offers more granularity by tracking timing at individual model layers.
 
-* `ZPL_TRACE_FULL_MODE` - This comprehensive profiling mode enables complete tracing.
+* `ZPL_TRACE_FULL_MODE` - this comprehensive profiling mode enables complete tracing.
   * This mode is suitable for in-depth debugging and performance analysis but incurs a higher runtime cost due to its extensive trace capture.
-  * It includes all basic and layer-level profiling features, and additionally implies a wide array of kernel and runtime tracing subsystems, which include:
+  * It includes all basic and layer-level profiling features, and additionally employs a wide array of kernel and runtime tracing subsystems, which include:
     * syscall tracing,
     * thread scheduling,
     * interrupt service routines (ISRs),
@@ -232,7 +230,7 @@ config ZPL_RUNTIME_CONFIG_UART
 
 It can later be used to decide whether a corresponding functionality should be defined:
 
-* in code, e.g. for functions declarations:
+* in code, e.g. for function declarations:
 
 ```c
 #ifdef CONFIG_ZPL_RUNTIME_CONFIG_UART
@@ -240,7 +238,7 @@ It can later be used to decide whether a corresponding functionality should be d
 #endif
 ```
 
-* in CMake, e.g. for including sources with functions definitions:
+* in CMake, e.g. for including sources with function definitions:
 
 ```cmake
 zephyr_library_sources_ifdef(CONFIG_ZPL_RUNTIME_CONFIG_UART configuration_uart.c)
@@ -264,7 +262,7 @@ To add a new configuration entry, add it to the list of existing ones in {zpl_re
 
 where:
 
-* `CONFIG` is macro defining configuration functionality,
+* `CONFIG` is the macro defining configuration functionality,
 * `ZPL_IMPL_IF_ENABLED(CONFIG_ZPL_MEMORY_PROFILING,    CONFIG)` decides whether a provided `CONFIG` should be expanded,
 * `(memory_profiler, IS_ENABLED(CONFIG_ZPL_MEMORY_PROFILING_CONF_THREADING))` defines `CONFIG` arguments:
     1. name of the configuration,
@@ -275,7 +273,7 @@ This will automatically attach existing logic to a given configuration entry.
 
 #### New configuration functionality
 
-To extend the configuration capabilities, add new `CONFIGS` invocations or change definition of an argument macro:
+To extend the configuration capabilities, add new `CONFIGS` invocations or change the definition of an argument macro:
 
 * adding declaration:
 

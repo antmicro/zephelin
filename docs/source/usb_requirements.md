@@ -1,10 +1,10 @@
 # Trace capture USB interface requirements
 
-This chapter describes the requirements to enable trace capture via the
-Zephelin's USB interface. Zephelin provides an out-of-the box USB device
+This chapter describes the requirements to enable trace capture via
+Zephelin's USB interface. Zephelin provides an out-of-the-box USB device
 implementation in `zpl/backends/usb_backend.c`
 
-To enable the USB interface, the user y-should select
+To enable the USB interface, the user should y-select
 the `CONFIG_ZPL_TRACE_BACKEND_USB` Kconfig option. The
 `CONFIG_ZPL_TRACE_BACKEND_USB` option automatically selects every necessary
 software component in Zephyr required to run the USB device stack.

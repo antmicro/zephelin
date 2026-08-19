@@ -20,35 +20,35 @@ There are several optional arguments available:
 * `--zephyr-base` - the script tries to automatically find the Zephyr directory in order to use the metadata file definition of CTF events.
   If this fails, you have to provide the path or set the `ZEPHYR_BASE` environmental variable.
 * `--build-dir` - the directory storing the results of the build and [ram_report](https://docs.zephyrproject.org/latest/develop/optimizations/tools.html#build-target-ram-report).
-* `--zephyr-elf-path` - the path to generated Zephyr ELF file, it should be deduced based on the build directory.
-* `--tflm-model-path` - the provided TFLite Micro model is processed to extract information about its layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} event.
+* `--zephyr-elf-path` - the path to the generated Zephyr ELF file, it should be deduced based on the build directory.
+* `--tflm-model-path` - the provided TFLite Micro model is processed to extract information about its layer and tensors, and the information is converted to a [`MODEL`](model-event) {{TEF_Metadata}} Event.
 * `--tflm-model-ids` - the IDs of TFLM models, the order has to be the same as in `--tflm-model-path`.
-  It has to be used only if default mechanism deducing IDs based on models' addresses fails.
-* `--tvm-model-path` - the provided microTVM graph JSON file is processed to extract information about model's layer and tensors, and the information is converted to [`MODEL`](model-event) {{TEF_Metadata}} Event.
-* `--tvm-model-metadata-path` - the provided microTVM Intermediate Representation file is processed to extract more information about operators parameters.
+  It has to be used only if the default mechanism deducing IDs based on the models' addresses fails.
+* `--tvm-model-path` - the provided microTVM graph JSON file is processed to extract information about the model's layer and tensors, and the information is converted to a [`MODEL`](model-event) {{TEF_Metadata}} Event.
+* `--tvm-model-metadata-path` - the provided microTVM Intermediate Representation file is processed to extract more information about the operator parameters.
   It can be obtained from the compiled module.
-  (see {zpl_repo}`scripts/export_tvm_metadata.py` for reference - please note, that `--tvm-module-name` has to be specified if custom module name was used, like `quantized` for sine model, based on generated functions' prefixes from {zpl_repo}`samples/common/tvm/src/sine.h`).
+  (see {zpl_repo}`scripts/export_tvm_metadata.py` for reference; please note that `--tvm-module-name` has to be specified if a custom module name was used, like `quantized` for the sine model, based on the generated functions' prefixes from {zpl_repo}`samples/common/tvm/src/sine.h`).
   Verified TVM versions: `v0.14.dev273` - `v0.18.0`.
-* `--tvm-model-op-remove-prefix` - the provided regular expression is used to remove microTVM operator prefixes.
-  Applied on both operator types and instances. Default value is `^tvmgen_default_`.
-* `--tvm-model-op-remove-suffix` - the provided regular expression is used to remove microTVM operator type suffixes.
-  Applied on operator types. Default value is `_\d*$`.
+* `--tvm-model-op-remove-prefix` - the provided regular expression is used to remove the microTVM operator prefixes.
+  Applied on both operator types and instances. The default value is `^tvmgen_default_`.
+* `--tvm-model-op-remove-suffix` - the provided regular expression is used to remove the microTVM operator type suffixes.
+  Applied on operator types. The default value is `_\d*$`.
 
 * `-i` or `--instrumentation` - the option to provide traces produced by the instrumentation subsystem.
-* `ctf_trace` - path to the trace produced by Zephelin, the script requires at least one trace either from Zephelin or instrumentation.
+* `ctf_trace` - the path to the trace produced by Zephelin, the script requires at least one trace either from Zephelin or the instrumentation.
 * `-o` - the file path which points to the file where the converted trace should be saved.
   If not provided, the JSON will be printed to STDOUT.
 
-The extension uses by default `c++filt` utility to demangle function names.
-A custom tool can be specified by setting `ZPL_DEMANGLE_CMD` environment variable.
+The extension uses the `c++filt` utility to demangle function names by default.
+A custom tool can be specified by setting the `ZPL_DEMANGLE_CMD` environment variable.
 
 Apart from changing the format, this involves a custom logic which can group elements into {{TEF_Duration}} events, and extend their arguments (see [](converted-events)).
-Completely new events can be added to the trace, extending the context, and improving the trace visualization capabilities (see [](optional-events)).
+Completely new events can be added to the trace, extending the context and improving the trace visualization capabilities (see [](optional-events)).
 Furthermore, the command also converts timestamps from nanoseconds (used in CTF) to microseconds, which are valid for Zephelin Trace Viewer and Speedscope (it assumes that the timestamps are provided in such unit).
 
-When two traces are provided, from Zephelin and instrumentation, the script will try to combine them.
+When two traces are provided, from Zephelin and the instrumentation, the script will try to combine them.
 If the instrumentation trace has unfinished events, they will be automatically closed ensuring they do not collide with Zephelin events.
-Also, events without a beginning will be removed.
+Events without a beginning will be removed.
 
 (trace-events)=
 ## Events
@@ -56,14 +56,14 @@ Also, events without a beginning will be removed.
 (converted-events)=
 ### Converted events
 
-This section describes events that are converted from CTF events, emitted during Zephelin runtime.
+This section describes events that are converted from CTF events emitted during Zephelin runtime.
 Based on those, the trace viewer produces dedicated panels with visualizations (e.g. plot panels).
 
 #### Zephyr events
 
 For default Zephyr events (defined in [metadata](https://github.com/zephyrproject-rtos/zephyr/blob/main/subsys/tracing/ctf/tsdl/metadata)), the beginning event always gets the `_enter` suffix, whereas the ending event gets the `_exit` suffix.
-These events are marked as `B` and `E` events, creating {{TEF_Duration}} event in TEF.
-The remaining Zephyr events are of {{TEF_Instant}} type, but since Speedscope does not support displaying such events, they are also converted to a Duration Event with 1 microsecond of duration.
+These events are marked as `B` and `E` events, creating the {{TEF_Duration}} event in TEF.
+The remaining Zephyr events are of the {{TEF_Instant}} type, but since Speedscope does not support displaying such events, they are also converted to a Duration Event with 1 microsecond of duration.
 
 :::{example} Example events
 :collapsible:
@@ -92,8 +92,8 @@ The remaining Zephyr events are of {{TEF_Instant}} type, but since Speedscope do
 #### `INFERENCE::MODEL[NUMBER]`
 
 The {{TEF_Duration}} event marking the beginning and end of model's inference.
-It is created from the CTF events `zpl_inference_enter` and `zpl_inference_exit` and creates `INFERENCE::MODEL[NUMBER]` event containing ID of the model that is executed.
-Where `NUMBER` is an optional model number (assigned based on the model ID starting from 0), shown only when trace contains more than one model.
+It is created from the CTF events `zpl_inference_enter` and `zpl_inference_exit` and creates the `INFERENCE::MODEL[NUMBER]` event containing the ID of the model that is executed.
+`NUMBER` is an optional model number (assigned based on the model ID starting from 0), shown only when the trace contains more than one model.
 
 :::{example} `zpl_inference` events examples
 :collapsible:
@@ -293,7 +293,7 @@ The event looks like this:
 #### `MEMORY::SYMBOLS`
 
 The {{TEF_Metadata}} event contains the mapping of memory region addresses to their symbols extracted from `zephyr.elf`.
-It is used to present human-readable description of the regions, e.g. making it easier to trace back to the source code.
+It is used to present a human-readable description of the regions, e.g. making it easier to trace back to the source code.
 Example event:
 
 :::{example} `MEMORY::SYMBOLS` metadata example
@@ -323,7 +323,7 @@ Example event:
 #### `thread_name`
 
 The {{TEF_Metadata}} event is used by Speedscope to associate a thread ID with a name.
-Apart from describing which thread is shown on the flamegraph, the thread name is also used to provide human-readable label for the thread stack.
+Apart from describing which thread is shown on the flamegraph, the thread name is also used to provide a human-readable label for the thread stack.
 
 One event describes exactly one thread with arguments containing the thread name, assigned to the key `name`.
 
@@ -356,7 +356,7 @@ The `MODEL` {{TEF_Metadata}} event contains following information:
   * `inputs` and `outputs` - lists with indices pointing to `tensors` with input and output data (respectively),
   * `inputs_types` and `outputs_types` - the operation's input and output data types,
   * `inputs_shapes` and `outputs_shapes` - the operation's input and output shapes,
-  * `parameters` - operation's parameters (e.g. `padding` or `fused_activation_function`).
+  * `parameters` - the operation's parameters (e.g. `padding` or `fused_activation_function`).
 
 :::{example} Example event of Magic Wand model for TFLite Micro runtime
 :collapsible:

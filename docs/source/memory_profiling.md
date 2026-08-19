@@ -23,10 +23,10 @@ Those events contain information about the memory regions at a point in time.
 The memory event is a packed structure, described below.
 It contains information about:
 * `timestamp` - the timestamp at which the event occurred
-* `id` - id of the event defined as `0xEE`
+* `id` - ID of the event defined as `0xEE`
 * `memory_region` - the profiled memory region (stack, heap, etc.)
-* `memory_addr` - memory address, which serves as memory region identifier
-* `used`, `unused` - Used and unused number of bytes
+* `memory_addr` - the memory address, which serves as memory region identifier
+* `used`, `unused` - used and unused number of bytes
 * `for_thread_id` - ID of the thread associated with the memory region or 0 otherwise
 
 ```c
@@ -55,8 +55,8 @@ enum zpl_memory_region {
 ### Plaintext
 
 When using a `CONFIG_ZPL_TRACE_FORMAT_PLAINTEXT` format, the memory events are printed in plaintext.
-The events contain the same information as in the CTF format, but in human readable form.
-The example shown below, contains a series of memory events of different memory regions.
+The events contain the same information as in CTF but in human readable form.
+The example shown below contains a series of memory events of different memory regions.
 
 * `zpl_memory_event` - event name
 * `stack`, `heap`, etc. - memory region

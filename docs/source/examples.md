@@ -3,7 +3,7 @@
 This chapter provides links to relevant resources, application examples and [Trace Viewer](visual_interface) views.
 
 :::{note}
-For details on how each demo is executed, open collapsible description of launch example.
+For details on how each demo is executed, open the collapsible description of the launch example.
 
 Before running commands, make sure you went through [Initializing the workspace](setting-up-workspace) and [Running sample project in Zephelin](running-samples) as it is needed to prepare the environment.
 :::
@@ -13,7 +13,7 @@ Before running commands, make sure you went through [Initializing the workspace]
 * **Source**: {zpl_repo}`samples/basic/marking_code_scopes`
 * **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_marking_code_scopes.json){.external}
 
-This sample demonstrates usage of `ZPL_MARK_CODE_SCOPE` which was described in [Code scopes chapter](code_scopes).
+This sample demonstrates the usage of `ZPL_MARK_CODE_SCOPE` which was described in [Code scopes chapter](code_scopes).
 
 :::::{example} Generating traces for code with scopes defined
 :collapsible:
@@ -24,12 +24,12 @@ To build a sample run:
 west build -p -b max32690fthr/max32690/m4 samples/basic/marking_code_scopes -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n
 ```
 
-Secondly, the traces can be either obtained from hardware or Renode simulation with:
+The traces can be either obtained from hardware or a Renode simulation with:
 
 ::::{tabs}
 
 :::{group-tab} Renode
-For Renode, simulation and collection of traces can be done with:
+For Renode, the simulation and collection of traces can be done with:
 
 ```bash
 python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
@@ -37,7 +37,7 @@ python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
 :::
 
 :::{group-tab} Hardware
-For hardware, once the device is flashed the traces can be collected with:
+For hardware, once the device is flashed, the traces can be collected with:
 
 ```bash
 west zpl-uart-capture /dev/ttyUSB0 115200 ./trace.ctf
@@ -51,7 +51,7 @@ Then, the TEF traces can be created with `west zpl-prepare-trace` like so:
 west zpl-prepare-trace ./trace.ctf -o ./tef_marking_code_scopes.json
 ```
 
-In the end, generated `tef_marking_code_scopes.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
+In the end, the generated `tef_marking_code_scopes.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 :::::
 
 ## Simple TFLite Micro profiling
@@ -60,23 +60,23 @@ In the end, generated `tef_marking_code_scopes.json` can be loaded in [Trace Vie
 * **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json){.external}
 
 This sample demonstrates tracing of the TensorFlow Lite Micro (or LiteRT) runtime.
-The collection of traces is performed as usual, but in `west zpl-prepare-trace` you need to provide `--tflm-model-path <path-to-model>` flag with used model.
+The collection of traces is performed as usual, but in `west zpl-prepare-trace` you need to provide the `--tflm-model-path <path-to-model>` flag with the used model.
 
 :::::{example} Generating traces for TFLite Micro runtime
 :collapsible:
 
-To build a sample run:
+To build a sample, run:
 
 ```bash
 west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_profiler -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n
 ```
 
-Secondly, the traces can be either obtained from hardware or Renode simulation with:
+The traces can be either obtained from hardware or a Renode simulation with:
 
 ::::{tabs}
 
 :::{group-tab} Renode
-For Renode, simulation and collection of traces can be done with:
+For Renode, the simulation and collection of traces can be done with:
 
 ```bash
 python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
@@ -84,7 +84,7 @@ python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
 :::
 
 :::{group-tab} Hardware
-For hardware, once the device is flashed the traces can be collected with:
+For hardware, once the device is flashed, the traces can be collected with:
 
 ```bash
 west zpl-uart-capture /dev/ttyUSB0 115200 ./trace.ctf
@@ -100,7 +100,7 @@ west zpl-prepare-trace ./trace.ctf \
   -o ./tef_tflm_profiler.json
 ```
 
-In the end, generated `tef_tflm_profiler.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
+In the end, the generated `tef_tflm_profiler.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 :::::
 
 ## Simple microTVM profiling
@@ -114,7 +114,7 @@ The collection of traces is performed as usual, but in `west zpl-prepare-trace` 
 * `--tvm-model-path <path-to-model-graph>` - path to JSON with model graph
 * `--tvm-model-metadata-path <path-to-metadata>` - path to metadata from compilation results
 
-For more details on above flags check {doc}`ctf_to_tef`.
+For more details on the above flags, check {doc}`ctf_to_tef`.
 
 :::::{example} Generating traces for microTVM runtime
 :collapsible:
@@ -125,12 +125,12 @@ To build a sample run:
 west build -p -b max32690fthr/max32690/m4 samples/profiling/tvm_profiler -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n
 ```
 
-Secondly, the traces can be either obtained from hardware or Renode simulation with:
+The traces can be either obtained from hardware or a Renode simulation with:
 
 ::::{tabs}
 
 :::{group-tab} Renode
-For Renode, simulation and collection of traces can be done with:
+For Renode, the simulation and collection of traces can be done with:
 
 ```bash
 python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
@@ -138,7 +138,7 @@ python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
 :::
 
 :::{group-tab} Hardware
-For hardware, once the device is flashed the traces can be collected with:
+For hardware, once the device is flashed, the traces can be collected with:
 
 ```bash
 west zpl-uart-capture /dev/ttyUSB0 115200 ./trace.ctf
@@ -155,7 +155,7 @@ west zpl-prepare-trace ./trace.ctf \
   -o ./tef_tvm_profiler.json
 ```
 
-In the end, generated `tef_tvm_profiler.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
+In the end, the generated `tef_tvm_profiler.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 :::::
 
 ## Full TFLite Micro traces with instrumentation using separate UART connection for instrumentation traces
@@ -170,7 +170,7 @@ The collection of traces is performed using `west zpl-instrumentation-uart-gdb-c
 * Instrumentation data using UART
 * Zephelin data using GDB backend
 
-In this scenario you need to provide instrumentation traces separately using `-i` flag.
+In this scenario, you need to provide the instrumentation traces separately using the `-i` flag.
 
 Check {doc}`ctf_to_tef` for more details.
 
@@ -188,13 +188,13 @@ Secondly, flash the device or run a simulation and collect traces:
 ::::{tabs}
 
 :::{group-tab} Renode
-For Renode, simulation and collection of traces can be done with:
+For Renode, the simulation and collection of traces can be done with:
 
 ```bash
 python3 ./scripts/run_renode.py --simulation-only --debug
 ```
 
-This can run in a separate shell, since traces in this case will be obtained separately with a following command:
+This can run in a separate shell, since traces in this case will be obtained separately with the following command:
 
 ```bash
 west zpl-instrumentation-uart-gdb-capture /tmp/uart-log 115200 ./renode_tflm.instr.ctf ./renode_tflm.gdb.ctf --no-debug-server --timeout 20
@@ -202,9 +202,9 @@ west zpl-instrumentation-uart-gdb-capture /tmp/uart-log 115200 ./renode_tflm.ins
 :::
 
 :::{group-tab} Hardware
-For hardware, flash the device and make sure that UART and debug adapter is connected.
+For hardware, flash the device, and make sure that UART and a debug adapter is connected.
 
-Once this is done, run collection of traces with:
+Once this is done, run the collection of traces with:
 
 ```bash
 west zpl-instrumentation-uart-gdb-capture /dev/ttyUSB0 115200 ./renode_tflm.instr.ctf ./renode_tflm.gdb.ctf --timeout 20
@@ -220,10 +220,10 @@ Then, the TEF traces can be created with `west zpl-prepare-trace` like so:
 west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr.ctf renode_tflm.gdb.ctf --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
 ```
 
-In the end, generated `tef_tflm_instrumentation.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
+In the end, the generated `tef_tflm_instrumentation.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 
 :::{note}
-The `renode_tflm.instr.ctf` can be saved under a different path (e.g. `renode_tflm.instr.ctf`) due to resets - check paths reported by `west zpl-instrumentation-uart-gdb-capture` and update command accordingly.
+The `renode_tflm.instr.ctf` can be saved under a different path (e.g. `renode_tflm.instr.ctf`) due to resets - check paths reported by `west zpl-instrumentation-uart-gdb-capture` and update the command accordingly.
 :::
 :::::
 
@@ -232,14 +232,14 @@ The `renode_tflm.instr.ctf` can be saved under a different path (e.g. `renode_tf
 * **Source**: {zpl_repo}`samples/profiling/tflm_instrumentation`
 * **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_instrumentation_tracing.json){.external}
 
-This sample demonstrates how to collect regular traces, custom traces, execution metrics, model-specific metrics and instrumentation traces using only tracing subsystem transport, without delivering instrumentation traces separately.
+This sample demonstrates how to collect regular traces, custom traces, execution metrics, model-specific metrics and instrumentation traces using only the tracing subsystem transport, without delivering instrumentation traces separately.
 
-In this scenario instead of `west zpl-instrumentation-uart-gdb-capture` you can use regular Zephelin capture commands, such as `west zpl-uart-capture`.
+In this scenario, instead of `west zpl-instrumentation-uart-gdb-capture`, you can use regular Zephelin capture commands, such as `west zpl-uart-capture`.
 
 :::::{example} Collecting regular and instrumentation traces using `zpl-uart-capture`
 :collapsible:
 
-To build a sample run:
+To build a sample, run:
 
 ```bash
 west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_instrumentation -- -DEXTRA_CONF_FILE="instrumentation_tracing.conf;zpl.conf"
@@ -250,7 +250,7 @@ Secondly, flash the device or run a simulation and collect traces:
 ::::{tabs}
 
 :::{group-tab} Renode
-For Renode, simulation and collection of traces can be done with:
+For Renode, the simulation and collection of traces can be done with:
 
 ```bash
 python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
@@ -258,7 +258,7 @@ python3 ./scripts/run_renode.py --trace-output ./trace.ctf --timeout 45
 :::
 
 :::{group-tab} Hardware
-For hardware, once the device is flashed the traces can be collected with:
+For hardware, once the device is flashed, the traces can be collected with:
 
 ```bash
 west zpl-uart-capture /dev/ttyUSB0 115200 ./trace.ctf
@@ -274,7 +274,7 @@ west zpl-prepare-trace ./trace.ctf \
   -o ./tef_tflm_instrumentation_tracing.json
 ```
 
-In the end, generated `./tef_tflm_instrumentation_tracing.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
+In the end, the generated `./tef_tflm_instrumentation_tracing.json` can be loaded in [Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer/).
 :::::
 
 ## Multithreaded application running multiple models
@@ -282,16 +282,16 @@ In the end, generated `./tef_tflm_instrumentation_tracing.json` can be loaded in
 * **Source**: {zpl_repo}`samples/profiling/smp_tvm`
 * **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_smp_tvm_models.json){.external} (models are running on a different thread than `main`)
 
-Zephelin allows tracing of applications running on multiple threads and cores with no additional configuration changes.
-Each event contains ID of the CPU which emitted it and this ID is used during parsing traces.
+Zephelin allows for tracing of applications running on multiple threads and cores with no additional configuration changes.
+Each event contains the ID of the CPU which emitted it; this ID is used during parsing traces.
 
 This sample loads four simple models using TVM runtime.
-Those models are then executed on different CPUs using random input data generated by main thread.
+Those models are then executed on different CPUs using random input data generated by the main thread.
 
 :::::{example} Tracing multiple threads with Zephelin
 :collapsible:
 
-To build a sample run:
+To build a sample, run:
 ```bash
 west build -p -b  mpfs_icicle/polarfire/u54/smp samples/profiling/smp_tvm
 ```
@@ -318,7 +318,7 @@ west zpl-prepare-trace ./smp.ctf -o ./tef_smp_tvm_models.json \
   --trim-metadata
 ```
 
-In the Trace Viewer there should be separate thread for each model and each of those threads should contain events produced by that model.
+In the Trace Viewer, there should be a separate thread for each model; each of those threads should contain events produced by that model.
 :::::
 
 ## Simple tracing of two applications running on different SoCs with common external clock
@@ -326,15 +326,15 @@ In the Trace Viewer there should be separate thread for each model and each of t
 * **Source**: {zpl_repo}`samples/multi_machine/two_models`
 * **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler_0.json&profileURL=./tef_tflm_profiler_1.json){.external}
 
-This sample demonstrates tracing of two Zephyr applications running on separate boards.
+This sample demonstrates the tracing of two Zephyr applications running on separate boards.
 
 Those boards share a common clock provider, allowing for traces to be synchronized.
-An artificial time offset is introduced for the demonstration purposes.
+An artificial time offset is introduced for demonstration purposes.
 
-:::::{example} Tracing same solution on two machines
+:::::{example} Tracing the same solution on two machines
 :collapsible:
 
-To build a sample run:
+To build a sample, run:
 ```bash
 west build -p -b max32650fthr --sysbuild samples/multi_machine/two_models/node_0 -- \
    -Dnode_0_CONFIG_ZPL_TRACE_FORMAT_CTF=y \
@@ -343,7 +343,7 @@ west build -p -b max32650fthr --sysbuild samples/multi_machine/two_models/node_0
    -Dnode_1_CONFIG_TRACING_BUFFER_SIZE=10000
 ```
 
-Demos uses same application for both boards.
+The demonstration uses the same application for both boards.
 
 The above sample can be simulated in Renode with:
 
@@ -358,7 +358,7 @@ python3 ./scripts/run_renode_multimachine.py \
 	--timeout 20
 ```
 
-Finally, to parse produced `./trace.ctf` and `./trace_1.ctf` run:
+To parse the produced `./trace.ctf` and `./trace_1.ctf`, run:
 
 ```bash
 west zpl-prepare-trace ./trace.ctf \
@@ -373,7 +373,7 @@ west zpl-prepare-trace ./trace_1.ctf \
   -o ./tef_tflm_profiler_1.json
 ```
 
-In the Trace Viewer, traces from the same model run should be available but with 2s offset between them.
+In Trace Viewer, traces from the same model run should be available but with 2s offset between them.
 :::::
 
 ## Preprocessing to micro-speech pipeline
@@ -381,11 +381,12 @@ In the Trace Viewer, traces from the same model run should be available but with
 * **Source**: {zpl_repo}`samples/multi_machine/micro_speech`
 * **Trace Viewer**: [preview](_static/trace_viewer/index.html#profileURL=./tef_preprocessor.json&profileURL=./tef_micro_speech.json){.external}
 
-This sample demonstrates deployment of Micro-speech model on two SoCs connected via UART.
-The preprocessor running on 1st SoC converts raw audio sample into a spectrographic feature.
-Processed data is passed via UART to the second SoC that runs Micro-speech model once sufficient data has been accumulated.
-Model responses can be `yes`, `no`, `silence` and `undefined`.
-Sample expects `.h` files as input, to prepare `.wav`  file you can use following [script]({zpl_repo}`samples/multi_machine/micro_speech/scripts/wav_to_h.py`).
+This sample demonstrates deployment of a Micro-speech model on two SoCs connected via UART.
+The preprocessor running on the first SoC converts a raw audio sample into a spectrographic feature.
+The processed data is passed via UART to the second SoC, which runs a Micro-speech model once sufficient data has been accumulated.
+The model responses can be `yes`, `no`, `silence` and `undefined`.
+The sample expects `.h` files as input.
+To prepare the `.wav`  file, you can use following [script]({zpl_repo}`samples/multi_machine/micro_speech/scripts/wav_to_h.py`).
 Example usage:
 ```bash
 python3 wav_to_h.py input.wav output.h
@@ -394,7 +395,7 @@ python3 wav_to_h.py input.wav output.h
 :::::{example} Micro-speech pipeline
 :collapsible:
 
-To build a sample run:
+To build a sample, run:
 ```bash
 
 west build -p -b max32650fthr --sysbuild samples/multi_machine/micro_speech/micro_speech -- \
@@ -418,7 +419,7 @@ python3 ./scripts/run_renode_multimachine.py \
 --timeout 45
 ```
 
-Finally, to parse produced `./microspeech.ctf` and `./microspeech_1.ctf` run:
+To parse the produced `./microspeech.ctf` and `./microspeech_1.ctf`, run:
 
 ```bash
 west zpl-prepare-trace ./micro_speech.ctf \

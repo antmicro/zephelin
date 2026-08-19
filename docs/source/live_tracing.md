@@ -12,11 +12,11 @@ Real-time visualization requires running a local Python server responsible for i
 :preview: true
 ```
 
-Compared to diagram from {ref}`zephelin-trace-collection`, instead of saving and converting complete CTF traces to TEF format and uploading them to Zephelin Trace Viewer, we continuously deliver traces over TCP to a Zephelin's server, convert them chunk by chunk to TEF format and deliver to Zephelin Trace Viewer over Remote Procedure Calls (RPC).
+Compared to the diagram from {ref}`zephelin-trace-collection`, instead of saving and converting complete CTF traces to TEF and uploading them to Zephelin Trace Viewer, we continuously deliver traces over TCP to a Zephelin server, convert them chunk by chunk to TEF and deliver to Zephelin Trace Viewer over Remote Procedure Calls (RPC).
 
-The Zephelin's server consists of:
+The Zephelin server consists of:
 
-* [Trace Handler](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py) - configures Parser Proxy, `libbtrace` live plugin and RPC Dispatcher and controls delivery of traces and commands to the Zephelin Trace Viewer.
+* [Trace Handler](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py) - configures Parser Proxy, the `libbtrace` live plugin and the RPC Dispatcher and controls the delivery of traces and commands to the Zephelin Trace Viewer.
 * [RPC Dispatcher](https://github.com/antmicro/zephelin/blob/main/server/rpc_dispatcher.py) - sends and receives messages from Zephelin Trace Viewer.
 * [Stream Parser Proxy](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py) - collects data from `west zpl-<backend>-capture` over TCP and subdivides it to the commands' stream and traces.
   Traces are delivered to `libbtrace` live plugin.
@@ -28,7 +28,7 @@ Before running the server, you need to install required backend dependencies and
 
 ### Install server dependencies
 
-Apart from installing Zephelin's dependencies (see {ref}`setting-up-workspace`), server dependencies need to be installed as well with the following command:
+Apart from installing Zephelin dependencies (see {ref}`setting-up-workspace`), server dependencies need to be installed as well with the following command:
 
 ```bash
 pip install -r server/requirements.txt
@@ -36,14 +36,14 @@ pip install -r server/requirements.txt
 
 ### Build the frontend for Trace Viewer
 
-The server requires a compiled version of the [Zephelin Trace Viewer](visual_interface).
+The server requires a compiled version of [Zephelin Trace Viewer](visual_interface).
 First, clone the repository:
 
 ```bash
 git clone --recursive https://github.com/antmicro/zephelin-trace-viewer.git
 ```
 
-After cloning the repository, install `corepack` and install necessary dependencies with:
+After cloning the repository, install `corepack` and install the necessary dependencies with:
 
 ```bash
 cd zephelin-trace-viewer
@@ -51,18 +51,18 @@ corepack enable
 yarn
 ```
 
-In the end, build the backend with:
+Lastly, build the backend with:
 
 ```bash
 yarn build
 cd ..
 ```
 
-Built frontend will be available under `./zephelin-trace-viewer/dist` directory.
+Built frontend will be available under the `./zephelin-trace-viewer/dist` directory.
 
 ## Running the server
 
-To start the Zephelin Server and host the visualizer, execute the `server/run_backend.py` script.
+To start the Zephelin server and host the visualizer, execute the `server/run_backend.py` script.
 
 ### Basic usage
 
@@ -74,7 +74,7 @@ python server/run_backend.py --frontend-directory <path_to_dist>
 
 ### Configuration Options
 
-You can customize the server's networking interfaces, and specify trace parsing options that will be used in [CTF to TEF](ctf_to_tef) conversion.
+You can customize the server's networking interfaces, and specify trace parsing options that will be used in the [CTF to TEF](ctf_to_tef) conversion.
 
 * `--tcp-server-host` - Address of the Zephelin TCP socket for CTF trace ingestion (Default: `127.0.0.1`).
 * `--tcp-server-port`- Port of the Zephelin TCP socket for CTF trace ingestion (Default: `5000`).
@@ -92,7 +92,7 @@ You can customize the server's networking interfaces, and specify trace parsing 
 
 ### Additional configuration options for tests
 
-There is a possibility to run the server in a mock mode, where TEF traces are delivered as inputs and sent to the website at specified speed:
+There is a possibility to run the server in mock mode, where TEF traces are delivered as inputs and sent to the website at specified speed:
 
 * `--mock-trace-file` - Path to the TEF/JSON trace file to use for the mock.
 * `--mock-playback-speed` - Playback speed multiplier for the mock.
@@ -100,7 +100,7 @@ There is a possibility to run the server in a mock mode, where TEF traces are de
 ## Providing traces to the server
 
 Once the server is running, it listens for CTF traces on the TCP socket.
-To route the traces read from one of the available backends (described in [Trace Collection](trace-collection) section), `--send-to-remote` argument can be provided with TCP socket address specified.
+To route the traces read from one of the available backends (described in [Trace Collection](trace-collection) section), the `--send-to-remote` argument can be provided with the TCP socket address specified.
 
 **Example**:
 
@@ -115,7 +115,7 @@ If the Visualizer is connected to the server, the live-tracing controls are avai
 * `Start streaming` - enables continuous rendering of received traces.
 * `Stop streaming` - disables continuous rendering.
 * `Collect` - visualizes all the traces gathered so far.
-* `Stop Tailing` - Stops the default behavior in which viewport follows live edge of visualized trace.
+* `Stop Tailing` - Stops the default behavior in which viewport follows the live edge of the visualized trace.
 * `Resume Tailing` - Snaps the viewport back to the live edge.
 
 :::{note}
@@ -127,38 +127,38 @@ Such failure can manifest itself as the Trace Viewer no longer receiving any new
 
 ## Sample collection of traces
 
-Let's run an application running profiling for TensorFlow Lite Micro model.
+This sample demonstrates how to run an application running profiling for a TensorFlow Lite Micro model.
 
-First of, let's build a sample application running two TensorFlow Lite Micro models, with increased number of iterations:
+First, build a sample application running two TensorFlow Lite Micro models, with an increased number of iterations:
 
 ```bash
 west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_multi_model -- -DCONFIG_ZPL_TRACE_FORMAT_CTF=y -DCONFIG_TRACING_BUFFER_SIZE=10000 -DCONFIG_BOOT_BANNER=n -DCONFIG_PRINTK=n -DCONFIG_LOG=n -DCONFIG_ZPL_SAMPLE_TFLM_NUM_ITERS=200
 ```
 
-After this, run server for live tracing, providing paths to models:
+After this, run the server for live tracing, providing the paths to the models:
 
 ```bash
 python server/run_backend.py --frontend-directory ./zephelin-trace-viewer/dist --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite ./samples/common/tflm/model/sine.tflite
 ```
 
-In the end, run collection of traces from:
+Then, run the collection of traces from:
 
 * Renode:
   ```bash
   python scripts/run_renode.py --trace-output test.ctf --send-to-remote 127.0.0.1:5000
   ```
-* From actual hardware (after flash), e.g.:
+* From physical hardware (after flash), e.g.:
   ```bash
   west zpl-uart-capture <path-to-uart> 115200 ./trace-hw.ctf --send-to-remote 127.0.0.1:5000
   ```
 
 ## Live tracing with instrumentation
 
-Traces produced by the [instrumentation subsystem](instrumentation) can be visualized live as well, as long as they are delivered over the same channel as the regular Zephelin traces.
+Traces produced by the [instrumentation subsystem](instrumentation) can be visualized live as well, as long as they are delivered over the same channel as regular Zephelin traces.
 This is the case for the tracing subsystem backend (`CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE=y`), which packs instrumentation events into a separate CTF stream of the regular trace.
-Thanks to this, no additional capture command is needed - a single `west zpl-<backend>-capture` with `--send-to-remote` feeds both streams to the server.
+With that, no additional capture command is needed - a single `west zpl-<backend>-capture` with `--send-to-remote` feeds both streams to the server.
 
-Let's use the {zpl_repo}`samples/profiling/tflm_instrumentation` sample, which runs a TFLM model with both Zephelin profilers and the instrumentation subsystem enabled.
+We will use the {zpl_repo}`samples/profiling/tflm_instrumentation` sample, which runs a TFLM model with both Zephelin profilers and the instrumentation subsystem enabled.
 
 First, build the sample with the instrumentation tracing backend configuration:
 
@@ -175,30 +175,30 @@ python server/run_backend.py --frontend-directory ./zephelin-trace-viewer/dist \
   --build-dir ./build
 ```
 
-Next, run collection of traces from:
+Next, run the collection of traces from:
 
 * Renode:
   ```bash
   python scripts/run_renode.py --send-to-remote 127.0.0.1:5000 --pause
   ```
-* From actual hardware (after flash), e.g.:
+* From physical hardware (after flash), e.g.:
   ```bash
   west zpl-uart-capture <path-to-uart> 115200 ./trace-hw.ctf --send-to-remote 127.0.0.1:5000
   ```
 
 :::{note}
-Starting simulation with `--pause` allows to postpone the execution of the sample until the frontend is set up and ready.
-When using actual hardware, the server will only start processing traces after board reset.
+Starting the simulation with `--pause` allows to postpone the execution of the sample until the frontend is set up and ready.
+When using physical hardware, the server will only start processing traces after board reset.
 :::
 
-Once the simulation is connected to the backend, open the visualizer at configured address (default: `http://127.0.0.1:8000`), press `Start streaming` and unpause the simulation.
+Once the simulation is connected to the backend, open the visualizer at the configured address (default: `http://127.0.0.1:8000`), press `Start streaming` and unpause the simulation.
 
 ::::{only} html
 The recording below shows the sample being visualized live.
 
 :::{note}
 The presented trace was gathered using Renode.
-Running the sample on actual hardware may result in extended execution time due to instrumentation overhead.
+Running the sample on physical hardware may result in extended execution time due to instrumentation overhead.
 :::
 
 ```{raw} html
@@ -211,29 +211,29 @@ Running the sample on actual hardware may result in extended execution time due 
 
 ## Communication flow
 
-Server implementation in `server/run_backend.py` consists of following access points:
+The server implementation in `server/run_backend.py` consists of the following access points:
 
-* `<tcp_server_host>:<tcp_server_port>` - allows communication between `west` capture subcommands and the server.
-* `<backend_host>:<backend_port>` - this hosts the website loaded from `--frontend-directory` directory and configures communication between website and server.
-* `127.0.0.1:<bt_port>` - allows delivery of pure CTF events to the `libbtrace` live plugin (it is a one-way communication).
+* `<tcp_server_host>:<tcp_server_port>` - allows for communication between `west` capture subcommands and the server.
+* `<backend_host>:<backend_port>` - hosts the website loaded from the `--frontend-directory` directory and configures the communication between website and server.
+* `127.0.0.1:<bt_port>` - allows for delivery of pure CTF events to the `libbtrace` live plugin (it is a one-way communication).
 
-As in file-based Zephelin flow, the traces are first collected and sent by the board to the host using a selected backend (e.g. UART).
-After this, `west zpl-<backend>-capture` command with `--send-to-remote` flag configured to e.g. `127.0.0.1:5000` will send CTF traces with additional data (such as `_zpl_ctf_start__` start tag) to a given address.
+Like in the file-based Zephelin flow, the traces are first collected and sent by the board to the host using a selected backend (e.g. UART).
+After this, the `west zpl-<backend>-capture` command with the `--send-to-remote` flag configured to e.g. `127.0.0.1:5000` will send CTF traces with additional data (such as `_zpl_ctf_start__` start tag) to a given address.
 
-This address should match `--tcp-server-host` and `--tcp-server-port` settings in the `server/run_backend.py` script.
+This address should match the `--tcp-server-host` and `--tcp-server-port` settings in the `server/run_backend.py` script.
 [`Stream Parser Proxy`](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py) will receive packets sent by the `west` subcommand and subdivide them into commands (such as restart the viewer based on start tag) that should be sent as RPC commands to the website, and pure CTF events.
 
-Pure CTF events are sent to [`libbtrace` live plugin](https://github.com/antmicro/libbtrace/tree/main/src/plugins/ctf/live-src) over `--bt-port` port on loopback (e.g. `127.0.0.1:42674`), for fast conversion to TEF events in C++.
+Pure CTF events are sent to the [`libbtrace` live plugin](https://github.com/antmicro/libbtrace/tree/main/src/plugins/ctf/live-src) over the `--bt-port` port on loopback (e.g. `127.0.0.1:42674`), for fast conversion to TEF events in C++.
 The plugin communicates with the `libbtrace` module running in the server, delivering `bt2` messages with parts of parsed TEF events - it is not socket-based communication.
 
 :::{note}
-It is possible to deliver pure CTF events directly to `libbtrace` live plugin by sending events directly to `--bt-port`, skipping the `Stream Parser Proxy`.
+It is possible to deliver pure CTF events directly to the `libbtrace` live plugin by sending events directly to `--bt-port`, skipping the `Stream Parser Proxy`.
 :::
 
 Those `bt2` messages are delivered to the [`Trace Handler`](https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py).
 Trace Handler performs final adjustments of the TEF events and sends them to the website.
 
-In the meantime, [`RPC Dispatcher`](https://github.com/antmicro/zephelin/blob/main/server/rpc_dispatcher.py) allows sending calls between server and website, and controls the state of the Zephelin Trace Viewer using procedures described in {ref}`server-api-reference`.
+In the meantime, [`RPC Dispatcher`](https://github.com/antmicro/zephelin/blob/main/server/rpc_dispatcher.py) allows for sending calls between server and website, and controls the state of Zephelin Trace Viewer using procedures described in {ref}`server-api-reference`.
 
 (server-api-reference)=
 ## Server API reference

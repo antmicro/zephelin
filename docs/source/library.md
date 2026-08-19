@@ -1,48 +1,4 @@
-# Zephelin
-
-Zephyr Profiling Library, or Zephelin for short, is a Zephyr RTOS library which enables capturing and reporting runtime performance metrics with a special focus on AI runtimes.
-
-It collects traces from execution with either:
-
-* **Tracing subsystem and predefined or user-provided events** - allowing to track functions, sections of code, loops, ...
-* **Instrumentation subsystem** - allowing to leverage compiler's instrumentation feature to automatically trace functions defined in the source, with a possibility to filter functions of interest
-
-Zephelin is an [official external module for Zephyr RTOS](https://docs.zephyrproject.org/latest/develop/manifest/external/zephelin.html).
-
-## Use cases for Zephelin
-
-Zephelin can be used to analyze:
-
-* Regular Zephyr applications
-* Internals of the Zephyr RTOS with the help of [Instrumentation subsystem](instrumentation)
-* AI models
-* AI runtimes
-* Multithreaded applications
-
-(zephelin-trace-collection)=
-## Zephelin trace collection
-
-```{pipeline_manager}
-:spec: ./zephelin-flow-spec.json
-:graph: ./zephelin-flow-graph.json
-:preview: true
-```
-
-Zephelin collects:
-
-* Traces
-* User-defined code scopes
-* CPU load
-* Memory usage (from runtime and RAM/ROM reports)
-* Die temperature
-* Model-related data:
-    * Global - inference time
-    * Per-layer:
-        * Memory consumption
-        * Total time of individual layers and layers' types
-        * Dimensions of tensors
-
-The above data is later processed by `west zpl-<backend>-capture` commands (described in [Trace collection](#trace-collection)) and enhanced using `west zpl-prepare-trace` (described in [CTF and TEF trace processing](ctf_to_tef)).
+# Using and customizing Zephelin
 
 (setting-up-workspace)=
 ## Initializing the workspace
@@ -57,7 +13,7 @@ git clone --recursive git@github.com:antmicro/zephelin.git
 cd zephelin
 ```
 
-Then, install `west` and additional dependencies listed in project's `requirements.txt` with `pip`:
+Then, install `west` and additional dependencies listed in the project's `requirements.txt` with `pip`:
 
 ```bash
 pip install -r requirements.txt
@@ -78,7 +34,7 @@ west zephyr-export
 west packages pip --install
 ```
 
-For testing without hardware in the loop, download Renode portable and add the download path to `PATH` environment variable:
+For testing without hardware in the loop, download Renode portable and add the download path to the `PATH` environment variable:
 
 ```{Warning}
 Make sure to use Renode version v1.16.0.4276 or newer.
@@ -130,7 +86,7 @@ To collect traces and visualize them using Zephelin Trace Viewer, you can run {z
 The default {zpl_repo}`configuration <samples/demo/prj.conf>` in this demo collects traces along with all possible additional information, like memory usage, die temperature, inference statistics, and more.
 One UART provides logs from the application, whereas the other UART returns CTF traces.
 
-### Running the demo in Renode simulation
+### Running the demo in a Renode simulation
 
 To build the demo, run:
 
@@ -150,45 +106,45 @@ python ./scripts/run_renode.py \
 ```
 
 This demo will run for 10 seconds, until a timeout is reached.
-After this time, CTF traces returned over the secondary UART will be stored in `trace.ctf`.
+Afterwards, CTF traces returned over the secondary UART will be stored in `trace.ctf`.
 
 :::{note}
 For trace collection on actual hardware, refer to [Trace collection](#trace-collection).
 :::
 
-The trace needs to be converted to the TEF format, so that it can be loaded into Zephelin Trace Viewer.
+The trace needs to be converted to a TEF file to be loaded into Zephelin Trace Viewer.
 
-For that purpose, run:
+To do that, run:
 
 ```bash
 west zpl-prepare-trace ./trace.ctf --tvm-model-path samples/common/tvm/model/magic-wand-graph.json -o ./tef_tvm_profiler.json
 ```
 
-The part `--tvm-model-path` is an input argument with the path to a TVM model graph, which is used to introduce additional model data to the TEF trace file metadata.
+The `--tvm-model-path` element is an input argument with the path to a TVM model graph, which is used to introduce additional model data to the TEF trace file metadata.
 
 To get an overview of the traces, load the output `tef_tvm_profiler.json` file in [Zephelin Trace Viewer](https://antmicro.github.io/zephelin-trace-viewer).
 
 ### Running the demo on HW
 
-This demo can be also run on physical MAX32690 Evaluation Kit using ADXL345 accelerometer.
+This demo can be also run on a physical MAX32690 Evaluation Kit using the ADXL345 accelerometer.
 The accelerometer can be connected to `i2c0` as follows:
 * `VIN` -> any 3v3 pin
 * `GND` -> any ground pin
 * `SDA` -> pin 7 on port `JH4`
 * `SCL` -> pin 8 on port `JH4`
 
-It is also required to connect following jumpers to enable `i2c0`:
+It is also required to connect the following jumpers to enable `i2c0`:
 * `JP2`
 * `JP3`
 * `JP4`
 
-To program the board, connect MAX32625 Pico using USB cable to PC and via `SWD` header to the board.
+To program the board, connect the MAX32625PICO using a USB cable to the PC, and via the `SWD` header to the board.
 Then, connect another USB cable to `CN2` - this will be used to collect data via UART (`uart2`).
 Finally, to collect the traces, connect USB-UART converter to `uart0` using following pins:
 * `RX` - pin 11 on port `JH4`
 * `TX` - pin 12 on port `JH4`
 
-Alternatively, when USB-UART converter is not available, it is possible to switch UARTs in board overlay and collect traces the same way as logs - using `uart2`.
+Alternatively, when the USB-UART converter is not available, it is possible to switch UARTs in the board overlay and collect traces the same way as logs - using `uart2`.
 
 To build the demo, run:
 ```bash
@@ -201,7 +157,7 @@ west flash --openocd=${MSDK_OPENOCD}
 ```
 using `openocd` from [Analog Devices MSDK](https://github.com/analogdevicesinc/msdk).
 
-After flashing there should be logged readings from sensor to the UART.
+After flashing, there should be logged readings from the sensor to the UART.
 ```
 *** Booting Zephyr OS build v4.2.0-rc2-49-g732a3a5c6655 ***
 adxl345@53: x=+0.312 y=+0.906 z=+0.046
@@ -219,13 +175,13 @@ adxl345@53: x=-0.015 y=+0.374 z=+0.078
 model output: wing=1.000 ring=0.000 slope=0.000 negative=0.000
 ```
 
-Then, the traces collected via UART can be analyzed the same way as in [Running the demo in Renode simulation](#running-the-demo-in-renode-simulation).
+Then, the traces collected via UART can be analyzed the same way as in [Running the demo in a Renode simulation](#running-the-demo-in-renode-simulation).
 
 ## Customizing and using Zephelin
 
 Zephelin can be enabled by y-selecting the `CONFIG_ZPL` symbol in the project configuration file.
-By default, Zephelin is automatically initialized during Zephyr initialization, but it can also be initialized in a runtime, by setting Kconfig symbol `CONFIG_ZPL_AUTORUN_INIT` to `n` and using the `zpl_init()` function defined by the `zpl/lib.h` header.
-You can enable various Zephelin components by using Kconfig and runtime configuration, as described in following sections.
+By default, Zephelin is automatically initialized during Zephyr initialization, but it can also be initialized in a runtime by setting the Kconfig symbol `CONFIG_ZPL_AUTORUN_INIT` to `n` and using the `zpl_init()` function defined by the `zpl/lib.h` header.
+You can enable various Zephelin components by using Kconfig and runtime configuration, as described in the following sections.
 
 :::{warning}
 Manual and automatic initializations are mutually exclusive. Enabling `CONFIG_ZPL_AUTORUN_INIT` makes `zpl_init` local as a protection
@@ -234,7 +190,7 @@ against using both methods at the same time. Improper use will result in a compi
 
 ### Configuration
 
-The library can be configured both during building and during a run on a device.
+The library can be configured both during building and while running on a device.
 To find out how to configure the library and how to add new configurations, check {doc}`configuration`.
 
 (trace-collection)=
@@ -349,28 +305,28 @@ typedef struct {
 } zpl_clock_t;
 ```
 
-This might be useful when system clock is not synchronized between different Zephelin instances running at the same time.
+This might be useful when the system clock is not synchronized between different Zephelin instances running at the same time.
 
 An example can be found in {zpl_repo}`samples/basic/custom_clock/src/main.c`.
 
 ### Memory profiler
 
-To use Zephelin memory profiler, y-select the `CONFIG_ZPL_MEMORY_PROFILING` in Kconfig.
+To use Zephelin's memory profiler, y-select the `CONFIG_ZPL_MEMORY_PROFILING` in Kconfig.
 No further actions are needed in the application code to generate memory profiling events in the generated trace.
-Memory profiling along with memory events are described in {doc}`memory_profiling`.
+Memory profiling, along with memory events, are described in {doc}`memory_profiling`.
 
 ### TLFM events
 
-To use Zephelin custom events with Tensorflow Lite Micro (TLFM), use the functions `zpl_emit_tflm_begin_event()` and `zpl_emit_tflm_end_event()`, provided by `zpl/tflm_events.h`.
+To use Zephelin's custom events with Tensorflow Lite Micro (TLFM), use the functions `zpl_emit_tflm_begin_event()` and `zpl_emit_tflm_end_event()`, provided by `zpl/tflm_events.h`.
 
 ### Delayed emission of layer profiling events
 
-By default, the TFLM and microTVM profilers emit a trace event on every operator boundary, right when that boundary is reached.
+By default, the TFLM and microTVM profilers emit a trace event on every operator boundary right when that boundary is reached.
 Formatting and pushing an event into the tracing buffer takes time, and since it happens between the operators, that time is included in the inference being measured.
 
 The delayed emission mechanism removes this overhead from the measurement.
 When it is enabled, the profiler only reads the cycle counter at each operator boundary and stores the timestamps in memory.
-All the events are formatted and emitted at once, once the inference finishes.
+All the events are formatted and emitted at once when the inference finishes.
 
 The mechanism is disabled by default and can be enabled per runtime:
 

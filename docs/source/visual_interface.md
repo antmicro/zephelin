@@ -22,26 +22,26 @@ There are several predefined commands with basic utilities:
 - `yarn build` - Builds for production, emitting to `dist/`
 - `yarn preview` - Starts a server at `http://localhost:4173/` to test production build locally
 - `yarn dev` - Starts a dev server at `http://localhost:5173/`
-- `yarn lint` - Lints a code and applies all applicable fixes
+- `yarn lint` - Lints the code and applies all applicable fixes
 
 ## Usage
 
 The viewer is built around [Speedscope](https://github.com/jlfwong/speedscope) - an interactive flamegraph viewer with support for many trace/profiling formats.
 
 To display a trace, simply import a TEF file using the `File/Import trace` (or `Browse`) button ({numref}`main_screen_fig`).
-This action will change the internal state of Speedscope, which triggers the reaction of `Additional info` section.
+This action will change the internal state of Speedscope, which triggers the reaction of the `Additional info` section.
 It gathers metadata and initializes custom panels based on available data.
 
 :::{figure-md} main_screen_fig
 ![](./imgs/trace_viewer_main_screen.png)
 
-The main page of Trace viewer
+The main page of Trace Viewer
 :::
 
 
 :::{only} html and trace_viewer
 
-To checked out an iterative version of the Zephelin Trace Viewer select one of the examples below:
+To check out an iterative version of the Zephelin Trace Viewer, select one of the examples below:
 * [LiteRT runtime example](_static/trace_viewer/index.html#profileURL=./tef_tflm_profiler.json){.external}
 * [microTVM runtime example](_static/trace_viewer/index.html#profileURL=./tef_tvm_profiler.json){.external}
 * [marking code scopes example](_static/trace_viewer/index.html#profileURL=./tef_marking_code_scopes.json){.external}
@@ -78,9 +78,9 @@ The microTVM model information example
 
 ### Plot panels
 
-The trace viewer can also visualize resource usage (like memory or CPU load) or data from sensors (such as die temperature) using plots ({numref}`plots_fig`).
+The Trace Viewer can also visualize resource usage (like memory or CPU load) or data from sensors (such as die temperature) using plots ({numref}`plots_fig`).
 
-Panels with these plots are automatically created whenever a trace with necessary data is loaded:
+Panels with these plots are automatically created whenever a trace with the necessary data is loaded:
 * [](memory-event) events for memory plots,
 * [](cpu-load-event) events for CPU load plot,
 * [](die-temp-event) events for die temperature plot.
