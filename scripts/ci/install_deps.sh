@@ -7,7 +7,7 @@
 
 set -xeuo pipefail
 
-export RENODE_VERSION="renode-1.16.0+20250929gitc16006c94.linux-portable-dotnet.tar.gz"
+source ./scripts/zephyr_version.sh
 
 # install deps with apt
 sudo apt update -qq
@@ -19,13 +19,17 @@ sudo apt install -yqq --no-install-recommends gdb-multiarch mono-complete \
   python3 python3-pip git cmake ninja-build gperf unzip qemu-system-arm
 
 pip install --break-system-packages uv
-uv venv -p 3.11
+uv venv -p "${ZPL_PYTHON_VERSION}"
 source .venv/bin/activate
 
 uv pip install --upgrade pip
 
 # install deps with pip
 uv pip install -r requirements.txt
+
+if [ -n "${BT2_INDEX:-}" ]; then
+    uv pip install bt2 -f "$BT2_INDEX" --force-reinstall
+fi
 
 # install recent flatbuffers-compiler
 FLATC_URL=https://github.com/google/flatbuffers/releases/download/v25.2.10/Linux.flatc.binary.g++-13.zip
@@ -34,7 +38,7 @@ sudo unzip flatc.zip -d /usr/bin
 rm flatc.zip
 
 # install Renode
-wget -q "https://dl.antmicro.com/projects/renode/builds/${RENODE_VERSION}" -O renode.tar.gz
+wget -q "https://dl.antmicro.com/projects/renode/builds/${ZPL_RENODE_PACKAGE}" -O renode.tar.gz
 rm -rf /opt/renode
 mkdir /opt/renode
 tar -xf  renode.tar.gz -C /opt/renode --strip-components=1
