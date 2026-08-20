@@ -31,12 +31,23 @@ Download, patch and prepare the project sources using the following commands:
 
 ```
 west update
+west packages pip --install
 west patch -b "$ZPL_PATCH_BASE" -l "$ZPL_PATCH_YML" apply
 west zephyr-export
-west packages pip --install
 ```
 
-For testing without hardware in the loop, download Renode portable and add the download path to the `PATH` environment variable:
+:::{note}
+For default Zephyr release (`v4.3.0`) can be configured and used using regular calls:
+
+```
+west init -l .
+west update
+west packages pip --install
+west patch apply
+west zephyr-export
+```
+:::
+
 The workspace records which version it was initialized for, so from then on `scripts/zephyr_version.sh` picks that version up on its own.
 To move an existing workspace to another version, run:
 
