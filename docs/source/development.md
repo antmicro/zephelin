@@ -189,8 +189,11 @@ The CTF traces will later be parsed by the {zpl_repo}`scripts/ctf2tef.py` script
 
 To simplify the development of Zephyr patches, you can use `apply_patches.py` and `update_patches.py` scripts for applying patches and converting commits to patches.
 
-Before using those scripts, ensure that the repositories are updated:
+Both scripts work on the patch set of one Zephyr version, and they take which one from `$ZPL_PATCH_BASE` rather than guessing, so source the resolver first.
+Before using them, ensure that the repositories are updated:
+
 ```shell
+source ./scripts/zephyr_version.sh
 west update
 ```
 
@@ -205,3 +208,6 @@ In case new commits are introduced or existing commits are modified, the changes
 ```shell
 python scripts/update_patches.py
 ```
+
+The resolver takes the version from the workspace, so these always act on the patch set that matches what is checked out.
+To work on a different version, run `./scripts/switch_zephyr_version.sh <version>` first.

@@ -19,20 +19,35 @@ Then, install `west` and additional dependencies listed in the project's `requir
 pip install -r requirements.txt
 ```
 
-Next, initialize the workspace using West. To do that, run the following command:
+Next, pick the Zephyr version to build against and initialize the workspace using West.
+Pass the version to the script, or set `ZEPHYR_VERSION` to choose it (the supported values are the file names in `zephyr-versions/`).
 
 ```bash
-west init -l .
+source ./scripts/zephyr_version.sh v4.4.1
+west init -l . --mf "$ZPL_WEST_MANIFEST"
 ```
 
 Download, patch and prepare the project sources using the following commands:
 
 ```
 west update
-west patch apply
+west patch -b "$ZPL_PATCH_BASE" -l "$ZPL_PATCH_YML" apply
 west zephyr-export
 west packages pip --install
 ```
+
+For testing without hardware in the loop, download Renode portable and add the download path to the `PATH` environment variable:
+The workspace records which version it was initialized for, so from then on `scripts/zephyr_version.sh` picks that version up on its own.
+To move an existing workspace to another version, run:
+
+```bash
+./scripts/switch_zephyr_version.sh <version>
+```
+
+It removes the outgoing version's patches, repoints the manifest, updates the modules and applies the incoming version's patches, in that order.
+:::{note}
+Two versions may expect different Zephyr SDKs.
+:::
 
 For testing without hardware in the loop, download Renode portable and add the download path to the `PATH` environment variable:
 
