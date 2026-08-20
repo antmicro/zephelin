@@ -50,18 +50,44 @@ Configure a virtual environment and install `west` with `pip`:
 pip3 install -r requirements.txt
 ```
 
-Then, initialize the workspace using `west`:
+Then, initialize the workspace using `west`.
 
-<!-- name="west-init" -->
+By default, Zephelin supports Zephyr `v4.3.0` release.
+The initialization of the workspace in this case looks as follows:
+
 ```shell
 west init -l .
 west update
+west packages pip --install
 west patch apply
 west zephyr-export
-west packages pip --install
 west sdk install
 source zpl_env.sh
 ```
+
+Zephelin supports more than one Zephyr version; `scripts/zephyr_version.sh` picks one and exports the manifest and patch set that go with it.
+Pass the version to the script (`source ./scripts/zephyr_version.sh v4.4.1`) or set `ZEPHYR_VERSION` beforehand; see `zephyr-versions/` for the supported values.
+With neither, the repository default (`v4.3.0`) is used:
+
+<!-- name="west-init" -->
+```shell
+source ./scripts/zephyr_version.sh
+west init -l . --mf "$ZPL_WEST_MANIFEST"
+west update
+west packages pip --install
+west patch -b "$ZPL_PATCH_BASE" -l "$ZPL_PATCH_YML" apply
+west zephyr-export
+west sdk install
+source zpl_env.sh
+```
+
+To move an existing workspace to another version, use:
+
+```shell
+./scripts/switch_zephyr_version.sh <version>
+```
+
+> Two versions may expect different Zephyr SDKs. The script says which one the version it switched to expects.
 
 In the end, download [Renode](https://renode.io) and configure environment variables for [pyrenode3](https://github.com/antmicro/pyrenode3) package:
 
