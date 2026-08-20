@@ -255,12 +255,14 @@ async def test_reset_clears_state_and_notifies(handler):
 
 
 @pytest.mark.asyncio
-async def test_connect_rejects_when_already_listening(handler):
-    """A second connect while a bt2 thread exists is rejected."""
+async def test_connect_keeps_existing_when_already_listening(handler):
+    """A second connect while a bt2 thread exists keeps the current one."""
     handler.bt2_thread = object()
 
-    with pytest.raises(Exception, match="Already listening"):
-        await handler.connect()
+    result = await handler.connect()
+
+    assert result["status"] == "success"
+    assert "Already listening" in result["message"]
 
 
 @pytest.mark.asyncio
