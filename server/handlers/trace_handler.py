@@ -22,7 +22,12 @@ from typing import Literal, Union
 import bt2
 import server_utils.network as networking_utils
 from config import TraceConfig
-from ctf2tef import StreamingCTFToTEF, merge_metadata, stream_ctf_to_tef
+from ctf2tef import (
+    StreamingCTFToTEF,
+    deduce_zephyr_base,
+    merge_metadata,
+    stream_ctf_to_tef,
+)
 from endpoints import Endpoints
 from extract_tvm_model_data import tvm_recalculate_model_numbers
 from handlers.base import BaseHandler
@@ -39,7 +44,6 @@ from prepare_trace import (
 from socketio import AsyncServer
 
 BT2_BATCH_SIZE = 50
-ZEPHYR_BASE = Path(__file__).resolve().parent.parent.parent.with_name("zephyr")
 DATA_CHUNK_BYTES = 8192
 # Upper bound on teardown
 CLEANUP_TIMEOUT_S = 5
@@ -414,7 +418,7 @@ class TraceHandler(BaseHandler):
                 for tflm_model_path in self.tflm_model_paths:
                     if tflm_model_path.exists():
                         metadata = extract_model_data(
-                            tflm_model_path, ZEPHYR_BASE, zephyr_elf_path, None
+                            tflm_model_path, deduce_zephyr_base(), zephyr_elf_path, None
                         )
                         if "id" not in metadata:
                             add_model_metadata(tef_metadata_events, metadata)

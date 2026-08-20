@@ -605,16 +605,47 @@ def ctf_to_tef(
     return CTFConversionResult(converted, thread_name)
 
 
-def deduce_zephyr_base():
+ZEPHYR_METADATA_RELPATH = Path("subsys") / "tracing" / "ctf" / "tsdl" / "metadata"
+
+
+def deduce_zephyr_base() -> Path:
     """
-    Deduces ZEPHYR_BASE path.
+    Resolves the ZEPHYR_BASE path.
 
     Returns
     -------
     Path
         ZEPHYR_BASE path
+
+    Raises
+    ------
+    FileNotFoundError
+        When no candidate points at a Zephyr repository.
     """
-    return Path(__file__).parents[2] / "zephyr"
+    checked = []
+
+    if zephyr_base := os.environ.get("ZEPHYR_BASE"):
+        base = Path(zephyr_base)
+        if (base / ZEPHYR_METADATA_RELPATH).exists():
+            return base
+        print(
+            f"ZEPHYR_BASE ({base}) is not a Zephyr repository:"
+            f" {ZEPHYR_METADATA_RELPATH} is missing, falling back to workspace lookup",
+            file=sys.stderr,
+        )
+        checked.append(f"{base} (ZEPHYR_BASE)")
+
+    module_root = Path(__file__).resolve().parents[1]
+    for workspace in (module_root.parent, module_root.parents[1]):
+        base = workspace / "zephyr"
+        if (base / ZEPHYR_METADATA_RELPATH).exists():
+            return base
+        checked.append(str(base))
+
+    raise FileNotFoundError(
+        "Cannot locate a Zephyr repository. Set ZEPHYR_BASE or pass --zephyr-base."
+        f" Checked: {', '.join(checked)}"
+    )
 
 
 def instrumentation_ctf_to_tef(
@@ -672,7 +703,7 @@ def merge_metadata(dst_dir: Path, zephyr_base: Path | None = None) -> Path:
         When either the Zephyr base or Zephelin metadata cannot be found.
     """
     zephyr_base = zephyr_base if zephyr_base else deduce_zephyr_base()
-    zephyr_metadata = zephyr_base / "subsys" / "tracing" / "ctf" / "tsdl" / "metadata"
+    zephyr_metadata = zephyr_base / ZEPHYR_METADATA_RELPATH
     if not zephyr_metadata.exists():
         raise FileNotFoundError(f"Zephyr CTF metadata ({zephyr_metadata}) does not exist")
 
