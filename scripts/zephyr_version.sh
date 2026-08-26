@@ -40,7 +40,7 @@ set -a
 set +a
 
 export ZPL_WEST_MANIFEST="manifests/west-${ZPL_ZEPHYR_VERSION}.yml"
-export ZPL_PATCH_BASE="zephyr/patches/${ZPL_ZEPHYR_VERSION}"
-export ZPL_PATCH_YML="zephyr/patches/${ZPL_ZEPHYR_VERSION}.yml"
+export ZPL_PATCH_BASE="zephyr/patches-releases/${ZPL_ZEPHYR_VERSION}"
+export ZPL_PATCH_YML="zephyr/patches-releases/${ZPL_ZEPHYR_VERSION}.yml"
 
 unset _zpl_root _zpl_manifest _zephyr_version _zpl_request
