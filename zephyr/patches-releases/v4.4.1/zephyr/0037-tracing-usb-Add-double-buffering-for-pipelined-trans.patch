@@ -1,0 +1,117 @@
+From d92c17964c594e6452f5bf6e4842de1e5c48db71 Mon Sep 17 00:00:00 2001
+From: Jan Bylicki <jbylicki@antmicro.com>
+Date: Thu, 27 Aug 2026 21:56:43 +0200
+Subject: [PATCH 37/37] tracing: usb: Add double buffering for pipelined
+ transfers
+
+Replace single bounce buffer with double buffering using a semaphore-based
+producer-consumer pattern. This allows multiple USB transfers to be
+in flight simultaneously, improving USB throughput.
+
+Signed-off-by: Jan Bylicki <jbylicki@antmicro.com>
+---
+ subsys/tracing/Kconfig               |  8 +++++++
+ subsys/tracing/tracing_backend_usb.c | 31 ++++++++++++++++++++++++++--
+ 2 files changed, 37 insertions(+), 2 deletions(-)
+
+diff --git a/subsys/tracing/Kconfig b/subsys/tracing/Kconfig
+index 9df4f0cec01..edc5cfcf2ca 100644
+--- a/subsys/tracing/Kconfig
++++ b/subsys/tracing/Kconfig
+@@ -162,6 +162,14 @@ config TRACING_BACKEND_USB
+ 	help
+ 	  Use USB to output tracing data.
+ 
++config TRACING_BACKEND_USB_DOUBLE_BUFFERING
++	bool "Use double buffering for USB tracing"
++	depends on TRACING_BACKEND_USB
++	default y
++	help
++	  Enable double buffering for USB tracing backend. This allows
++	  multiple USB transfers to be in flight simultaneously.
++
+ config TRACING_BACKEND_POSIX
+ 	bool "Posix architecture (native) backend"
+ 	depends on TRACING_SYNC
+diff --git a/subsys/tracing/tracing_backend_usb.c b/subsys/tracing/tracing_backend_usb.c
+index 96046441d0a..3f74445acf7 100644
+--- a/subsys/tracing/tracing_backend_usb.c
++++ b/subsys/tracing/tracing_backend_usb.c
+@@ -11,6 +11,7 @@
+ 
+ #include <zephyr/sys/util.h>
+ #include <zephyr/sys/atomic.h>
++#include <zephyr/kernel.h>
+ #include <zephyr/sys/__assert.h>
+ #include <zephyr/sys/byteorder.h>
+ #include <zephyr/usb/usbd.h>
+@@ -19,8 +20,16 @@
+ #include <tracing_buffer.h>
+ #include <tracing_backend.h>
+ 
+-/* Single bounce buffer for bulk IN transfer */
+-UDC_BUF_POOL_DEFINE(tracing_data_pool, 1, CONFIG_TRACING_BUFFER_SIZE,
++#if defined(CONFIG_TRACING_BACKEND_USB_DOUBLE_BUFFERING)
++/* Multiple bounce buffers for pipelined bulk IN transfers */
++#define TRACING_USB_BUF_COUNT 2
++/* Semaphore acts as count of available buffers for producer-consumer pattern */
++K_SEM_DEFINE(tracing_usb_buf_sem, TRACING_USB_BUF_COUNT, TRACING_USB_BUF_COUNT);
++#else
++#define TRACING_USB_BUF_COUNT 1
++#endif
++
++UDC_BUF_POOL_DEFINE(tracing_data_pool, TRACING_USB_BUF_COUNT, CONFIG_TRACING_BUFFER_SIZE,
+ 		    sizeof(struct udc_buf_info), NULL);
+ 
+ struct tracing_func_desc {
+@@ -116,7 +125,12 @@ static int tracing_func_request_handler(struct usbd_class_data *const c_data,
+ 	}
+ 
+ 	if (bi->ep == tracing_func_get_bulk_in(c_data)) {
++#if defined(CONFIG_TRACING_BACKEND_USB_DOUBLE_BUFFERING)
++		usbd_ep_buf_free(uds_ctx, buf);
++		k_sem_give(&tracing_usb_buf_sem);
++#else
+ 		usbd_ep_buf_free(uds_ctx, buf);
++#endif
+ 		k_sem_give(&data->sync_sem);
+ 	}
+ 
+@@ -270,8 +284,16 @@ static void tracing_backend_usb_output(const struct tracing_backend *backend,
+ 			return;
+ 		}
+ 
++#if defined(CONFIG_TRACING_BACKEND_USB_DOUBLE_BUFFERING)
++		/* Wait for available buffer (semaphore = available buffer count) */
++		k_sem_take(&tracing_usb_buf_sem, K_FOREVER);
++#endif
++
+ 		buf = tracing_func_buf_alloc(&tracing_func);
+ 		if (buf == NULL) {
++#if defined(CONFIG_TRACING_BACKEND_USB_DOUBLE_BUFFERING)
++			k_sem_give(&tracing_usb_buf_sem);
++#endif
+ 			return;
+ 		}
+ 
+@@ -281,12 +303,17 @@ static void tracing_backend_usb_output(const struct tracing_backend *backend,
+ 		ret = usbd_ep_enqueue(&tracing_func, buf);
+ 		if (ret) {
+ 			net_buf_unref(buf);
++#if defined(CONFIG_TRACING_BACKEND_USB_DOUBLE_BUFFERING)
++			k_sem_give(&tracing_usb_buf_sem);
++#endif
+ 			continue;
+ 		}
+ 
+ 		data += bytes;
+ 		length -= bytes;
++#if !defined(CONFIG_TRACING_BACKEND_USB_DOUBLE_BUFFERING)
+ 		k_sem_take(&func_data.sync_sem, K_FOREVER);
++#endif
+ 	}
+ }
+ 
+-- 
+2.54.0
+

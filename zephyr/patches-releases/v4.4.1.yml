@@ -276,6 +276,12 @@ patches:
   module: zephyr
   path: zephyr/0036-scripts-ci-check_compliance.py-Added-skipping-symlin.patch
   sha256sum: 4ae852a563ab65a5cf6617de6d7e8721e50eb050e41d2bd64e8620689692dedd
+- author: Jan Bylicki
+  date: '2026-08-27'
+  email: jbylicki@antmicro.com
+  module: zephyr
+  path: zephyr/0037-tracing-usb-Add-double-buffering-for-pipelined-trans.patch
+  sha256sum: 779c6e23a0662930ea92e633e99ecf19aea88c89b22971ad3b4736acab1ca859
 - author: Maciej Torhan
   date: '2025-06-04'
   email: mtorhan@antmicro.com
