@@ -270,6 +270,12 @@ patches:
   module: zephyr
   path: zephyr/0035-Bump-to-4.4.1.patch
   sha256sum: 73643824a101c453756b802e52e11252722b75ea63325a79557551774181f3e7
+- author: Grzegorz Latosinski
+  date: '2026-08-27'
+  email: glatosinski@antmicro.com
+  module: zephyr
+  path: zephyr/0036-scripts-ci-check_compliance.py-Added-skipping-symlin.patch
+  sha256sum: 4ae852a563ab65a5cf6617de6d7e8721e50eb050e41d2bd64e8620689692dedd
 - author: Maciej Torhan
   date: '2025-06-04'
   email: mtorhan@antmicro.com

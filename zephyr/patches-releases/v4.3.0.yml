@@ -294,6 +294,12 @@ patches:
   module: zephyr
   path: zephyr/0040-instrumentation-Remove-printk-from-recursive-exclusi.patch
   sha256sum: 215c8f76f92d7146ac86613b54c0b0caf8f4962d3b430a2d4088661849bcb8fc
+- author: Grzegorz Latosinski
+  date: '2026-08-27'
+  email: glatosinski@antmicro.com
+  module: zephyr
+  path: zephyr/0041-scripts-ci-check_compliance.py-Added-skipping-symlin.patch
+  sha256sum: 4187788c69cd9c5fe57d78720e8914643f02edb4b277433301cdfd900f0f3e5d
 - author: Maciej Torhan
   date: '2025-06-04'
   email: mtorhan@antmicro.com
