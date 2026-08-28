@@ -1,0 +1,1176 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="_static/favicon.ico">
+    
+    
+      
+        <title>Live tracing of events from the board - Zephelin - Zephyr AI Profiling Library - documentation</title>
+      
+    
+    
+      
+        
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+        <link rel="stylesheet" type="text/css" href="_static/sphinx_immaterial_theme.c5589c0bd87d933a4.min.css?v=eeeb54bc" />
+        <link rel="stylesheet" type="text/css" href="_static/css/styles.css?v=31a946ac" />
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Zephelin - Zephyr AI Profiling Library - documentation" class="md-header__button md-logo" aria-label="Zephelin - Zephyr AI Profiling Library - documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Zephelin - Zephyr AI Profiling Library - documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Live tracing of events from the board
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <div class="md-header__button">
+        <a href="zephelin-ai-profiling-documentation.pdf" title="PDF - zephelin-ai-profiling-documentation.pdf">
+          <div class="md-icon">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zm192 0v128h128L256 0zM64 224h24c30.9 0 56 25.1 56 56s-25.1 56-56 56h-8v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24h-8v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-24c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16v-64c0-8.8-7.2-16-16-16h-8v96zm96-128h48c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/></svg>
+          </div>
+        </a>
+      </div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/antmicro/zephelin" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/zephelin
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Zephelin - Zephyr AI Profiling Library - documentation" class="md-nav__button md-logo" aria-label="Zephelin - Zephyr AI Profiling Library - documentation" data-md-component="logo">
+      <img src="_static/white.svg" alt="logo">
+    </a>
+    Zephelin - Zephyr AI Profiling Library - documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/antmicro/zephelin" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    antmicro/zephelin
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="introduction.html" class="md-nav__link">
+        <span class="md-ellipsis">Introduction</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="library.html" class="md-nav__link">
+        <span class="md-ellipsis">Using and customizing Zephelin</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="configuration.html" class="md-nav__link">
+        <span class="md-ellipsis">Zephelin configuration</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory_profiling.html" class="md-nav__link">
+        <span class="md-ellipsis">Memory profiling</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="code_scopes.html" class="md-nav__link">
+        <span class="md-ellipsis">Tracing code scopes</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="usb_requirements.html" class="md-nav__link">
+        <span class="md-ellipsis">Trace capture USB interface requirements</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="debug_capture.html" class="md-nav__link">
+        <span class="md-ellipsis">Trace capture debug interface</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="instrumentation.html" class="md-nav__link">
+        <span class="md-ellipsis">Instrumentation</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ctf_to_tef.html" class="md-nav__link">
+        <span class="md-ellipsis">CTF to TEF conversion</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="new_runtime.html" class="md-nav__link">
+        <span class="md-ellipsis">Adding support for new AI inference libraries</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="visual_interface.html" class="md-nav__link">
+        <span class="md-ellipsis">Zephelin Trace Viewer</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          <span class="md-ellipsis">Live tracing of events from the board</span>
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="#" class="md-nav__link md-nav__link--active">
+        <span class="md-ellipsis">Live tracing of events from the board</span>
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#real-time-tracing-server-structure" class="md-nav__link">
+    <span class="md-ellipsis">Real-<wbr>time tracing server structure</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">Prerequisites</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-server-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">Install server dependencies</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-the-frontend-for-trace-viewer" class="md-nav__link">
+    <span class="md-ellipsis">Build the frontend for Trace Viewer</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-server" class="md-nav__link">
+    <span class="md-ellipsis">Running the server</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running the server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">Basic usage</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">Configuration Options</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-configuration-options-for-tests" class="md-nav__link">
+    <span class="md-ellipsis">Additional configuration options for tests</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#providing-traces-to-the-server" class="md-nav__link">
+    <span class="md-ellipsis">Providing traces to the server</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-tracing-controls" class="md-nav__link">
+    <span class="md-ellipsis">Live-<wbr>tracing controls</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-collection-of-traces" class="md-nav__link">
+    <span class="md-ellipsis">Sample collection of traces</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-tracing-with-instrumentation" class="md-nav__link">
+    <span class="md-ellipsis">Live tracing with instrumentation</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#communication-flow" class="md-nav__link">
+    <span class="md-ellipsis">Communication flow</span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server-api-reference" class="md-nav__link">
+    <span title="server-api-reference (reference label)" class="md-ellipsis">Server API reference</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server API reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#handlers.trace_handler.TraceHandler.connect" class="md-nav__link">
+    <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span><span title="handlers.trace_handler.TraceHandler.connect (Python function) — Starts the TCP server to listen for incoming trace streams from capture scripts." class="md-ellipsis">handlers.<wbr>trace_<wbr>handler.<wbr>Trace<wbr>Handler.<wbr>connect</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="handlers.trace_handler.TraceHandler.connect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">Returns</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlers.trace_handler.TraceHandler.disconnect" class="md-nav__link">
+    <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span><span title="handlers.trace_handler.TraceHandler.disconnect (Python function) — Terminates the background read task and tears down transportation backend." class="md-ellipsis">handlers.<wbr>trace_<wbr>handler.<wbr>Trace<wbr>Handler.<wbr>disconnect</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="handlers.trace_handler.TraceHandler.disconnect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">Returns</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlers.trace_handler.TraceHandler.stream_start" class="md-nav__link">
+    <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span><span title="handlers.trace_handler.TraceHandler.stream_start (Python function) — Enables continuous trace streaming to the frontend." class="md-ellipsis">handlers.<wbr>trace_<wbr>handler.<wbr>Trace<wbr>Handler.<wbr>stream_<wbr>start</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="handlers.trace_handler.TraceHandler.stream_start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">Returns</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlers.trace_handler.TraceHandler.stream_stop" class="md-nav__link">
+    <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span><span title="handlers.trace_handler.TraceHandler.stream_stop (Python function) — Disables continuous trace streaming to the frontend." class="md-ellipsis">handlers.<wbr>trace_<wbr>handler.<wbr>Trace<wbr>Handler.<wbr>stream_<wbr>stop</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="handlers.trace_handler.TraceHandler.stream_stop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">Returns</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlers.trace_handler.TraceHandler.metadata" class="md-nav__link">
+    <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span><span title="handlers.trace_handler.TraceHandler.metadata (Python function) — Provides model metadata and memory symbols for the trace." class="md-ellipsis">handlers.<wbr>trace_<wbr>handler.<wbr>Trace<wbr>Handler.<wbr>metadata</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="handlers.trace_handler.TraceHandler.metadata">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">Returns</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlers.trace_handler.TraceHandler.reset" class="md-nav__link">
+    <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span><span title="handlers.trace_handler.TraceHandler.reset (Python function) — Resets the trace buffer." class="md-ellipsis">handlers.<wbr>trace_<wbr>handler.<wbr>Trace<wbr>Handler.<wbr>reset</span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlers.trace_handler.TraceHandler.collect" class="md-nav__link">
+    <span aria-label="Python function" class="objinfo-icon objinfo-icon__procedure" title="Python function">F</span><span title="handlers.trace_handler.TraceHandler.collect (Python function) — Provides the increment of the trace buffer not yet sent." class="md-ellipsis">handlers.<wbr>trace_<wbr>handler.<wbr>Trace<wbr>Handler.<wbr>collect</span>
+  </a>
+  
+    <nav class="md-nav" aria-label="handlers.trace_handler.TraceHandler.collect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#returns" class="md-nav__link">
+    <span class="md-ellipsis">Returns</span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples.html" class="md-nav__link">
+        <span class="md-ellipsis">Zephelin usage examples</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="troubleshooting.html" class="md-nav__link">
+        <span class="md-ellipsis">Troubleshooting</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="development.html" class="md-nav__link">
+        <span class="md-ellipsis">Zephelin’s developer guidelines</span>
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="benchmark_report.html" class="md-nav__link">
+        <span class="md-ellipsis">Zephelin benchmarking</span>
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset" role="main">
+                  
+
+
+  <a href="https://github.com/antmicro/zephelin/blob/main/docs/source/live_tracing.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+<h1 id="live-tracing-of-events-from-the-board">Live tracing of events from the board<a class="headerlink" href="#live-tracing-of-events-from-the-board" title="Link to this heading">¶</a></h1>
+<p>This chapter covers the usage of <a class="reference internal" href="visual_interface.html"><span class="doc std std-doc">Zephelin Trace Viewer</span></a> for live visualization of traces being gathered during application execution.</p>
+<p>Real-time visualization requires running a local Python server responsible for ingesting CTF traces, parsing them into TEF, and forwarding them to the visualizer.</p>
+<h2 id="real-time-tracing-server-structure">Real-time tracing server structure<a class="headerlink" href="#real-time-tracing-server-structure" title="Link to this heading">¶</a></h2>
+
+<p align='center'>
+    <iframe src='_static/pipeline-manager.html?spec=relative%3A%2F%2F..%2F_downloads%2Fa318f6514ec20e2a2fedc4f35f3ea794%2Fzephelin-flow-spec.json&graph=relative%3A%2F%2F..%2F_downloads%2Fe5ce75c1ef60c2fbd83a1928ea1349c2%2Fzephelin-flow-graph-live.json&preview=true'
+        alt='An interactive KPM frame, where you can explore the block design for this section, is available here in the HTML version of this documentation.'
+        allow='fullscreen'
+            style='
+                width:100%;
+                aspect-ratio:3/2;
+                border:none;
+                display: block;
+            '
+    ></iframe>
+</p><a class="reference download internal" download="" href="_downloads/a318f6514ec20e2a2fedc4f35f3ea794/zephelin-flow-spec.json"></a><a class="reference download internal" download="" href="_downloads/e5ce75c1ef60c2fbd83a1928ea1349c2/zephelin-flow-graph-live.json"></a><p>Compared to the diagram from <a class="reference internal" href="introduction.html#zephelin-trace-collection"><span class="std std-ref">Zephelin trace collection</span></a>, instead of saving and converting complete CTF traces to TEF and uploading them to Zephelin Trace Viewer, we continuously deliver traces over TCP to a Zephelin server, convert them chunk by chunk to TEF and deliver to Zephelin Trace Viewer over Remote Procedure Calls (RPC).</p>
+<p>The Zephelin server consists of:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py">Trace Handler</a> - configures Parser Proxy, the <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> live plugin and the RPC Dispatcher and controls the delivery of traces and commands to the Zephelin Trace Viewer.</p></li>
+<li><p><a class="reference external" href="https://github.com/antmicro/zephelin/blob/main/server/rpc_dispatcher.py">RPC Dispatcher</a> - sends and receives messages from Zephelin Trace Viewer.</p></li>
+<li><p><a class="reference external" href="https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py">Stream Parser Proxy</a> - collects data from <code class="docutils literal notranslate"><span class="pre">west</span> <span class="pre">zpl-&lt;backend&gt;-capture</span></code> over TCP and subdivides it to the commands’ stream and traces.
+Traces are delivered to <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> live plugin.</p></li>
+<li><p><a class="reference external" href="https://github.com/antmicro/libbtrace/tree/main/src/plugins/ctf/live-src"><code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> live plugin</a> - receives parts of CTF traces and converts them to parts of TEF messages that are later delivered to Trace Handler.</p></li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<p>Before running the server, you need to install required backend dependencies and compile the frontend visualizer.</p>
+<h3 id="install-server-dependencies">Install server dependencies<a class="headerlink" href="#install-server-dependencies" title="Link to this heading">¶</a></h3>
+<p>Apart from installing Zephelin dependencies (see <a class="reference internal" href="library.html#setting-up-workspace"><span class="std std-ref">Initializing the workspace</span></a>), server dependencies need to be installed as well with the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>server/requirements.txt
+</code></pre></div>
+</div>
+<h3 id="build-the-frontend-for-trace-viewer">Build the frontend for Trace Viewer<a class="headerlink" href="#build-the-frontend-for-trace-viewer" title="Link to this heading">¶</a></h3>
+<p>The server requires a compiled version of <a class="reference internal" href="visual_interface.html"><span class="doc std std-doc">Zephelin Trace Viewer</span></a>.
+First, clone the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>https://github.com/antmicro/zephelin-trace-viewer.git
+</code></pre></div>
+</div>
+<p>After cloning the repository, install <code class="docutils literal notranslate"><span class="pre">corepack</span></code> and install the necessary dependencies with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>zephelin-trace-viewer
+corepack<span class="w"> </span><span class="nb">enable</span>
+yarn
+</code></pre></div>
+</div>
+<p>Lastly, build the backend with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>yarn<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>..
+</code></pre></div>
+</div>
+<p>Built frontend will be available under the <code class="docutils literal notranslate"><span class="pre">./zephelin-trace-viewer/dist</span></code> directory.</p>
+<h2 id="running-the-server">Running the server<a class="headerlink" href="#running-the-server" title="Link to this heading">¶</a></h2>
+<p>To start the Zephelin server and host the visualizer, execute the <code class="docutils literal notranslate"><span class="pre">server/run_backend.py</span></code> script.</p>
+<h3 id="basic-usage">Basic usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
+<p>To run the server with default settings and serve the frontend, point it to the <code class="docutils literal notranslate"><span class="pre">dist</span></code> directory with the compiled frontend:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>server/run_backend.py<span class="w"> </span>--frontend-directory<span class="w"> </span>&lt;path_to_dist&gt;
+</code></pre></div>
+</div>
+<h3 id="configuration-options">Configuration Options<a class="headerlink" href="#configuration-options" title="Link to this heading">¶</a></h3>
+<p>You can customize the server’s networking interfaces, and specify trace parsing options that will be used in the <a class="reference internal" href="ctf_to_tef.html"><span class="doc std std-doc">CTF to TEF</span></a> conversion.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--tcp-server-host</span></code> - Address of the Zephelin TCP socket for CTF trace ingestion (Default: <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tcp-server-port</span></code>- Port of the Zephelin TCP socket for CTF trace ingestion (Default: <code class="docutils literal notranslate"><span class="pre">5000</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--backend-host</span></code> - Address where the backend API and visualizer are hosted (Default: <code class="docutils literal notranslate"><span class="pre">127.0.0.1</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--backend-port</span></code> - Port where the backend API and visualizer are hosted (Default: <code class="docutils literal notranslate"><span class="pre">8000</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--bt-port</span></code> - Port used by <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> live plugin to collect pure CTF traces (Default: <code class="docutils literal notranslate"><span class="pre">42674</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--frontend-directory</span></code> - Path to compiled frontend directory.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--build-dir</span></code> - Path to the traced application build directory.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tflm-model-paths</span></code> - Paths to the TFLM models.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tvm-model-paths</span></code> - Paths to the TVM models.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tvm-model-metadata-paths</span></code> - Paths to the TVM model metadata files.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tvm-model-op-remove-prefix</span></code> - Regex pattern used for removing TVM operator prefixes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--tvm-model-op-remove-suffix</span></code> - Regex pattern used for removing TVM operator suffixes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--verbosity</span></code> - Set the logging verbosity level (<code class="docutils literal notranslate"><span class="pre">DEBUG,</span> <span class="pre">INFO,</span> <span class="pre">WARNING,</span> <span class="pre">ERROR,</span> <span class="pre">CRITICAL</span></code>).</p></li>
+</ul>
+<h3 id="additional-configuration-options-for-tests">Additional configuration options for tests<a class="headerlink" href="#additional-configuration-options-for-tests" title="Link to this heading">¶</a></h3>
+<p>There is a possibility to run the server in mock mode, where TEF traces are delivered as inputs and sent to the website at specified speed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--mock-trace-file</span></code> - Path to the TEF/JSON trace file to use for the mock.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--mock-playback-speed</span></code> - Playback speed multiplier for the mock.</p></li>
+</ul>
+<h2 id="providing-traces-to-the-server">Providing traces to the server<a class="headerlink" href="#providing-traces-to-the-server" title="Link to this heading">¶</a></h2>
+<p>Once the server is running, it listens for CTF traces on the TCP socket.
+To route the traces read from one of the available backends (described in <a class="reference internal" href="library.html#trace-collection"><span class="std std-ref">Trace Collection</span></a> section), the <code class="docutils literal notranslate"><span class="pre">--send-to-remote</span></code> argument can be provided with the TCP socket address specified.</p>
+<p><strong>Example</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>west<span class="w"> </span>zpl-uart-capture<span class="w"> </span>/dev/pts/12<span class="w"> </span><span class="m">115200</span><span class="w"> </span>--send-to-remote<span class="w"> </span><span class="m">127</span>.0.0.1:5000
+</code></pre></div>
+</div>
+<h2 id="live-tracing-controls">Live-tracing controls<a class="headerlink" href="#live-tracing-controls" title="Link to this heading">¶</a></h2>
+<p>If the Visualizer is connected to the server, the live-tracing controls are available on the top-bar.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">streaming</span></code> - enables continuous rendering of received traces.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Stop</span> <span class="pre">streaming</span></code> - disables continuous rendering.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Collect</span></code> - visualizes all the traces gathered so far.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Stop</span> <span class="pre">Tailing</span></code> - Stops the default behavior in which viewport follows the live edge of the visualized trace.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Resume</span> <span class="pre">Tailing</span></code> - Snaps the viewport back to the live edge.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Additionally, <code class="docutils literal notranslate"><span class="pre">Alt</span></code>+<code class="docutils literal notranslate"><span class="pre">R</span></code> performs a hard reset of the tracing session, which restarts the <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> instance parsing the trace.
+It should only be used to recover from a <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> failure, as it drops the traces gathered so far.</p>
+<p>Such failure can manifest itself as the Trace Viewer no longer receiving any new events, even though the capture command keeps streaming data to the server, with a <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> error traceback printed in the server log.</p>
+</div>
+<h2 id="sample-collection-of-traces">Sample collection of traces<a class="headerlink" href="#sample-collection-of-traces" title="Link to this heading">¶</a></h2>
+<p>This sample demonstrates how to run an application running profiling for a TensorFlow Lite Micro model.</p>
+<p>First, build a sample application running two TensorFlow Lite Micro models, with an increased number of iterations:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>west<span class="w"> </span>build<span class="w"> </span>-p<span class="w"> </span>-b<span class="w"> </span>max32690fthr/max32690/m4<span class="w"> </span>samples/profiling/tflm_multi_model<span class="w"> </span>--<span class="w"> </span>-DCONFIG_ZPL_TRACE_FORMAT_CTF<span class="o">=</span>y<span class="w"> </span>-DCONFIG_TRACING_BUFFER_SIZE<span class="o">=</span><span class="m">10000</span><span class="w"> </span>-DCONFIG_BOOT_BANNER<span class="o">=</span>n<span class="w"> </span>-DCONFIG_PRINTK<span class="o">=</span>n<span class="w"> </span>-DCONFIG_LOG<span class="o">=</span>n<span class="w"> </span>-DCONFIG_ZPL_SAMPLE_TFLM_NUM_ITERS<span class="o">=</span><span class="m">200</span>
+</code></pre></div>
+</div>
+<p>After this, run the server for live tracing, providing the paths to the models:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>server/run_backend.py<span class="w"> </span>--frontend-directory<span class="w"> </span>./zephelin-trace-viewer/dist<span class="w"> </span>--tflm-model-paths<span class="w"> </span>./samples/common/tflm/model/magic-wand.tflite<span class="w"> </span>./samples/common/tflm/model/sine.tflite
+</code></pre></div>
+</div>
+<p>Then, run the collection of traces from:</p>
+<ul>
+<li><p>Renode:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>scripts/run_renode.py<span class="w"> </span>--trace-output<span class="w"> </span>test.ctf<span class="w"> </span>--send-to-remote<span class="w"> </span><span class="m">127</span>.0.0.1:5000
+</code></pre></div>
+</div>
+</li>
+<li><p>From physical hardware (after flash), e.g.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>west<span class="w"> </span>zpl-uart-capture<span class="w"> </span>&lt;path-to-uart&gt;<span class="w"> </span><span class="m">115200</span><span class="w"> </span>./trace-hw.ctf<span class="w"> </span>--send-to-remote<span class="w"> </span><span class="m">127</span>.0.0.1:5000
+</code></pre></div>
+</div>
+</li>
+</ul>
+<h2 id="live-tracing-with-instrumentation">Live tracing with instrumentation<a class="headerlink" href="#live-tracing-with-instrumentation" title="Link to this heading">¶</a></h2>
+<p>Traces produced by the <a class="reference internal" href="instrumentation.html"><span class="doc std std-doc">instrumentation subsystem</span></a> can be visualized live as well, as long as they are delivered over the same channel as regular Zephelin traces.
+This is the case for the tracing subsystem backend (<code class="docutils literal notranslate"><span class="pre">CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE=y</span></code>), which packs instrumentation events into a separate CTF stream of the regular trace.
+With that, no additional capture command is needed - a single <code class="docutils literal notranslate"><span class="pre">west</span> <span class="pre">zpl-&lt;backend&gt;-capture</span></code> with <code class="docutils literal notranslate"><span class="pre">--send-to-remote</span></code> feeds both streams to the server.</p>
+<p>We will use the <a class="extlink-zpl_repo reference external" href="https://github.com/antmicro/zephelin/tree/7c8116c0766060083ae7b67df3f5360c5c69435a/samples/profiling/tflm_instrumentation">samples/profiling/tflm_instrumentation</a> sample, which runs a TFLM model with both Zephelin profilers and the instrumentation subsystem enabled.</p>
+<p>First, build the sample with the instrumentation tracing backend configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>west<span class="w"> </span>build<span class="w"> </span>-p<span class="w"> </span>-b<span class="w"> </span>max32690fthr/max32690/m4<span class="w"> </span>samples/profiling/tflm_instrumentation<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-DEXTRA_CONF_FILE<span class="o">=</span><span class="s2">"zpl.conf;instrumentation_tracing.conf"</span>
+</code></pre></div>
+</div>
+<p>Then, start the server, pointing it to the model used by the sample and to the build directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>server/run_backend.py<span class="w"> </span>--frontend-directory<span class="w"> </span>./zephelin-trace-viewer/dist<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--tflm-model-paths<span class="w"> </span>./samples/common/tflm/model/sine.tflite<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-dir<span class="w"> </span>./build
+</code></pre></div>
+</div>
+<p>Next, run the collection of traces from:</p>
+<ul>
+<li><p>Renode:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>python<span class="w"> </span>scripts/run_renode.py<span class="w"> </span>--send-to-remote<span class="w"> </span><span class="m">127</span>.0.0.1:5000<span class="w"> </span>--pause
+</code></pre></div>
+</div>
+</li>
+<li><p>From physical hardware (after flash), e.g.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code>west<span class="w"> </span>zpl-uart-capture<span class="w"> </span>&lt;path-to-uart&gt;<span class="w"> </span><span class="m">115200</span><span class="w"> </span>./trace-hw.ctf<span class="w"> </span>--send-to-remote<span class="w"> </span><span class="m">127</span>.0.0.1:5000
+</code></pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Starting the simulation with <code class="docutils literal notranslate"><span class="pre">--pause</span></code> allows to postpone the execution of the sample until the frontend is set up and ready.
+When using physical hardware, the server will only start processing traces after board reset.</p>
+</div>
+<p>Once the simulation is connected to the backend, open the visualizer at the configured address (default: <code class="docutils literal notranslate"><span class="pre">http://127.0.0.1:8000</span></code>), press <code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">streaming</span></code> and unpause the simulation.</p>
+<p>The recording below shows the sample being visualized live.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The presented trace was gathered using Renode.
+Running the sample on physical hardware may result in extended execution time due to instrumentation overhead.</p>
+</div>
+<video controls playsinline preload="metadata" width="100%" style="max-width: 100%;">
+  <source src="https://dl.antmicro.com/kenning/media/live_tracing_instrumentation.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video><h2 id="communication-flow">Communication flow<a class="headerlink" href="#communication-flow" title="Link to this heading">¶</a></h2>
+<p>The server implementation in <code class="docutils literal notranslate"><span class="pre">server/run_backend.py</span></code> consists of the following access points:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;tcp_server_host&gt;:&lt;tcp_server_port&gt;</span></code> - allows for communication between <code class="docutils literal notranslate"><span class="pre">west</span></code> capture subcommands and the server.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;backend_host&gt;:&lt;backend_port&gt;</span></code> - hosts the website loaded from the <code class="docutils literal notranslate"><span class="pre">--frontend-directory</span></code> directory and configures the communication between website and server.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">127.0.0.1:&lt;bt_port&gt;</span></code> - allows for delivery of pure CTF events to the <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> live plugin (it is a one-way communication).</p></li>
+</ul>
+<p>Like in the file-based Zephelin flow, the traces are first collected and sent by the board to the host using a selected backend (e.g. UART).
+After this, the <code class="docutils literal notranslate"><span class="pre">west</span> <span class="pre">zpl-&lt;backend&gt;-capture</span></code> command with the <code class="docutils literal notranslate"><span class="pre">--send-to-remote</span></code> flag configured to e.g. <code class="docutils literal notranslate"><span class="pre">127.0.0.1:5000</span></code> will send CTF traces with additional data (such as <code class="docutils literal notranslate"><span class="pre">_zpl_ctf_start__</span></code> start tag) to a given address.</p>
+<p>This address should match the <code class="docutils literal notranslate"><span class="pre">--tcp-server-host</span></code> and <code class="docutils literal notranslate"><span class="pre">--tcp-server-port</span></code> settings in the <code class="docutils literal notranslate"><span class="pre">server/run_backend.py</span></code> script.
+<a class="reference external" href="https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py"><code class="docutils literal notranslate"><span class="pre">Stream</span> <span class="pre">Parser</span> <span class="pre">Proxy</span></code></a> will receive packets sent by the <code class="docutils literal notranslate"><span class="pre">west</span></code> subcommand and subdivide them into commands (such as restart the viewer based on start tag) that should be sent as RPC commands to the website, and pure CTF events.</p>
+<p>Pure CTF events are sent to the <a class="reference external" href="https://github.com/antmicro/libbtrace/tree/main/src/plugins/ctf/live-src"><code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> live plugin</a> over the <code class="docutils literal notranslate"><span class="pre">--bt-port</span></code> port on loopback (e.g. <code class="docutils literal notranslate"><span class="pre">127.0.0.1:42674</span></code>), for fast conversion to TEF events in C++.
+The plugin communicates with the <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> module running in the server, delivering <code class="docutils literal notranslate"><span class="pre">bt2</span></code> messages with parts of parsed TEF events - it is not socket-based communication.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is possible to deliver pure CTF events directly to the <code class="docutils literal notranslate"><span class="pre">libbtrace</span></code> live plugin by sending events directly to <code class="docutils literal notranslate"><span class="pre">--bt-port</span></code>, skipping the <code class="docutils literal notranslate"><span class="pre">Stream</span> <span class="pre">Parser</span> <span class="pre">Proxy</span></code>.</p>
+</div>
+<p>Those <code class="docutils literal notranslate"><span class="pre">bt2</span></code> messages are delivered to the <a class="reference external" href="https://github.com/antmicro/zephelin/blob/main/server/handlers/trace_handler.py"><code class="docutils literal notranslate"><span class="pre">Trace</span> <span class="pre">Handler</span></code></a>.
+Trace Handler performs final adjustments of the TEF events and sends them to the website.</p>
+<p>In the meantime, <a class="reference external" href="https://github.com/antmicro/zephelin/blob/main/server/rpc_dispatcher.py"><code class="docutils literal notranslate"><span class="pre">RPC</span> <span class="pre">Dispatcher</span></code></a> allows for sending calls between server and website, and controls the state of Zephelin Trace Viewer using procedures described in <a class="reference internal" href="#server-api-reference"><span class="std std-ref">Server API reference</span></a>.</p>
+<h2 id="server-api-reference"><span id="id1"></span>Server API reference<a class="headerlink" href="#server-api-reference" title="Link to this heading">¶</a></h2>
+<p>The Zephelin real-time tracing server supports the following JSON-RPC requests sent as rpc_request WebSocket event:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace.connect</span></code></p>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="handlers.trace_handler.TraceHandler.connect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.trace_handler.TraceHandler.</span></span><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#handlers.trace_handler.TraceHandler.connect" title="handlers.trace_handler.TraceHandler.connect.self (Python parameter)"><span class="n"><span class="pre">self</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'status'</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="s"><span class="pre">'message'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></span><a class="headerlink" href="#handlers.trace_handler.TraceHandler.connect" title="Link to this definition">¶</a></dt>
+<dd><p>Starts the TCP server to listen for incoming trace streams from capture scripts.</p>
+<h3 id="returns">Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict[Literal[“status”, “message”], str]</dt><dd><p>Status message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace.disconnect</span></code></p>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="handlers.trace_handler.TraceHandler.disconnect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.trace_handler.TraceHandler.</span></span><span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#handlers.trace_handler.TraceHandler.disconnect" title="handlers.trace_handler.TraceHandler.disconnect.self (Python parameter)"><span class="n"><span class="pre">self</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'status'</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="s"><span class="pre">'message'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></span><a class="headerlink" href="#handlers.trace_handler.TraceHandler.disconnect" title="Link to this definition">¶</a></dt>
+<dd><p>Terminates the background read task and tears down transportation backend.</p>
+<h3 id="returns">Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict[Literal[“status”, “message”], str]</dt><dd><p>Status message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace.stream_start</span></code></p>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="handlers.trace_handler.TraceHandler.stream_start">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.trace_handler.TraceHandler.</span></span><span class="sig-name descname"><span class="pre">stream_start</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#handlers.trace_handler.TraceHandler.stream_start" title="handlers.trace_handler.TraceHandler.stream_start.self (Python parameter)"><span class="n"><span class="pre">self</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'status'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></span><a class="headerlink" href="#handlers.trace_handler.TraceHandler.stream_start" title="Link to this definition">¶</a></dt>
+<dd><p>Enables continuous trace streaming to the frontend.</p>
+<h3 id="returns">Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict[Literal[“status”], str]</dt><dd><p>Status message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace.stream_stop</span></code></p>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="handlers.trace_handler.TraceHandler.stream_stop">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.trace_handler.TraceHandler.</span></span><span class="sig-name descname"><span class="pre">stream_stop</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#handlers.trace_handler.TraceHandler.stream_stop" title="handlers.trace_handler.TraceHandler.stream_stop.self (Python parameter)"><span class="n"><span class="pre">self</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'status'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span></span><a class="headerlink" href="#handlers.trace_handler.TraceHandler.stream_stop" title="Link to this definition">¶</a></dt>
+<dd><p>Disables continuous trace streaming to the frontend.</p>
+<h3 id="returns">Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict[Literal[“status”], str]</dt><dd><p>Status message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace.metadata</span></code></p>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="handlers.trace_handler.TraceHandler.metadata">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.trace_handler.TraceHandler.</span></span><span class="sig-name descname"><span class="pre">metadata</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#handlers.trace_handler.TraceHandler.metadata" title="handlers.trace_handler.TraceHandler.metadata.self (Python parameter)"><span class="n"><span class="pre">self</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'status'</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="s"><span class="pre">'message'</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="s"><span class="pre">'data'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span></span><a class="headerlink" href="#handlers.trace_handler.TraceHandler.metadata" title="Link to this definition">¶</a></dt>
+<dd><p>Provides model metadata and memory symbols for the trace.</p>
+<p>Runs the heavy collection work in a background thread so the
+async event loop (and thus the streaming pipeline) is not
+blocked.  Once the work finishes any events that accumulated in
+the emit queue during the collection are flushed immediately.</p>
+<h3 id="returns">Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict[Literal[“status”, “message”, “data”], Union[str, dict]]</dt><dd><p>Message with metadata events or error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace.reset</span></code></p>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight py" id="handlers.trace_handler.TraceHandler.reset">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.trace_handler.TraceHandler.</span></span><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#handlers.trace_handler.TraceHandler.reset" title="handlers.trace_handler.TraceHandler.reset.self (Python parameter)"><span class="n"><span class="pre">self</span></span></a></em></span><span class="sig-paren">)</span><a class="headerlink" href="#handlers.trace_handler.TraceHandler.reset" title="Link to this definition">¶</a></dt>
+<dd><p>Resets the trace buffer.</p>
+</dd></dl>
+
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trace.collect</span></code></p>
+<dl class="py function objdesc">
+<dt class="sig sig-object highlight sig-wrap py" id="handlers.trace_handler.TraceHandler.collect">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">handlers.trace_handler.TraceHandler.</span></span><span class="sig-name descname"><span class="pre">collect</span></span><span class="sig-paren">(</span><span class="sig-param-decl"><em class="sig-param"><a class="n reference internal" href="#handlers.trace_handler.TraceHandler.collect" title="handlers.trace_handler.TraceHandler.collect.self (Python parameter)"><span class="n"><span class="pre">self</span></span></a></em></span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="desctype"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'status'</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="s"><span class="pre">'message'</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="s"><span class="pre">'data'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span></span><a class="headerlink" href="#handlers.trace_handler.TraceHandler.collect" title="Link to this definition">¶</a></dt>
+<dd><p>Provides the increment of the trace buffer not yet sent.</p>
+<h3 id="returns">Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>dict[Literal[“status”, “message”, “data”], Union[str, dict]]</dt><dd><p>Message with all events present in the buffer or error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</li>
+</ul>
+
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2026-08-28
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="visual_interface.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Zephelin Trace Viewer" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Zephelin Trace Viewer
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="examples.html" class="md-footer__link md-footer__link--next" aria-label="Next: Zephelin usage examples" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Zephelin usage examples
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  
+  
+  <div class="md-footer-meta md-typeset">
+    
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-footer-copyright__highlight">
+        Copyright &#169; Analog Devices, Inc.; Antmicro, 2026.
+        
+    </div>
+  
+      <a href="https://github.com/antmicro/zephelin/tree/7c8116c0766060083ae7b67df3f5360c5c69435a">7c8116c0</a>
+        @ <a href="https://github.com/antmicro/zephelin/tree/main">main</a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/antmicro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/antmicro" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+    
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["toc.integrate"], "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+      
+        <script src="_static/sphinx_immaterial_theme.f9d9eeeb247ace16c.min.js?v=8ec58cb5"></script>
+    
+  </body>
+</html>

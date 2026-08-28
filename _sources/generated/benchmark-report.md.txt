@@ -1,0 +1,131 @@
+## Zephelin Benchmark Results
+
+### max32690fthr_max32690_m4
+| Benchmark                                                      |   Cycles |   FLASH [B] |   RAM [B] | Configs                                                    |
+|----------------------------------------------------------------|----------|-------------|-----------|------------------------------------------------------------|
+| [bench.basic (basic)](#zpl_benchmark_run_basic)                |     7583 |        4784 |     18032 |                                                            |
+| [bench.basic.instr (basic)](#zpl_benchmark_run_basic)          | 21205802 |       21496 |     58780 | [instr_tracing.conf](#instr-tracing-conf)                  |
+| [bench.basic.tracing (basic)](#zpl_benchmark_run_basic)        |     7583 |        5048 |     20624 | [tracing.conf](#tracing-conf)                              |
+| [bench.basic.zpl (basic)](#zpl_benchmark_run_basic)            |   237038 |        5080 |     21576 | [zpl.conf](#zpl-conf)                                      |
+| [bench.dhry (dhrystone)](#zpl_benchmark_run_dhrystone)         |     2025 |       15176 |     20412 |                                                            |
+| [bench.dhry.instr (dhrystone)](#zpl_benchmark_run_dhrystone)   |  4695733 |       31880 |     61420 | [instr_tracing.conf](#instr-tracing-conf)                  |
+| [bench.dhry.tracing (dhrystone)](#zpl_benchmark_run_dhrystone) |     2027 |       15440 |     22984 | [tracing.conf](#tracing-conf)                              |
+| [bench.dhry.zpl (dhrystone)](#zpl_benchmark_run_dhrystone)     |     2027 |       15456 |     23592 | [zpl.conf](#zpl-conf)                                      |
+| [bench.tflite (tflite)](#zpl_benchmark_run_tflite)             |    76433 |       29720 |     79276 | [tflite.conf](#tflite-conf)                                |
+| [bench.tflite.tracing (tflite)](#zpl_benchmark_run_tflite)     |    76052 |       29984 |     82772 | [tflite.conf](#tflite-conf), [tracing.conf](#tracing-conf) |
+| [bench.tflite.zpl (tflite)](#zpl_benchmark_run_tflite)         |    84884 |       30040 |     83964 | [tflite.conf](#tflite-conf), [zpl.conf](#zpl-conf)         |
+| [bench.threads (threads)](#zpl_benchmark_run_threads)          |  5950517 |       16216 |     19672 |                                                            |
+| [bench.threads.tracing (threads)](#zpl_benchmark_run_threads)  | 40655082 |       17128 |     24252 | [tracing.conf](#tracing-conf)                              |
+
+### stm32f746g_disco_stm32f746xx
+| Benchmark                                                      |   Cycles |   FLASH [B] |   RAM [B] | Configs                                                    |
+|----------------------------------------------------------------|----------|-------------|-----------|------------------------------------------------------------|
+| [bench.basic (basic)](#zpl_benchmark_run_basic)                |     7951 |        4608 |     18552 |                                                            |
+| [bench.basic.instr (basic)](#zpl_benchmark_run_basic)          | 29506628 |       21312 |     65848 | [instr_tracing.conf](#instr-tracing-conf)                  |
+| [bench.basic.tracing (basic)](#zpl_benchmark_run_basic)        |     7951 |        4800 |     21164 | [tracing.conf](#tracing-conf)                              |
+| [bench.basic.zpl (basic)](#zpl_benchmark_run_basic)            |   183986 |        4864 |     21916 | [zpl.conf](#zpl-conf)                                      |
+| [bench.dhry (dhrystone)](#zpl_benchmark_run_dhrystone)         |     2125 |       14976 |     20936 |                                                            |
+| [bench.dhry.instr (dhrystone)](#zpl_benchmark_run_dhrystone)   |  6528969 |       31744 |     68484 | [instr_tracing.conf](#instr-tracing-conf)                  |
+| [bench.dhry.tracing (dhrystone)](#zpl_benchmark_run_dhrystone) |     2125 |       15232 |     23528 | [tracing.conf](#tracing-conf)                              |
+| [bench.dhry.zpl (dhrystone)](#zpl_benchmark_run_dhrystone)     |     2125 |       15232 |     23932 | [zpl.conf](#zpl-conf)                                      |
+| [bench.tflite (tflite)](#zpl_benchmark_run_tflite)             |    78292 |       29568 |     79804 | [tflite.conf](#tflite-conf)                                |
+| [bench.tflite.tracing (tflite)](#zpl_benchmark_run_tflite)     |    78029 |       29760 |     83332 | [tflite.conf](#tflite-conf), [tracing.conf](#tracing-conf) |
+| [bench.tflite.zpl (tflite)](#zpl_benchmark_run_tflite)         |    84324 |       29824 |     84304 | [tflite.conf](#tflite-conf), [zpl.conf](#zpl-conf)         |
+| [bench.threads (threads)](#zpl_benchmark_run_threads)          |  6576133 |       16832 |     20244 |                                                            |
+| [bench.threads.tracing (threads)](#zpl_benchmark_run_threads)  | 47878785 |       17536 |     24856 | [tracing.conf](#tracing-conf)                              |
+
+## Benchmarks
+
+### ZPL_BENCHMARK_RUN_BASIC
+Basic Zephelin benchmark (a very inefficient dot product implementaton)
+
+Based on an inefficient dot product implementation. Uses ZPL scopes for tracing.
+
+
+### ZPL_BENCHMARK_RUN_DHRYSTONE
+Dhrystone Zephelin benchmark
+
+Synthetic benchmark for integer operations. Doesn't rely on any Zephyr features.
+
+
+### ZPL_BENCHMARK_RUN_TFLITE
+TFLite-based Zephelin benchmark
+
+Performs inference using a simple TFLite model. Uses ZPL scopes and model tracing.
+
+
+### ZPL_BENCHMARK_RUN_THREADS
+Threads-based Zephelin benchmark
+
+Features multiple threads performing a dummy operation on a single resource. Uses Zephyr's mutexes and semaphores.
+
+
+
+## Configs
+
+### instr_tracing.conf
+```
+CONFIG_TRACING=y
+CONFIG_INSTRUMENTATION=y
+CONFIG_TRACING_CTF=y
+CONFIG_TRACING_SYNC=y
+CONFIG_TRACING_MUTEX=y
+CONFIG_INSTRUMENTATION_BACKEND_TRACING_CORE=y
+CONFIG_THREAD_NAME=y
+CONFIG_THREAD_MAX_NAME_LEN=20
+CONFIG_INSTRUMENTATION_DYNAMIC_TRIGGER=n
+CONFIG_MAIN_STACK_SIZE=8196
+CONFIG_INSTRUMENTATION_TRIGGER_FUNCTION="benchmark_run"
+CONFIG_INSTRUMENTATION_STOPPER_FUNCTION="benchmark_run"
+
+```
+
+### prj.conf
+```
+CONFIG_TIMING_FUNCTIONS=y
+
+```
+
+### tflite.conf
+```
+CONFIG_MAIN_STACK_SIZE=3072
+
+CONFIG_TEST_RANDOM_GENERATOR=y
+CONFIG_TENSORFLOW_LITE_MICRO=y
+CONFIG_CPP=y
+CONFIG_STD_CPP17=y
+CONFIG_REQUIRES_FLOAT_PRINTF=y
+
+```
+
+### tracing.conf
+```
+CONFIG_TRACING=y
+CONFIG_TRACING_CTF=y
+CONFIG_TRACING_SYNC=y
+CONFIG_TRACING_MUTEX=y
+CONFIG_TRACING_SEMAPHORE=y
+CONFIG_TRACING_THREAD=y
+CONFIG_TRACING_STACK=y
+
+```
+
+### zpl.conf
+```
+CONFIG_TRACING=y
+CONFIG_TRACING_CTF=y
+CONFIG_TRACING_SYNC=y
+
+CONFIG_ZPL=y
+CONFIG_ZPL_TRACE=y
+CONFIG_ZPL_TRACE_FULL_MODE=y
+CONFIG_ZPL_TRACE_FORMAT_CTF=y
+CONFIG_ZPL_SCOPE_MARKING=y
+
+```
+
+## Commits
+| Project   | Commit                                   |
+|-----------|------------------------------------------|
+| zephelin  | 7c8116c0766060083ae7b67df3f5360c5c69435a |
+| zephyr    | 3568e1b6d5cdd51a6b964a2a1d6d29200fea2056 |

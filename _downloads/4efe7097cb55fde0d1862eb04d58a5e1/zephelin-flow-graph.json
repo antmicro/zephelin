@@ -1,0 +1,554 @@
+{
+    "graphs": [
+        {
+            "id": "d53adf53-15b0-4f8e-adea-499ec8067770",
+            "name": "Zephelin Trace Collection Flow",
+            "nodes": [
+                {
+                    "id": "56b28612-9c87-47a0-8e86-130760d9fd6c",
+                    "position": {
+                        "x": 2156,
+                        "y": -378
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "TEF trace",
+                            "id": "ccf621b7-7e9d-436b-b881-562e9d8513a7",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "RPC",
+                            "id": "29e81c05-40e4-4f1b-8e30-afc53dbc24be",
+                            "direction": "inout",
+                            "side": "left",
+                            "sidePosition": 1
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Trace Viewer",
+                            "id": "6ae609a8-ffd3-4569-addf-5c15b5b487a1",
+                            "value": "https://antmicro.github.io/zephelin-trace-viewer/",
+                            "hidden": false
+                        },
+                        {
+                            "name": "UI",
+                            "id": "0c3f5828-2d8f-43c5-a651-1a490cd71d89",
+                            "value": "![](https://github.com/antmicro/zephelin-trace-viewer/raw/main/imgs/trace_viewer_view.png)",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Zephelin Trace Viewer",
+                    "instanceName": "Zephelin Trace Viewer"
+                },
+                {
+                    "id": "cae21ffb-aac6-4c11-a823-867c1048ee1e",
+                    "position": {
+                        "x": 1466,
+                        "y": -91
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "CTF trace",
+                            "id": "25756c34-07aa-4914-8fba-114fdc65b274",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "Model",
+                            "id": "658806a8-eb2a-4304-a9de-813a97e9bfd1",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "TEF trace",
+                            "id": "aff23eef-9954-41d6-934e-46bd4f4a4138",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Documentation",
+                            "id": "89995031-9f22-4a46-821b-a2e536bc0ead",
+                            "value": "https://antmicro.github.io/zephelin/ctf_to_tef.html",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "west zpl-prepare-trace",
+                    "instanceName": "west zpl-prepare-trace"
+                },
+                {
+                    "id": "0a996557-59ce-4114-8d6b-328abdcd2ddf",
+                    "position": {
+                        "x": 714,
+                        "y": -90
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "USB",
+                            "id": "1304f6b0-b7db-48ef-a1d1-713d728aaa4e",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "CTF trace",
+                            "id": "d3435ea8-e4dd-447d-a177-b86fb56f9f07",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Documentation",
+                            "id": "545370e7-a4a4-4fa7-a85b-cad55e98c097",
+                            "value": "https://antmicro.github.io/zephelin/library.html#usb",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "west zpl-usb-capture",
+                    "instanceName": "west zpl-usb-capture"
+                },
+                {
+                    "id": "e1c7c06e-c026-4293-b9c2-47e8a658259f",
+                    "position": {
+                        "x": -155,
+                        "y": 51
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Usage",
+                            "id": "73bf5840-d9bf-4bf0-9df1-f973c07ac8e9",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Documentation",
+                            "id": "e91f8012-f0b0-41af-9f8f-c3d8d8e85fae",
+                            "value": "https://docs.zephyrproject.org/latest/services/debugging/cpu_load.html",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "CPU",
+                    "instanceName": "CPU"
+                },
+                {
+                    "id": "7f79c4b4-9114-47e8-9255-9ad7370a9093",
+                    "position": {
+                        "x": -154,
+                        "y": -131
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Temperature",
+                            "id": "6b9b998a-08ea-4b8b-90b0-ca044f5a63f0",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Documentation",
+                            "id": "cafb02a0-9f13-4611-94ff-c81368cea0b6",
+                            "value": "https://docs.zephyrproject.org/latest/samples/sensor/die_temp_polling/README.html",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "DIE sensors",
+                    "instanceName": "DIE sensors"
+                },
+                {
+                    "id": "78375353-709b-4fe6-a3c1-857d80eb8f7f",
+                    "position": {
+                        "x": -153,
+                        "y": -268
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Runtime",
+                            "id": "27b0117f-2494-4911-9df1-b76bed3e876c",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Runtime-specific events",
+                    "instanceName": "Runtime-specific events"
+                },
+                {
+                    "id": "7df5974f-7ca5-4273-8d9a-20175f7f0189",
+                    "position": {
+                        "x": -157,
+                        "y": 230
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Memory usage",
+                            "id": "bb1177e4-eea4-4ad0-abd2-d5b3bc781bed",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Documentation",
+                            "id": "0464ac17-dca2-41fd-97b0-87c059b86d92",
+                            "value": "https://antmicro.github.io/zephelin/memory_profiling.html",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "Memory regions",
+                    "instanceName": "Memory regions"
+                },
+                {
+                    "id": "4a22260c-4ecf-465f-a834-63bc485a4c8e",
+                    "position": {
+                        "x": 321,
+                        "y": -98
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "DIE Temperature",
+                            "id": "37b37666-5df2-4132-83a8-49753a646770",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 1
+                        },
+                        {
+                            "name": "CPU usage",
+                            "id": "42c09056-1e76-48bd-9fe5-803d7cc90537",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "Memory usage",
+                            "id": "bae3d0e3-60b2-47c0-a0ee-8463a5d09a45",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 3
+                        },
+                        {
+                            "name": "Runtime",
+                            "id": "58011dcf-1c35-46e4-8689-7d02ad978a5d",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "UART",
+                            "id": "39bce671-2f1e-48d0-a3e3-a49e330e36f8",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "USB",
+                            "id": "447d18c2-7560-4ba0-a9ca-ff319d212375",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 2
+                        },
+                        {
+                            "name": "J-Link",
+                            "id": "075022f2-8c4b-4203-9f52-69460b324306",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 3
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Zephelin + Tracing subsystem",
+                    "instanceName": "Zephelin + Tracing subsystem"
+                },
+                {
+                    "id": "7f15aaeb-35a9-488f-8f36-37d5e3df9303",
+                    "position": {
+                        "x": 1097,
+                        "y": 160
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "Input model",
+                            "id": "7df7f528-fd76-4a3a-97d9-db823679060f",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "Input models",
+                    "instanceName": "Input models"
+                },
+                {
+                    "id": "3e1990f2-bde7-482f-ad09-ee224677daee",
+                    "position": {
+                        "x": 1813,
+                        "y": -34
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": " ",
+                            "id": "1747dc67-f10e-4d18-8bbe-7f979ef2e455",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "  ",
+                            "id": "fd19cb0a-eb2d-4036-9b8f-644961ada5ba",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "TEF File",
+                    "instanceName": "TEF File"
+                },
+                {
+                    "id": "440c5a76-2f4b-4584-9802-3d59806f1e5e",
+                    "position": {
+                        "x": 1101,
+                        "y": -36
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": " ",
+                            "id": "f479bc12-ca0a-4863-bc59-a379f5896a52",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "  ",
+                            "id": "f2cc6956-98b3-401c-ba07-4eb7b45a9adf",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [],
+                    "enabledInterfaceGroups": [],
+                    "name": "CTF File",
+                    "instanceName": "CTF File"
+                },
+                {
+                    "id": "cefa733a-46e8-4d5e-92dc-5e960f572de4",
+                    "position": {
+                        "x": 716,
+                        "y": -270
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "UART",
+                            "id": "17c139b8-58d3-49cc-9b69-a04f6d5d6281",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "CTF trace",
+                            "id": "d48d7070-4c50-45f3-a487-61250c699dd0",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Documentation",
+                            "id": "23b6ab9e-809d-410d-bbe7-aefea3891a2f",
+                            "value": "https://antmicro.github.io/zephelin/library.html#uart",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "west zpl-uart-capture",
+                    "instanceName": "west zpl-uart-capture"
+                },
+                {
+                    "id": "0448b166-a455-43e0-ba81-2dc869e84136",
+                    "position": {
+                        "x": 714,
+                        "y": 95
+                    },
+                    "width": 300,
+                    "twoColumn": true,
+                    "interfaces": [
+                        {
+                            "name": "J-Link",
+                            "id": "cc327f81-78ca-4598-8e82-ebd88f311a57",
+                            "direction": "input",
+                            "side": "left",
+                            "sidePosition": 0
+                        },
+                        {
+                            "name": "CTF trace",
+                            "id": "a9815eaf-f50e-4500-b57d-ba92633ba399",
+                            "direction": "output",
+                            "side": "right",
+                            "sidePosition": 0
+                        }
+                    ],
+                    "properties": [
+                        {
+                            "name": "Documentation",
+                            "id": "3fc739d0-5eef-4366-8c6a-44e8e9a90d43",
+                            "value": "https://antmicro.github.io/zephelin/library.html#debugger",
+                            "hidden": false
+                        }
+                    ],
+                    "enabledInterfaceGroups": [],
+                    "name": "west zpl-gdb-capture",
+                    "instanceName": "west zpl-gdb-capture"
+                }
+            ],
+            "groups": [
+                {
+                    "id": "04598afe-ad2f-436c-8019-243ef9310810",
+                    "color": "#6e32ca",
+                    "name": "Zephelin on board",
+                    "nodes": [
+                        "e1c7c06e-c026-4293-b9c2-47e8a658259f",
+                        "7f79c4b4-9114-47e8-9255-9ad7370a9093",
+                        "78375353-709b-4fe6-a3c1-857d80eb8f7f",
+                        "7df5974f-7ca5-4273-8d9a-20175f7f0189",
+                        "4a22260c-4ecf-465f-a834-63bc485a4c8e"
+                    ]
+                },
+                {
+                    "id": "4016566e-8871-431d-a851-0356c9244e5f",
+                    "color": "#004972",
+                    "name": "Zephelin West Trace Capture",
+                    "nodes": [
+                        "0448b166-a455-43e0-ba81-2dc869e84136",
+                        "cefa733a-46e8-4d5e-92dc-5e960f572de4",
+                        "0a996557-59ce-4114-8d6b-328abdcd2ddf"
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "id": "329a1d18-fad6-4cbe-b73b-61976b2eac68",
+                    "from": "27b0117f-2494-4911-9df1-b76bed3e876c",
+                    "to": "58011dcf-1c35-46e4-8689-7d02ad978a5d"
+                },
+                {
+                    "id": "a855977d-b576-48b8-bc42-82b181ae3a51",
+                    "from": "bb1177e4-eea4-4ad0-abd2-d5b3bc781bed",
+                    "to": "bae3d0e3-60b2-47c0-a0ee-8463a5d09a45"
+                },
+                {
+                    "id": "9aaf43ab-619f-4515-bfed-74d095b98627",
+                    "from": "447d18c2-7560-4ba0-a9ca-ff319d212375",
+                    "to": "1304f6b0-b7db-48ef-a1d1-713d728aaa4e"
+                },
+                {
+                    "id": "a9a5865e-e7f5-4e9f-96e2-0c0168767834",
+                    "from": "6b9b998a-08ea-4b8b-90b0-ca044f5a63f0",
+                    "to": "37b37666-5df2-4132-83a8-49753a646770"
+                },
+                {
+                    "id": "d5ebf82e-4afb-460a-9104-80254d9af2fc",
+                    "from": "73bf5840-d9bf-4bf0-9df1-f973c07ac8e9",
+                    "to": "42c09056-1e76-48bd-9fe5-803d7cc90537"
+                },
+                {
+                    "id": "58a06434-0b23-4ce0-8a74-38a6c07f3bf6",
+                    "from": "7df7f528-fd76-4a3a-97d9-db823679060f",
+                    "to": "658806a8-eb2a-4304-a9de-813a97e9bfd1"
+                },
+                {
+                    "id": "7acc355e-6cb3-4ce6-a515-7c5880d705f9",
+                    "from": "aff23eef-9954-41d6-934e-46bd4f4a4138",
+                    "to": "1747dc67-f10e-4d18-8bbe-7f979ef2e455"
+                },
+                {
+                    "id": "23fd6df8-cba1-4a0a-aa54-ebf60d3432f3",
+                    "from": "fd19cb0a-eb2d-4036-9b8f-644961ada5ba",
+                    "to": "ccf621b7-7e9d-436b-b881-562e9d8513a7"
+                },
+                {
+                    "id": "65f52718-ba21-441c-a2b0-dbd76a818085",
+                    "from": "d3435ea8-e4dd-447d-a177-b86fb56f9f07",
+                    "to": "f479bc12-ca0a-4863-bc59-a379f5896a52"
+                },
+                {
+                    "id": "67fde8ce-8529-4c2f-97cc-a8e065f99880",
+                    "from": "f2cc6956-98b3-401c-ba07-4eb7b45a9adf",
+                    "to": "25756c34-07aa-4914-8fba-114fdc65b274"
+                },
+                {
+                    "id": "f9b01fcf-169e-40eb-b01b-faf277e05ba0",
+                    "from": "39bce671-2f1e-48d0-a3e3-a49e330e36f8",
+                    "to": "17c139b8-58d3-49cc-9b69-a04f6d5d6281"
+                },
+                {
+                    "id": "2f3f3bb9-11f0-4e2a-9578-6f162a34e76b",
+                    "from": "d48d7070-4c50-45f3-a487-61250c699dd0",
+                    "to": "f479bc12-ca0a-4863-bc59-a379f5896a52"
+                },
+                {
+                    "id": "ab3f0df3-8237-48fd-8035-d0d80de24354",
+                    "from": "a9815eaf-f50e-4500-b57d-ba92633ba399",
+                    "to": "f479bc12-ca0a-4863-bc59-a379f5896a52"
+                },
+                {
+                    "id": "47734fa7-1320-4c9e-aae2-eee5ffe29dfb",
+                    "from": "075022f2-8c4b-4203-9f52-69460b324306",
+                    "to": "cc327f81-78ca-4598-8e82-ebd88f311a57"
+                }
+            ]
+        }
+    ],
+    "entryGraph": "d53adf53-15b0-4f8e-adea-499ec8067770",
+    "version": "20250623.14"
+}
