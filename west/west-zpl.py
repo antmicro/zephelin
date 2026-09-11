@@ -35,7 +35,7 @@ class CtfFileHandler:
     '_zpl_ctf_start__' tags. Everything before the first passed tag is ignored.
     """
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, expect_start_tag: bool = True):
         """
         Initializes the class.
 
@@ -47,11 +47,18 @@ class CtfFileHandler:
             ('_zpl_ctf_start__') will be written to this file. Everything
             after subsequent tags will be written into other files (with '_1',
             '_02' etc. suffix added to the file name).
+        expect_start_tag: bool
+            If `True`, closing the handler without finding a start tag raises
+            a `ValueError`.
         """
-        self.file_number = -1
+        self.file_number = -1 if expect_start_tag else 0
         self.output_path = path
         self.sliding_window_chunk_buffer = b""
         self.current_output_path = path
+
+        self.expect_start_tag = expect_start_tag
+        self.start_tag_found = False
+
         if path.exists():
             path.unlink()
 
@@ -79,12 +86,16 @@ class CtfFileHandler:
             if self.file_number == 0:
                 self.current_output_path = self.output_path
             else:
-                self.output_path.with_stem(self.output_path.stem + f"_{self.file_number}")
+                self.current_output_path = self.output_path.with_stem(
+                    f"{self.output_path.stem}_{self.file_number}"
+                )
+            self.start_tag_found = True
             if self.current_output_path.exists():
                 self.current_output_path.unlink()
             tqdm.write(
                 f"Found CTF trace start, writing trace to new file {self.current_output_path}"
             )
+
         if self.file_number >= 0:
             with open(self.current_output_path, "ab") as of:
                 of.write(chunk)
@@ -132,9 +143,17 @@ class CtfFileHandler:
         """
         Finalizes the work of the handler. Flushes the intermediate buffer,
         ensuring that the final sliding window chunk is processed.
+
+        Raises
+        ------
+        ValueError
+            Thrown when start tag is expected but was never found.
         """
         if len(self.sliding_window_chunk_buffer) > 0:
             self._save_integral_chunk(self.sliding_window_chunk_buffer)
+
+        if self.expect_start_tag and not self.start_tag_found:
+            raise ValueError("Expected CTF start tag, but none was found in the trace.")
 
 
 class ZplGdbCapture(WestCommand):
@@ -184,6 +203,11 @@ class ZplGdbCapture(WestCommand):
             "--measure-throughput",
             help="Display maximum trace gathering speed on shutdown (for continuous tracing)",
             default=False,
+            action="store_true",
+        )
+        parser.add_argument(
+            "--no-expect-start-tag",
+            help="Do not require a start tag to be present; works only with --capture-once",
             action="store_true",
         )
         stop_condition_group = parser.add_mutually_exclusive_group()
@@ -283,7 +307,8 @@ class ZplGdbCapture(WestCommand):
         original_mtime = stats.st_mtime
         file_handler = None
         if args.output_path:
-            file_handler = CtfFileHandler(args.output_path)
+            expect_start_tag = not args.no_expect_start_tag if args.capture_once else True
+            file_handler = CtfFileHandler(args.output_path, expect_start_tag)
         remote_socket = None
         if args.send_to_remote:
             remote_socket = _open_socket(self, args.send_to_remote)
@@ -296,7 +321,7 @@ class ZplGdbCapture(WestCommand):
             (output, _) = proc_gdb.communicate()
             exit_code = proc_gdb.wait()
 
-            if exit_code == 0 and remote_socket:
+            if exit_code == 0:
                 try:
                     with open(temp_file, "rb") as tf:
                         buf = tf.read()
@@ -307,7 +332,13 @@ class ZplGdbCapture(WestCommand):
                 except Exception as e:
                     self.wrn(f"Failed to send data: {e}")
                 finally:
-                    remote_socket.close()
+                    if remote_socket:
+                        remote_socket.close()
+                    if file_handler:
+                        file_handler.close()
+            else:
+                raise Exception(f"gdb exited with error {exit_code}")
+
         else:
             # Monitor the output file and report its size
             stats = temp_file.stat()
