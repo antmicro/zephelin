@@ -79,9 +79,12 @@ def get_kconfigs(build_dir: Path | None = None) -> dict[str, str | None]:
     if build_dir is None:
         build_dir = zephyr_build_dir()
 
+    if build_dir is None:
+        return {}
+
     config_file = build_dir / "zephyr" / ".config"
     if not config_file.exists():
-        return []
+        return {}
 
     with config_file.open("r") as fd:
         configs = fd.read()
