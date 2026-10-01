@@ -1,0 +1,40 @@
+From 3aea3d9037739b979a64d6d162e8d7ec6553dd33 Mon Sep 17 00:00:00 2001
+From: Chaitanya Tata <chaitanya@dotstarsystems.com>
+Date: Thu, 1 Oct 2026 22:15:27 +0530
+Subject: [PATCH 39/41] instrumentation: tolerate missing recursive-exclude
+ functions
+
+The default INSTRUMENTATION_RECURSIVE_EXCLUDE_LIST names sys_clock_isr,
+which only some system timer drivers define. With the nRF GRTC timer it
+does not exist and the build fails at link time:
+
+  undefined reference to `sys_clock_isr'
+
+Declare the generated references weak so absent functions resolve to
+NULL, which never matches a callee.
+
+Signed-off-by: Chaitanya Tata <chaitanya@dotstarsystems.com>
+Assisted-by: Claude:claude-opus-5.5
+---
+ subsys/instrumentation/instr_exclude_gen.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/subsys/instrumentation/instr_exclude_gen.py b/subsys/instrumentation/instr_exclude_gen.py
+index 019a7cd74..521e8cc52 100755
+--- a/subsys/instrumentation/instr_exclude_gen.py
++++ b/subsys/instrumentation/instr_exclude_gen.py
+@@ -12,7 +12,10 @@ out_path = sys.argv[2]
+ 
+ with open(out_path, "w") as out_f:
+     for f in fs:
+-        print(f"extern void {f}(void);", file=out_f)
++        # Weak, so a name that does not exist in this build (e.g. a timer
++        # ISR that only some drivers define) resolves to NULL instead of
++        # failing the link. NULL never matches a callee.
++        print(f"extern void {f}(void) __attribute__((weak));", file=out_f)
+ 
+     print(f"unsigned instr_exclude_list_len = {len(fs)};", file=out_f)
+     print("void (*instr_exclude_list[])(void) __attribute__((retain)) = {", file=out_f)
+-- 
+2.43.0
+

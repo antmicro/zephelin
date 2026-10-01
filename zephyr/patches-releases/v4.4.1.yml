@@ -282,6 +282,30 @@ patches:
   module: zephyr
   path: zephyr/0037-tracing-usb-Add-double-buffering-for-pipelined-trans.patch
   sha256sum: 779c6e23a0662930ea92e633e99ecf19aea88c89b22971ad3b4736acab1ca859
+- author: Chaitanya Tata
+  date: '2026-10-01'
+  email: chaitanya@dotstarsystems.com
+  module: zephyr
+  path: zephyr/0038-instrumentation-don-t-run-hooks-before-the-kernel-se.patch
+  sha256sum: 01711b430c7283d7fbf523984b9afccb1bfbbb024d83cb8357fd84887948612e
+- author: Chaitanya Tata
+  date: '2026-10-01'
+  email: chaitanya@dotstarsystems.com
+  module: zephyr
+  path: zephyr/0039-instrumentation-tolerate-missing-recursive-exclude-f.patch
+  sha256sum: 491b018eec03bfaaf6b261444a27b1d6906c30621aecd12e23e944e022134c17
+- author: Chaitanya Tata
+  date: '2026-10-01'
+  email: chaitanya@dotstarsystems.com
+  module: zephyr
+  path: zephyr/0040-instrumentation-exclude-CMSIS-intrinsics-by-default-.patch
+  sha256sum: 208c730ee581fd873c6dac02d2a0fa29b65cbb241dfeae4cf8120b93a73c4bd0
+- author: Chaitanya Tata
+  date: '2026-10-01'
+  email: chaitanya@dotstarsystems.com
+  module: zephyr
+  path: zephyr/0041-instrumentation-select-RING_BUFFER_LARGE-for-trace-b.patch
+  sha256sum: 29b8046357e06ed60588d0038697ffac74b2d847dbe1bdcfdc104ffd848ae5af
 - author: Maciej Torhan
   date: '2025-06-04'
   email: mtorhan@antmicro.com
