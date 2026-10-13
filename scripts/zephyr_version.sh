@@ -7,7 +7,7 @@
 # Exports Zephyr version related variables into the shell.
 
 
-ZPL_DEFAULT_ZEPHYR_VERSION=v4.3.0
+ZPL_DEFAULT_ZEPHYR_VERSION=v4.4.1
 
 _zpl_request="${1:-${ZEPHYR_VERSION:-}}"
 
