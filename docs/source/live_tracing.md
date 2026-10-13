@@ -34,42 +34,18 @@ Apart from installing Zephelin dependencies (see {ref}`setting-up-workspace`), s
 pip install -r server/requirements.txt
 ```
 
-### Build the frontend for Trace Viewer
-
-The server requires a compiled version of [Zephelin Trace Viewer](visual_interface).
-First, clone the repository:
-
-```bash
-git clone --recursive https://github.com/antmicro/zephelin-trace-viewer.git
-```
-
-After cloning the repository, install `corepack` and install the necessary dependencies with:
-
-```bash
-cd zephelin-trace-viewer
-corepack enable
-yarn
-```
-
-Lastly, build the backend with:
-
-```bash
-yarn build
-cd ..
-```
-
-Built frontend will be available under the `./zephelin-trace-viewer/dist` directory.
-
-## Running the server
-
-To start the Zephelin server and host the visualizer, execute the `server/run_backend.py` script.
-
 ### Basic usage
 
-To run the server with default settings and serve the frontend, point it to the `dist` directory with the compiled frontend:
+To run the server with default settings and serve the frontend, call:
 
 ```bash
-python server/run_backend.py --frontend-directory <path_to_dist>
+python server/run_backend.py
+```
+
+or `west` subcommand:
+
+```bash
+west zpl-live-server
 ```
 
 ### Configuration Options
@@ -81,7 +57,7 @@ You can customize the server's networking interfaces, and specify trace parsing 
 * `--backend-host` - Address where the backend API and visualizer are hosted (Default: `127.0.0.1`).
 * `--backend-port` - Port where the backend API and visualizer are hosted (Default: `8000`).
 * `--bt-port` - Port used by `libbtrace` live plugin to collect pure CTF traces (Default: `42674`).
-* `--frontend-directory` - Path to compiled frontend directory.
+* `--frontend-directory` - Path to compiled frontend directory (for downloading and building frontend check [Zephelin Trace Viewer](https://github.com/antmicro/zephelin-trace-viewer)).
 * `--build-dir` - Path to the traced application build directory.
 * `--tflm-model-paths` - Paths to the TFLM models.
 * `--tvm-model-paths` - Paths to the TVM models.
@@ -89,6 +65,10 @@ You can customize the server's networking interfaces, and specify trace parsing 
 * `--tvm-model-op-remove-prefix` - Regex pattern used for removing TVM operator prefixes.
 * `--tvm-model-op-remove-suffix` - Regex pattern used for removing TVM operator suffixes.
 * `--verbosity` - Set the logging verbosity level (`DEBUG, INFO, WARNING, ERROR, CRITICAL`).
+
+:::{note}
+If `--frontend-directory` is not provided with built website, the script downloads the latest built version from [Zephelin Trace Viewer's GitHub](https://github.com/antmicro/zephelin-trace-viewer).
+:::
 
 ### Additional configuration options for tests
 
@@ -138,7 +118,7 @@ west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_multi_model -- 
 After this, run the server for live tracing, providing the paths to the models:
 
 ```bash
-python server/run_backend.py --frontend-directory ./zephelin-trace-viewer/dist --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite ./samples/common/tflm/model/sine.tflite
+west zpl-live-server --tflm-model-paths ./samples/common/tflm/model/magic-wand.tflite ./samples/common/tflm/model/sine.tflite
 ```
 
 Then, run the collection of traces from:
@@ -170,7 +150,7 @@ west build -p -b max32690fthr/max32690/m4 samples/profiling/tflm_instrumentation
 Then, start the server, pointing it to the model used by the sample and to the build directory:
 
 ```bash
-python server/run_backend.py --frontend-directory ./zephelin-trace-viewer/dist \
+west zpl-live-server \
   --tflm-model-paths ./samples/common/tflm/model/sine.tflite \
   --build-dir ./build
 ```
@@ -211,7 +191,7 @@ Running the sample on physical hardware may result in extended execution time du
 
 ## Communication flow
 
-The server implementation in `server/run_backend.py` consists of the following access points:
+The server implementation in `server/run_backend.py` (also available as `west zpl-live-server`) consists of the following access points:
 
 * `<tcp_server_host>:<tcp_server_port>` - allows for communication between `west` capture subcommands and the server.
 * `<backend_host>:<backend_port>` - hosts the website loaded from the `--frontend-directory` directory and configures the communication between website and server.
