@@ -196,115 +196,109 @@ patches:
   date: '2026-03-17'
   email: jczykier@antmicro.com
   module: zephyr
-  path: zephyr/0024-boards-add-sysbuild-domain-export.patch
-  sha256sum: 360f9549aabd6b4f97b50cb67e7a3e02ccd726de29cb7e66b9e461003530f096
-- author: Jedrzej Czykier
-  date: '2026-03-17'
-  email: jczykier@antmicro.com
-  module: zephyr
-  path: zephyr/0025-scripts-ci-check_compliance-Add-test-kconfig-option-.patch
+  path: zephyr/0024-scripts-ci-check_compliance-Add-test-kconfig-option-.patch
   sha256sum: 1632a465562f657abe6170f218481b0494bb03f4118a08fbefbed551c2d01d97
 - author: Mikolaj Klikowicz
   date: '2026-01-16'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0026-instrumentation-Add-tracing-subsystem-transport-back.patch
+  path: zephyr/0025-instrumentation-Add-tracing-subsystem-transport-back.patch
   sha256sum: e76c833e0c89fbc9d2600e36982e96ff3f109091ecd91263bfc85dcf0fde1290
 - author: Mikolaj Klikowicz
   date: '2026-02-10'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0027-scripts-instrumentation-Support-instrumentation-via-.patch
+  path: zephyr/0026-scripts-instrumentation-Support-instrumentation-via-.patch
   sha256sum: 539e1ac8a05bbc94e0688ab05de07a3b72d8c9ee0ad8c9f1b2eb27eb34f02605
 - author: Mikolaj Klikowicz
   date: '2026-02-10'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0028-tracing-Add-reboot-magic.patch
+  path: zephyr/0027-tracing-Add-reboot-magic.patch
   sha256sum: c6aef8b1274c5136bf51bba9987fa3c5421c213c10d01ecdc6e25cae12da50f6
 - author: Mikolaj Klikowicz
   date: '2026-02-13'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0029-instrumentation-Add-recursive-disable-of-functions.patch
+  path: zephyr/0028-instrumentation-Add-recursive-disable-of-functions.patch
   sha256sum: 33e701de7e1da05efc3b1a5c04266c6fec6f49539c016cf2b4d498b4a60fd8ca
 - author: Mikolaj Klikowicz
   date: '2026-03-05'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0030-boards-add-support-for-uart_ctf.patch
+  path: zephyr/0029-boards-add-support-for-uart_ctf.patch
   sha256sum: ee6db343f42944fe44cf52f1b93fe58c01ee57b18e89b04a9f7e9901bae773e5
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
-  path: zephyr/0031-drivers-usb-udc-max32-Fix-ISR-context-issues-with-MA.patch
+  path: zephyr/0030-drivers-usb-udc-max32-Fix-ISR-context-issues-with-MA.patch
   sha256sum: cd77cac91ea543bff5731c84a5d9d9e9a24af29d89d840f7ac88409d0391f5ea
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
-  path: zephyr/0032-drivers-usb-udc-max32-Reduce-spurious-resume-events.patch
+  path: zephyr/0031-drivers-usb-udc-max32-Reduce-spurious-resume-events.patch
   sha256sum: 7902f3d9f0b457d51a0430811607ad6a923620d8661f946b48c55327f244993d
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
-  path: zephyr/0033-drivers-usb-udc-max32-Minor-function-movements.patch
+  path: zephyr/0032-drivers-usb-udc-max32-Minor-function-movements.patch
   sha256sum: 439f971cbace97d2009752c3ce8c4e66f761ef3fa67faa5a6eada63a292ea9ae
 - author: Brandon Hurst
   date: '2026-02-17'
   email: brandon.hurst@analog.com
   module: zephyr
-  path: zephyr/0034-drivers-usb-udc-max32-Handle-deferred-endpoint-trans.patch
+  path: zephyr/0033-drivers-usb-udc-max32-Handle-deferred-endpoint-trans.patch
   sha256sum: dc79658566754120f5f8314d8a7cf8e8923d08f9d2eb9829f8b4d05b01aaad50
 - author: Eryk Szpotanski
   date: '2026-03-19'
   email: eszpotanski@antmicro.com
   module: zephyr
-  path: zephyr/0035-arch-riscv-irq-fix-missing-header-file.patch
+  path: zephyr/0034-arch-riscv-irq-fix-missing-header-file.patch
   sha256sum: db25274ad66161a75c1b73d7196eb159828b6e78448027417df3e33585174019
 - author: Jedrzej Czykier
   date: '2026-03-31'
   email: jczykier@antmicro.com
   module: zephyr
-  path: zephyr/0036-scripts-ci-Add-sample-specific-kconfig-option-to-ign.patch
+  path: zephyr/0035-scripts-ci-Add-sample-specific-kconfig-option-to-ign.patch
   sha256sum: 741b12e4f0e204319ec87777119e1c66823178029d249d19c72af88dc369efba
 - author: =?UTF-8?q?=C5=81ukasz=20K=C4=99dziora?=
   date: '2026-03-31'
   email: lkedziora@antmicro.com
   module: zephyr
-  path: zephyr/0037-subsys-instrumentation-Exclude-irq-lock-unlock-and-t.patch
+  path: zephyr/0036-subsys-instrumentation-Exclude-irq-lock-unlock-and-t.patch
   sha256sum: 75be4c34ae4212891710f15420b70c526ecc7dad82ebe19c60fd0e904d31d857
 - author: Mikolaj Klikowicz
   date: '2026-04-16'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0038-subsys-instrumentation-Fix-instrumentation-triggers-.patch
+  path: zephyr/0037-subsys-instrumentation-Fix-instrumentation-triggers-.patch
   sha256sum: 95ccb597b81b44035970f0d2b7b9e65a8b2a408ee629c6355b080c12040a469d
 - author: Mikolaj Klikowicz
   date: '2026-05-15'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0039-scripts-ci-check_compliance-update-kconfig-allowlist.patch
+  path: zephyr/0038-scripts-ci-check_compliance-update-kconfig-allowlist.patch
   sha256sum: 599ca1ab9c83fcccb9567b335936a80d4436de971f4d7ba364ea35ca110d76d6
 - author: Mikolaj Klikowicz
   date: '2026-05-18'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0040-instrumentation-Remove-printk-from-recursive-exclusi.patch
+  path: zephyr/0039-instrumentation-Remove-printk-from-recursive-exclusi.patch
   sha256sum: 215c8f76f92d7146ac86613b54c0b0caf8f4962d3b430a2d4088661849bcb8fc
 - author: Grzegorz Latosinski
   date: '2026-08-27'
   email: glatosinski@antmicro.com
   module: zephyr
-  path: zephyr/0041-scripts-ci-check_compliance.py-Added-skipping-symlin.patch
+  path: zephyr/0040-scripts-ci-check_compliance.py-Added-skipping-symlin.patch
   sha256sum: 4187788c69cd9c5fe57d78720e8914643f02edb4b277433301cdfd900f0f3e5d
 - author: Jan Bylicki
   date: '2026-08-13'
   email: jbylicki@antmicro.com
   module: zephyr
-  path: zephyr/0042-tracing-usb-Add-double-buffering-for-pipelined-trans.patch
+  path: zephyr/0041-tracing-usb-Add-double-buffering-for-pipelined-trans.patch
   sha256sum: 31575fc5efe91abe249da19356248ce8de0f88ce708db438707844fe9087e70d
 - author: Maciej Torhan
   date: '2025-06-04'

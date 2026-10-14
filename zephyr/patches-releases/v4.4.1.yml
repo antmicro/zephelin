@@ -190,97 +190,91 @@ patches:
   date: '2026-03-17'
   email: jczykier@antmicro.com
   module: zephyr
-  path: zephyr/0022-boards-add-sysbuild-domain-export.patch
-  sha256sum: 88b490ec9c1d2d523c36ecfefc0ccbf33c6009c8d5803b59f3656fe6fafb8534
-- author: Jedrzej Czykier
-  date: '2026-03-17'
-  email: jczykier@antmicro.com
-  module: zephyr
-  path: zephyr/0023-scripts-ci-check_compliance-Add-test-kconfig-option-.patch
+  path: zephyr/0022-scripts-ci-check_compliance-Add-test-kconfig-option-.patch
   sha256sum: 1756f4a245a74e24fcd96269936849b8a1d5c806bc7d0c99a4a86377211c3874
 - author: Mikolaj Klikowicz
   date: '2026-01-16'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0024-instrumentation-Add-tracing-subsystem-transport-back.patch
+  path: zephyr/0023-instrumentation-Add-tracing-subsystem-transport-back.patch
   sha256sum: 662c87cbbaa57800bec9535f2c10c8b2edf2cea8987b001f2baf68cea50ee5b0
 - author: Mikolaj Klikowicz
   date: '2026-02-10'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0025-scripts-instrumentation-Support-instrumentation-via-.patch
+  path: zephyr/0024-scripts-instrumentation-Support-instrumentation-via-.patch
   sha256sum: e3a45c42c0237f1528ba94dcfceb56bca2449e56f8aa61c002de018668649744
 - author: Mikolaj Klikowicz
   date: '2026-02-10'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0026-tracing-Add-reboot-magic.patch
+  path: zephyr/0025-tracing-Add-reboot-magic.patch
   sha256sum: 694e90f20f073db0fa726e6ed2abae1e3c6825fee915e653f674dcb956735343
 - author: Mikolaj Klikowicz
   date: '2026-02-13'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0027-instrumentation-Add-recursive-disable-of-functions.patch
+  path: zephyr/0026-instrumentation-Add-recursive-disable-of-functions.patch
   sha256sum: e969c88e294cc4854df64e5682eb88c4e029e3015556d8d9b3213dd419cfe415
 - author: Mikolaj Klikowicz
   date: '2026-03-05'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0028-boards-add-support-for-uart_ctf.patch
+  path: zephyr/0027-boards-add-support-for-uart_ctf.patch
   sha256sum: 52a5f456ba288175cddb6374bc528b0ad4864e17aa661999f533cd278a0728f5
 - author: Eryk Szpotanski
   date: '2026-03-19'
   email: eszpotanski@antmicro.com
   module: zephyr
-  path: zephyr/0029-arch-riscv-irq-fix-missing-header-file.patch
+  path: zephyr/0028-arch-riscv-irq-fix-missing-header-file.patch
   sha256sum: 0d46e4fcf9dae1a3054fc3568914006472b600583aa05d5ba9c6d0e1ad16b577
 - author: Jedrzej Czykier
   date: '2026-03-31'
   email: jczykier@antmicro.com
   module: zephyr
-  path: zephyr/0030-scripts-ci-Add-sample-specific-kconfig-option-to-ign.patch
+  path: zephyr/0029-scripts-ci-Add-sample-specific-kconfig-option-to-ign.patch
   sha256sum: ae4e17740774aea2983d9aa3ea1ec65b2a619e56db66a5878a5e60ca823fd51d
 - author: =?UTF-8?q?=C5=81ukasz=20K=C4=99dziora?=
   date: '2026-03-31'
   email: lkedziora@antmicro.com
   module: zephyr
-  path: zephyr/0031-subsys-instrumentation-Exclude-irq-lock-unlock-and-t.patch
+  path: zephyr/0030-subsys-instrumentation-Exclude-irq-lock-unlock-and-t.patch
   sha256sum: ec79411ffb72c9050c71dda4ebc2208d417e42cc0ca552ca24145a8537e3781f
 - author: Mikolaj Klikowicz
   date: '2026-04-16'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0032-subsys-instrumentation-Fix-instrumentation-triggers-.patch
+  path: zephyr/0031-subsys-instrumentation-Fix-instrumentation-triggers-.patch
   sha256sum: 420021dd565c5b7a199b9cb720a1244bc4fa6c33962ab561bc60c38ddf6f752f
 - author: Mikolaj Klikowicz
   date: '2026-05-15'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0033-scripts-ci-check_compliance-update-kconfig-allowlist.patch
+  path: zephyr/0032-scripts-ci-check_compliance-update-kconfig-allowlist.patch
   sha256sum: 3ed243a1c8c36c29b48fb1a743302362ac8cc9aba091399735236ccdf8a01c52
 - author: Mikolaj Klikowicz
   date: '2026-05-18'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0034-instrumentation-Remove-printk-from-recursive-exclusi.patch
+  path: zephyr/0033-instrumentation-Remove-printk-from-recursive-exclusi.patch
   sha256sum: dc2a724a221573989fabc4eea5e2489be7ec0cd4314bca436b8a9e2335bfc5ff
 - author: Mikolaj Klikowicz
   date: '2026-07-06'
   email: mklikowicz@antmicro.com
   module: zephyr
-  path: zephyr/0035-Bump-to-4.4.1.patch
+  path: zephyr/0034-Bump-to-4.4.1.patch
   sha256sum: 73643824a101c453756b802e52e11252722b75ea63325a79557551774181f3e7
 - author: Grzegorz Latosinski
   date: '2026-08-27'
   email: glatosinski@antmicro.com
   module: zephyr
-  path: zephyr/0036-scripts-ci-check_compliance.py-Added-skipping-symlin.patch
+  path: zephyr/0035-scripts-ci-check_compliance.py-Added-skipping-symlin.patch
   sha256sum: 4ae852a563ab65a5cf6617de6d7e8721e50eb050e41d2bd64e8620689692dedd
 - author: Jan Bylicki
   date: '2026-08-27'
   email: jbylicki@antmicro.com
   module: zephyr
-  path: zephyr/0037-tracing-usb-Add-double-buffering-for-pipelined-trans.patch
+  path: zephyr/0036-tracing-usb-Add-double-buffering-for-pipelined-trans.patch
   sha256sum: 779c6e23a0662930ea92e633e99ecf19aea88c89b22971ad3b4736acab1ca859
 - author: Maciej Torhan
   date: '2025-06-04'
