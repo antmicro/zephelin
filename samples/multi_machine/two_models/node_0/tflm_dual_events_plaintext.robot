@@ -6,13 +6,14 @@
 *** Settings ***
 Library         OperatingSystem
 Library         RenodeLibrary
+Library         ../../../common/ZephyrBuildDir.py
 
 Resource        ../../multiple_machines.resource
 
 *** Test Cases ***
 Should Execute All Inferences On Both Nodes
-    ${node_0_elf}=    Join Path    ${EXECDIR}    ${SYSBUILD_DIR}    node_0    zephyr    zephyr.elf
-    ${node_1_elf}=    Join Path    ${EXECDIR}    ${SYSBUILD_DIR}    node_1    zephyr    zephyr.elf
+    ${node_0_elf}=    Get Zephyr Image ELF    node_0
+    ${node_1_elf}=    Get Zephyr Image ELF    node_1
     ${board_repl}=    Join Path    ${CURDIR}    ..    ..    boards    max32650fthr.repl
     ${shared_clock_repl}=    Join Path    ${CURDIR}    ..    ..    shared_clock.repl
 

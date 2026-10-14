@@ -16,13 +16,9 @@ tests:
   sample.trace.two_models.boot:
     harness_config:
       robot_testsuite: tflm_dual_events_plaintext.robot
-      robot_option:
-        - --variable=SYSBUILD_DIR:${APPLICATION_BINARY_DIR}/..
 
   sample.multi.staggered_boot:
     harness_config:
       robot_testsuite: tflm_staggered_boot.robot
-      robot_option:
-        - --variable=SYSBUILD_DIR:${APPLICATION_BINARY_DIR}/..
     extra_args:
       - node_1_CONFIG_ZPL_SAMPLE_APP_STARTUP_DELAY_MS:STRING=2000

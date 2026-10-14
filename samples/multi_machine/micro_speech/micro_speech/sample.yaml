@@ -16,5 +16,3 @@ tests:
   sample.trace.micro_speech.communication_is_happening:
     harness_config:
       robot_testsuite: tflm_nodes_communicating.robot
-      robot_option:
-        - --variable=SYSBUILD_DIR:${APPLICATION_BINARY_DIR}/..

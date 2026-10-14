@@ -6,13 +6,14 @@
 *** Settings ***
 Library         OperatingSystem
 Library         RenodeLibrary
+Library         ../../../common/ZephyrBuildDir.py
 
 Resource        ../../multiple_machines.resource
 
 *** Test Cases ***
 Should Execute Inference Pipeline Across Two Nodes
-    ${micro_speech_elf}=    Join Path    ${EXECDIR}    ${SYSBUILD_DIR}    micro_speech    zephyr    zephyr.elf
-    ${preprocessor_elf}=    Join Path    ${EXECDIR}    ${SYSBUILD_DIR}    preprocessor    zephyr    zephyr.elf
+    ${micro_speech_elf}=    Get Zephyr Image ELF    micro_speech
+    ${preprocessor_elf}=    Get Zephyr Image ELF    preprocessor
     ${board_repl}=    Join Path    ${CURDIR}    ..    ..    boards    max32650fthr.repl
     ${shared_clock_repl}=    Join Path    ${CURDIR}    ..    ..    shared_clock.repl
 
