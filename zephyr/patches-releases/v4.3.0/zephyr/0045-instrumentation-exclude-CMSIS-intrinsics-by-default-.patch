@@ -1,0 +1,56 @@
+From ea4acfc53829a517b6164c32aba26e7985f3ed88 Mon Sep 17 00:00:00 2001
+From: Chaitanya Tata <chaitanya@dotstarsystems.com>
+Date: Thu, 1 Oct 2026 22:15:27 +0530
+Subject: [PATCH 45/46] instrumentation: exclude CMSIS intrinsics by default on
+ Cortex-M
+
+The CMSIS core intrinsics and arm_cmse.h are inline functions, so
+-finstrument-functions emits entry and exit hooks around every inlined
+copy, including inside sequences that must not touch the stack.
+
+arch_switch_to_main_thread() sets PSPLIM to the main thread's stack
+with __set_PSPLIM() while still running on the early boot stack, then
+switches PSP. The exit hook emitted after the inlined __set_PSPLIM()
+pushes onto the old stack, below the new limit, and the CPU takes a
+stack overflow fault before main() runs.
+
+Exclude the CMSIS core headers and arm_cmse.h by default on Cortex-M.
+Same change as proposed for upstream Zephyr.
+
+Signed-off-by: Chaitanya Tata <chaitanya@dotstarsystems.com>
+Assisted-by: Claude:claude-opus-5.5
+---
+ subsys/instrumentation/Kconfig | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/subsys/instrumentation/Kconfig b/subsys/instrumentation/Kconfig
+index d01ad159..0fc72884 100644
+--- a/subsys/instrumentation/Kconfig
++++ b/subsys/instrumentation/Kconfig
+@@ -117,6 +117,7 @@ config INSTRUMENTATION_EXCLUDE_FUNCTION_LIST
+ 
+ config INSTRUMENTATION_EXCLUDE_FILE_LIST
+ 	string "Exclude file list"
++	default "include/zephyr/spinlock.h,include/zephyr/timing/timing.h,zephyr/subsys/tracing/,CMSIS/Core/Include/,arm_cmse.h" if CPU_CORTEX_M
+ 	default "include/zephyr/spinlock.h,include/zephyr/timing/timing.h,zephyr/subsys/tracing/"
+ 	depends on INSTRUMENTATION_MODE_CALLGRAPH || INSTRUMENTATION_MODE_STATISTICAL
+ 	help
+@@ -125,6 +126,15 @@ config INSTRUMENTATION_EXCLUDE_FILE_LIST
+ 	  the file name, it is considered to be a match. The files in the list
+ 	  are separate by a comma, for instance: file0, file1, ...
+ 
++	  On Cortex-M, the CMSIS core and arm_cmse.h intrinsics are excluded by
++	  default. They are inline functions, so -finstrument-functions emits
++	  hooks around every inlined copy, including inside sequences that must
++	  not touch the stack. For example, arch_switch_to_main_thread() sets
++	  PSPLIM to the main thread's stack with __set_PSPLIM() while still
++	  running on the early boot stack: the exit hook emitted after it pushes
++	  below the new limit and the CPU takes a stack overflow fault before
++	  main() runs.
++
+ config INSTRUMENTATION_CTF_TIMER
+ 	bool "Use the same time measuring mechanism as in CTF events"
+ 	help
+-- 
+2.43.0
+

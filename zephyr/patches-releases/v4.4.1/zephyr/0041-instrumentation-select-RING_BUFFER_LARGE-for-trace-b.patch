@@ -1,0 +1,54 @@
+From 042e4c46f8763b4b3b824e6ff7e67aa6ec1632d7 Mon Sep 17 00:00:00 2001
+From: Chaitanya Tata <chaitanya@dotstarsystems.com>
+Date: Thu, 1 Oct 2026 22:47:04 +0530
+Subject: [PATCH 41/41] instrumentation: select RING_BUFFER_LARGE for trace
+ buffers over 32 KiB
+
+INSTRUMENTATION_MODE_CALLGRAPH_TRACE_BUFFER_SIZE accepts up to 4 GiB,
+but the trace buffer is a ring_buf, whose indices are 16-bit unless
+RING_BUFFER_LARGE is enabled. ring_buf_init() only checks the size with
+__ASSERT, so with assertions off a larger buffer is silently truncated:
+a 256 KiB buffer on nrf54lm20dk accepted 1 byte per claim and no
+call-graph record was ever stored.
+
+Select RING_BUFFER_LARGE when the buffer needs it, and turn the size
+check into a BUILD_ASSERT.
+
+Signed-off-by: Chaitanya Tata <chaitanya@dotstarsystems.com>
+Assisted-by: Claude:claude-opus-5.5
+---
+ subsys/instrumentation/Kconfig                 | 3 +++
+ subsys/instrumentation/ringbuffer/ringbuffer.c | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/subsys/instrumentation/Kconfig b/subsys/instrumentation/Kconfig
+index 0fc72884f..866c3b934 100644
+--- a/subsys/instrumentation/Kconfig
++++ b/subsys/instrumentation/Kconfig
+@@ -42,6 +42,9 @@ config INSTRUMENTATION_MODE_CALLGRAPH
+ 	select THREAD_NAME
+ 	select TRACING
+ 	select TIMING_FUNCTIONS
++	# The trace buffer is a ring_buf; without RING_BUFFER_LARGE its
++	# indices are 16-bit and anything over 32 KiB is silently truncated.
++	select RING_BUFFER_LARGE if INSTRUMENTATION_MODE_CALLGRAPH_TRACE_BUFFER_SIZE > 32766
+ 	help
+ 	  Enables reconstruction of function call graphs and the observation
+ 	  of context switches (threads), within the limits of the trace buffer
+diff --git a/subsys/instrumentation/ringbuffer/ringbuffer.c b/subsys/instrumentation/ringbuffer/ringbuffer.c
+index e36a6d6a8..eb59a5444 100644
+--- a/subsys/instrumentation/ringbuffer/ringbuffer.c
++++ b/subsys/instrumentation/ringbuffer/ringbuffer.c
+@@ -10,6 +10,9 @@
+ static struct ring_buf instr_ring_buf;
+ static uint8_t instr_buffer[CONFIG_INSTRUMENTATION_MODE_CALLGRAPH_TRACE_BUFFER_SIZE + 1];
+ 
++BUILD_ASSERT(sizeof(instr_buffer) <= RING_BUFFER_MAX_SIZE,
++	     "Trace buffer too big, enable CONFIG_RING_BUFFER_LARGE");
++
+ uint32_t instr_buffer_put_claim(uint8_t **data, uint32_t size)
+ {
+ 	return ring_buf_put_claim(&instr_ring_buf, data, size);
+-- 
+2.43.0
+
