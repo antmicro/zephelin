@@ -205,12 +205,6 @@ patches:
   path: zephyr/0024-scripts-instrumentation-Support-instrumentation-via-.patch
   sha256sum: e3a45c42c0237f1528ba94dcfceb56bca2449e56f8aa61c002de018668649744
 - author: Mikolaj Klikowicz
-  date: '2026-02-10'
-  email: mklikowicz@antmicro.com
-  module: zephyr
-  path: zephyr/0025-tracing-Add-reboot-magic.patch
-  sha256sum: 694e90f20f073db0fa726e6ed2abae1e3c6825fee915e653f674dcb956735343
-- author: Mikolaj Klikowicz
   date: '2026-02-13'
   email: mklikowicz@antmicro.com
   module: zephyr
