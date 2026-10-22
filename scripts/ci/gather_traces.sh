@@ -90,7 +90,7 @@ sleep 5
 west zpl-instrumentation-uart-gdb-capture \
   /tmp/uart-log 115200 ./renode_tflm.instr.ctf ./renode_tflm.gdb.ctf \
   --no-debug-server --timeout 20
-kill $RENODE_SIM && rm /tmp/uart-log
+kill $RENODE_SIM && rm -f /tmp/uart-*
 west zpl-prepare-trace -o tef_tflm_instrumentation.json -i renode_tflm.instr.ctf renode_tflm.gdb.ctf \
   --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
 
@@ -103,7 +103,7 @@ sleep 5
 west zpl-instrumentation-uart-gdb-capture \
   /tmp/uart-log 115200 ./renode_tvm.instr.ctf ./renode_tvm.gdb.ctf \
   --no-debug-server --n-bytes 1000
-kill $RENODE_SIM && rm /tmp/uart-log
+kill $RENODE_SIM && rm -f /tmp/uart-*
 west zpl-prepare-trace -o tef_tvm_instrumentation.json -i renode_tvm.instr.ctf renode_tvm.gdb.ctf \
   --tvm-model-path ./samples/common/tvm/model/sine-graph.json \
   --tvm-model-metadata ./samples/common/tvm/model/sine-metadata.json \
@@ -118,7 +118,7 @@ python3 ./scripts/run_renode.py --simulation-only \
 RENODE_SIM=$!
 sleep 5
 timeout --preserve-status -s INT 1m west zpl-gdb-capture --no-debug-server ./smp_tvm_gdb.ctf
-kill $RENODE_SIM && rm /tmp/uart-log
+kill $RENODE_SIM && rm -f /tmp/uart-*
 west zpl-prepare-trace ./smp_tvm_gdb.ctf -o ./tef_smp_tvm_gdb.json \
   --tvm-model-paths ./samples/common/tvm/model/sine-graph.json \
     ./samples/common/tvm/model/magic-wand-graph.json \
@@ -194,7 +194,7 @@ python3 ./scripts/run_renode.py --simulation-only --renode-logs &> run_renode_tf
 RENODE_SIM=$!
 while [ ! -e /tmp/uart-trace-0 ]; do sleep 0.05; done
 timeout --preserve-status -s INT 50 west zpl-uart-capture /tmp/uart-trace-0 115200 ./renode_tflm_instrumentation.ctf
-kill -9 $RENODE_SIM && rm -f /tmp/uart-log
+kill $RENODE_SIM && rm -f /tmp/uart-*
 west zpl-prepare-trace -o tef_tflm_instrumentation_capture.json renode_tflm_instrumentation.ctf \
   --tflm-model-path ./samples/common/tflm/model/sine.tflite --trim-metadata
 
