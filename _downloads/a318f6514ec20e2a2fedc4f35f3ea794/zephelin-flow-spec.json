@@ -1,0 +1,527 @@
+{
+    "version": "20250623.14",
+    "nodes": [
+        {
+            "name": "Runtime-specific events",
+            "layer": "",
+            "category": "Zephyr",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "Runtime",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "style": [
+                "mcu",
+                "__edited"
+            ],
+            "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
+        },
+        {
+            "name": "Zephelin + Tracing subsystem",
+            "layer": "",
+            "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico",
+            "category": "Zephyr",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "DIE Temperature",
+                    "direction": "input"
+                },
+                {
+                    "name": "CPU usage",
+                    "direction": "input"
+                },
+                {
+                    "name": "Memory usage",
+                    "direction": "input"
+                },
+                {
+                    "name": "Runtime",
+                    "direction": "input"
+                },
+                {
+                    "name": "UART",
+                    "direction": "output",
+                    "type": "connector"
+                },
+                {
+                    "name": "USB",
+                    "direction": "output",
+                    "type": "connector"
+                },
+                {
+                    "name": "J-Link",
+                    "direction": "output",
+                    "type": "connector"
+                }
+            ],
+            "properties": [],
+            "style": "mcu"
+        },
+        {
+            "name": "DIE sensors",
+            "layer": "",
+            "category": "Default category",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "Temperature",
+                    "direction": "output"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Documentation",
+                    "type": "button-url",
+                    "default": "https://docs.zephyrproject.org/latest/samples/sensor/die_temp_polling/README.html"
+                }
+            ],
+            "style": [
+                "mcu",
+                "__edited"
+            ]
+        },
+        {
+            "name": "CPU",
+            "layer": "",
+            "category": "Data",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "Usage",
+                    "direction": "output"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Documentation",
+                    "type": "button-url",
+                    "default": "https://docs.zephyrproject.org/latest/services/debugging/cpu_load.html"
+                }
+            ],
+            "style": [
+                "mcu",
+                "__edited"
+            ]
+        },
+        {
+            "name": "Memory regions",
+            "layer": "",
+            "category": "Data",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "Memory usage",
+                    "direction": "output"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Documentation",
+                    "type": "button-url",
+                    "default": "https://antmicro.github.io/zephelin/memory_profiling.html"
+                }
+            ],
+            "style": [
+                "mcu",
+                "__edited"
+            ]
+        },
+        {
+            "name": "west zpl-uart-capture",
+            "layer": "",
+            "category": "west subcommands",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "UART",
+                    "direction": "input",
+                    "type": "connector"
+                },
+                {
+                    "name": "CTF trace",
+                    "direction": "output"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Documentation",
+                    "type": "button-url",
+                    "default": "https://antmicro.github.io/zephelin/library.html#uart"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ],
+            "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
+        },
+        {
+            "name": "west zpl-uart-capture (remote)",
+            "extends": [
+                "west zpl-uart-capture"
+            ],
+            "interfaces": [
+                {
+                    "name": "CTF trace over TCP",
+                    "direction": "output"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ]
+        },
+        {
+            "name": "west zpl-usb-capture",
+            "layer": "",
+            "category": "west subcommands",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "USB",
+                    "direction": "input",
+                    "type": "connector"
+                },
+                {
+                    "name": "CTF trace",
+                    "direction": "output"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Documentation",
+                    "type": "button-url",
+                    "default": "https://antmicro.github.io/zephelin/library.html#usb"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ],
+            "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
+        },
+        {
+            "name": "west zpl-usb-capture (remote)",
+            "extends": [
+                "west zpl-usb-capture"
+            ],
+            "interfaces": [
+                {
+                    "name": "CTF trace over TCP",
+                    "direction": "output"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ]
+        },
+        {
+            "name": "west zpl-gdb-capture",
+            "layer": "",
+            "category": "west subcommands",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "J-Link",
+                    "direction": "input",
+                    "type": "connector"
+                },
+                {
+                    "name": "CTF trace",
+                    "direction": "output"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Documentation",
+                    "type": "button-url",
+                    "default": "https://antmicro.github.io/zephelin/library.html#debugger"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ],
+            "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
+        },
+        {
+            "name": "west zpl-gdb-capture (remote)",
+            "extends": [
+                "west zpl-gdb-capture"
+            ],
+            "interfaces": [
+                {
+                    "name": "CTF trace over TCP",
+                    "direction": "output"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ]
+        },
+        {
+            "name": "west zpl-prepare-trace",
+            "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico",
+            "layer": "",
+            "category": "west subcommands",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "CTF trace",
+                    "maxConnectionsCount": 3,
+                    "direction": "input"
+                },
+                {
+                    "name": "Model",
+                    "direction": "input"
+                },
+                {
+                    "name": "TEF trace",
+                    "direction": "output"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Documentation",
+                    "type": "button-url",
+                    "default": "https://antmicro.github.io/zephelin/ctf_to_tef.html"
+                }
+            ],
+            "style": [
+                "host",
+                "__edited"
+            ]
+        },
+        {
+            "name": "Zephelin Trace Viewer",
+            "layer": "",
+            "category": "Trace visualizer",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "TEF trace",
+                    "direction": "input"
+                },
+                {
+                    "name": "RPC",
+                    "direction": "inout"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "Trace Viewer",
+                    "type": "button-url",
+                    "default": "https://antmicro.github.io/zephelin-trace-viewer/"
+                },
+                {
+                    "name": "UI",
+                    "type": "multiline",
+                    "default": "![](https://github.com/antmicro/zephelin-trace-viewer/raw/main/imgs/trace_viewer_view.png)"
+                }
+            ],
+            "style": [
+                "__edited"
+            ],
+            "icon": "https://raw.githubusercontent.com/antmicro/zephelin-trace-viewer/refs/heads/main/public/favicon.ico"
+        },
+        {
+            "name": "Input models",
+            "layer": "",
+            "category": "Models",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "Input model",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "style": [
+                "__edited"
+            ]
+        },
+        {
+            "name": "CTF File",
+            "layer": "",
+            "category": "File formats",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": " ",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "  ",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "style": [
+                "__edited"
+            ]
+        },
+        {
+            "name": "TEF File",
+            "layer": "",
+            "category": "File formats",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": " ",
+                    "direction": "input"
+                },
+                {
+                    "name": "  ",
+                    "direction": "output"
+                }
+            ],
+            "properties": [],
+            "style": [
+                "__edited"
+            ]
+        },
+        {
+            "name": "libbtrace live plugin",
+            "layer": "",
+            "category": "Server",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "CTF trace",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "BT2 messages with TEF",
+                    "direction": "output",
+                    "maxConnectionsCount": -1
+                }
+            ],
+            "properties": [],
+            "style": "__edited"
+        },
+        {
+            "name": "Stream Parser Proxy",
+            "layer": "",
+            "category": "Server",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "CTF traces + metadata",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "Clean CTF traces",
+                    "direction": "output",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "commands",
+                    "direction": "inout",
+                    "maxConnectionsCount": -1
+                }
+            ],
+            "properties": [],
+            "style": "__edited"
+        },
+        {
+            "name": "Trace Handler",
+            "layer": "",
+            "category": "Server",
+            "description": "",
+            "interfaces": [
+                {
+                    "name": "TEF trace",
+                    "direction": "input",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "Input model",
+                    "direction": "input"
+                },
+                {
+                    "name": "commands",
+                    "direction": "inout",
+                    "maxConnectionsCount": -1
+                },
+                {
+                    "name": "RPC",
+                    "direction": "inout",
+                    "maxConnectionsCount": -1
+                }
+            ],
+            "properties": [],
+            "style": "__edited"
+        }
+    ],
+    "metadata": {
+        "editableTypes": true,
+        "toggleableEditableTypes": false,
+        "twoColumn": true,
+        "newGraphNode": false,
+        "interfaces": {
+            "BinaryImage": {
+                "interfaceColor": "#FF00FF",
+                "interfaceConnectionPattern": "dashed",
+                "interfaceConnectionColor": "#FF0000"
+            },
+            "Image": {
+                "interfaceConnectionPattern": "dotted",
+                "interfaceConnectionColor": "#FFFF00"
+            },
+            "connector": {
+                "interfaceConnectionPattern": "dashed",
+                "interfaceConnectionColor": "#CACACA",
+                "interfaceColor": "#CACACA"
+            }
+        },
+        "connectionStyle": "curved",
+        "layers": [
+            {
+                "name": "IOs",
+                "nodeLayers": [
+                    "filesystem"
+                ]
+            },
+            {
+                "name": "Binary imaging",
+                "nodeInterfaces": [
+                    "BinaryImage"
+                ]
+            },
+            {
+                "name": "Both",
+                "nodeLayers": [
+                    "processing"
+                ],
+                "nodeInterfaces": [
+                    "BinaryImage"
+                ]
+            }
+        ],
+        "styles": {
+            "__new": {
+                "icon": null
+            },
+            "__edited": {
+                "icon": null
+            },
+            "mcu": {
+                "color": "#6e32ca"
+            },
+            "host": {
+                "color": "#004972"
+            }
+        },
+        "movementStep": 1
+    },
+    "graphs": []
+}
